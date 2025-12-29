@@ -1,334 +1,382 @@
 <!DOCTYPE html>
-
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ШАГАЙ ДОМА: Зимняя игра </title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            color: white;
-            user-select: none;
-        }
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ШАГАЙ ДОМА: Зимняя игра</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      color: white;
+      user-select: none;
+    }
 
     h1 {
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        margin-bottom: 10px;
-        text-align: center;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      margin-bottom: 10px;
+      text-align: center;
     }
 
     .score-board {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 10px 20px;
-        border-radius: 15px;
-        font-size: 24px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      background: rgba(255, 255, 255, 0.2);
+      padding: 10px 20px;
+      border-radius: 15px;
+      font-size: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 
     .grid {
-        display: flex;
-        flex-wrap: wrap;
-        width: 560px;
-        height: 560px;
-        background-color: rgba(255, 255, 255, 0.3);
-        border-radius: 10px;
-        padding: 5px;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      display: flex;
+      flex-wrap: wrap;
+      width: 560px;
+      height: 560px;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      padding: 5px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     }
 
     .grid div {
-        width: 70px;
-        height: 70px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 40px;
-        cursor: pointer;
-        transition: transform 0.2s;
-        border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+      border-radius: 18px;
+
+      /* ВАЖНО: картинка вместо emoji */
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
     }
 
     .grid div:hover {
-        transform: scale(1.1);
-        background-color: rgba(255,255,255,0.1);
+      transform: scale(1.06);
+      background-color: rgba(255,255,255,0.08);
     }
 
     .selected {
-        background-color: rgba(255,255,255,0.4) !important;
-        transform: scale(1.15) !important;
+      background-color: rgba(255,255,255,0.28) !important;
+      transform: scale(1.10) !important;
+      outline: 2px solid rgba(255,255,255,0.45);
+      outline-offset: -2px;
     }
 
     .fade-out {
-        animation: fadeOut 0.5s forwards;
+      animation: fadeOut 0.5s forwards;
     }
 
     @keyframes fadeOut {
-        to { opacity: 0; transform: scale(0); }
+      to { opacity: 0; transform: scale(0); }
     }
 
     button {
-        margin-top: 20px;
-        padding: 10px 20px;
-        font-size: 18px;
-        background-color: #ff6b6b;
-        color: white;
-        border: none;
-        border-radius: 50px;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        transition: background 0.3s;
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transition: background 0.3s;
     }
 
     button:hover {
-        background-color: #ff4757;
+      background-color: #ff4757;
     }
 
     @media (max-width: 600px) {
-        .grid {
-            width: 350px;
-            height: 350px;
-        }
-        .grid div {
-            width: 43.75px;
-            height: 43.75px;
-            font-size: 25px;
-        }
-        h1 {
-            font-size: 24px;
-        }
+      .grid { width: 350px; height: 350px; }
+      .grid div { width: 43.75px; height: 43.75px; border-radius: 14px; }
+      h1 { font-size: 24px; }
     }
-</style>
-
-
+  </style>
 </head>
-<body>
-    <h1>❄️ ШАГАЙ ДОМА: Зимняя игра ❄️</h1>
-    <div class="score-board">Очки: <span id="score">0</span></div>
-    <div class="grid" id="grid"></div>
-    <button onclick="startGame()">🔄 Новая игра</button>
 
-<script>
+<body>
+  <h1>❄️ ШАГАЙ ДОМА: Зимняя игра ❄️</h1>
+  <div class="score-board">Очки: <span id="score">0</span></div>
+  <div class="grid" id="grid"></div>
+  <button onclick="startGame()">🔄 Новая игра</button>
+
+  <script>
     const width = 8;
     const grid = document.getElementById('grid');
     const scoreDisplay = document.getElementById('score');
     let squares = [];
     let score = 0;
-    
-    const candyColors = ['🎿', '⛷️', '🏂', '❄️', '⛸️', '🎅'];
-    
+
+    // ✅ ТВОИ КАРТИНКИ (пути относительно html)
+    const regularCandies = [
+      'IMG_3660.png', // снежинка
+      'IMG_3661.png', // термос
+      'IMG_3662.png', // шаги на снеге
+      'IMG_3663.png', // ботинки
+      'IMG_3664.png', // варежки
+      'IMG_3659.png', // елка
+    ];
+
+    const specialCandies = [
+      'IMG_3655.png', // золотые шаги
+      'IMG_3656.png', // свечка
+      'IMG_3657.png', // мешок подарков
+      'IMG_3658.png', // золотая снежинка
+    ];
+
+    // Шанс спец-элементов (можешь менять)
+    const SPECIAL_CHANCE = 0.12; // 12%
+
     let squareIdBeingDragged;
     let squareIdBeingReplaced;
 
+    // --- helpers: хранение/отрисовка в square.dataset.candy ---
+    function setCandy(square, filename) {
+      square.dataset.candy = filename || '';
+      square.style.backgroundImage = filename ? `url('${filename}')` : '';
+    }
+
+    function getCandy(square) {
+      return square.dataset.candy || '';
+    }
+
+    function randomCandy() {
+      const useSpecial = Math.random() < SPECIAL_CHANCE;
+      const pool = useSpecial ? specialCandies : regularCandies;
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
     function createBoard() {
-        grid.innerHTML = '';
-        squares = [];
-        for (let i = 0; i < width * width; i++) {
-            const square = document.createElement('div');
-            square.setAttribute('draggable', true);
-            square.setAttribute('id', i);
-            let randomColor = Math.floor(Math.random() * candyColors.length);
-            square.textContent = candyColors[randomColor];
-            grid.appendChild(square);
-            squares.push(square);
-            
-            square.addEventListener('dragstart', dragStart);
-            square.addEventListener('dragend', dragEnd);
-            square.addEventListener('dragover', dragOver);
-            square.addEventListener('dragenter', dragEnter);
-            square.addEventListener('dragleave', dragLeave);
-            square.addEventListener('drop', dragDrop);
-            
-            square.addEventListener('click', selectSquare);
-        }
+      grid.innerHTML = '';
+      squares = [];
+
+      for (let i = 0; i < width * width; i++) {
+        const square = document.createElement('div');
+        square.setAttribute('draggable', true);
+        square.setAttribute('id', i);
+
+        setCandy(square, randomCandy());
+
+        grid.appendChild(square);
+        squares.push(square);
+
+        square.addEventListener('dragstart', dragStart);
+        square.addEventListener('dragend', dragEnd);
+        square.addEventListener('dragover', dragOver);
+        square.addEventListener('dragenter', dragEnter);
+        square.addEventListener('dragleave', dragLeave);
+        square.addEventListener('drop', dragDrop);
+
+        square.addEventListener('click', selectSquare);
+      }
     }
 
     let selectedSquare = null;
 
     function selectSquare(e) {
-        const squareId = parseInt(e.target.id);
-        
-        if (selectedSquare === null) {
-            selectedSquare = squareId;
-            squares[squareId].classList.add('selected');
-        } else {
-            if (selectedSquare === squareId) {
-                squares[selectedSquare].classList.remove('selected');
-                selectedSquare = null;
-                return;
-            }
-            
-            const validMoves = [
-                selectedSquare - 1,
-                selectedSquare + 1,
-                selectedSquare - width,
-                selectedSquare + width
-            ];
-            
-            if (validMoves.includes(squareId)) {
-                if (selectedSquare % width === 0 && squareId === selectedSquare - 1) return;
-                if (selectedSquare % width === width - 1 && squareId === selectedSquare + 1) return;
-                
-                swapSquares(selectedSquare, squareId);
-                squares[selectedSquare].classList.remove('selected');
-                selectedSquare = null;
-            } else {
-                squares[selectedSquare].classList.remove('selected');
-                selectedSquare = squareId;
-                squares[squareId].classList.add('selected');
-            }
-        }
+      const squareId = parseInt(e.currentTarget.id);
+
+      if (selectedSquare === null) {
+        selectedSquare = squareId;
+        squares[squareId].classList.add('selected');
+        return;
+      }
+
+      if (selectedSquare === squareId) {
+        squares[selectedSquare].classList.remove('selected');
+        selectedSquare = null;
+        return;
+      }
+
+      const validMoves = [
+        selectedSquare - 1,
+        selectedSquare + 1,
+        selectedSquare - width,
+        selectedSquare + width
+      ];
+
+      if (validMoves.includes(squareId)) {
+        if (selectedSquare % width === 0 && squareId === selectedSquare - 1) return;
+        if (selectedSquare % width === width - 1 && squareId === selectedSquare + 1) return;
+
+        swapSquares(selectedSquare, squareId);
+        squares[selectedSquare].classList.remove('selected');
+        selectedSquare = null;
+      } else {
+        squares[selectedSquare].classList.remove('selected');
+        selectedSquare = squareId;
+        squares[squareId].classList.add('selected');
+      }
     }
 
     function swapSquares(id1, id2) {
-        const temp = squares[id1].textContent;
-        squares[id1].textContent = squares[id2].textContent;
-        squares[id2].textContent = temp;
-        
-        setTimeout(() => {
-            const match = checkForMatches();
-            if (!match) {
-                squares[id1].textContent = squares[id2].textContent;
-                squares[id2].textContent = temp;
-            }
-        }, 100);
+      const temp = getCandy(squares[id1]);
+      setCandy(squares[id1], getCandy(squares[id2]));
+      setCandy(squares[id2], temp);
+
+      setTimeout(() => {
+        const match = checkForMatches();
+        if (!match) {
+          // откат
+          const temp2 = getCandy(squares[id1]);
+          setCandy(squares[id1], getCandy(squares[id2]));
+          setCandy(squares[id2], temp2);
+        }
+      }, 120);
     }
 
     function dragStart() {
-        squareIdBeingDragged = this.id;
+      squareIdBeingDragged = this.id;
+    }
+
+    function dragDrop() {
+      squareIdBeingReplaced = this.id;
+
+      // swap
+      const dragged = squares[squareIdBeingDragged];
+      const replaced = squares[squareIdBeingReplaced];
+
+      const temp = getCandy(replaced);
+      setCandy(replaced, getCandy(dragged));
+      setCandy(dragged, temp);
     }
 
     function dragEnd() {
-        let validMoves = [
-            parseInt(squareIdBeingDragged) - 1,
-            parseInt(squareIdBeingDragged) + 1,
-            parseInt(squareIdBeingDragged) - width,
-            parseInt(squareIdBeingDragged) + width
-        ];
-        
-        let validMove = validMoves.includes(parseInt(squareIdBeingReplaced));
-        
-        if (parseInt(squareIdBeingDragged) % width === 0 && parseInt(squareIdBeingReplaced) === parseInt(squareIdBeingDragged) - 1) validMove = false;
-        if (parseInt(squareIdBeingDragged) % width === width - 1 && parseInt(squareIdBeingReplaced) === parseInt(squareIdBeingDragged) + 1) validMove = false;
+      let validMoves = [
+        parseInt(squareIdBeingDragged) - 1,
+        parseInt(squareIdBeingDragged) + 1,
+        parseInt(squareIdBeingDragged) - width,
+        parseInt(squareIdBeingDragged) + width
+      ];
 
-        if (squareIdBeingReplaced && validMove) {
-            squareIdBeingReplaced = null;
-        } else if (squareIdBeingReplaced && !validMove) {
-            squares[squareIdBeingReplaced].textContent = squares[squareIdBeingDragged].textContent;
-            squares[squareIdBeingDragged].textContent = this.textContent;
-        }
+      let validMove = validMoves.includes(parseInt(squareIdBeingReplaced));
+
+      if (parseInt(squareIdBeingDragged) % width === 0 &&
+          parseInt(squareIdBeingReplaced) === parseInt(squareIdBeingDragged) - 1) validMove = false;
+
+      if (parseInt(squareIdBeingDragged) % width === width - 1 &&
+          parseInt(squareIdBeingReplaced) === parseInt(squareIdBeingDragged) + 1) validMove = false;
+
+      if (squareIdBeingReplaced && validMove) {
+        squareIdBeingReplaced = null;
+      } else if (squareIdBeingReplaced && !validMove) {
+        // откат (swap обратно)
+        const dragged = squares[squareIdBeingDragged];
+        const replaced = squares[squareIdBeingReplaced];
+        const temp = getCandy(replaced);
+        setCandy(replaced, getCandy(dragged));
+        setCandy(dragged, temp);
+      }
+
+      squareIdBeingReplaced = null;
     }
 
-    function dragOver(e) {
-        e.preventDefault();
-    }
-
-    function dragEnter(e) {
-        e.preventDefault();
-    }
-
+    function dragOver(e) { e.preventDefault(); }
+    function dragEnter(e) { e.preventDefault(); }
     function dragLeave() {}
 
-    function dragDrop() {
-        squareIdBeingReplaced = this.id;
-        this.textContent = squares[squareIdBeingDragged].textContent;
-        squares[squareIdBeingDragged].textContent = this.textContent;
-    }
-
     function moveDown() {
-        for (let i = 0; i < 55; i++) {
-            if (squares[i + width].textContent === '') {
-                squares[i + width].textContent = squares[i].textContent;
-                squares[i].textContent = '';
-            }
+      for (let i = 0; i < 55; i++) {
+        if (getCandy(squares[i + width]) === '') {
+          setCandy(squares[i + width], getCandy(squares[i]));
+          setCandy(squares[i], '');
         }
+      }
     }
 
     function checkRowForThree() {
-        for (let i = 0; i < 62; i++) {
-            let rowOfThree = [i, i + 1, i + 2];
-            let decidedColor = squares[i].textContent;
-            const isBlank = decidedColor === '';
-            
-            if (rowOfThree.every(index => squares[index].textContent === decidedColor && !isBlank)) {
-                if (i % width < width - 2) {
-                    score += 3;
-                    scoreDisplay.textContent = score;
-                    rowOfThree.forEach(index => {
-                        squares[index].classList.add('fade-out');
-                        setTimeout(() => {
-                            squares[index].textContent = '';
-                            squares[index].classList.remove('fade-out');
-                        }, 300);
-                    });
-                    return true;
-                }
-            }
+      for (let i = 0; i < 62; i++) {
+        // чтобы не считать "перелёты" через край
+        if (i % width > width - 3) continue;
+
+        let rowOfThree = [i, i + 1, i + 2];
+        let decided = getCandy(squares[i]);
+        const isBlank = decided === '';
+
+        if (rowOfThree.every(index => getCandy(squares[index]) === decided && !isBlank)) {
+          score += 3;
+          scoreDisplay.textContent = score;
+
+          rowOfThree.forEach(index => {
+            squares[index].classList.add('fade-out');
+            setTimeout(() => {
+              setCandy(squares[index], '');
+              squares[index].classList.remove('fade-out');
+            }, 300);
+          });
+
+          return true;
         }
-        return false;
+      }
+      return false;
     }
 
     function checkColumnForThree() {
-        for (let i = 0; i < 47; i++) {
-            let columnOfThree = [i, i + width, i + width * 2];
-            let decidedColor = squares[i].textContent;
-            const isBlank = decidedColor === '';
-            
-            if (columnOfThree.every(index => squares[index].textContent === decidedColor && !isBlank)) {
-                score += 3;
-                scoreDisplay.textContent = score;
-                columnOfThree.forEach(index => {
-                    squares[index].classList.add('fade-out');
-                    setTimeout(() => {
-                        squares[index].textContent = '';
-                        squares[index].classList.remove('fade-out');
-                    }, 300);
-                });
-                return true;
-            }
+      for (let i = 0; i < 47; i++) {
+        let columnOfThree = [i, i + width, i + width * 2];
+        let decided = getCandy(squares[i]);
+        const isBlank = decided === '';
+
+        if (columnOfThree.every(index => getCandy(squares[index]) === decided && !isBlank)) {
+          score += 3;
+          scoreDisplay.textContent = score;
+
+          columnOfThree.forEach(index => {
+            squares[index].classList.add('fade-out');
+            setTimeout(() => {
+              setCandy(squares[index], '');
+              squares[index].classList.remove('fade-out');
+            }, 300);
+          });
+
+          return true;
         }
-        return false;
+      }
+      return false;
     }
 
     function checkForMatches() {
-        const rowMatch = checkRowForThree();
-        const colMatch = checkColumnForThree();
-        return rowMatch || colMatch;
+      const rowMatch = checkRowForThree();
+      const colMatch = checkColumnForThree();
+      return rowMatch || colMatch;
     }
 
     function generateNewCandies() {
-        for (let i = 0; i < width; i++) {
-            if (squares[i].textContent === '') {
-                let randomColor = Math.floor(Math.random() * candyColors.length);
-                squares[i].textContent = candyColors[randomColor];
-            }
+      for (let i = 0; i < width; i++) {
+        if (getCandy(squares[i]) === '') {
+          setCandy(squares[i], randomCandy());
         }
+      }
     }
 
+    let gameLoop = null;
+
     function startGame() {
-        score = 0;
-        scoreDisplay.textContent = score;
-        createBoard();
-        
-        setInterval(() => {
-            moveDown();
-            checkForMatches();
-            generateNewCandies();
-        }, 100);
+      score = 0;
+      scoreDisplay.textContent = score;
+
+      createBoard();
+
+      if (gameLoop) clearInterval(gameLoop);
+      gameLoop = setInterval(() => {
+        moveDown();
+        checkForMatches();
+        generateNewCandies();
+      }, 120);
     }
 
     startGame();
-</script>
-
-
+  </script>
 </body>
 </html>
