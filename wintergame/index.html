@@ -8,7 +8,15 @@
   <style>
     body{
       font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-      background:linear-gradient(135deg,#a8c0ff 0%,#3f2b96 100%);
+
+      /* ✅ НОВОЕ: фон картинкой IMG_3671.png (поверх можно оставить лёгкий градиент) */
+      background:
+        linear-gradient(135deg, rgba(168,192,255,.75) 0%, rgba(63,43,150,.75) 100%),
+        url("wintergame/IMG_3671.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+
       display:flex; flex-direction:column;
       align-items:center; justify-content:center;
       min-height:100vh; margin:0; color:#fff;
@@ -35,7 +43,14 @@
     .grid{
       display:flex; flex-wrap:wrap;
       width:560px; height:560px;
-      background:rgba(255,255,255,.3);
+
+      /* ✅ НОВОЕ: подложка IMG_3672.png */
+      background-image:
+        url("wintergame/IMG_3672.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+
       border-radius:10px;
       padding:5px;
       box-shadow:0 10px 20px rgba(0,0,0,.2);
@@ -78,7 +93,6 @@
     .cell[data-type="special_candle"]{ filter:drop-shadow(0 0 12px rgba(255,140,0,.65)); }
 
     /* ---- препятствия ---- */
-    /* сугроб: полупрозрачная “шапка” + замок */
     .cell[data-block="snow"]::after{
       content:"";
       position:absolute; inset:0;
@@ -96,7 +110,6 @@
       pointer-events:none;
     }
 
-    /* лёд: синеватая плёнка + цифра прочности */
     .cell[data-block="ice"]::after{
       content:"";
       position:absolute; inset:0;
@@ -212,11 +225,10 @@
 /* =========================================================================
    НАСТРОЙКА ПУТЕЙ К КАРТИНКАМ
    -------------------------------------------------------------------------
-   ВАЖНО:
-   - Если этот HTML лежит В ТОЙ ЖЕ папке, что и IMG_3655.png и т.д. — оставь ''.
-   - Если HTML лежит выше, а картинки в папке /wintergame/ — поставь 'wintergame/'.
+   ✅ У ТЕБЯ КАРТИНКИ В /wintergame/
+   Поэтому здесь ставим 'wintergame/' и дальше ВСЕ пути становятся правильными.
 ============================================================================ */
-const ASSET_PATH = ''; // например: 'wintergame/'
+const ASSET_PATH = 'wintergame/';
 
 const IMG = {
   // обычные
@@ -228,10 +240,14 @@ const IMG = {
   tree:      ASSET_PATH + 'IMG_3659.png',
 
   // спец
-  goldSteps:    ASSET_PATH + 'IMG_3655.png', // очищает строку
-  candle:       ASSET_PATH + 'IMG_3656.png', // размораживает лёд
-  giftBag:      ASSET_PATH + 'IMG_3657.png', // взрыв радиусом
-  goldSnowflake:ASSET_PATH + 'IMG_3658.png', // очищает экран
+  goldSteps:     ASSET_PATH + 'IMG_3655.png',
+  candle:        ASSET_PATH + 'IMG_3656.png',
+  giftBag:       ASSET_PATH + 'IMG_3657.png',
+  goldSnowflake: ASSET_PATH + 'IMG_3658.png',
+
+  // ✅ НОВОЕ (на будущее, если понадобится в JS)
+  bg:    ASSET_PATH + 'IMG_3671.png',
+  board: ASSET_PATH + 'IMG_3672.png',
 };
 
 const NORMAL_COLORS = ['snowflake','thermos','steps','boots','mittens','tree'];
@@ -258,13 +274,11 @@ const LEVELS = [
   { id:4,  target: 115, intro:"Уровень 4 — золотая снежинка. Соберите 5 в ряд → появится снежинка, она очищает весь экран.", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[] },
   { id:5,  target: 135, intro:"Уровень 5 — появляется препятствие «Снежный сугроб». Он блокирует клетку на несколько ходов.", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
 
-  // 6–9 (чуть сложнее) — продолжаем с сугробами и растим цель
   { id:6,  target: 155, intro:"Уровень 6 — больше сугробов. Используйте спец-элементы, чтобы освобождать поле.", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
   { id:7,  target: 175, intro:"Уровень 7 — сугробы становятся чаще. Делайте 4 и 5 в ряд для быстрых очисток.", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
   { id:8,  target: 195, intro:"Уровень 8 — держим темп: каскады после падения фишек дают больше матчей.", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
   { id:9,  target: 215, intro:"Уровень 9 — почти финал перед льдом. Готовимся к заморозке!", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
 
-  // 10 — лёд + свечка
   { id:10, target: 240, intro:"Уровень 10 — появляется «Ледяная клетка» (3 слоя) и «Свечка». Свечка при активации снимает 1 слой льда в области 3×3.", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR, SPECIAL.CANDLE], obstacles:[BLOCK.SNOW, BLOCK.ICE] },
 ];
 
@@ -289,19 +303,11 @@ let selectedSquare = null;
 let squareIdBeingDragged = null;
 let squareIdBeingReplaced = null;
 
-// защита от “одновременных” ходов во время каскадов
 let isResolving = false;
 
 /* =========================================================================
    МОДЕЛЬ КЛЕТКИ (dataset):
-   - data-color:   normal цвет (snowflake/thermos/...)
-   - data-type:    normal | special_...
-   - data-block:   '' | snow | ice
-   - data-turns:   для snow (сколько ходов осталось)
-   - data-ice:     для ice (hp 3..0) — это просто отображение, хранение тоже в data-icehp
-   - data-icehp:   hp льда (3..0)
 ============================================================================ */
-
 function setCell(square, colorKey, type='normal'){
   square.dataset.color = colorKey || '';
   square.dataset.type = type || 'normal';
@@ -311,12 +317,10 @@ function setCell(square, colorKey, type='normal'){
 
 function resolveImage(colorKey, type){
   if(!colorKey) return '';
-  // спец-элементы рисуются своим PNG, обычные — по ключу
   if(type === SPECIAL.LINE)   return IMG.goldSteps;
   if(type === SPECIAL.BOMB)   return IMG.giftBag;
   if(type === SPECIAL.CLEAR)  return IMG.goldSnowflake;
   if(type === SPECIAL.CANDLE) return IMG.candle;
-
   return IMG[colorKey] || '';
 }
 
@@ -329,7 +333,6 @@ function isBlocked(i){
 function clearCell(i){
   const sq = squares[i];
   setCell(sq, '', 'normal');
-  // не трогаем препятствия тут — они отдельным слоем
 }
 
 function hasCandy(i){
@@ -352,7 +355,6 @@ function showIntro(){
   introTitle.textContent = `Уровень ${lvl.id}`;
   introText.textContent = lvl.intro;
 
-  // список “правил” уровня — чтобы было вау и понятно
   introList.innerHTML = '';
   const items = [];
   items.push('Соберите 3 одинаковых фишки подряд — они исчезнут, а новые упадут сверху.');
@@ -396,7 +398,6 @@ function setupHUD(){
 function placeObstacles(){
   const lvl = currentLevel();
 
-  // очистить старые блоки
   for(let i=0;i<squares.length;i++){
     squares[i].dataset.block = '';
     squares[i].dataset.turns = '';
@@ -404,15 +405,13 @@ function placeObstacles(){
     squares[i].dataset.ice = '';
   }
 
-  // сугробы — рандомно (увеличиваем по уровню)
   if(lvl.obstacles.includes(BLOCK.SNOW)){
-    const count = Math.min(10, 3 + Math.floor((lvl.id-5)*1.2)); // 5lvl=3.. постепенно больше
+    const count = Math.min(10, 3 + Math.floor((lvl.id-5)*1.2));
     dropSnow(count);
   }
 
-  // лёд — только на 10 уровне
   if(lvl.obstacles.includes(BLOCK.ICE)){
-    const count = 10; // можно менять
+    const count = 10;
     dropIce(count);
   }
 }
@@ -423,12 +422,11 @@ function dropSnow(count){
   while(placed < count && tries < 500){
     tries++;
     const i = Math.floor(Math.random() * (width*width));
-    // не ставим на верхнюю строку слишком часто, чтобы не ломать спавн
     if(i < width) continue;
     if(squares[i].dataset.block) continue;
 
     squares[i].dataset.block = BLOCK.SNOW;
-    squares[i].dataset.turns = 3; // блок на 3 хода
+    squares[i].dataset.turns = 3;
     placed++;
   }
 }
@@ -440,7 +438,6 @@ function dropIce(count){
     tries++;
     const i = Math.floor(Math.random() * (width*width));
     if(squares[i].dataset.block) continue;
-    // лёд не ставим в первом ряду, чтобы проще “въехать” в уровень
     if(i < width) continue;
 
     squares[i].dataset.block = BLOCK.ICE;
@@ -451,7 +448,6 @@ function dropIce(count){
 }
 
 function tickObstaclesAfterMove(){
-  // сугробы: -1 ход
   for(let i=0;i<squares.length;i++){
     if(squares[i].dataset.block === BLOCK.SNOW){
       let t = (+squares[i].dataset.turns || 0);
@@ -498,10 +494,8 @@ function createBoard(){
     sq.setAttribute('draggable', true);
     sq.setAttribute('id', i);
 
-    // обычная фишка
     setCell(sq, randomNormal(), 'normal');
 
-    // слушатели
     sq.addEventListener('click', selectSquare);
 
     sq.addEventListener('dragstart', dragStart);
@@ -515,8 +509,6 @@ function createBoard(){
   }
 
   placeObstacles();
-
-  // чтобы не стартовать с готовыми матчами — слегка “перемешаем”
   stabilizeNoInitialMatches();
 }
 
@@ -527,8 +519,6 @@ function selectSquare(e){
   if(isResolving) return;
 
   const id = parseInt(e.currentTarget.id, 10);
-
-  // заблокированную клетку нельзя трогать
   if(isBlocked(id)) return;
 
   if(selectedSquare === null){
@@ -546,12 +536,9 @@ function selectSquare(e){
   const validMoves = [selectedSquare-1, selectedSquare+1, selectedSquare-width, selectedSquare+width];
   const isAdjacent = validMoves.includes(id);
 
-  // запрет “через край”
   if(isAdjacent){
     if(selectedSquare % width === 0 && id === selectedSquare - 1) return;
     if(selectedSquare % width === width-1 && id === selectedSquare + 1) return;
-
-    // второй тоже не должен быть заблокирован
     if(isBlocked(id)) return;
 
     doMove(selectedSquare, id);
@@ -615,7 +602,6 @@ function doSwap(a,b){
   B.dataset.color = tempColor;
   B.dataset.type  = tempType;
 
-  // обновить картинки
   A.style.backgroundImage = A.dataset.color ? `url('${resolveImage(A.dataset.color, A.dataset.type)}')` : '';
   B.style.backgroundImage = B.dataset.color ? `url('${resolveImage(B.dataset.color, B.dataset.type)}')` : '';
 }
@@ -624,25 +610,16 @@ function doMove(from,to){
   if(isResolving) return;
   isResolving = true;
 
-  // swap
   doSwap(from,to);
-
-  // это считается ходом → уменьшаем таймеры сугробов
   tickObstaclesAfterMove();
 
-  const movedSpecial = (squares[to].dataset.type !== 'normal' || squares[from].dataset.type !== 'normal');
-
-  // Если переместили спец — активируем (как “следующий ход”)
-  // Активируем спец, который оказался в точке TO (там “завершился” перенос)
   let activated = false;
   if(squares[to].dataset.type !== 'normal'){
     activated = activateSpecialAt(to);
   } else if(squares[from].dataset.type !== 'normal'){
-    // на случай если что-то странное — активируем второй
     activated = activateSpecialAt(from);
   }
 
-  // Если спец активировался — сразу резолвим каскады
   if(activated){
     resolveBoard().then(()=>{
       isResolving = false;
@@ -651,16 +628,13 @@ function doMove(from,to){
     return;
   }
 
-  // Если спец не активировался — обычная проверка матча
   const matches = findAllMatches();
   if(matches.length === 0){
-    // откат
     doSwap(from,to);
     isResolving = false;
     return;
   }
 
-  // если матч есть — применяем и каскадим
   applyMatches(matches, {from, to}).then(()=>{
     resolveBoard().then(()=>{
       isResolving = false;
@@ -676,28 +650,22 @@ function activateSpecialAt(i){
   const sq = squares[i];
   const type = sq.dataset.type;
   if(type === 'normal') return false;
-
-  // нельзя активировать, если клетка “заперта” препятствием
   if(isBlocked(i)) return false;
 
   if(type === SPECIAL.LINE){
-    // очистить всю строку
     const row = Math.floor(i / width);
     const start = row * width;
     for(let c=0;c<width;c++){
       const idx = start + c;
-      // при эффекте “бьём” лёд на 1 слой, даже если фишка не исчезает из-за блокировки
       if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
       if(!isBlocked(idx)) clearCell(idx);
     }
-    // сама спец-клетка исчезает
     clearCell(i);
     addScore(8);
     return true;
   }
 
   if(type === SPECIAL.BOMB){
-    // взрыв 3×3
     const r0 = Math.floor(i/width);
     const c0 = i % width;
     for(let dr=-1; dr<=1; dr++){
@@ -715,9 +683,8 @@ function activateSpecialAt(i){
   }
 
   if(type === SPECIAL.CLEAR){
-    // очистить весь экран
     for(let idx=0; idx<width*width; idx++){
-      if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1); // лёд теряет 1 слой
+      if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
       if(!isBlocked(idx)) clearCell(idx);
     }
     addScore(16);
@@ -725,7 +692,6 @@ function activateSpecialAt(i){
   }
 
   if(type === SPECIAL.CANDLE){
-    // разморозить лёд 3×3 (и чуть очистить рядом, если не заблокировано)
     const r0 = Math.floor(i/width);
     const c0 = i % width;
     for(let dr=-1; dr<=1; dr++){
@@ -734,10 +700,7 @@ function activateSpecialAt(i){
         if(r<0||r>=width||c<0||c>=width) continue;
         const idx = r*width + c;
 
-        // свечка снимает 1 слой льда
         if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
-
-        // и при этом очищает обычные фишки, если клетка не заблокирована
         if(!isBlocked(idx)) clearCell(idx);
       }
     }
@@ -750,13 +713,11 @@ function activateSpecialAt(i){
 }
 
 /* =========================================================================
-   ПОИСК МАТЧЕЙ (3/4/5 + L/T)
-   Возвращает массив групп: { cells:[...], kind:'row'|'col'|'lt', len, colorKey }
+   ПОИСК МАТЧЕЙ
 ============================================================================ */
 function findAllMatches(){
   const groups = [];
 
-  // горизонтали
   for(let r=0;r<width;r++){
     let c=0;
     while(c<width){
@@ -764,7 +725,6 @@ function findAllMatches(){
       const key = squares[idx].dataset.color;
       const type = squares[idx].dataset.type;
 
-      // матчим только normal фишки (спец не участвуют в матчах по цвету)
       if(!key || type !== 'normal' || isBlocked(idx)){
         c++;
         continue;
@@ -787,7 +747,6 @@ function findAllMatches(){
     }
   }
 
-  // вертикали
   for(let c=0;c<width;c++){
     let r=0;
     while(r<width){
@@ -817,8 +776,6 @@ function findAllMatches(){
     }
   }
 
-  // L/T: пересечения row и col групп по одной клетке
-  // соберём карту: cell -> сколько групп её содержит
   const cellToGroups = new Map();
   groups.forEach((g, gi)=>{
     g.cells.forEach(i=>{
@@ -830,10 +787,8 @@ function findAllMatches(){
   const ltGroups = [];
   cellToGroups.forEach((giList, cell)=>{
     if(giList.length >= 2){
-      // проверим что пересечение по одному цвету (должен быть тот же colorKey)
       const keys = new Set(giList.map(gi=>groups[gi].colorKey));
       if(keys.size === 1){
-        // объединяем две группы вокруг точки — это L/T
         const union = new Set();
         giList.forEach(gi => groups[gi].cells.forEach(x=>union.add(x)));
         ltGroups.push({cells:[...union], kind:'lt', len:union.size, colorKey:[...keys][0], pivot:cell});
@@ -841,9 +796,7 @@ function findAllMatches(){
     }
   });
 
-  // убираем из обычных групп те, что входят в lt, чтобы не “двойной” очистки
   if(ltGroups.length){
-    // простая логика: если у группы есть пересечение с lt — её не добавляем отдельно
     const blockedGroupIdx = new Set();
     ltGroups.forEach(lt=>{
       groups.forEach((g, gi)=>{
@@ -860,11 +813,7 @@ function findAllMatches(){
 }
 
 /* =========================================================================
-   СПАВН СПЕЦОВ И ОЧИСТКА МАТЧА
-   Правила:
-   - 5 подряд → special_clear
-   - 4 подряд → special_line (с 10 уровня: если собран 4 из THERMOS — свечка, чтобы логично)
-   - L/T → special_bomb
+   СПАВН СПЕЦОВ И ОЧИСТКА
 ============================================================================ */
 function levelHasSpecial(type){
   return currentLevel().specials.includes(type);
@@ -876,24 +825,16 @@ function addScore(n){
 }
 
 async function applyMatches(matches, moveInfo){
-  const lvl = currentLevel();
-
-  // объединяем все клетки, которые надо очистить
-  // но спец-элемент (если рождается) мы оставим на месте
   const toClear = new Set();
 
-  // хотим рожать спец в точке “управляемой игроком”
-  // выбираем pivot: если в группе есть moveInfo.to или moveInfo.from — ставим туда
   function chooseSpawnCell(group){
     const {from, to} = moveInfo || {};
     if(typeof to === 'number' && group.cells.includes(to)) return to;
     if(typeof from === 'number' && group.cells.includes(from)) return from;
-    // иначе центр
     return group.cells[Math.floor(group.cells.length/2)];
   }
 
-  // сначала решим, какие спец-элементы рождаются
-  const spawns = []; // {at, type}
+  const spawns = [];
   for(const g of matches){
     if(g.kind === 'lt'){
       if(levelHasSpecial(SPECIAL.BOMB)){
@@ -912,10 +853,7 @@ async function applyMatches(matches, moveInfo){
     }
 
     if(g.len === 4){
-      // Уровень 2+: line
       if(levelHasSpecial(SPECIAL.LINE)){
-        // Уровень 10+: свечка как “помощь против льда”
-        // Логика: если собрали 4 из термосов — создаём свечку.
         const spawnAt = chooseSpawnCell(g);
         if(levelHasSpecial(SPECIAL.CANDLE) && g.colorKey === 'thermos'){
           spawns.push({ at: spawnAt, type: SPECIAL.CANDLE });
@@ -927,41 +865,30 @@ async function applyMatches(matches, moveInfo){
       continue;
     }
 
-    // обычные 3
     g.cells.forEach(i=>toClear.add(i));
   }
 
-  // применяем очистку, но не очищаем клетки, где будет спец
   const spawnCells = new Set(spawns.map(s=>s.at));
 
-  // анимация исчезновения
   const clearList = [...toClear].filter(i=>!spawnCells.has(i));
   clearList.forEach(i=>squares[i].classList.add('fade-out'));
 
   await sleep(220);
 
   for(const i of clearList){
-    // эффекты также бьют лёд
     if(squares[i].dataset.block === BLOCK.ICE) damageIceAt(i, 1);
     if(!isBlocked(i)) clearCell(i);
     squares[i].classList.remove('fade-out');
   }
 
-  // поставить спец
   for(const s of spawns){
-    // если клетка заблокирована — спец не ставим (чтобы не было глюков)
     if(isBlocked(s.at)) continue;
-    // сама клетка должна остаться “занятой” спецом — её цвет можно оставить как исходный или пустой
-    // оставим цвет исходный, чтобы было проще отрисовать, но тип задаёт картинку
     if(!squares[s.at].dataset.color) squares[s.at].dataset.color = randomNormal();
     squares[s.at].dataset.type = s.type;
     squares[s.at].style.backgroundImage = `url('${resolveImage(squares[s.at].dataset.color, squares[s.at].dataset.type)}')`;
   }
 
-  // очки
-  // за матч
-  const base = clearList.length;
-  addScore(base); // 1 очко за фишку
+  addScore(clearList.length);
 }
 
 function sleep(ms){ return new Promise(res=>setTimeout(res, ms)); }
@@ -970,21 +897,17 @@ function sleep(ms){ return new Promise(res=>setTimeout(res, ms)); }
    ГРАВИТАЦИЯ + КАСКАДЫ
 ============================================================================ */
 function moveDown(){
-  // снизу вверх
   for(let i = width*width - 1; i >= 0; i--){
-    // пропускаем заблокированные клетки
     if(isBlocked(i)) continue;
 
     const below = i + width;
     if(below >= width*width) continue;
     if(isBlocked(below)) continue;
 
-    // если внизу пусто — падаем
     if(!hasCandy(below) && hasCandy(i)){
       squares[below].dataset.color = squares[i].dataset.color;
       squares[below].dataset.type  = squares[i].dataset.type;
       squares[below].style.backgroundImage = squares[i].style.backgroundImage;
-
       clearCell(i);
     }
   }
@@ -1000,16 +923,13 @@ function generateNewCandies(){
 }
 
 async function resolveBoard(){
-  // повторяем: падение → появление → матчи → очистка → снова падение…
   for(let step=0; step<25; step++){
-    // 1) падение несколько тиков (чтобы “докапало”)
     for(let k=0;k<10;k++){
       moveDown();
       generateNewCandies();
       await sleep(40);
     }
 
-    // 2) матчи от каскада
     const matches = findAllMatches();
     if(matches.length === 0) break;
 
@@ -1022,12 +942,10 @@ async function resolveBoard(){
    СТАРТ / ПЕРЕХОД УРОВНЯ
 ============================================================================ */
 function stabilizeNoInitialMatches(){
-  // грубо: пока есть матч — перегенерим часть клеток (без препятствий)
   for(let tries=0; tries<30; tries++){
     const matches = findAllMatches();
     if(matches.length === 0) return;
 
-    // для каждой группы “перемешаем” 1–2 клетки
     matches.forEach(g=>{
       const pick = g.cells[Math.floor(Math.random()*g.cells.length)];
       if(!isBlocked(pick)){
@@ -1040,12 +958,10 @@ function stabilizeNoInitialMatches(){
 function checkLevelComplete(){
   const lvl = currentLevel();
   if(score >= lvl.target){
-    // следующий уровень
     if(levelIndex < LEVELS.length-1){
       levelIndex++;
       startLevel(false);
     } else {
-      // победа — покажем поздравление через модалку
       introTitle.textContent = 'Вы прошли все уровни! 🎉';
       introText.textContent  = 'Можно играть дальше ради очков или начать заново.';
       introList.innerHTML = '';
