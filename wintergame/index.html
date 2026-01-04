@@ -6,10 +6,10 @@
   <title>ШАГАЙ ДОМА: Зимняя игра</title>
 
   <style>
+    *{ box-sizing:border-box; }
+
     body{
       font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-
-   
       background:
         linear-gradient(135deg, rgba(168,192,255,.75) 0%, rgba(63,43,150,.75) 100%),
         url("/Camp/wintergame/IMG_3671.png");
@@ -23,7 +23,11 @@
       user-select:none;
     }
 
-    h1{ text-shadow:2px 2px 4px rgba(0,0,0,.3); margin:0 0 10px; text-align:center; }
+    h1{
+      text-shadow:2px 2px 4px rgba(0,0,0,.3);
+      margin:0 0 10px;
+      text-align:center;
+    }
 
     .topbar{
       display:flex; gap:12px; align-items:center; justify-content:center;
@@ -44,9 +48,7 @@
       display:flex; flex-wrap:wrap;
       width:560px; height:560px;
 
-      /* ✅ НОВОЕ: подложка IMG_3672.png */
-      background-image:
-        url("/Camp/wintergame/IMG_3672.png");
+      background-image: url("/Camp/wintergame/IMG_3672.png");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -130,21 +132,6 @@
       pointer-events:none;
     }
 
-/* добавьте один раз где-нибудь в начале style */
-*{ box-sizing:border-box; }
-
-/* и замените ваш mobile-блок на такой */
-@media (max-width: 600px){
-  .grid{ width:350px; height:350px; }
-  .cell{
-    width:43.75px; height:43.75px;
-    border-radius:14px;
-    padding:0;                 /* ✅ важно: не увеличиваем ячейку */
-    background-size: 88% 88%;  /* ✅ иконка меньше → не выпирает */
-  }
-  h1{ font-size:24px; }
-  .pill{ font-size:16px; }
-}
     /* ---- модалка инструкций уровня ---- */
     .overlay{
       position:fixed; inset:0;
@@ -185,113 +172,117 @@
     .modal button:hover{ background:#ff4757; transform:translateY(-1px); }
 
     /* ---- кнопки снизу ---- */
-    .btnbar{ display:flex; gap:12px; margin-top:18px; flex-wrap:wrap; justify-content:center; }.btnbar button{
-  padding:12px 22px;
-  font-size:18px;
+    .btnbar{
+      display:flex;
+      gap:12px;
+      margin-top:18px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .btnbar button{
+      padding:12px 22px;
+      font-size:18px;
 
-  /* ✅ glass-стиль */
-  background: rgba(255,255,255,.22);
-  color:#fff;
-  border: 1px solid rgba(255,255,255,.28);
-  border-radius:18px;
-  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+      background: rgba(255,255,255,.22);
+      color:#fff;
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius:18px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.18);
 
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
 
-  cursor:pointer;
-  transition: transform .15s, background .2s, border-color .2s;
-}
-
-.btnbar button:hover{
-  background: rgba(255,255,255,.30);
-  border-color: rgba(255,255,255,.40);
-  transform: translateY(-1px);
-}
-
-.btnbar button:active{
-  transform: translateY(0px) scale(.98);
-}
-    @media (max-width: 600px){
-      .grid{ width:350px; height:350px; }
-      .cell{ width:43.75px; height:43.75px; border-radius:14px; }
-      h1{ font-size:24px; }
-      .pill{ font-size:16px; }
+      cursor:pointer;
+      transition: transform .15s, background .2s, border-color .2s;
+    }
+    .btnbar button:hover{
+      background: rgba(255,255,255,.30);
+      border-color: rgba(255,255,255,.40);
+      transform: translateY(-1px);
+    }
+    .btnbar button:active{
+      transform: translateY(0px) scale(.98);
     }
 
     /* =========================
-   FX: обратная связь спецов
-========================= */
+       FX: обратная связь спецов
+    ========================= */
 
-/* вспышка по всей сетке */
-.grid::after{
-  content:"";
-  position:absolute; inset:0;
-  border-radius:10px;
-  pointer-events:none;
-  opacity:0;
-  background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.55), rgba(255,255,255,0) 55%);
-  transition: opacity .18s ease;
-}
-.grid.fx-flash::after{ opacity:1; }
+    .grid::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius:10px;
+      pointer-events:none;
+      opacity:0;
+      background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.55), rgba(255,255,255,0) 55%);
+      transition: opacity .18s ease;
+    }
+    .grid.fx-flash::after{ opacity:1; }
 
-/* "удар" по конкретным клеткам */
-.cell.fx-hit{
-  animation: fxHit .28s ease-out both;
-  filter: drop-shadow(0 0 12px rgba(255,255,255,.55));
-}
-@keyframes fxHit{
-  0%{ transform:scale(1); }
-  45%{ transform:scale(1.13); }
-  100%{ transform:scale(.98); }
-}
+    .cell.fx-hit{
+      animation: fxHit .28s ease-out both;
+      filter: drop-shadow(0 0 12px rgba(255,255,255,.55));
+    }
+    @keyframes fxHit{
+      0%{ transform:scale(1); }
+      45%{ transform:scale(1.13); }
+      100%{ transform:scale(.98); }
+    }
 
-/* линия (для special_line) */
-.cell.fx-line{
-  animation: fxLine .35s ease-out both;
-  filter: drop-shadow(0 0 14px rgba(255,215,0,.85));
-}
-@keyframes fxLine{
-  0%{ transform:scale(1); }
-  40%{ transform:scale(1.18); }
-  100%{ transform:scale(1); }
-}
+    .cell.fx-line{
+      animation: fxLine .35s ease-out both;
+      filter: drop-shadow(0 0 14px rgba(255,215,0,.85));
+    }
+    @keyframes fxLine{
+      0%{ transform:scale(1); }
+      40%{ transform:scale(1.18); }
+      100%{ transform:scale(1); }
+    }
 
-/* взрыв (special_bomb) */
-.cell.fx-bomb{
-  animation: fxBomb .38s ease-out both;
-  filter: drop-shadow(0 0 16px rgba(255,255,255,.75));
-}
-@keyframes fxBomb{
-  0%{ transform:scale(1); }
-  35%{ transform:scale(1.22) rotate(-2deg); }
-  100%{ transform:scale(1) rotate(0deg); }
-}
+    .cell.fx-bomb{
+      animation: fxBomb .38s ease-out both;
+      filter: drop-shadow(0 0 16px rgba(255,255,255,.75));
+    }
+    @keyframes fxBomb{
+      0%{ transform:scale(1); }
+      35%{ transform:scale(1.22) rotate(-2deg); }
+      100%{ transform:scale(1) rotate(0deg); }
+    }
 
-/* супер-очистка (special_clear): тряска сетки + яркая вспышка */
-.grid.fx-shake{
-  animation: fxShake .28s ease-out both;
-}
-@keyframes fxShake{
-  0%{ transform:translateX(0); }
-  25%{ transform:translateX(-5px); }
-  50%{ transform:translateX(5px); }
-  75%{ transform:translateX(-3px); }
-  100%{ transform:translateX(0); }
-}
+    .grid.fx-shake{
+      animation: fxShake .28s ease-out both;
+    }
+    @keyframes fxShake{
+      0%{ transform:translateX(0); }
+      25%{ transform:translateX(-5px); }
+      50%{ transform:translateX(5px); }
+      75%{ transform:translateX(-3px); }
+      100%{ transform:translateX(0); }
+    }
 
-/* свеча (special_candle) — "тёплый" пульс */
-.cell.fx-candle{
-  animation: fxCandle .42s ease-out both;
-  filter: drop-shadow(0 0 18px rgba(255,140,0,.85));
-}
-@keyframes fxCandle{
-  0%{ transform:scale(1); }
-  30%{ transform:scale(1.2); }
-  60%{ transform:scale(1.08); }
-  100%{ transform:scale(1); }
-}
-    
+    .cell.fx-candle{
+      animation: fxCandle .42s ease-out both;
+      filter: drop-shadow(0 0 18px rgba(255,140,0,.85));
+    }
+    @keyframes fxCandle{
+      0%{ transform:scale(1); }
+      30%{ transform:scale(1.2); }
+      60%{ transform:scale(1.08); }
+      100%{ transform:scale(1); }
+    }
+
+    /* ---- адаптив ---- */
+    @media (max-width: 600px){
+      .grid{ width:350px; height:350px; }
+      .cell{
+        width:43.75px; height:43.75px;
+        border-radius:14px;
+        padding:0;                 /* не раздуваем */
+        background-size: 88% 88%;  /* иконка меньше */
+      }
+      h1{ font-size:24px; }
+      .pill{ font-size:16px; }
+    }
   </style>
 </head>
 
@@ -326,9 +317,6 @@
 <script>
 /* =========================================================================
    НАСТРОЙКА ПУТЕЙ К КАРТИНКАМ
-   -------------------------------------------------------------------------
-   ✅ У ТЕБЯ КАРТИНКИ В /wintergame/
-   Поэтому здесь ставим 'wintergame/' и дальше ВСЕ пути становятся правильными.
 ============================================================================ */
 const ASSET_PATH = '/Camp/wintergame/';
 
@@ -347,7 +335,7 @@ const IMG = {
   giftBag:       ASSET_PATH + 'IMG_3657.png',
   goldSnowflake: ASSET_PATH + 'IMG_3658.png',
 
-  // ✅ НОВОЕ (на будущее, если понадобится в JS)
+  // фон/подложка (не обязательно в JS, но пусть будет)
   bg:    ASSET_PATH + 'IMG_3671.png',
   board: ASSET_PATH + 'IMG_3672.png',
 };
@@ -368,7 +356,7 @@ const BLOCK = {
   ICE:  'ice',
 };
 
-// уровни по твоему ТЗ
+// уровни
 const LEVELS = [
   { id:1,  target: 60,  intro:"Уровень 1 — без спец-элементов. Просто собирайте 3 в ряд.", specials:[], obstacles:[] },
   { id:2,  target: 80,  intro:"Уровень 2 — появляются «Золотые шаги». Соберите 4 в ряд → появится спец. Активируйте его следующим ходом (передвиньте) → очистится строка.", specials:[SPECIAL.LINE], obstacles:[] },
@@ -385,6 +373,7 @@ const LEVELS = [
 ];
 
 const width = 8;
+
 const grid = document.getElementById('grid');
 const scoreDisplay = document.getElementById('score');
 const levelDisplay = document.getElementById('level');
@@ -408,15 +397,31 @@ let squareIdBeingReplaced = null;
 let isResolving = false;
 
 /* =========================================================================
-   МОДЕЛЬ КЛЕТКИ (dataset):
+   УТИЛИТЫ
 ============================================================================ */
-function setCell(square, colorKey, type='normal'){
-  square.dataset.color = colorKey || '';
-  square.dataset.type = type || 'normal';
-  const img = resolveImage(square.dataset.color, square.dataset.type);
-  square.style.backgroundImage = img ? `url('${img}')` : '';
+function sleep(ms){ return new Promise(res=>setTimeout(res, ms)); }
+
+function addFxToCells(indices, cls){
+  indices.forEach(i=>{
+    const el = squares[i];
+    if(!el) return;
+    el.classList.add(cls);
+    setTimeout(()=>el.classList.remove(cls), 420);
+  });
 }
 
+function flashGrid(shake=false){
+  grid.classList.add('fx-flash');
+  if(shake) grid.classList.add('fx-shake');
+  setTimeout(()=>{
+    grid.classList.remove('fx-flash');
+    grid.classList.remove('fx-shake');
+  }, 260);
+}
+
+/* =========================================================================
+   МОДЕЛЬ КЛЕТКИ (dataset)
+============================================================================ */
 function resolveImage(colorKey, type){
   if(!colorKey) return '';
   if(type === SPECIAL.LINE)   return IMG.goldSteps;
@@ -426,10 +431,11 @@ function resolveImage(colorKey, type){
   return IMG[colorKey] || '';
 }
 
-function isBlocked(i){
-  const sq = squares[i];
-  return (sq.dataset.block === BLOCK.SNOW && (+sq.dataset.turns || 0) > 0)
-      || (sq.dataset.block === BLOCK.ICE  && (+sq.dataset.icehp || 0) > 0);
+function setCell(square, colorKey, type='normal'){
+  square.dataset.color = colorKey || '';
+  square.dataset.type = type || 'normal';
+  const img = resolveImage(square.dataset.color, square.dataset.type);
+  square.style.backgroundImage = img ? `url('${img}')` : '';
 }
 
 function clearCell(i){
@@ -445,11 +451,24 @@ function randomNormal(){
   return NORMAL_COLORS[Math.floor(Math.random() * NORMAL_COLORS.length)];
 }
 
+function isBlocked(i){
+  const sq = squares[i];
+  return (sq.dataset.block === BLOCK.SNOW && (+sq.dataset.turns || 0) > 0)
+      || (sq.dataset.block === BLOCK.ICE  && (+sq.dataset.icehp || 0) > 0);
+}
+
 /* =========================================================================
-   УРОВНИ: генерация поля + препятствия
+   УРОВЕНЬ / HUD / ИНТРО
 ============================================================================ */
 function currentLevel(){
   return LEVELS[levelIndex] || LEVELS[LEVELS.length-1];
+}
+
+function setupHUD(){
+  const lvl = currentLevel();
+  levelDisplay.textContent = lvl.id;
+  targetDisplay.textContent = lvl.target;
+  scoreDisplay.textContent = score;
 }
 
 function showIntro(){
@@ -490,13 +509,9 @@ overlay.addEventListener('click', (e)=>{
   }
 });
 
-function setupHUD(){
-  const lvl = currentLevel();
-  levelDisplay.textContent = lvl.id;
-  targetDisplay.textContent = lvl.target;
-  scoreDisplay.textContent = score;
-}
-
+/* =========================================================================
+   ПРЕПЯТСТВИЯ
+============================================================================ */
 function placeObstacles(){
   const lvl = currentLevel();
 
@@ -513,8 +528,7 @@ function placeObstacles(){
   }
 
   if(lvl.obstacles.includes(BLOCK.ICE)){
-    const count = 10;
-    dropIce(count);
+    dropIce(10);
   }
 }
 
@@ -524,7 +538,7 @@ function dropSnow(count){
   while(placed < count && tries < 500){
     tries++;
     const i = Math.floor(Math.random() * (width*width));
-    if(i < width) continue;
+    if(i < width) continue;                 // не на верхней линии
     if(squares[i].dataset.block) continue;
 
     squares[i].dataset.block = BLOCK.SNOW;
@@ -539,8 +553,8 @@ function dropIce(count){
   while(placed < count && tries < 800){
     tries++;
     const i = Math.floor(Math.random() * (width*width));
-    if(squares[i].dataset.block) continue;
     if(i < width) continue;
+    if(squares[i].dataset.block) continue;
 
     squares[i].dataset.block = BLOCK.ICE;
     squares[i].dataset.icehp = 3;
@@ -596,6 +610,12 @@ function createBoard(){
     sq.setAttribute('draggable', true);
     sq.setAttribute('id', i);
 
+    // базовые значения, чтобы isBlocked не ломался на undefined
+    sq.dataset.block = '';
+    sq.dataset.turns = '';
+    sq.dataset.icehp = '';
+    sq.dataset.ice = '';
+
     setCell(sq, randomNormal(), 'normal');
 
     sq.addEventListener('click', selectSquare);
@@ -643,9 +663,12 @@ function selectSquare(e){
     if(selectedSquare % width === width-1 && id === selectedSquare + 1) return;
     if(isBlocked(id)) return;
 
-    doMove(selectedSquare, id);
     squares[selectedSquare].classList.remove('selected');
+    const from = selectedSquare;
     selectedSquare = null;
+
+    // не ждём здесь (UI не блокируем), но ход внутри сам синхронизируется флагом isResolving
+    doMove(from, id);
   } else {
     squares[selectedSquare].classList.remove('selected');
     selectedSquare = id;
@@ -653,14 +676,14 @@ function selectSquare(e){
   }
 }
 
-function dragStart(e){
+function dragStart(){
   if(isResolving) return;
   const id = parseInt(this.id,10);
   if(isBlocked(id)) return;
   squareIdBeingDragged = this.id;
 }
 
-function dragDrop(e){
+function dragDrop(){
   if(isResolving) return;
   const id = parseInt(this.id,10);
   if(isBlocked(id)) return;
@@ -691,7 +714,7 @@ function dragEnd(){
 }
 
 /* =========================================================================
-   ХОД: swap → (если спец передвинут — активировать) → иначе искать матчи
+   ХОД
 ============================================================================ */
 function doSwap(a,b){
   const A = squares[a], B = squares[b];
@@ -715,72 +738,36 @@ async function doMove(from,to){
   doSwap(from,to);
   tickObstaclesAfterMove();
 
+  // 1) если в результате СДВИГА спец оказался в одной из двух клеток — активируем
   let activated = false;
-if(squares[to].dataset.type !== 'normal'){
-  activated = await activateSpecialAt(to);
-} else if(squares[from].dataset.type !== 'normal'){
-  activated = await activateSpecialAt(from);
-}
+  if(squares[to].dataset.type !== 'normal'){
+    activated = await activateSpecialAt(to);
+  } else if(squares[from].dataset.type !== 'normal'){
+    activated = await activateSpecialAt(from);
+  }
 
   if(activated){
-    resolveBoard().then(()=>{
-      isResolving = false;
-      checkLevelComplete();
-    });
+    await resolveBoard();
+    isResolving = false;
+    checkLevelComplete();
     return;
   }
 
+  // 2) иначе — обычные матчи
   const matches = findAllMatches();
   if(matches.length === 0){
-    doSwap(from,to);
+    doSwap(from,to); // откат хода
     isResolving = false;
     return;
   }
 
-  applyMatches(matches, {from, to}).then(()=>{
-    resolveBoard().then(()=>{
-      isResolving = false;
-      checkLevelComplete();
-    });
-  });
-}
-  for(const i of clearList){
-    if(squares[i].dataset.block === BLOCK.ICE) damageIceAt(i, 1);
-    if(!isBlocked(i)) clearCell(i);
-    squares[i].classList.remove('fade-out');
-  }
+  await applyMatches(matches, {from, to});
+  await resolveBoard();
 
-  for(const s of spawns){
-    if(isBlocked(s.at)) continue;
-    if(!squares[s.at].dataset.color) squares[s.at].dataset.color = randomNormal();
-    squares[s.at].dataset.type = s.type;
-    squares[s.at].style.backgroundImage = `url('${resolveImage(squares[s.at].dataset.color, squares[s.at].dataset.type)}')`;
-  }
-
-  addScore(clearList.length);
+  isResolving = false;
+  checkLevelComplete();
 }
 
-function sleep(ms){ return new Promise(res=>setTimeout(res, ms)); }
-
-function addFxToCells(indices, cls){
-  indices.forEach(i=>{
-    const el = squares[i];
-    if(!el) return;
-    el.classList.add(cls);
-    // чтобы можно было повторно запускать эффект
-    setTimeout(()=>el.classList.remove(cls), 420);
-  });
-}
-
-function flashGrid(shake=false){
-  grid.classList.add('fx-flash');
-  if(shake) grid.classList.add('fx-shake');
-  setTimeout(()=>{
-    grid.classList.remove('fx-flash');
-    grid.classList.remove('fx-shake');
-  }, 260);
-}
-  
 /* =========================================================================
    АКТИВАЦИЯ СПЕЦ-ЭЛЕМЕНТОВ
 ============================================================================ */
@@ -790,7 +777,6 @@ async function activateSpecialAt(i){
   if(type === 'normal') return false;
   if(isBlocked(i)) return false;
 
-  // какие клетки затрагиваем (для анимации)
   let affected = [];
 
   if(type === SPECIAL.LINE){
@@ -843,10 +829,8 @@ async function activateSpecialAt(i){
     affected = Array.from({length: width*width}, (_,k)=>k);
 
     flashGrid(true);
-    // немного “волной” — чтобы было эффектнее, чем мгновенно
     addFxToCells([i], 'fx-hit');
 
-    // быстрая волна подсветки (не тормозит сильно)
     for(let p=0; p<affected.length; p+=8){
       addFxToCells(affected.slice(p, p+8), 'fx-hit');
       await sleep(18);
@@ -895,6 +879,7 @@ async function activateSpecialAt(i){
 function findAllMatches(){
   const groups = [];
 
+  // строки
   for(let r=0;r<width;r++){
     let c=0;
     while(c<width){
@@ -924,6 +909,7 @@ function findAllMatches(){
     }
   }
 
+  // колонки
   for(let c=0;c<width;c++){
     let r=0;
     while(r<width){
@@ -953,6 +939,7 @@ function findAllMatches(){
     }
   }
 
+  // L/T (пересечение строки и колонки одного цвета)
   const cellToGroups = new Map();
   groups.forEach((g, gi)=>{
     g.cells.forEach(i=>{
@@ -1012,10 +999,11 @@ async function applyMatches(matches, moveInfo){
   }
 
   const spawns = [];
+
   for(const g of matches){
     if(g.kind === 'lt'){
       if(levelHasSpecial(SPECIAL.BOMB)){
-        spawns.push({ at: g.pivot ?? chooseSpawnCell(g), type: SPECIAL.BOMB });
+        spawns.push({ at: (g.pivot ?? chooseSpawnCell(g)), type: SPECIAL.BOMB });
       }
       g.cells.forEach(i=>toClear.add(i));
       continue;
@@ -1032,6 +1020,8 @@ async function applyMatches(matches, moveInfo){
     if(g.len === 4){
       if(levelHasSpecial(SPECIAL.LINE)){
         const spawnAt = chooseSpawnCell(g);
+
+        // логика свечи: если активен уровень со свечой и 4-ка собрана термосами
         if(levelHasSpecial(SPECIAL.CANDLE) && g.colorKey === 'thermos'){
           spawns.push({ at: spawnAt, type: SPECIAL.CANDLE });
         } else {
@@ -1047,13 +1037,35 @@ async function applyMatches(matches, moveInfo){
 
   const spawnCells = new Set(spawns.map(s=>s.at));
 
+  // очищаем всё, КРОМЕ клетки-спавна (там появится спец)
   const clearList = [...toClear].filter(i=>!spawnCells.has(i));
-  clearList.forEach(i=>squares[i].classList.add('fade-out'));
 
+  clearList.forEach(i=>squares[i].classList.add('fade-out'));
   await sleep(220);
 
+  // реальная очистка
+  for(const i of clearList){
+    if(squares[i].dataset.block === BLOCK.ICE) damageIceAt(i, 1);
+    if(!isBlocked(i)) clearCell(i);
+    squares[i].classList.remove('fade-out');
+  }
 
-  
+  // ставим спец
+  for(const s of spawns){
+    if(isBlocked(s.at)) continue;
+
+    // если вдруг клетка пустая (бывает в каскаде) — дадим ей базовый цвет,
+    // но тип сделаем спецовый (и картинка возьмётся по type)
+    if(!squares[s.at].dataset.color) squares[s.at].dataset.color = randomNormal();
+
+    squares[s.at].dataset.type = s.type;
+    squares[s.at].style.backgroundImage = `url('${resolveImage(squares[s.at].dataset.color, squares[s.at].dataset.type)}')`;
+  }
+
+  // очки: за каждую очищенную клетку
+  addScore(clearList.length);
+}
+
 /* =========================================================================
    ГРАВИТАЦИЯ + КАСКАДЫ
 ============================================================================ */
@@ -1085,6 +1097,7 @@ function generateNewCandies(){
 
 async function resolveBoard(){
   for(let step=0; step<25; step++){
+    // “падение” чуть по шагам — чтобы выглядело живо
     for(let k=0;k<10;k++){
       moveDown();
       generateNewCandies();
@@ -1121,7 +1134,7 @@ function checkLevelComplete(){
   if(score >= lvl.target){
     if(levelIndex < LEVELS.length-1){
       levelIndex++;
-startLevel(true);
+      startLevel(true); // сбрасываем очки на новый уровень
     } else {
       introTitle.textContent = 'Вы прошли все уровни! 🎉';
       introText.textContent  = 'Можно играть дальше ради очков или начать заново.';
@@ -1133,9 +1146,7 @@ startLevel(true);
 }
 
 function startLevel(resetScore){
-  if(resetScore){
-    score = 0;
-  }
+  if(resetScore) score = 0;
   setupHUD();
   createBoard();
   showIntro();
