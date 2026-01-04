@@ -177,20 +177,33 @@
     .modal button:hover{ background:#ff4757; transform:translateY(-1px); }
 
     /* ---- кнопки снизу ---- */
-    .btnbar{ display:flex; gap:12px; margin-top:18px; flex-wrap:wrap; justify-content:center; }
-    .btnbar button{
-      padding:10px 20px;
-      font-size:18px;
-      background:#ff6b6b;
-      color:#fff;
-      border:none;
-      border-radius:50px;
-      cursor:pointer;
-      box-shadow:0 4px 15px rgba(0,0,0,.2);
-      transition:background .3s, transform .15s;
-    }
-    .btnbar button:hover{ background:#ff4757; transform:translateY(-1px); }
+    .btnbar{ display:flex; gap:12px; margin-top:18px; flex-wrap:wrap; justify-content:center; }.btnbar button{
+  padding:12px 22px;
+  font-size:18px;
 
+  /* ✅ glass-стиль */
+  background: rgba(255,255,255,.22);
+  color:#fff;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius:18px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  cursor:pointer;
+  transition: transform .15s, background .2s, border-color .2s;
+}
+
+.btnbar button:hover{
+  background: rgba(255,255,255,.30);
+  border-color: rgba(255,255,255,.40);
+  transform: translateY(-1px);
+}
+
+.btnbar button:active{
+  transform: translateY(0px) scale(.98);
+}
     @media (max-width: 600px){
       .grid{ width:350px; height:350px; }
       .cell{ width:43.75px; height:43.75px; border-radius:14px; }
