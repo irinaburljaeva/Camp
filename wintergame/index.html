@@ -210,6 +210,80 @@
       h1{ font-size:24px; }
       .pill{ font-size:16px; }
     }
+
+    /* =========================
+   FX: обратная связь спецов
+========================= */
+
+/* вспышка по всей сетке */
+.grid::after{
+  content:"";
+  position:absolute; inset:0;
+  border-radius:10px;
+  pointer-events:none;
+  opacity:0;
+  background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.55), rgba(255,255,255,0) 55%);
+  transition: opacity .18s ease;
+}
+.grid.fx-flash::after{ opacity:1; }
+
+/* "удар" по конкретным клеткам */
+.cell.fx-hit{
+  animation: fxHit .28s ease-out both;
+  filter: drop-shadow(0 0 12px rgba(255,255,255,.55));
+}
+@keyframes fxHit{
+  0%{ transform:scale(1); }
+  45%{ transform:scale(1.13); }
+  100%{ transform:scale(.98); }
+}
+
+/* линия (для special_line) */
+.cell.fx-line{
+  animation: fxLine .35s ease-out both;
+  filter: drop-shadow(0 0 14px rgba(255,215,0,.85));
+}
+@keyframes fxLine{
+  0%{ transform:scale(1); }
+  40%{ transform:scale(1.18); }
+  100%{ transform:scale(1); }
+}
+
+/* взрыв (special_bomb) */
+.cell.fx-bomb{
+  animation: fxBomb .38s ease-out both;
+  filter: drop-shadow(0 0 16px rgba(255,255,255,.75));
+}
+@keyframes fxBomb{
+  0%{ transform:scale(1); }
+  35%{ transform:scale(1.22) rotate(-2deg); }
+  100%{ transform:scale(1) rotate(0deg); }
+}
+
+/* супер-очистка (special_clear): тряска сетки + яркая вспышка */
+.grid.fx-shake{
+  animation: fxShake .28s ease-out both;
+}
+@keyframes fxShake{
+  0%{ transform:translateX(0); }
+  25%{ transform:translateX(-5px); }
+  50%{ transform:translateX(5px); }
+  75%{ transform:translateX(-3px); }
+  100%{ transform:translateX(0); }
+}
+
+/* свеча (special_candle) — "тёплый" пульс */
+.cell.fx-candle{
+  animation: fxCandle .42s ease-out both;
+  filter: drop-shadow(0 0 18px rgba(255,140,0,.85));
+}
+@keyframes fxCandle{
+  0%{ transform:scale(1); }
+  30%{ transform:scale(1.2); }
+  60%{ transform:scale(1.08); }
+  100%{ transform:scale(1); }
+}
+    
   </style>
 </head>
 
@@ -634,11 +708,11 @@ function doMove(from,to){
   tickObstaclesAfterMove();
 
   let activated = false;
-  if(squares[to].dataset.type !== 'normal'){
-    activated = activateSpecialAt(to);
-  } else if(squares[from].dataset.type !== 'normal'){
-    activated = activateSpecialAt(from);
-  }
+if(squares[to].dataset.type !== 'normal'){
+  activated = await activateSpecialAt(to);
+} else if(squares[from].dataset.type !== 'normal'){
+  activated = await activateSpecialAt(from);
+}
 
   if(activated){
     resolveBoard().then(()=>{
@@ -662,21 +736,67 @@ function doMove(from,to){
     });
   });
 }
+  for(const i of clearList){
+    if(squares[i].dataset.block === BLOCK.ICE) damageIceAt(i, 1);
+    if(!isBlocked(i)) clearCell(i);
+    squares[i].classList.remove('fade-out');
+  }
 
+  for(const s of spawns){
+    if(isBlocked(s.at)) continue;
+    if(!squares[s.at].dataset.color) squares[s.at].dataset.color = randomNormal();
+    squares[s.at].dataset.type = s.type;
+    squares[s.at].style.backgroundImage = `url('${resolveImage(squares[s.at].dataset.color, squares[s.at].dataset.type)}')`;
+  }
+
+  addScore(clearList.length);
+}
+
+function sleep(ms){ return new Promise(res=>setTimeout(res, ms)); }
+
+function addFxToCells(indices, cls){
+  indices.forEach(i=>{
+    const el = squares[i];
+    if(!el) return;
+    el.classList.add(cls);
+    // чтобы можно было повторно запускать эффект
+    setTimeout(()=>el.classList.remove(cls), 420);
+  });
+}
+
+function flashGrid(shake=false){
+  grid.classList.add('fx-flash');
+  if(shake) grid.classList.add('fx-shake');
+  setTimeout(()=>{
+    grid.classList.remove('fx-flash');
+    grid.classList.remove('fx-shake');
+  }, 260);
+}
+  
 /* =========================================================================
    АКТИВАЦИЯ СПЕЦ-ЭЛЕМЕНТОВ
 ============================================================================ */
-function activateSpecialAt(i){
+async function activateSpecialAt(i){
   const sq = squares[i];
   const type = sq.dataset.type;
   if(type === 'normal') return false;
   if(isBlocked(i)) return false;
 
+  // какие клетки затрагиваем (для анимации)
+  let affected = [];
+
   if(type === SPECIAL.LINE){
     const row = Math.floor(i / width);
     const start = row * width;
-    for(let c=0;c<width;c++){
-      const idx = start + c;
+    for(let c=0;c<width;c++) affected.push(start + c);
+
+    addFxToCells([i], 'fx-line');
+    addFxToCells(affected, 'fx-hit');
+    flashGrid(false);
+
+    await sleep(160);
+
+    for(const idx of affected){
       if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
       if(!isBlocked(idx)) clearCell(idx);
     }
@@ -692,10 +812,19 @@ function activateSpecialAt(i){
       for(let dc=-1; dc<=1; dc++){
         const r = r0 + dr, c = c0 + dc;
         if(r<0||r>=width||c<0||c>=width) continue;
-        const idx = r*width + c;
-        if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
-        if(!isBlocked(idx)) clearCell(idx);
+        affected.push(r*width + c);
       }
+    }
+
+    addFxToCells([i], 'fx-bomb');
+    addFxToCells(affected, 'fx-hit');
+    flashGrid(false);
+
+    await sleep(170);
+
+    for(const idx of affected){
+      if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
+      if(!isBlocked(idx)) clearCell(idx);
     }
     clearCell(i);
     addScore(10);
@@ -703,6 +832,18 @@ function activateSpecialAt(i){
   }
 
   if(type === SPECIAL.CLEAR){
+    affected = Array.from({length: width*width}, (_,k)=>k);
+
+    flashGrid(true);
+    // немного “волной” — чтобы было эффектнее, чем мгновенно
+    addFxToCells([i], 'fx-hit');
+
+    // быстрая волна подсветки (не тормозит сильно)
+    for(let p=0; p<affected.length; p+=8){
+      addFxToCells(affected.slice(p, p+8), 'fx-hit');
+      await sleep(18);
+    }
+
     for(let idx=0; idx<width*width; idx++){
       if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
       if(!isBlocked(idx)) clearCell(idx);
@@ -718,11 +859,19 @@ function activateSpecialAt(i){
       for(let dc=-1; dc<=1; dc++){
         const r = r0 + dr, c = c0 + dc;
         if(r<0||r>=width||c<0||c>=width) continue;
-        const idx = r*width + c;
-
-        if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
-        if(!isBlocked(idx)) clearCell(idx);
+        affected.push(r*width + c);
       }
+    }
+
+    addFxToCells([i], 'fx-candle');
+    addFxToCells(affected, 'fx-hit');
+    flashGrid(false);
+
+    await sleep(170);
+
+    for(const idx of affected){
+      if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
+      if(!isBlocked(idx)) clearCell(idx);
     }
     clearCell(i);
     addScore(12);
@@ -895,24 +1044,8 @@ async function applyMatches(matches, moveInfo){
 
   await sleep(220);
 
-  for(const i of clearList){
-    if(squares[i].dataset.block === BLOCK.ICE) damageIceAt(i, 1);
-    if(!isBlocked(i)) clearCell(i);
-    squares[i].classList.remove('fade-out');
-  }
 
-  for(const s of spawns){
-    if(isBlocked(s.at)) continue;
-    if(!squares[s.at].dataset.color) squares[s.at].dataset.color = randomNormal();
-    squares[s.at].dataset.type = s.type;
-    squares[s.at].style.backgroundImage = `url('${resolveImage(squares[s.at].dataset.color, squares[s.at].dataset.type)}')`;
-  }
-
-  addScore(clearList.length);
-}
-
-function sleep(ms){ return new Promise(res=>setTimeout(res, ms)); }
-
+  
 /* =========================================================================
    ГРАВИТАЦИЯ + КАСКАДЫ
 ============================================================================ */
