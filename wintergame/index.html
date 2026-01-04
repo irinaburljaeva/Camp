@@ -130,12 +130,20 @@
       pointer-events:none;
     }
 
-    @media (max-width: 600px){
+/* добавьте один раз где-нибудь в начале style */
+*{ box-sizing:border-box; }
+
+/* и замените ваш mobile-блок на такой */
+@media (max-width: 600px){
+  .grid{ width:350px; height:350px; }
   .cell{
     width:43.75px; height:43.75px;
     border-radius:14px;
-    padding:5px;               /* ✅ чтобы иконки тоже не выпирали */
+    padding:0;                 /* ✅ важно: не увеличиваем ячейку */
+    background-size: 88% 88%;  /* ✅ иконка меньше → не выпирает */
   }
+  h1{ font-size:24px; }
+  .pill{ font-size:16px; }
 }
     /* ---- модалка инструкций уровня ---- */
     .overlay{
