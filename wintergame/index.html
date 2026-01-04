@@ -960,7 +960,8 @@ function checkLevelComplete(){
   if(score >= lvl.target){
     if(levelIndex < LEVELS.length-1){
       levelIndex++;
-      startLevel(false);
+-      startLevel(false);
++      startLevel(true); // ✅ сбрасываем очки на новый уровень
     } else {
       introTitle.textContent = 'Вы прошли все уровни! 🎉';
       introText.textContent  = 'Можно играть дальше ради очков или начать заново.';
