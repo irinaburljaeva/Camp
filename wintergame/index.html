@@ -130,6 +130,13 @@
       pointer-events:none;
     }
 
+    @media (max-width: 600px){
+  .cell{
+    width:43.75px; height:43.75px;
+    border-radius:14px;
+    padding:5px;               /* ✅ чтобы иконки тоже не выпирали */
+  }
+}
     /* ---- модалка инструкций уровня ---- */
     .overlay{
       position:fixed; inset:0;
