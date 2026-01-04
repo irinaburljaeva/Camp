@@ -44,35 +44,65 @@
       display:flex; gap:8px; align-items:center;
     }
 
-    .grid{
-      display:flex; flex-wrap:wrap;
-      width:560px; height:560px;
+/* размеры сетки */
+:root{
+  --cell: 70px;     /* размер клетки */
+  --pad:  5px;      /* padding у поля */
+  --cols: 8;        /* 8x8 */
+}
 
-      background-image: url("/Camp/wintergame/IMG_3672.png");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+.grid{
+  display:flex;
+  flex-wrap:wrap;
 
-      border-radius:10px;
-      padding:5px;
-      box-shadow:0 10px 20px rgba(0,0,0,.2);
-      position:relative;
-    }
+  /* ✅ ширина/высота учитывают padding */
+  width:  calc(var(--cell) * var(--cols) + var(--pad) * 2);
+  height: calc(var(--cell) * var(--cols) + var(--pad) * 2);
 
-    .cell{
-      width:70px; height:70px;
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
-      transition:transform .18s, filter .18s, background-color .18s;
-      border-radius:18px;
+  padding: var(--pad);
 
-      background-repeat:no-repeat;
-      background-position:center;
-      background-size:contain;
-      position:relative;
-      overflow:hidden;
-    }
+  background-image: url("/Camp/wintergame/IMG_3672.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 
+  border-radius:10px;
+  box-shadow:0 10px 20px rgba(0,0,0,.2);
+  position:relative;
+}
+
+.cell{
+  width: var(--cell);
+  height: var(--cell);
+
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  transition:transform .18s, filter .18s, background-color .18s;
+  border-radius:18px;
+
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:contain;
+  position:relative;
+  overflow:hidden;
+}
+
+/* ---- адаптив ---- */
+@media (max-width: 600px){
+  :root{
+    --cell: 43.75px;   /* 350/8 */
+    --pad:  5px;
+  }
+
+  .cell{
+    border-radius:14px;
+    padding:0;
+    background-size: 88% 88%;
+  }
+
+  h1{ font-size:24px; }
+  .pill{ font-size:16px; }
+}
     .cell:hover{
       transform:scale(1.06);
       background-color:rgba(255,255,255,.08);
@@ -274,14 +304,7 @@
     /* ---- адаптив ---- */
     @media (max-width: 600px){
       .grid{ width:350px; height:350px; }
-      .cell{
-        width:43.75px; height:43.75px;
-        border-radius:14px;
-        padding:0;                 /* не раздуваем */
-        background-size: 88% 88%;  /* иконка меньше */
-      }
-      h1{ font-size:24px; }
-      .pill{ font-size:16px; }
+ 
     }
   </style>
 </head>
