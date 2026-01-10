@@ -373,6 +373,15 @@ ice1:      ASSET_PATH + 'IMG_ice_1.png',
   board: ASSET_PATH + 'IMG_3672.png',
 };
 
+  // ---- ЗВУКИ ----
+const SFX = {
+  ice: new Audio(ASSET_PATH + 'ice.mp3'),
+};
+
+// настройки звука
+SFX.ice.volume = 0.6;        // громкость (0–1)
+SFX.ice.preload = 'auto';
+
 const NORMAL_COLORS = ['snowflake','thermos','steps','boots','mittens','tree'];
 
 // типы спецов
@@ -729,6 +738,9 @@ function damageIceAt(i, amount=1){
   let hp = +sq.dataset.icehp;
   hp = Math.max(0, hp - amount);
   sq.dataset.icehp = String(hp);
+
+  // 🔊 звук треска льда
+  playIceSound();
 
   if(hp === 0){
     sq.dataset.block = '';
