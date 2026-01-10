@@ -46,7 +46,7 @@
 
     /* размеры сетки */
     :root{
-      --cell: 70px;     /* размер клетки */
+      --cell: calc((var(--board) - (var(--pad) * 2)) / var(--cols));
       --pad:  10px;      /* padding у поля */
       --cols: 8;        /* 8x8 */
      --board: min(92vw, 520px);
@@ -82,7 +82,7 @@
       display:flex; align-items:center; justify-content:center;
       cursor:pointer;
       transition:transform .18s, filter .18s, background-color .18s;
-      border-radius:18px;
+      border-radius: calc(var(--cell) * 0.25);
 
       background-repeat:no-repeat;
       background-position:center;
@@ -954,8 +954,7 @@ async function activateSpecialAt(i){
     clearCell(i);
     addScore(10);
     if(currentLevel().id === 3) BombActivated = true;
-    if(currentLevel().id === 4) SnowflakeActivated = true;
-    return true;
+      return true;
   }
 
   if(type === SPECIAL.CLEAR){
@@ -974,6 +973,7 @@ async function activateSpecialAt(i){
       if(!isBlocked(idx)) clearCell(idx);
     }
     addScore(16);
+      if(currentLevel().id === 4) SnowflakeActivated = true;
     return true;
   }
 
@@ -1260,7 +1260,8 @@ function stabilizeNoInitialMatches(){
 
 function checkLevelComplete(){
   const lvl = currentLevel();
-  const complete = (lvl.id === 3) ? BombActivated : (score >= lvl.target);
+  const complete = 
+  (lvl.id === 3) ? BombActivated : 
   (lvl.id === 4) ? SnowflakeActivated : (score >= lvl.target)
   if(complete){
     if(levelIndex < LEVELS.length-1){
