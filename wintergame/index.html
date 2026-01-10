@@ -1100,13 +1100,31 @@ function damageIceAt(i, amount=1){
   playIceSound();
 
   if(hp === 0){
+    // снимаем лёд
     sq.dataset.block = '';
     sq.dataset.icehp = '';
+
+    // ✅ как только один лёд разрушен — появляется свечка (на этой клетке)
+    // если вдруг под льдом не было фишки — создаём
+    if(!sq.dataset.color){
+      setCell(sq, randomNormal(), 'normal');
+    }
+
+    // свечку спавним только на уровнях, где она разрешена
+    if(levelHasSpecial(SPECIAL.CANDLE)){
+      sq.dataset.type = SPECIAL.CANDLE;
+      sq.style.backgroundImage = `url('${resolveImage(sq.dataset.color, sq.dataset.type)}')`;
+    } else {
+      // на всякий случай возвращаем обычную фишку
+      sq.dataset.type = 'normal';
+      sq.style.backgroundImage = `url('${resolveImage(sq.dataset.color, sq.dataset.type)}')`;
+    }
+
+    return;
   }
 
   updateBlockVisual(i);
 }
-
 /* =========================================================================
    СОЗДАНИЕ ПОЛЯ
 ============================================================================ */
