@@ -1596,11 +1596,22 @@ async function applyMatches(matches, moveInfo){
 
   function playIceSound(){
   try{
+    // перезапуск
+    SFX.ice.pause();
     SFX.ice.currentTime = 0;
-    SFX.ice.play();
-  }catch(e){
-   
-  }
+
+    const p = SFX.ice.play();
+    if(p && typeof p.catch === 'function') p.catch(()=>{});
+
+    // ⏱ обрезаем до ~1.2 сек
+    setTimeout(()=>{
+      try{
+        SFX.ice.pause();
+        SFX.ice.currentTime = 0;
+      }catch(e){}
+    }, 1200);
+
+  }catch(e){}
 }
 /* =========================================================================
    ГРАВИТАЦИЯ + КАСКАДЫ
