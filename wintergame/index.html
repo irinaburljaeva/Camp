@@ -467,7 +467,7 @@ function loadProgress(){
 
     BombActivated = !!data.BombActivated;
     SnowflakeActivated = !!data.SnowflakeActivated;
-
+    saveProgress();
     return true;
   }catch(e){
     return false;
@@ -531,6 +531,7 @@ function closeEnergyModal(){
 function consumeMove(){
   movesLeft = Math.max(0, movesLeft - 1);
   setupHUD();
+  saveProgress();
   if(movesLeft === 0) openEnergyModal();
 }
 
@@ -557,6 +558,7 @@ energyDoneBtn.onclick = () => {
   energy += 1;
   movesLeft = MOVES_PER_LIFE;
   setupHUD();
+  saveProgress();
   closeEnergyModal();
 };
 
@@ -1016,6 +1018,7 @@ async function activateSpecialAt(i){
     }
     addScore(16);
       if(currentLevel().id === 4) SnowflakeActivated = true;
+     saveProgress();
     return true;
   }
 
@@ -1042,6 +1045,7 @@ async function activateSpecialAt(i){
     }
     clearCell(i);
     addScore(12);
+     saveProgress();
     return true;
   }
 
@@ -1160,7 +1164,8 @@ function levelHasSpecial(type){
 
 function addScore(n){
   score += n;
-  setupHUD(); // ✅ сразу обновляем «Цель: score/target»
+  setupHUD(); 
+  saveProgress();
 }
 
 async function applyMatches(matches, moveInfo){
@@ -1304,11 +1309,12 @@ function checkLevelComplete(){
   const lvl = currentLevel();
   const complete = 
   (lvl.id === 3) ? BombActivated : 
-  (lvl.id === 4) ? SnowflakeActivated : (score >= lvl.target)
+  (lvl.id === 4) ? SnowflakeActivated : (score >= lvl.target);
   if(complete){
     if(levelIndex < LEVELS.length-1){
       levelIndex++;
       startLevel(true);
+       saveProgress();
     } else {
       introTitle.textContent = 'Вы прошли все уровни! 🎉';
       introText.textContent  = 'Можно играть дальше ради очков или начать заново.';
@@ -1343,7 +1349,13 @@ function startGame(){
    ИНИЦИАЛИЗАЦИЯ
 ============================================================================ */
 setupHUD();
+  if(loadProgress()){
+    setupHUD();
+    createBoard();
+  } else { 
 startGame();
+
+  }
 </script>
 </body>
 </html>
