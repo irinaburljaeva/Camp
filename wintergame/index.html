@@ -47,8 +47,9 @@
     /* размеры сетки */
     :root{
       --cell: 70px;     /* размер клетки */
-      --pad:  5px;      /* padding у поля */
+      --pad:  10px;      /* padding у поля */
       --cols: 8;        /* 8x8 */
+     --board: min(92vw, 520px);
     }
 
     .grid{
@@ -59,11 +60,10 @@
 
       width:  var(--board);
       height: var(--board);
-
       padding: var(--pad);
 
       background-image: url("/Camp/wintergame/IMG_3672.png");
-      background-size: cover;
+      background-size: 100% 100%;
       background-position: center;
       background-repeat: no-repeat;
 
@@ -270,20 +270,7 @@
       100%{ transform:scale(1); }
     }
 
-    /* ---- адаптив ---- */
-    @media (max-width: 600px){
-      :root{
-        --cell: 43.75px;   /* 350/8 */
-        --pad:  5px;
-      }
-      .cell{
-        border-radius:14px;
-        padding:0;
-        background-size: 88% 88%;
-      }
-      h1{ font-size:24px; }
-      .pill{ font-size:16px; }
-    }
+   
   </style>
 </head>
 
