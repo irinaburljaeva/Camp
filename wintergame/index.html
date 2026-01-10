@@ -15,16 +15,30 @@ body{
   font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
   background: url("/Camp/wintergame/IMG_3671.png") center/cover no-repeat;
 
+  /* было center — из-за этого всё прижимается */
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:center;
+  justify-content:flex-start;
 
-  min-height:100vh;
+  /* iOS: лучше svh */
+  min-height:100svh;
   margin:0;
   color:#fff;
   user-select:none;
+
+  /* ✅ отступы от краёв + safe-area */
+  padding:
+    calc(14px + env(safe-area-inset-top))
+    calc(14px + env(safe-area-inset-right))
+    calc(14px + env(safe-area-inset-bottom))
+    calc(14px + env(safe-area-inset-left));
 }
+
+ .topbar, .btnbar, h1 { 
+  width: min(680px, 100%);
+}
+    
 
 h1{
   margin:0 0 10px;
@@ -100,8 +114,7 @@ h1{
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100% 100%;
-  background-origin: content-box;
-  background-clip: content-box;
+  
 }
 
 /* =========================
