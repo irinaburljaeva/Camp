@@ -1036,6 +1036,23 @@ function dropIce(count){
   }
 }
 
+  function spawnSnowAt(i, turns=3){
+  const sq = squares[i];
+  if(!sq) return;
+  if(sq.dataset.block) return;        // уже есть препятствие
+  if(i < 0 || i >= width*width) return;
+
+  // под снегом НИЧЕГО: клетка пустая, только блок
+  sq.dataset.color = '';
+  sq.dataset.type  = 'normal';
+  sq.style.backgroundImage = '';      // на всякий случай
+
+  sq.dataset.block = BLOCK.SNOW;
+  sq.dataset.turns = String(turns);
+
+  updateBlockVisual(i);               // нарисует снег
+}
+  
 function tickObstaclesAfterMove(){
   for(let i=0;i<squares.length;i++){
     const sq = squares[i];
@@ -1563,10 +1580,27 @@ function moveDown(){
 }
 
 function generateNewCandies(){
+  const lvl = currentLevel();
+
+  // с 6 уровня начинаем "ронять" снег сверху (если на уровне есть сугробы)
+  const snowFromTop = (lvl.id >= 6) && lvl.obstacles.includes(BLOCK.SNOW);
+
+  // шанс — умеренный и растёт по уровням, но с потолком
+  const pSnow = snowFromTop
+    ? Math.min(0.22, 0.10 + (lvl.id - 6) * 0.03)   // 10% на 6, 13% на 7, ... до 22%
+    : 0;
+
   for(let i=0;i<width;i++){
     if(isBlocked(i)) continue;
+
     if(!hasCandy(i)){
-      setCell(squares[i], randomNormal(), 'normal');
+      // иногда вместо новой фишки — сугроб
+      if(snowFromTop && Math.random() < pSnow){
+        // "падает" снег: ставим сугроб на 3 хода (как в dropSnow)
+        spawnSnowAt(i, 3);
+      } else {
+        setCell(squares[i], randomNormal(), 'normal');
+      }
     }
   }
 }
