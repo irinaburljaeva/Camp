@@ -44,6 +44,28 @@ h1{
   line-height:1.2;
 }
 
+    .coachWrap{
+  margin-top: 10px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(0,0,0,.06);
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+.coachVideo{
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.coachHint{
+  padding: 8px 10px;
+  font-size: 14px;
+  opacity: .85;
+}
+
 /* =========================
    ВЕРХНЯЯ ПАНЕЛЬ
 ========================= */
@@ -441,6 +463,23 @@ h1{
         Время зарядить батарейку! Пошагайте в течение 30 секунд —
         и откроется новая жизнь.
       </p>
+        <div class="coachWrap" aria-hidden="true">
+    <video
+      id="coachVideo"
+      class="coachVideo"
+      playsinline
+      muted
+      loop
+      preload="metadata"
+      poster="/Camp/wintergame/coach_poster.jpg"
+    >
+      <source src="/Camp/wintergame/coach.mp4" type="video/mp4" />
+    </video>
+
+    <div class="coachHint" id="coachHint">
+      Нажмите «Начать шагать», и видео запустится 🎬
+    </div>
+  </div>
 
            <div class="actions" style="margin-top:12px; display:flex; gap:10px;">
         <button id="energyStartBtn">▶️ Начать шагать (30 сек)</button>
@@ -544,6 +583,8 @@ const energyOverlay  = document.getElementById('energyOverlay');
 const energyStartBtn = document.getElementById('energyStartBtn');
 const energyDoneBtn  = document.getElementById('energyDoneBtn');
 const energyTimerEl  = document.getElementById('energyTimer');
+const coachVideo = document.getElementById('coachVideo');
+const coachHint  = document.getElementById('coachHint');
 
 let squares = [];
 let score = 0;
@@ -652,10 +693,20 @@ function openEnergyModal(){
   energyOverlay.classList.add('show');
   energyOverlay.setAttribute('aria-hidden','false');
 }
+    // видео в исходное состояние
+  if(coachVideo){
+    coachVideo.pause();
+    coachVideo.currentTime = 0;
+  }
+  if(coachHint) coachHint.style.display = 'block';
 
 function closeEnergyModal(){
   energyOverlay.classList.remove('show');
   energyOverlay.setAttribute('aria-hidden','true');
+    if(coachVideo){
+    coachVideo.pause();
+    coachVideo.currentTime = 0;
+  }
   unlockGame();
 }
 
@@ -668,6 +719,13 @@ function consumeMove(){
 
 energyStartBtn.onclick = () => {
   if(rechargeInterval) return;
+    // стартуем видео (после клика — автоплей разрешён браузером)
+  if(coachVideo){
+    coachVideo.muted = true;     // важно для iOS
+    coachVideo.playsInline = true;
+    coachVideo.play().catch(()=>{});
+  }
+  if(coachHint) coachHint.style.display = 'none';
 
   energyDoneBtn.disabled = true;
   rechargeSeconds = 30;
@@ -680,6 +738,9 @@ energyStartBtn.onclick = () => {
     if(rechargeSeconds <= 0){
       clearInterval(rechargeInterval);
       rechargeInterval = null;
+            if(coachVideo){
+        coachVideo.pause();
+      }
       energyDoneBtn.disabled = false;
     }
   }, 1000);
