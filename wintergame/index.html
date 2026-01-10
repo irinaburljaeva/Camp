@@ -734,7 +734,17 @@ energyStartBtn.onclick = () => {
       energyDoneBtn.disabled = false;
     }
   }, 1000);
+}
+  energyDoneBtn.onclick = () => {
+  // выдаём новую "жизнь": возвращаем ходы
+  movesLeft = MOVES_PER_LIFE;
+
+  setupHUD();
+  saveProgress();
+
+  closeEnergyModal(); // закрываем модалку и разблокируем игру
 };
+  ;
 
 function closeEnergyModal(){
   energyOverlay.classList.remove('show');
