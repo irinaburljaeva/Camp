@@ -1052,7 +1052,23 @@ function dropIce(count){
 
   updateBlockVisual(i);               // нарисует снег
 }
-  
+
+  function spawnIceAt(i, hp=3){
+  const sq = squares[i];
+  if(!sq) return;
+  if(sq.dataset.block) return;
+  if(i < 0 || i >= width*width) return;
+
+  // под льдом должна быть фишка — если клетка пустая, создаём её
+  if(!sq.dataset.color){
+    setCell(sq, randomNormal(), 'normal');
+  }
+
+  sq.dataset.block = BLOCK.ICE;
+  sq.dataset.icehp = String(hp);
+
+  updateBlockVisual(i); // нарисует слой льда поверх
+}
 function tickObstaclesAfterMove(){
   for(let i=0;i<squares.length;i++){
     const sq = squares[i];
@@ -1582,23 +1598,36 @@ function moveDown(){
 function generateNewCandies(){
   const lvl = currentLevel();
 
-  // с 6 уровня начинаем "ронять" снег сверху (если на уровне есть сугробы)
-  const snowFromTop = (lvl.id >= 6) && lvl.obstacles.includes(BLOCK.SNOW);
+  // ✅ с 9 уровня снег может "падать сверху" (если на уровне есть снег)
+  const snowFromTop = (lvl.id >= 9) && lvl.obstacles.includes(BLOCK.SNOW);
 
-  // шанс — умеренный и растёт по уровням, но с потолком
+  // ✅ с 9 уровня может "падать сверху" единичный лёд (если на уровне есть лёд)
+  const iceFromTop  = (lvl.id >= 9) && lvl.obstacles.includes(BLOCK.ICE);
+
+  // шанс снега — умеренный, растёт, но с потолком
   const pSnow = snowFromTop
-    ? Math.min(0.22, 0.10 + (lvl.id - 6) * 0.03)   // 10% на 6, 13% на 7, ... до 22%
+    ? Math.min(0.22, 0.10 + (lvl.id - 9) * 0.03)  // 10% на 9, 13% на 10, ...
+    : 0;
+
+  // шанс льда — небольшой, тоже растёт, но максимум 10%
+  const pIce = iceFromTop
+    ? Math.min(0.10, 0.05 + (lvl.id - 9) * 0.02)  // 5% на 9, 7% на 10, ...
     : 0;
 
   for(let i=0;i<width;i++){
     if(isBlocked(i)) continue;
 
     if(!hasCandy(i)){
-      // иногда вместо новой фишки — сугроб
-      if(snowFromTop && Math.random() < pSnow){
-        // "падает" снег: ставим сугроб на 3 хода (как в dropSnow)
+      const r = Math.random();
+
+      // приоритет: снег → лёд → обычная фишка
+      if(snowFromTop && r < pSnow){
         spawnSnowAt(i, 3);
-      } else {
+      } 
+      else if(iceFromTop && r < (pSnow + pIce)){
+        spawnIceAt(i, 3);
+      } 
+      else {
         setCell(squares[i], randomNormal(), 'normal');
       }
     }
