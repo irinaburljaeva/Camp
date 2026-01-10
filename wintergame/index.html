@@ -1550,10 +1550,7 @@ async function applyMatches(matches, moveInfo){
     if(g.len === 4){
       if(levelHasSpecial(SPECIAL.LINE)){
         const spawnAt = chooseSpawnCell(g);
-        if(levelHasSpecial(SPECIAL.CANDLE) && g.colorKey === 'thermos'){
-          spawns.push({ at: spawnAt, type: SPECIAL.CANDLE });
-        } else {
-          spawns.push({ at: spawnAt, type: SPECIAL.LINE });
+              spawns.push({ at: spawnAt, type: SPECIAL.LINE });
         }
       }
       g.cells.forEach(i=>toClear.add(i));
