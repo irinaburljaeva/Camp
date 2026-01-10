@@ -119,8 +119,8 @@ h1{
   aspect-ratio: 1 / 1;
 
   display:grid;
-  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-  grid-template-rows: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-template-rows: repeat(var(--cols), 1fr);
 
   gap: var(--gap);
   padding: var(--pad);
@@ -128,10 +128,9 @@ h1{
   background-image: url("/Camp/wintergame/IMG_3672.png");
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 100%;
+  background-size: calc(100% - 2 * var(--pad));
   
   border-radius:10px;
-  flex-shrink: 1;
 }
 
 /* =========================
