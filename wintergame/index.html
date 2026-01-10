@@ -771,8 +771,9 @@ energyStartBtn.onclick = () => {
   if(rechargeInterval) return;
     // стартуем видео (после клика — автоплей разрешён браузером)
   if(coachVideo){
-    coachVideo.muted = true;     // важно для iOS
     coachVideo.playsInline = true;
+        coachVideo.muted = false;
+        coachVideo.volume = 1;   
     coachVideo.play().catch(()=>{});
   }
   if(coachHint) coachHint.style.display = 'none';
