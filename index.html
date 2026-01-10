@@ -143,13 +143,30 @@
       sounds[key] = a;
     }
 
-    // iOS/webkit: разблокировать аудио на первый жест
-    const unlock = () => {
-      Object.values(sounds).forEach(a => {
-        try { a.play().then(()=>a.pause()).catch(()=>{}); } catch(_){}
+ let audioUnlocked = false;
+
+const unlock = () => {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+
+  Object.values(sounds).forEach(a => {
+    try {
+      a.muted = true;              // важно: чтобы не было слышно
+      a.currentTime = 0;
+      a.play().then(() => {
+        a.pause();
+        a.currentTime = 0;
+        a.muted = false;
+      }).catch(() => {
+        a.muted = false;
       });
-    };
-    document.addEventListener('pointerdown', unlock, { once:true });
+    } catch(_) {
+      a.muted = false;
+    }
+  });
+};
+
+document.addEventListener('pointerdown', unlock, { once:true, passive:true });
 
     // ограничение звучания до 3 секунд для всех звуков
     const MAX_PLAY_MS = 3000;
