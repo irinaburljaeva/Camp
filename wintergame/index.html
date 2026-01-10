@@ -435,6 +435,48 @@ let movesLeft = MOVES_PER_LIFE;
 let rechargeInterval = null;
 let rechargeSeconds = 30;
 
+  /* =========================================================================
+   SAVE / LOAD (localStorage)
+============================================================================ */
+const SAVE_KEY = 'wintergame_progress_v1';
+
+function saveProgress(){
+  try{
+    const data = {
+      levelIndex,
+      score,
+      movesLeft,
+      energy,
+      BombActivated,
+      SnowflakeActivated
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  }catch(e){}
+}
+
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+
+    levelIndex = Math.max(0, Math.min(LEVELS.length-1, +data.levelIndex || 0));
+    score = +data.score || 0;
+    movesLeft = +data.movesLeft || MOVES_PER_LIFE;
+    energy = +data.energy || 1;
+
+    BombActivated = !!data.BombActivated;
+    SnowflakeActivated = !!data.SnowflakeActivated;
+
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+function clearProgress(){
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+}
 /* =========================================================================
    УТИЛИТЫ
 ============================================================================ */
