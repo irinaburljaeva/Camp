@@ -44,65 +44,49 @@
       display:flex; gap:8px; align-items:center;
     }
 
-/* размеры сетки */
-:root{
-  --cell: 70px;     /* размер клетки */
-  --pad:  5px;      /* padding у поля */
-  --cols: 8;        /* 8x8 */
-}
+    /* размеры сетки */
+    :root{
+      --cell: 70px;     /* размер клетки */
+      --pad:  5px;      /* padding у поля */
+      --cols: 8;        /* 8x8 */
+    }
 
-.grid{
-  display:flex;
-  flex-wrap:wrap;
+    .grid{
+      display:flex;
+      flex-wrap:wrap;
 
-  /* ✅ ширина/высота учитывают padding */
-  width:  calc(var(--cell) * var(--cols) + var(--pad) * 2);
-  height: calc(var(--cell) * var(--cols) + var(--pad) * 2);
+      /* ✅ ширина/высота учитывают padding */
+      width:  calc(var(--cell) * var(--cols) + var(--pad) * 2);
+      height: calc(var(--cell) * var(--cols) + var(--pad) * 2);
 
-  padding: var(--pad);
+      padding: var(--pad);
 
-  background-image: url("/Camp/wintergame/IMG_3672.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+      background-image: url("/Camp/wintergame/IMG_3672.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
 
-  border-radius:10px;
-  box-shadow:0 10px 20px rgba(0,0,0,.2);
-  position:relative;
-}
+      border-radius:10px;
+      box-shadow:0 10px 20px rgba(0,0,0,.2);
+      position:relative;
+    }
 
-.cell{
-  width: var(--cell);
-  height: var(--cell);
+    .cell{
+      width: var(--cell);
+      height: var(--cell);
 
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer;
-  transition:transform .18s, filter .18s, background-color .18s;
-  border-radius:18px;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+      transition:transform .18s, filter .18s, background-color .18s;
+      border-radius:18px;
 
-  background-repeat:no-repeat;
-  background-position:center;
-  background-size:86% 86%;
-  position:relative;
-  overflow:hidden;
-}
+      background-repeat:no-repeat;
+      background-position:center;
+      background-size:86% 86%;
+      position:relative;
+      overflow:hidden;
+    }
 
-/* ---- адаптив ---- */
-@media (max-width: 600px){
-  :root{
-    --cell: 43.75px;   /* 350/8 */
-    --pad:  5px;
-  }
-
-  .cell{
-    border-radius:14px;
-    padding:0;
-    background-size: 88% 88%;
-  }
-
-  h1{ font-size:24px; }
-  .pill{ font-size:16px; }
-}
     .cell:hover{
       transform:scale(1.06);
       background-color:rgba(255,255,255,.08);
@@ -162,7 +146,7 @@
       pointer-events:none;
     }
 
-    /* ---- модалка инструкций уровня ---- */
+    /* ---- модалки ---- */
     .overlay{
       position:fixed; inset:0;
       background:rgba(0,0,0,.55);
@@ -200,6 +184,12 @@
       transition:background .2s, transform .15s;
     }
     .modal button:hover{ background:#ff4757; transform:translateY(-1px); }
+    .modal button:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+      transform:none !important;
+      box-shadow:none;
+    }
 
     /* ---- кнопки снизу ---- */
     .btnbar{
@@ -237,7 +227,6 @@
     /* =========================
        FX: обратная связь спецов
     ========================= */
-
     .grid::after{
       content:"";
       position:absolute; inset:0;
@@ -301,7 +290,19 @@
       100%{ transform:scale(1); }
     }
 
-  
+    /* ---- адаптив ---- */
+    @media (max-width: 600px){
+      :root{
+        --cell: 43.75px;   /* 350/8 */
+        --pad:  5px;
+      }
+      .cell{
+        border-radius:14px;
+        padding:0;
+        background-size: 88% 88%;
+      }
+      h1{ font-size:24px; }
+      .pill{ font-size:16px; }
     }
   </style>
 </head>
@@ -313,6 +314,9 @@
     <div class="pill">Уровень: <b id="level">1</b></div>
     <div class="pill">Очки: <b id="score">0</b></div>
     <div class="pill">Цель: <b id="target">0</b></div>
+
+    <div class="pill">Ходы: <b id="moves">0</b></div>
+    <div class="pill">⚡ Энергия: <b id="energy">0</b></div>
   </div>
 
   <div class="grid" id="grid"></div>
@@ -331,6 +335,31 @@
       <div class="actions">
         <button id="introBtn">Понятно, играю!</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Модалка "Зарядка энергии" -->
+  <div class="overlay" id="energyOverlay" aria-hidden="true">
+    <div class="modal">
+      <h2>⚡ Закончились ходы?</h2>
+      <p id="energyText">
+        Время зарядить батарейку! Сделайте 100 шагов на месте или 15 приседаний —
+        и откроется новая жизнь.
+      </p>
+
+      <ul>
+        <li><b>Вариант 1:</b> 100 шагов на месте</li>
+        <li><b>Вариант 2:</b> 15 приседаний</li>
+      </ul>
+
+      <div class="actions" style="margin-top:12px; display:flex; gap:10px;">
+        <button id="energyStartBtn">▶️ Начать зарядку (30 сек)</button>
+        <button id="energyDoneBtn" disabled>✅ Готово — открыть жизнь</button>
+      </div>
+
+      <p style="margin-top:10px; opacity:.85;">
+        Осталось: <b id="energyTimer">30</b> сек
+      </p>
     </div>
   </div>
 
@@ -355,7 +384,7 @@ const IMG = {
   giftBag:       ASSET_PATH + 'IMG_3657.png',
   goldSnowflake: ASSET_PATH + 'IMG_3658.png',
 
-  // фон/подложка (не обязательно в JS, но пусть будет)
+  // фон/подложка
   bg:    ASSET_PATH + 'IMG_3671.png',
   board: ASSET_PATH + 'IMG_3672.png',
 };
@@ -399,11 +428,20 @@ const scoreDisplay = document.getElementById('score');
 const levelDisplay = document.getElementById('level');
 const targetDisplay = document.getElementById('target');
 
+const movesDisplay  = document.getElementById('moves');
+const energyDisplay = document.getElementById('energy');
+
 const overlay = document.getElementById('overlay');
 const introTitle = document.getElementById('introTitle');
 const introText  = document.getElementById('introText');
 const introList  = document.getElementById('introList');
 const introBtn   = document.getElementById('introBtn');
+
+// зарядка
+const energyOverlay  = document.getElementById('energyOverlay');
+const energyStartBtn = document.getElementById('energyStartBtn');
+const energyDoneBtn  = document.getElementById('energyDoneBtn');
+const energyTimerEl  = document.getElementById('energyTimer');
 
 let squares = [];
 let score = 0;
@@ -415,6 +453,14 @@ let squareIdBeingDragged = null;
 let squareIdBeingReplaced = null;
 
 let isResolving = false;
+
+// ===== ЭНЕРГИЯ / ХОДЫ =====
+const MOVES_PER_LIFE = 20;   // сколько ходов даёт 1 "жизнь"
+let energy = 1;              // текущая энергия (жизни)
+let movesLeft = MOVES_PER_LIFE;
+
+let rechargeInterval = null;
+let rechargeSeconds = 30;
 
 /* =========================================================================
    УТИЛИТЫ
@@ -438,6 +484,76 @@ function flashGrid(shake=false){
     grid.classList.remove('fx-shake');
   }, 260);
 }
+
+/* =========================================================================
+   ЭНЕРГИЯ / ЗАРЯДКА
+============================================================================ */
+function lockGame(){ isResolving = true; }
+function unlockGame(){ isResolving = false; }
+
+function openEnergyModal(){
+  lockGame();
+
+  rechargeSeconds = 30;
+  energyTimerEl.textContent = rechargeSeconds;
+  energyDoneBtn.disabled = true;
+
+  if(rechargeInterval){
+    clearInterval(rechargeInterval);
+    rechargeInterval = null;
+  }
+
+  energyOverlay.classList.add('show');
+  energyOverlay.setAttribute('aria-hidden','false');
+}
+
+function closeEnergyModal(){
+  energyOverlay.classList.remove('show');
+  energyOverlay.setAttribute('aria-hidden','true');
+  unlockGame();
+}
+
+function consumeMove(){
+  movesLeft = Math.max(0, movesLeft - 1);
+  setupHUD();
+
+  if(movesLeft === 0){
+    openEnergyModal();
+  }
+}
+
+energyStartBtn.onclick = () => {
+  if(rechargeInterval) return;
+
+  energyDoneBtn.disabled = true;
+  rechargeSeconds = 30;
+  energyTimerEl.textContent = rechargeSeconds;
+
+  rechargeInterval = setInterval(()=>{
+    rechargeSeconds--;
+    energyTimerEl.textContent = rechargeSeconds;
+
+    if(rechargeSeconds <= 0){
+      clearInterval(rechargeInterval);
+      rechargeInterval = null;
+      energyDoneBtn.disabled = false;
+    }
+  }, 1000);
+};
+
+energyDoneBtn.onclick = () => {
+  energy += 1;
+  movesLeft = MOVES_PER_LIFE;
+  setupHUD();
+  closeEnergyModal();
+};
+
+// фон модалки не закрывает (чтобы нельзя было обойти зарядку)
+energyOverlay.addEventListener('click', (e)=>{
+  if(e.target === energyOverlay){
+    // намеренно ничего не делаем
+  }
+});
 
 /* =========================================================================
    МОДЕЛЬ КЛЕТКИ (dataset)
@@ -489,6 +605,9 @@ function setupHUD(){
   levelDisplay.textContent = lvl.id;
   targetDisplay.textContent = lvl.target;
   scoreDisplay.textContent = score;
+
+  movesDisplay.textContent  = movesLeft;
+  energyDisplay.textContent = energy;
 }
 
 function showIntro(){
@@ -499,6 +618,7 @@ function showIntro(){
   introList.innerHTML = '';
   const items = [];
   items.push('Соберите 3 одинаковых фишки подряд — они исчезнут, а новые упадут сверху.');
+  items.push('Каждый успешный ход тратит 1 ход. Когда ходы закончатся — нужно “зарядиться”, чтобы получить новую жизнь.');
 
   const s = lvl.specials;
   if(s.includes(SPECIAL.LINE))  items.push('4 в ряд → «Золотые шаги». Передвиньте их следующим ходом → очистится строка.');
@@ -687,7 +807,6 @@ function selectSquare(e){
     const from = selectedSquare;
     selectedSquare = null;
 
-    // не ждём здесь (UI не блокируем), но ход внутри сам синхронизируется флагом isResolving
     doMove(from, id);
   } else {
     squares[selectedSquare].classList.remove('selected');
@@ -767,6 +886,7 @@ async function doMove(from,to){
   }
 
   if(activated){
+    consumeMove();                 // ✅ тратим ход только за успешное действие
     await resolveBoard();
     isResolving = false;
     checkLevelComplete();
@@ -781,6 +901,7 @@ async function doMove(from,to){
     return;
   }
 
+  consumeMove();                   // ✅ тратим ход только если был матч
   await applyMatches(matches, {from, to});
   await resolveBoard();
 
@@ -1074,8 +1195,6 @@ async function applyMatches(matches, moveInfo){
   for(const s of spawns){
     if(isBlocked(s.at)) continue;
 
-    // если вдруг клетка пустая (бывает в каскаде) — дадим ей базовый цвет,
-    // но тип сделаем спецовый (и картинка возьмётся по type)
     if(!squares[s.at].dataset.color) squares[s.at].dataset.color = randomNormal();
 
     squares[s.at].dataset.type = s.type;
@@ -1117,7 +1236,6 @@ function generateNewCandies(){
 
 async function resolveBoard(){
   for(let step=0; step<25; step++){
-    // “падение” чуть по шагам — чтобы выглядело живо
     for(let k=0;k<10;k++){
       moveDown();
       generateNewCandies();
@@ -1175,6 +1293,10 @@ function startLevel(resetScore){
 function startGame(){
   levelIndex = 0;
   score = 0;
+
+  energy = 1;
+  movesLeft = MOVES_PER_LIFE;
+
   startLevel(true);
 }
 
