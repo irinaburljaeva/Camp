@@ -691,14 +691,12 @@ function openEnergyModal(){
   energyOverlay.classList.add('show');
   energyOverlay.setAttribute('aria-hidden','false');
 
-  // ✅ видео в исходное состояние
+  // видео в исходное состояние
   if(coachVideo){
     coachVideo.pause();
     coachVideo.currentTime = 0;
   }
   if(coachHint) coachHint.style.display = 'block';
-}
-  unlockGame();
 }
 
 function consumeMove(){
@@ -737,20 +735,17 @@ energyStartBtn.onclick = () => {
   }, 1000);
 };
 
-energyDoneBtn.onclick = () => {
-  energy += 1;
-  movesLeft = MOVES_PER_LIFE;
-  setupHUD();
-  saveProgress();
-  closeEnergyModal();
-};
+function closeEnergyModal(){
+  energyOverlay.classList.remove('show');
+  energyOverlay.setAttribute('aria-hidden','true');
 
-// фон модалки не закрывает (чтобы нельзя было обойти зарядку)
-energyOverlay.addEventListener('click', (e)=>{
-  if(e.target === energyOverlay){
-    // намеренно ничего не делаем
+  if(coachVideo){
+    coachVideo.pause();
+    coachVideo.currentTime = 0;
   }
-});
+
+  unlockGame();
+}
 
 /* =========================================================================
    МОДЕЛЬ КЛЕТКИ (dataset)
