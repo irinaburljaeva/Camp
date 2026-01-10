@@ -107,13 +107,12 @@ h1{
 }
 
 /* =========================
-   GRID (✅ ГЛАВНОЕ ИСПРАВЛЕНИЕ)
+   GRID
 ========================= */
 .grid{
   position:relative;
   overflow:hidden;
 
-  /* ✅ Принудительно делаем квадрат */
   width: var(--board);
   height: var(--board);
   aspect-ratio: 1 / 1;
@@ -125,11 +124,10 @@ h1{
   gap: var(--gap);
   padding: var(--pad);
 
-  /* ✅ КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: contain вместо 100% 100% */
   background-image: url("/Camp/wintergame/IMG_3672.png");
   background-repeat: no-repeat;
   background-position: center;
-  background-size: contain;  /* ← сохраняет пропорции! */
+  background-size: 100% 100%
   
   border-radius:10px;
   flex-shrink: 1;
