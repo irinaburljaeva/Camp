@@ -9,13 +9,11 @@
 /* =========================
    БАЗА
 ========================= */
-*{
-  box-sizing: border-box;
-}
+*{ box-sizing:border-box; }
 
 body{
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: url("/Camp/wintergame/IMG_3671.png") center / cover no-repeat;
+  font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  background: url("/Camp/wintergame/IMG_3671.png") center/cover no-repeat;
 
   display:flex;
   flex-direction:column;
@@ -47,7 +45,7 @@ h1{
 }
 
 .pill{
-  background: rgba(255,255,255,.2);
+  background:rgba(255,255,255,.2);
   padding:10px 16px;
   border-radius:15px;
   font-size:18px;
@@ -59,18 +57,22 @@ h1{
 }
 
 /* =========================
-   НАСТРОЙКИ ПОЛЯ (512×512)
+   НАСТРОЙКИ ПОЛЯ (PNG 512×512, 8×8)
 ========================= */
 :root{
   --cols: 8;
 
-  --img: 512;     /* размер PNG */
-  --line: 2;      /* толщина линий в PNG (px) */
+  --img: 512px;   /* размер PNG */
+  --line: 2px;    /* толщина линий в PNG (ПОДБИРАЕТСЯ) */
 
+  /* размер поля на экране */
   --board: min(96vw, 620px, 72vh);
 
-  /* gap синхронизирован с PNG */
+  /* gap синхронизирован с линиями PNG */
   --gap: calc(var(--board) * (var(--line) / var(--img)));
+
+  /* отступ от края подложки до первой клетки (как “рамка” на PNG) */
+  --pad: var(--gap);
 
   /* размер иконки внутри клетки */
   --icon: 86%;
@@ -80,6 +82,9 @@ h1{
    GRID
 ========================= */
 .grid{
+  position:relative;          /* ✅ обязательно для ::after */
+  overflow:hidden;            /* чтобы FX не вылезал наружу */
+
   width: var(--board);
   height: var(--board);
 
@@ -88,9 +93,15 @@ h1{
   grid-template-rows: repeat(var(--cols), minmax(0, 1fr));
 
   gap: var(--gap);
-  padding: 0;
+  padding: var(--pad);
 
-  background: url("/Camp/wintergame/IMG_3672.png") center / 100% 100% no-repeat;
+  /* ✅ подложка растягивается ровно под "внутреннюю" область (content-box) */
+  background-image: url("/Camp/wintergame/IMG_3672.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  background-origin: content-box;
+  background-clip: content-box;
 }
 
 /* =========================
@@ -114,20 +125,17 @@ h1{
   background-position:center;
   background-size: var(--icon) var(--icon);
 
-  transition:
-    transform .18s ease,
-    filter .18s ease,
-    background-color .18s ease;
+  transition: transform .18s ease, filter .18s ease, background-color .18s ease;
 }
 
 .cell:hover{
-  transform: scale(1.04);
-  background-color: rgba(255,255,255,.08);
+  transform:scale(1.04);
+  background-color:rgba(255,255,255,.08);
 }
 
-.cell.selected{
-  background-color: rgba(255,255,255,.28);
-  transform: scale(1.06);
+.selected{
+  background-color:rgba(255,255,255,.28) !important;
+  transform:scale(1.06) !important;
   outline:2px solid rgba(255,255,255,.45);
   outline-offset:-2px;
 }
@@ -135,73 +143,135 @@ h1{
 /* =========================
    АНИМАЦИИ
 ========================= */
-.fade-out{
-  animation: fadeOut .45s forwards;
-}
-
-@keyframes fadeOut{
-  to{
-    opacity:0;
-    transform:scale(0);
-  }
-}
+.fade-out{ animation:fadeOut .45s forwards; }
+@keyframes fadeOut{ to{ opacity:0; transform:scale(0); } }
 
 /* =========================
-   СПЕЦ-ЭФФЕКТЫ
+   СПЕЦ-ЭЛЕМЕНТЫ
 ========================= */
-.cell[data-type="special_line"]{
-  filter: drop-shadow(0 0 10px rgba(255,215,0,.55));
-}
-
-.cell[data-type="special_bomb"]{
-  filter: drop-shadow(0 0 10px rgba(255,255,255,.35));
-}
-
-.cell[data-type="special_clear"]{
-  filter: drop-shadow(0 0 12px rgba(255,215,0,.75));
-}
-
-.cell[data-type="special_candle"]{
-  filter: drop-shadow(0 0 12px rgba(255,140,0,.65));
-}
+.cell[data-type="special_line"]{  filter:drop-shadow(0 0 10px rgba(255,215,0,.55)); }
+.cell[data-type="special_bomb"]{  filter:drop-shadow(0 0 10px rgba(255,255,255,.35)); }
+.cell[data-type="special_clear"]{ filter:drop-shadow(0 0 12px rgba(255,215,0,.75)); }
+.cell[data-type="special_candle"]{filter:drop-shadow(0 0 12px rgba(255,140,0,.65)); }
 
 /* =========================
    ПРЕПЯТСТВИЯ
 ========================= */
 .cell[data-block="snow"],
 .cell[data-block="ice"]{
-  cursor: not-allowed;
-  filter: saturate(.9) brightness(.95);
+  cursor:not-allowed;
+  filter:saturate(.9) brightness(.95);
 }
 
 /* =========================
-   FX СЕТКИ
+   КНОПКИ СНИЗУ
+========================= */
+.btnbar{
+  display:flex;
+  gap:12px;
+  margin-top:18px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.btnbar button{
+  padding:12px 22px;
+  font-size:18px;
+
+  background: rgba(255,255,255,.22);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:18px;
+  box-shadow:0 10px 24px rgba(0,0,0,.18);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  cursor:pointer;
+  transition: transform .15s, background .2s, border-color .2s;
+}
+.btnbar button:hover{
+  background: rgba(255,255,255,.30);
+  border-color: rgba(255,255,255,.40);
+  transform: translateY(-1px);
+}
+.btnbar button:active{
+  transform: translateY(0) scale(.98);
+}
+
+/* =========================
+   МОДАЛКИ (✅ были потеряны, из-за этого они “видны сразу”)
+========================= */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+
+  display:none;               /* ✅ скрыты по умолчанию */
+  align-items:center;
+  justify-content:center;
+
+  padding:18px;
+  z-index:50;
+}
+.overlay.show{ display:flex; }
+
+.modal{
+  width:min(560px, 95vw);
+  background:rgba(255,255,255,.96);
+  color:#1f2937;
+  border-radius:18px;
+  padding:18px 18px 14px;
+  box-shadow:0 16px 48px rgba(0,0,0,.35);
+}
+.modal h2{ margin:0 0 8px; font-size:20px; }
+.modal p{ margin:0 0 10px; line-height:1.45; }
+.modal ul{ margin:0 0 12px; padding-left:18px; }
+.modal li{ margin:6px 0; }
+
+.modal .actions{ display:flex; gap:10px; margin-top:10px; }
+.modal button{
+  flex:1;
+  margin:0;
+  padding:10px 14px;
+  font-size:16px;
+  background:#ff6b6b;
+  color:#fff;
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);
+  transition:background .2s, transform .15s;
+}
+.modal button:hover{ background:#ff4757; transform:translateY(-1px); }
+.modal button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+  transform:none !important;
+  box-shadow:none;
+}
+
+/* =========================
+   FX: вспышка по полю
 ========================= */
 .grid::after{
   content:"";
   position:absolute;
   inset:0;
+  border-radius:10px;
   pointer-events:none;
   opacity:0;
 
-  background:
-    radial-gradient(
-      circle at 50% 45%,
-      rgba(255,255,255,.55),
-      rgba(255,255,255,0) 55%
-    );
+  background: radial-gradient(circle at 50% 45%,
+    rgba(255,255,255,.55),
+    rgba(255,255,255,0) 55%
+  );
 
   transition: opacity .18s ease;
 }
+.grid.fx-flash::after{ opacity:1; }
 
-.grid.fx-flash::after{
-  opacity:1;
-}
-
-.grid.fx-shake{
-  animation: fxShake .28s ease-out both;
-}
-
+.grid.fx-shake{ animation: fxShake .28s ease-out both; }
 @keyframes fxShake{
   0%{ transform:translateX(0); }
   25%{ transform:translateX(-5px); }
@@ -209,8 +279,6 @@ h1{
   75%{ transform:translateX(-3px); }
   100%{ transform:translateX(0); }
 }
-
-   
   </style>
 </head>
 
