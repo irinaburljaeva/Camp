@@ -6,264 +6,209 @@
   <title>ШАГАЙ ДОМА: Зимняя игра</title>
 
   <style>
-    *{ box-sizing:border-box; }
-
-    body{
-      font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-      background:
-        url("/Camp/wintergame/IMG_3671.png");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      min-height:100vh; margin:0; color:#fff;
-      user-select:none;
-    }
-
-    h1{
-      text-shadow:2px 2px 4px rgba(0,0,0,.3);
-      margin:0 0 10px;
-      text-align:center;
-    }
-
-    .topbar{
-      display:flex; gap:12px; align-items:center; justify-content:center;
-      flex-wrap:wrap;
-      margin-bottom:14px;
-    }
-
-    .pill{
-      background:rgba(255,255,255,.2);
-      padding:10px 16px;
-      border-radius:15px;
-      font-size:18px;
-      box-shadow:0 4px 6px rgba(0,0,0,.1);
-      display:flex; gap:8px; align-items:center;
-      white-space:nowrap;
-    }
-
-    /* размеры сетки */
-  :root{
-  --pad: 0px;
-  --cols: 8;
-  --board: min(96vw, 620px, 72vh);
+/* =========================
+   БАЗА
+========================= */
+*{
+  box-sizing: border-box;
 }
 
+body{
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: url("/Camp/wintergame/IMG_3671.png") center / cover no-repeat;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  min-height:100vh;
+  margin:0;
+  color:#fff;
+  user-select:none;
+}
+
+h1{
+  margin:0 0 10px;
+  text-align:center;
+  text-shadow:2px 2px 4px rgba(0,0,0,.3);
+}
+
+/* =========================
+   ВЕРХНЯЯ ПАНЕЛЬ
+========================= */
+.topbar{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+
+.pill{
+  background: rgba(255,255,255,.2);
+  padding:10px 16px;
+  border-radius:15px;
+  font-size:18px;
+  box-shadow:0 4px 6px rgba(0,0,0,.1);
+  display:flex;
+  gap:8px;
+  align-items:center;
+  white-space:nowrap;
+}
+
+/* =========================
+   НАСТРОЙКИ ПОЛЯ (512×512)
+========================= */
+:root{
+  --cols: 8;
+
+  --img: 512;     /* размер PNG */
+  --line: 2;      /* толщина линий в PNG (px) */
+
+  --board: min(96vw, 620px, 72vh);
+
+  /* gap синхронизирован с PNG */
+  --gap: calc(var(--board) * (var(--line) / var(--img)));
+
+  /* размер иконки внутри клетки */
+  --icon: 86%;
+}
+
+/* =========================
+   GRID
+========================= */
 .grid{
+  width: var(--board);
+  height: var(--board);
+
   display:grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   grid-template-rows: repeat(var(--cols), minmax(0, 1fr));
-  gap: 2px;
 
-  width: var(--board);
-  height: var(--board);
-  padding: var(--pad);
+  gap: var(--gap);
+  padding: 0;
 
-  background-image: url("/Camp/wintergame/IMG_3672.png");
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-origin: border-box;
-  background-clip: border-box;
-
+  background: url("/Camp/wintergame/IMG_3672.png") center / 100% 100% no-repeat;
 }
 
+/* =========================
+   КЛЕТКИ
+========================= */
 .cell{
-  /* ✅ убираем фиксированные width/height по var(--cell) */
-  width: 100%;
-  height: 100%;
+  width:100%;
+  height:100%;
 
-  display:flex; align-items:center; justify-content:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
   cursor:pointer;
-  transition:transform .18s, filter .18s, background-color .18s;
-  border-radius: 14px; /* можно оставить так или подобрать */
-
-  background-repeat:no-repeat;
-  background-position:center;
-  background-size:100% 100%;
   position:relative;
   overflow:hidden;
 
-  transform-origin:center;
+  border-radius:14px;
+
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size: var(--icon) var(--icon);
+
+  transition:
+    transform .18s ease,
+    filter .18s ease,
+    background-color .18s ease;
 }
-    .cell:hover{
-      transform:scale(1.04);
-      background-color:rgba(255,255,255,.08);
-    }
 
-    .selected{
-      background-color:rgba(255,255,255,.28) !important;
-      transform:scale(1.06) !important;
-      outline:2px solid rgba(255,255,255,.45);
-      outline-offset:-2px;
-    }
+.cell:hover{
+  transform: scale(1.04);
+  background-color: rgba(255,255,255,.08);
+}
 
-    .fade-out{ animation:fadeOut .45s forwards; }
-    @keyframes fadeOut{ to{opacity:0; transform:scale(0)} }
+.cell.selected{
+  background-color: rgba(255,255,255,.28);
+  transform: scale(1.06);
+  outline:2px solid rgba(255,255,255,.45);
+  outline-offset:-2px;
+}
 
-    /* ---- визуал спецов ---- */
-    .cell[data-type="special_line"]{ filter:drop-shadow(0 0 10px rgba(255,215,0,.55)); }
-    .cell[data-type="special_bomb"]{ filter:drop-shadow(0 0 10px rgba(255,255,255,.35)); }
-    .cell[data-type="special_clear"]{ filter:drop-shadow(0 0 12px rgba(255,215,0,.75)); }
-    .cell[data-type="special_candle"]{ filter:drop-shadow(0 0 12px rgba(255,140,0,.65)); }
+/* =========================
+   АНИМАЦИИ
+========================= */
+.fade-out{
+  animation: fadeOut .45s forwards;
+}
 
-/* ---- препятствия (ТОЛЬКО PNG, без эмодзи и ::after) ---- */
+@keyframes fadeOut{
+  to{
+    opacity:0;
+    transform:scale(0);
+  }
+}
+
+/* =========================
+   СПЕЦ-ЭФФЕКТЫ
+========================= */
+.cell[data-type="special_line"]{
+  filter: drop-shadow(0 0 10px rgba(255,215,0,.55));
+}
+
+.cell[data-type="special_bomb"]{
+  filter: drop-shadow(0 0 10px rgba(255,255,255,.35));
+}
+
+.cell[data-type="special_clear"]{
+  filter: drop-shadow(0 0 12px rgba(255,215,0,.75));
+}
+
+.cell[data-type="special_candle"]{
+  filter: drop-shadow(0 0 12px rgba(255,140,0,.65));
+}
+
+/* =========================
+   ПРЕПЯТСТВИЯ
+========================= */
 .cell[data-block="snow"],
 .cell[data-block="ice"]{
   cursor: not-allowed;
   filter: saturate(.9) brightness(.95);
 }
 
-/* лёд разный по слоям */
-.cell[data-icehp="3"]{ }
-.cell[data-icehp="2"]{ }
-.cell[data-icehp="1"]{ }
+/* =========================
+   FX СЕТКИ
+========================= */
+.grid::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:0;
 
-    /* ---- модалки ---- */
-    .overlay{
-      position:fixed; inset:0;
-      background:rgba(0,0,0,.55);
-      display:none;
-      align-items:center; justify-content:center;
-      padding:18px;
-      z-index:50;
-    }
-    .overlay.show{ display:flex; }
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(255,255,255,.55),
+      rgba(255,255,255,0) 55%
+    );
 
-    .modal{
-      width:min(560px, 95vw);
-      background:rgba(255,255,255,.96);
-      color:#1f2937;
-      border-radius:18px;
-      padding:18px 18px 14px;
-      box-shadow:0 16px 48px rgba(0,0,0,.35);
-    }
-    .modal h2{ margin:0 0 8px; font-size:20px; }
-    .modal p{ margin:0 0 10px; line-height:1.45; }
-    .modal ul{ margin:0 0 12px; padding-left:18px; }
-    .modal li{ margin:6px 0; }
-    .modal .actions{ display:flex; gap:10px; margin-top:10px; }
-    .modal button{
-      flex:1;
-      margin:0;
-      padding:10px 14px;
-      font-size:16px;
-      background:#ff6b6b;
-      color:#fff;
-      border:none;
-      border-radius:14px;
-      cursor:pointer;
-      box-shadow:0 6px 18px rgba(0,0,0,.18);
-      transition:background .2s, transform .15s;
-    }
-    .modal button:hover{ background:#ff4757; transform:translateY(-1px); }
-    .modal button:disabled{
-      opacity:.5;
-      cursor:not-allowed;
-      transform:none !important;
-      box-shadow:none;
-    }
+  transition: opacity .18s ease;
+}
 
-    /* ---- кнопки снизу ---- */
-    .btnbar{
-      display:flex;
-      gap:12px;
-      margin-top:18px;
-      flex-wrap:wrap;
-      justify-content:center;
-    }
-    .btnbar button{
-      padding:12px 22px;
-      font-size:18px;
+.grid.fx-flash::after{
+  opacity:1;
+}
 
-      background: rgba(255,255,255,.22);
-      color:#fff;
-      border: 1px solid rgba(255,255,255,.28);
-      border-radius:18px;
-      box-shadow: 0 10px 24px rgba(0,0,0,.18);
+.grid.fx-shake{
+  animation: fxShake .28s ease-out both;
+}
 
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-
-      cursor:pointer;
-      transition: transform .15s, background .2s, border-color .2s;
-    }
-    .btnbar button:hover{
-      background: rgba(255,255,255,.30);
-      border-color: rgba(255,255,255,.40);
-      transform: translateY(-1px);
-    }
-    .btnbar button:active{
-      transform: translateY(0px) scale(.98);
-    }
-
-    /* =========================
-       FX: обратная связь спецов
-    ========================= */
-    .grid::after{
-      content:"";
-      position:absolute; inset:0;
-      border-radius:10px;
-      pointer-events:none;
-      opacity:0;
-      background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.55), rgba(255,255,255,0) 55%);
-      transition: opacity .18s ease;
-    }
-    .grid.fx-flash::after{ opacity:1; }
-
-    .cell.fx-hit{
-      animation: fxHit .28s ease-out both;
-      filter: drop-shadow(0 0 12px rgba(255,255,255,.55));
-    }
-    @keyframes fxHit{
-      0%{ transform:scale(1); }
-      45%{ transform:scale(1.13); }
-      100%{ transform:scale(.98); }
-    }
-
-    .cell.fx-line{
-      animation: fxLine .35s ease-out both;
-      filter: drop-shadow(0 0 14px rgba(255,215,0,.85));
-    }
-    @keyframes fxLine{
-      0%{ transform:scale(1); }
-      40%{ transform:scale(1.18); }
-      100%{ transform:scale(1); }
-    }
-
-    .cell.fx-bomb{
-      animation: fxBomb .38s ease-out both;
-      filter: drop-shadow(0 0 16px rgba(255,255,255,.75));
-    }
-    @keyframes fxBomb{
-      0%{ transform:scale(1); }
-      35%{ transform:scale(1.22) rotate(-2deg); }
-      100%{ transform:scale(1) rotate(0deg); }
-    }
-
-    .grid.fx-shake{
-      animation: fxShake .28s ease-out both;
-    }
-    @keyframes fxShake{
-      0%{ transform:translateX(0); }
-      25%{ transform:translateX(-5px); }
-      50%{ transform:translateX(5px); }
-      75%{ transform:translateX(-3px); }
-      100%{ transform:translateX(0); }
-    }
-
-    .cell.fx-candle{
-      animation: fxCandle .42s ease-out both;
-      filter: drop-shadow(0 0 18px rgba(255,140,0,.85));
-    }
-    @keyframes fxCandle{
-      0%{ transform:scale(1); }
-      30%{ transform:scale(1.2); }
-      60%{ transform:scale(1.08); }
-      100%{ transform:scale(1); }
-    }
+@keyframes fxShake{
+  0%{ transform:translateX(0); }
+  25%{ transform:translateX(-5px); }
+  50%{ transform:translateX(5px); }
+  75%{ transform:translateX(-3px); }
+  100%{ transform:translateX(0); }
+}
 
    
   </style>
