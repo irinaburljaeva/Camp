@@ -889,13 +889,21 @@ function setupHUD(){
   const lvl = currentLevel();
   levelDisplay.textContent = lvl.id;
 
-  // ✅ «Цель: 0/60»
-  progressDisplay.textContent = `${score}/${lvl.target}`;
+  // Цели уровней:
+  if(lvl.id === 3){
+    progressDisplay.textContent = BombActivated
+      ? 'Мешок подарков: ✅'
+      : 'Мешок подарков: 0/1';
+  } else if(lvl.id === 4){
+    progressDisplay.textContent = SnowflakeActivated
+      ? 'Золотая снежинка: ✅'
+      : 'Золотая снежинка: 0/1';
+  } else {
+    progressDisplay.textContent = `${score}/${lvl.target}`;
+  }
 
-  movesDisplay.textContent  = movesLeft;
-
+  movesDisplay.textContent = movesLeft;
 }
-
 function showIntro(){
   const lvl = currentLevel();
   introTitle.textContent = `Уровень ${lvl.id}`;
