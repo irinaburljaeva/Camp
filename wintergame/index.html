@@ -1001,7 +1001,8 @@ function placeObstacles(){
   }
 
   if(lvl.obstacles.includes(BLOCK.ICE)){
-    dropIce(10);
+    const iceCount = Math.min(5, 1 + Math.max(0, (lvl.id - 8)));
+    dropIce(iceCount);
   }
 }
 
