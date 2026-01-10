@@ -46,12 +46,11 @@
 
     /* размеры сетки */
   :root{
-  --pad: 12px;
+  --pad: 0px;
   --cols: 8;
   --board: min(96vw, 620px, 72vh);
 }
 
-/* ✅ grid без пиксельных track-size */
 .grid{
   display:grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
@@ -66,8 +65,8 @@
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-  background-origin: content-box;
-  background-clip: content-box;
+  background-origin: border-box;
+  background-clip: border-box;
 
 }
 
