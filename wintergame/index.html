@@ -115,43 +115,17 @@
     .cell[data-type="special_clear"]{ filter:drop-shadow(0 0 12px rgba(255,215,0,.75)); }
     .cell[data-type="special_candle"]{ filter:drop-shadow(0 0 12px rgba(255,140,0,.65)); }
 
-    /* ---- препятствия ---- */
-    .cell[data-block="snow"]::after{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,.7), rgba(255,255,255,0) 55%),
-        radial-gradient(circle at 70% 40%, rgba(255,255,255,.6), rgba(255,255,255,0) 60%),
-        linear-gradient(to bottom, rgba(255,255,255,.55), rgba(255,255,255,.15));
-      opacity:.95;
-      pointer-events:none;
-    }
-    .cell[data-block="snow"]::before{
-      content:"⛔";
-      position:absolute; right:6px; top:6px;
-      font-size:16px; opacity:.9;
-      pointer-events:none;
-    }
+/* ---- препятствия (ТОЛЬКО PNG, без эмодзи и ::after) ---- */
+.cell[data-block="snow"],
+.cell[data-block="ice"]{
+  cursor: not-allowed;
+  filter: saturate(.9) brightness(.95);
+}
 
-    .cell[data-block="ice"]::after{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        linear-gradient(135deg, rgba(160,220,255,.55), rgba(70,160,255,.25)),
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), rgba(255,255,255,0) 55%);
-      opacity:.95;
-      pointer-events:none;
-    }
-    .cell[data-block="ice"]::before{
-      content:attr(data-ice);
-      position:absolute; right:8px; top:6px;
-      font-weight:700;
-      font-size:14px;
-      background:rgba(0,0,0,.25);
-      padding:2px 6px;
-      border-radius:10px;
-      pointer-events:none;
-    }
+/* лёд разный по слоям */
+.cell[data-icehp="3"]{ }
+.cell[data-icehp="2"]{ }
+.cell[data-icehp="1"]{ }
 
     /* ---- модалки ---- */
     .overlay{
@@ -389,6 +363,11 @@ const IMG = {
   giftBag:       ASSET_PATH + 'IMG_3657.png',
   goldSnowflake: ASSET_PATH + 'IMG_3658.png',
 
+  // препятствия
+snowBlock: ASSET_PATH + 'IMG_snow.png',
+ice3:      ASSET_PATH + 'IMG_ice_3.png',
+ice2:      ASSET_PATH + 'IMG_ice_2.png',
+ice1:      ASSET_PATH + 'IMG_ice_1.png',
   // фон/подложка
   bg:    ASSET_PATH + 'IMG_3671.png',
   board: ASSET_PATH + 'IMG_3672.png',
@@ -571,6 +550,26 @@ function resolveImage(colorKey, type){
   if(type === SPECIAL.CANDLE) return IMG.candle;
   return IMG[colorKey] || '';
 }
+  function updateBlockVisual(i){
+  const sq = squares[i];
+
+  if(sq.dataset.block === BLOCK.SNOW){
+    sq.style.backgroundImage = `url('${IMG.snowBlock}')`;
+    return;
+  }
+
+  if(sq.dataset.block === BLOCK.ICE){
+    const hp = sq.dataset.icehp;
+    if(hp === '3') sq.style.backgroundImage = `url('${IMG.ice3}')`;
+    if(hp === '2') sq.style.backgroundImage = `url('${IMG.ice2}')`;
+    if(hp === '1') sq.style.backgroundImage = `url('${IMG.ice1}')`;
+    return;
+  }
+
+  // если блок снят — возвращаем обычную фишку
+  const img = resolveImage(sq.dataset.color, sq.dataset.type);
+  sq.style.backgroundImage = img ? `url('${img}')` : '';
+}
 
 function setCell(square, colorKey, type='normal'){
   square.dataset.color = colorKey || '';
@@ -676,67 +675,67 @@ function placeObstacles(){
 
 function dropSnow(count){
   let placed = 0;
-  let tries = 0;
-  while(placed < count && tries < 500){
-    tries++;
+  while(placed < count){
     const i = Math.floor(Math.random() * (width*width));
     if(i < width) continue;
     if(squares[i].dataset.block) continue;
 
     squares[i].dataset.block = BLOCK.SNOW;
     squares[i].dataset.turns = 3;
+
+    updateBlockVisual(i);
     placed++;
   }
 }
 
 function dropIce(count){
   let placed = 0;
-  let tries = 0;
-  while(placed < count && tries < 800){
-    tries++;
+  while(placed < count){
     const i = Math.floor(Math.random() * (width*width));
     if(i < width) continue;
     if(squares[i].dataset.block) continue;
 
     squares[i].dataset.block = BLOCK.ICE;
-    squares[i].dataset.icehp = 3;
-    squares[i].dataset.ice = '3';
+    squares[i].dataset.icehp = '3';
+
+    updateBlockVisual(i);
     placed++;
   }
 }
 
 function tickObstaclesAfterMove(){
   for(let i=0;i<squares.length;i++){
-    if(squares[i].dataset.block === BLOCK.SNOW){
-      let t = (+squares[i].dataset.turns || 0);
-      if(t > 0){
-        t--;
-        squares[i].dataset.turns = String(t);
-        if(t <= 0){
-          squares[i].dataset.block = '';
-          squares[i].dataset.turns = '';
-        }
+    const sq = squares[i];
+
+    if(sq.dataset.block === BLOCK.SNOW){
+      let t = +sq.dataset.turns;
+      t--;
+      sq.dataset.turns = t;
+
+      if(t <= 0){
+        sq.dataset.block = '';
+        sq.dataset.turns = '';
+        updateBlockVisual(i);
       }
     }
   }
+}
 }
 
 function damageIceAt(i, amount=1){
   const sq = squares[i];
   if(sq.dataset.block !== BLOCK.ICE) return;
 
-  let hp = (+sq.dataset.icehp || 0);
-  if(hp <= 0) return;
-
+  let hp = +sq.dataset.icehp;
   hp = Math.max(0, hp - amount);
   sq.dataset.icehp = String(hp);
-  sq.dataset.ice = hp ? String(hp) : '';
 
   if(hp === 0){
     sq.dataset.block = '';
     sq.dataset.icehp = '';
-    sq.dataset.ice = '';
   }
+
+  updateBlockVisual(i);
 }
 
 /* =========================================================================
