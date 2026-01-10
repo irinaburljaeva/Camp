@@ -45,54 +45,55 @@
     }
 
     /* размеры сетки */
-    :root{
-      --cell: calc((var(--board) - (var(--pad) * 2)) / var(--cols));
-      --pad:  20px;      /* padding у поля */
-      --cols: 8;        /* 8x8 */
-     --board: min(92vw, 520px);
-    }
+  :root{
+  --pad: 20px;
+  --cols: 8;
+  --board: min(92vw, 520px);
+}
 
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(var(--cols), var(--cell));
-      grid-template-rows: repeat(var(--cols), var(--cell));
-      gap: 0;
+/* ✅ grid без пиксельных track-size */
+.grid{
+  display:grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--cols), minmax(0, 1fr));
+  gap: 0;
 
-      width:  var(--board);
-      height: var(--board);
-      padding: var(--pad);
+  width: var(--board);
+  height: var(--board);
+  padding: var(--pad);
 
-      background-image: url("/Camp/wintergame/IMG_3672.png");
-      background-size: 100% 100%;
-      background-position: center;
-      background-repeat: no-repeat;
+  background-image: url("/Camp/wintergame/IMG_3672.png");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
 
-      border-radius:10px;
-      box-shadow:0 10px 20px rgba(0,0,0,.2);
-      position:relative;
+  border-radius:10px;
+  box-shadow:0 10px 20px rgba(0,0,0,.2);
+  position:relative;
+  overflow:hidden;
 
-      overflow:hidden;          
-      place-content:start;
-    }
+  /* лучше растягивать сетку по доступному месту */
+  place-content: stretch;
+}
 
-    .cell{
-      width: var(--cell);
-      height: var(--cell);
+.cell{
+  /* ✅ убираем фиксированные width/height по var(--cell) */
+  width: 100%;
+  height: 100%;
 
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
-      transition:transform .18s, filter .18s, background-color .18s;
-      border-radius: calc(var(--cell) * 0.25);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  transition:transform .18s, filter .18s, background-color .18s;
+  border-radius: 14px; /* можно оставить так или подобрать */
 
-      background-repeat:no-repeat;
-      background-position:center;
-      background-size:70% 70%;
-      position:relative;
-      overflow:hidden;
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:70% 70%;
+  position:relative;
+  overflow:hidden;
 
-      transform-origin:center;   /* ✅ стабильнее при скейле */
-    }
-
+  transform-origin:center;
+}
     .cell:hover{
       transform:scale(1.04);
       background-color:rgba(255,255,255,.08);
