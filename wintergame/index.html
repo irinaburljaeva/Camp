@@ -57,13 +57,13 @@
       grid-template-rows: repeat(var(--cols), var(--cell));
       gap: 0;
 
-      width:  calc(var(--cell) * var(--cols) + var(--pad) * 2);
-      height: calc(var(--cell) * var(--cols) + var(--pad) * 2);
+      width:  var(--board);
+      height: var(--board);
 
       padding: var(--pad);
 
       background-image: url("/Camp/wintergame/IMG_3672.png");
-      background-size: 100% 100%;
+      background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
 
@@ -71,7 +71,7 @@
       box-shadow:0 10px 20px rgba(0,0,0,.2);
       position:relative;
 
-      overflow:hidden;           /* ✅ чтобы ховер-скейл не вылезал за границы */
+      overflow:hidden;          
       place-content:start;
     }
 
