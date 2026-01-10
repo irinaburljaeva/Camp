@@ -173,25 +173,39 @@ document.addEventListener('pointerdown', unlock, { once:true, passive:true });
     const pauseTimers = {};
 
     function playSound(key){
-      const a = sounds[key];
-      if(!a) return;
+  const a = sounds[key];
+  if(!a) return;
 
-      try {
-        // сбрасываем предыдущий автопаузер для этого звука
-        if (pauseTimers[key]) clearTimeout(pauseTimers[key]);
+  stopAllExcept(key); // ✅ чтобы не было одновременного проигрывания
 
-        // быстрый перезапуск при повторных кликах
-        a.currentTime = 0;
-        a.play().catch(()=>{});
+  try {
+    if (pauseTimers[key]) clearTimeout(pauseTimers[key]);
 
-        // автопауза через 3 секунды
-        pauseTimers[key] = setTimeout(()=>{
-          a.pause();
-          a.currentTime = 0;
-        }, MAX_PLAY_MS);
-      } catch(e){}
+    a.currentTime = 0;
+    a.play().catch(()=>{});
+
+    pauseTimers[key] = setTimeout(()=>{
+      a.pause();
+      a.currentTime = 0;
+    }, MAX_PLAY_MS);
+  } catch(e){}
+}
+
+    function stopAllExcept(exceptKey){
+  for (const k in sounds){
+    if (k === exceptKey) continue;
+    try{
+      sounds[k].pause();
+      sounds[k].currentTime = 0;
+    }catch(_){}
+    if (pauseTimers[k]) {
+      clearTimeout(pauseTimers[k]);
+      pauseTimers[k] = null;
     }
+  }
+}
 
+    
     /* ====== ЭФФЕКТЫ ====== */
     function svgPoint(evt){
       const pt = svg.createSVGPoint();
