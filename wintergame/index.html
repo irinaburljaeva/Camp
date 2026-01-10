@@ -414,7 +414,6 @@ const levelDisplay = document.getElementById('level');
 const progressDisplay = document.getElementById('progress');
 
 const movesDisplay  = document.getElementById('moves');
-const energyDisplay = document.getElementById('energy');
 
 const overlay = document.getElementById('overlay');
 const introTitle = document.getElementById('introTitle');
@@ -610,7 +609,7 @@ function setupHUD(){
   progressDisplay.textContent = `${score}/${lvl.target}`;
 
   movesDisplay.textContent  = movesLeft;
-  energyDisplay.textContent = energy;
+
 }
 
 function showIntro(){
