@@ -13,7 +13,7 @@
 
 body{
   font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-  background: url("/Camp/wintergame/IMG_3671.png") center/cover no-repeat;
+  background: url("/Camp/wintergame/IMG_3671.png") center/cover no-repeat fixed;
 
   display:flex;
   flex-direction:column;
@@ -26,10 +26,10 @@ body{
   user-select:none;
 
   padding:
-    max(14px, env(safe-area-inset-top))
-    max(14px, env(safe-area-inset-right))
-    max(14px, env(safe-area-inset-bottom))
-    max(14px, env(safe-area-inset-left));
+    max(8px, env(safe-area-inset-top))
+    max(8px, env(safe-area-inset-right))
+    max(8px, env(safe-area-inset-bottom))
+    max(8px, env(safe-area-inset-left));
 }
 
 .topbar, .btnbar, h1 { 
@@ -37,10 +37,11 @@ body{
 }
 
 h1{
-  margin:0 0 10px;
+  margin:0 0 6px;
   text-align:center;
   text-shadow:2px 2px 4px rgba(0,0,0,.3);
-  font-size:clamp(20px, 5vw, 32px);
+  font-size:clamp(18px, 4.5vw, 28px);
+  line-height:1.2;
 }
 
 /* =========================
@@ -48,21 +49,21 @@ h1{
 ========================= */
 .topbar{
   display:flex;
-  gap:12px;
+  gap:8px;
   align-items:center;
   justify-content:center;
   flex-wrap:wrap;
-  margin-bottom:14px;
+  margin-bottom:8px;
 }
 
 .pill{
   background:rgba(255,255,255,.2);
-  padding:10px 16px;
-  border-radius:15px;
-  font-size:18px;
+  padding:6px 12px;
+  border-radius:12px;
+  font-size:clamp(14px, 3.5vw, 16px);
   box-shadow:0 4px 6px rgba(0,0,0,.1);
   display:flex;
-  gap:8px;
+  gap:6px;
   align-items:center;
   white-space:nowrap;
 }
@@ -74,21 +75,26 @@ h1{
   --cols: 8;
   --img: 512px;
   --line: 2px;
-  --board: min(96vw, 620px, 72vh);
+  
+  /* размер поля с учетом высоты экрана */
+  --board: min(92vw, 520px, calc(100svh - 280px));
+  
   --gap: calc(var(--board) * (var(--line) / var(--img)));
   --pad: var(--gap);
   --icon: 86%;
 }
 
 /* =========================
-   GRID
+   GRID (✅ ГЛАВНОЕ ИСПРАВЛЕНИЕ)
 ========================= */
 .grid{
   position:relative;
   overflow:hidden;
 
+  /* ✅ Принудительно делаем квадрат */
   width: var(--board);
   height: var(--board);
+  aspect-ratio: 1 / 1;
 
   display:grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
@@ -97,12 +103,14 @@ h1{
   gap: var(--gap);
   padding: var(--pad);
 
+  /* ✅ КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: contain вместо 100% 100% */
   background-image: url("/Camp/wintergame/IMG_3672.png");
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 100% 100%;
+  background-size: contain;  /* ← сохраняет пропорции! */
   
   border-radius:10px;
+  flex-shrink: 1;
 }
 
 /* =========================
@@ -111,6 +119,9 @@ h1{
 .cell{
   width:100%;
   height:100%;
+  
+  /* ✅ Клетки тоже квадратные */
+  aspect-ratio: 1 / 1;
 
   display:flex;
   align-items:center;
@@ -120,7 +131,7 @@ h1{
   position:relative;
   overflow:hidden;
 
-  border-radius:14px;
+  border-radius:12px;
 
   background-repeat:no-repeat;
   background-position:center;
@@ -188,21 +199,21 @@ h1{
 ========================= */
 .btnbar{
   display:flex;
-  gap:12px;
-  margin-top:18px;
+  gap:8px;
+  margin-top:10px;
   flex-wrap:wrap;
   justify-content:center;
 }
 
 .btnbar button{
-  padding:12px 22px;
-  font-size:18px;
+  padding:8px 16px;
+  font-size:clamp(14px, 3.5vw, 16px);
 
   background: rgba(255,255,255,.22);
   color:#fff;
   border:1px solid rgba(255,255,255,.28);
-  border-radius:18px;
-  box-shadow:0 10px 24px rgba(0,0,0,.18);
+  border-radius:14px;
+  box-shadow:0 6px 16px rgba(0,0,0,.18);
 
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -344,30 +355,54 @@ h1{
 }
 
 /* =========================
-   АДАПТИВНОСТЬ
+   АДАПТИВНОСТЬ ДЛЯ МАЛЕНЬКИХ ЭКРАНОВ
 ========================= */
-@media (max-width: 600px) {
+@media (max-height: 750px) {
+  :root {
+    --board: min(88vw, 480px, calc(100svh - 240px));
+  }
+  
   h1 {
-    font-size:clamp(18px, 6vw, 24px);
+    font-size:clamp(16px, 4vw, 22px);
+    margin-bottom:4px;
+  }
+  
+  .topbar {
+    gap:6px;
+    margin-bottom:6px;
   }
   
   .pill {
-    font-size:16px;
-    padding:8px 12px;
+    font-size:clamp(13px, 3vw, 15px);
+    padding:5px 10px;
+  }
+  
+  .btnbar {
+    margin-top:8px;
+    gap:6px;
   }
   
   .btnbar button {
-    font-size:16px;
-    padding:10px 18px;
+    padding:7px 14px;
+    font-size:clamp(13px, 3vw, 15px);
+  }
+}
+
+@media (max-height: 650px) {
+  :root {
+    --board: min(85vw, 420px, calc(100svh - 200px));
   }
   
-  .modal h2 {
-    font-size:18px;
+  body {
+    padding: max(4px, env(safe-area-inset-top)) max(4px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom)) max(4px, env(safe-area-inset-left));
   }
   
-  .modal button {
-    font-size:15px;
-  }  </style>
+  h1 {
+    font-size:clamp(14px, 3.5vw, 18px);
+    margin-bottom:3px;
+  }
+}
+ </style>
 </head>
 
 <body>
