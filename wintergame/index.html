@@ -417,6 +417,8 @@ const energyTimerEl  = document.getElementById('energyTimer');
 let squares = [];
 let score = 0;
 let levelIndex = 0;
+  let BombActivated = false;
+  let SnowflakeActivated = false;
 
 let selectedSquare = null;
 
@@ -951,6 +953,8 @@ async function activateSpecialAt(i){
     }
     clearCell(i);
     addScore(10);
+    if(currentLevel().id === 3) BombActivated = true;
+    if(currentLevel().id === 4) SnowflakeActivated = true;
     return true;
   }
 
@@ -1256,7 +1260,9 @@ function stabilizeNoInitialMatches(){
 
 function checkLevelComplete(){
   const lvl = currentLevel();
-  if(score >= lvl.target){
+  const complete = (lvl.id === 3) ? BombActivated : (score >= lvl.target);
+  (lvl.id === 4) ? SnowflakeActivated : (score >= lvl.target)
+  if(complete){
     if(levelIndex < LEVELS.length-1){
       levelIndex++;
       startLevel(true);
@@ -1272,6 +1278,9 @@ function checkLevelComplete(){
 
 function startLevel(resetScore){
   if(resetScore) score = 0;
+  BombActivated = false;
+  SnowflakeActivated = false;
+  
   setupHUD();
   createBoard();
   showIntro();
