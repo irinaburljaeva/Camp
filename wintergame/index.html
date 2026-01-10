@@ -966,7 +966,7 @@ function showIntro(){
   if(s.includes(SPECIAL.CLEAR)) items.push('5 в ряд → «Золотая снежинка» (очищает весь экран).');
   if(lvl.obstacles.includes(BLOCK.SNOW)) items.push('Сугробы блокируют клетки на несколько ходов (их нельзя двигать).');
   if(lvl.obstacles.includes(BLOCK.ICE))  items.push('Лёд ломается от золотой снежинки, мешка с подарками и золотых шагов.');
-  if(s.includes(SPECIAL.CANDLE))  items.push (Растопи лед и ты получишь свечку. Активируй ее рядом с другой ледяной ячейкой, чтобы убрать слой льда).
+  if(s.includes(SPECIAL.CANDLE)) items.push('Растопи лёд — и ты получишь свечку. Активируй её рядом с другой ледяной ячейкой, чтобы убрать слой льда.');
 
   items.forEach(t=>{
     const li = document.createElement('li');
