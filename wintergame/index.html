@@ -321,16 +321,11 @@
     <div class="modal">
       <h2>⚡ Закончились ходы?</h2>
       <p id="energyText">
-        Время зарядить батарейку! Сделайте 100 шагов на месте или 15 приседаний —
+        Время зарядить батарейку! Пошагайте в течение 30 секунд —
         и откроется новая жизнь.
       </p>
 
-      <ul>
-        <li><b>Вариант 1:</b> 100 шагов на месте</li>
-        <li><b>Вариант 2:</b> 15 приседаний</li>
-      </ul>
-
-      <div class="actions" style="margin-top:12px; display:flex; gap:10px;">
+           <div class="actions" style="margin-top:12px; display:flex; gap:10px;">
         <button id="energyStartBtn">▶️ Начать зарядку (30 сек)</button>
         <button id="energyDoneBtn" disabled>✅ Готово — открыть жизнь</button>
       </div>
@@ -399,18 +394,18 @@ const BLOCK = {
 
 // уровни
 const LEVELS = [
-  { id:1,  target: 60,  intro:"Уровень 1 — без спец-элементов. Просто собирайте 3 в ряд.", specials:[], obstacles:[] },
-  { id:2,  target: 80,  intro:"Уровень 2 — появляются «Золотые шаги». Соберите 4 в ряд → появится спец. Активируйте его следующим ходом (передвиньте) → очистится строка.", specials:[SPECIAL.LINE], obstacles:[] },
-  { id:3,  target: 95,  intro:"Уровень 3 — добавляем мешок подарков. Соберите L/T-комбинацию → появится мешок, он взрывает область 3×3.", specials:[SPECIAL.LINE, SPECIAL.BOMB], obstacles:[] },
-  { id:4,  target: 115, intro:"Уровень 4 — золотая снежинка. Соберите 5 в ряд → появится снежинка, она очищает весь экран.", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[] },
-  { id:5,  target: 135, intro:"Уровень 5 — появляется препятствие «Снежный сугроб». Он блокирует клетку на несколько ходов.", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
+  { id:1,  target: 60,  intro:"Уровень 1: соберите 3 в ряд.", specials:[], obstacles:[] },
+  { id:2,  target: 80,  intro:"Уровень 2: соберите 4 в ряд, чтобы получить золотые шаги", specials:[SPECIAL.LINE], obstacles:[] },
+  { id:3,  target: 95,  intro:"Уровень 3: соберите L/T-комбинацию, чтобы получить мешок подарков", specials:[SPECIAL.LINE, SPECIAL.BOMB], obstacles:[] },
+  { id:4,  target: 115, intro:"Уровень 4: соберите 5 в ряд, чтобы получить золотую снежинку", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[] },
+  { id:5,  target: 135, intro:"Уровень 5: первое препятствие", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
 
-  { id:6,  target: 155, intro:"Уровень 6 — больше сугробов. Используйте спец-элементы, чтобы освобождать поле.", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
-  { id:7,  target: 175, intro:"Уровень 7 — сугробы становятся чаще. Делайте 4 и 5 в ряд для быстрых очисток.", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
-  { id:8,  target: 195, intro:"Уровень 8 — держим темп: каскады после падения фишек дают больше матчей.", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
-  { id:9,  target: 215, intro:"Уровень 9 — почти финал перед льдом. Готовимся к заморозке!", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
+  { id:6,  target: 155, intro:"Уровень 6: используйте спец-элементы, чтобы освободить поле", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
+  { id:7,  target: 175, intro:"Уровень 7: сугробы становятся чаще. Без спецэлементов тут не справиться", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
+  { id:8,  target: 195, intro:"Уровень 8: держим темп", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
+  { id:9,  target: 215, intro:"Уровень 9: Говорят, скоро погода станет еще холоднее!", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
 
-  { id:10, target: 240, intro:"Уровень 10 — появляется «Ледяная клетка» (3 слоя) и «Свечка». Свечка при активации снимает 1 слой льда в области 3×3.", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR, SPECIAL.CANDLE], obstacles:[BLOCK.SNOW, BLOCK.ICE] },
+  { id:10, target: 240, intro:"Уровень 10: холода! Появляется препятсвие «ледяная клетка» и «Свечка»", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR, SPECIAL.CANDLE], obstacles:[BLOCK.SNOW, BLOCK.ICE] },
 ];
 
 const width = 8;
@@ -627,7 +622,7 @@ function showIntro(){
   introList.innerHTML = '';
   const items = [];
   items.push('Соберите 3 одинаковых фишки подряд — они исчезнут, а новые упадут сверху.');
-  items.push('Каждый успешный ход тратит 1 ход. Когда ходы закончатся — нужно “зарядиться”, чтобы получить новую жизнь.');
+  items.push('Каждое перемещение фишек тратит 1 ход. Когда ходы закончатся — понадобится “зарядиться”, чтобы получить новую жизнь.');
 
   const s = lvl.specials;
   if(s.includes(SPECIAL.LINE))  items.push('4 в ряд → «Золотые шаги». Передвиньте их следующим ходом → очистится строка.');
@@ -1210,7 +1205,7 @@ async function applyMatches(matches, moveInfo){
     SFX.ice.currentTime = 0;
     SFX.ice.play();
   }catch(e){
-    // может быть заблокировано браузером до первого клика — это ок
+   
   }
 }
 /* =========================================================================
