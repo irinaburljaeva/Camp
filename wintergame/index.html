@@ -729,7 +729,7 @@ function tickObstaclesAfterMove(){
     }
   }
 }
-}
+
 
 function damageIceAt(i, amount=1){
   const sq = squares[i];
@@ -1206,6 +1206,14 @@ async function applyMatches(matches, moveInfo){
   addScore(clearList.length);
 }
 
+  function playIceSound(){
+  try{
+    SFX.ice.currentTime = 0;
+    SFX.ice.play();
+  }catch(e){
+    // может быть заблокировано браузером до первого клика — это ок
+  }
+}
 /* =========================================================================
    ГРАВИТАЦИЯ + КАСКАДЫ
 ============================================================================ */
