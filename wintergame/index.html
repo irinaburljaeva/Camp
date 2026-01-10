@@ -44,6 +44,22 @@ h1{
   line-height:1.2;
 }
 
+ /* =========================
+   ЗАГОЛОВОК + ПАНЕЛЬ (воздух + читаемость)
+========================= */
+.headerWrap{
+  width: min(680px, 100%);
+  margin-top: 6px;
+  margin-bottom: 14px; /* ✅ место после "уровень/цель/ходы" перед полем */
+  padding: 10px 12px 12px; /* ✅ мягкая подложка под текст */
+  border-radius: 16px;
+
+  background: rgba(0,0,0,.16);              /* ✅ читаемость на любом фоне */
+  box-shadow: 0 10px 26px rgba(0,0,0,.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}   
+
     .coachWrap{
   margin-top: 10px;
   border-radius: 14px;
@@ -444,21 +460,44 @@ h1{
     --board: min(88vw, 480px, calc(100svh - 240px));
   }
   
-  h1 {
-    font-size:clamp(16px, 4vw, 22px);
-    margin-bottom:4px;
-  }
-  
-  .topbar {
-    gap:6px;
-    margin-bottom:6px;
-  }
-  
-  .pill {
-    font-size:clamp(13px, 3vw, 15px);
-    padding:5px 10px;
-  }
-  
+  h1{
+  margin: 4px 0 12px;     /* ✅ место после заголовка */
+  text-align:center;
+  font-size:clamp(18px, 4.5vw, 28px);
+  line-height:1.2;
+
+  /* ✅ белый текст читается лучше */
+  text-shadow:
+    0 2px 10px rgba(0,0,0,.45),
+    0 1px 2px rgba(0,0,0,.35);
+}
+
+.topbar{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+
+  margin: 0;             /* теперь отступами управляет headerWrap */
+}
+
+.pill{
+  background:rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.22);
+  padding:7px 12px;
+  border-radius:14px;
+  font-size:clamp(14px, 3.5vw, 16px);
+
+  box-shadow:0 6px 14px rgba(0,0,0,.18);
+  display:flex;
+  gap:6px;
+  align-items:center;
+  white-space:nowrap;
+
+  /* ✅ контраст текста */
+  text-shadow: 0 2px 8px rgba(0,0,0,.35);
+}
   .btnbar {
     margin-top:8px;
     gap:6px;
@@ -488,13 +527,15 @@ h1{
 </head>
 
 <body>
-  <h1> Зимняя игра от ШАГАЙ ДОМА  </h1>
+  <div class="headerWrap">
+  <h1>Зимняя игра от ШАГАЙ ДОМА</h1>
 
   <div class="topbar">
     <div class="pill">Уровень: <b id="level">1</b></div>
     <div class="pill">Цель: <b id="progress">0/0</b></div>
     <div class="pill">Ходы: <b id="moves">0</b></div>
   </div>
+</div>
 
   <div class="grid" id="grid"></div>
 
