@@ -1152,34 +1152,33 @@ function damageIceAt(i, amount=1){
   // 🔊 звук треска льда
   playIceSound();
 
-  if(hp === 0){
+    if(hp === 0){
     // снимаем лёд
     sq.dataset.block = '';
     sq.dataset.icehp = '';
 
-    // ✅ как только один лёд разрушен — появляется свечка (на этой клетке)
     // если вдруг под льдом не было фишки — создаём
     if(!sq.dataset.color){
       setCell(sq, randomNormal(), 'normal');
     }
 
- if(levelHasSpecial(SPECIAL.CANDLE)){
-  candleInv++;
+    if(levelHasSpecial(SPECIAL.CANDLE)){
+      candleInv++;
 
-  if(currentLevel().id === 8){
-    CandleActivated = true;
+      if(currentLevel().id === 8){
+        CandleActivated = true;
+      }
+
+      saveProgress();
+      setupHUD();
+    }
+
+    // клетка после льда остаётся обычной
+    sq.dataset.type = 'normal';
+    sq.style.backgroundImage = `url('${resolveImage(sq.dataset.color, sq.dataset.type)}')`;
+
+    updateBlockVisual(i);
   }
-
-  saveProgress();
-  setupHUD();
-}
-
-// клетка после льда остаётся обычной
-sq.dataset.type = 'normal';
-sq.style.backgroundImage = `url('${resolveImage(sq.dataset.color, sq.dataset.type)}')`;
-
-  
-  updateBlockVisual(i);
 }
 /* =========================================================================
    СОЗДАНИЕ ПОЛЯ
