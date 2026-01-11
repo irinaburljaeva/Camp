@@ -467,6 +467,75 @@ h1{
   100%{ transform:translateX(0); }
 }
 
+    /* =========================
+   ИНВЕНТАРЬ (свечка)
+========================= */
+.inv{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  padding:8px 12px;
+  border-radius:14px;
+
+  background: rgba(0,0,0,.22);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 8px 18px rgba(0,0,0,.18);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.invItem{
+  width:46px;
+  height:46px;
+  border-radius:14px;
+
+  background-size: 86% 86%;
+  background-repeat:no-repeat;
+  background-position:center;
+
+  border: 1px solid rgba(255,255,255,.22);
+  background-color: rgba(255,255,255,.10);
+
+  cursor:pointer;
+  transition: transform .15s ease, background .2s ease, border-color .2s ease, opacity .2s ease;
+}
+
+.invItem:hover{
+  transform: translateY(-1px);
+  background-color: rgba(255,255,255,.16);
+  border-color: rgba(255,255,255,.34);
+}
+
+.invItem.disabled{
+  opacity:.35;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.invItem.active{
+  outline: 2px solid rgba(255,255,255,.70);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(255,255,255,.12);
+}
+
+.invCount{
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-weight: 700;
+  color:#fff;
+
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.22);
+}
 /* =========================
    АДАПТИВНОСТЬ ДЛЯ МАЛЕНЬКИХ ЭКРАНОВ
 ========================= */
