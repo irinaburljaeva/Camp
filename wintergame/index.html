@@ -683,7 +683,9 @@ const energyDoneBtn  = document.getElementById('energyDoneBtn');
 const energyTimerEl  = document.getElementById('energyTimer');
 const coachVideo = document.getElementById('coachVideo');
 const coachHint  = document.getElementById('coachHint');
-
+const candleInvEl = document.getElementById('candleInv');
+const candleInvCountEl = document.getElementById('candleInvCount');
+  
 let squares = [];
 let score = 0;
 let levelIndex = 0;
@@ -695,8 +697,10 @@ let selectedSquare = null;
 
 let squareIdBeingDragged = null;
 let squareIdBeingReplaced = null;
-
+let candleInv = 0;
+let candlePlaceMode = false;
 let isResolving = false;
+  
 
 // ===== ЭНЕРГИЯ / ХОДЫ =====
 const MOVES_PER_LIFE = 20;   // сколько ходов даёт 1 "жизнь"
@@ -721,6 +725,7 @@ function saveProgress(){
       BombActivated,
       SnowflakeActivated,
       CandleActivated
+      candleInv
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
   }catch(e){}
@@ -740,6 +745,7 @@ function loadProgress(){
     BombActivated = !!data.BombActivated;
     SnowflakeActivated = !!data.SnowflakeActivated;
     CandleActivated = !!data.CandleActivated;
+    candleInv = +data.candleInv || 0;
     saveProgress();
     return true;
   }catch(e){
@@ -946,8 +952,23 @@ function setupHUD(){
   } else {
     progressDisplay.textContent = `${score}/${lvl.target}`;
   }
+  if(candleInvEl && candleInvCountEl){
+  candleInvEl.style.backgroundImage = `url('${IMG.candle}')`;
+  candleInvCountEl.textContent = String(candleInv);
+
+  candleInvEl.classList.toggle('disabled', candleInv <= 0);
+  candleInvEl.classList.toggle('active', candlePlaceMode === true && candleInv > 0);
+}
 
   movesDisplay.textContent = movesLeft;
+}
+  if(candleInvEl){
+  candleInvEl.addEventListener('click', ()=>{
+    if(candleInv <= 0) return;
+    candlePlaceMode = !candlePlaceMode;
+    setupHUD();
+    saveProgress();
+  });
 }
 function showIntro(){
   const lvl = currentLevel();
@@ -1117,23 +1138,22 @@ function damageIceAt(i, amount=1){
       setCell(sq, randomNormal(), 'normal');
     }
 
-    // свечку спавним только на уровнях, где она разрешена
-    if(levelHasSpecial(SPECIAL.CANDLE)){
-      sq.dataset.type = SPECIAL.CANDLE;
-      sq.style.backgroundImage = `url('${resolveImage(sq.dataset.color, sq.dataset.type)}')`;
-      if(currentLevel().id === 8){
-        CandleActivated = true;
-        saveProgress();
-  setupHUD();
-      }
-    } else {
-        sq.dataset.type = 'normal';
-      sq.style.backgroundImage = `url('${resolveImage(sq.dataset.color, sq.dataset.type)}')`;
-    }
+ if(levelHasSpecial(SPECIAL.CANDLE)){
+  candleInv++;
 
-    return;
+  if(currentLevel().id === 8){
+    CandleActivated = true;
   }
 
+  saveProgress();
+  setupHUD();
+}
+
+// клетка после льда остаётся обычной
+sq.dataset.type = 'normal';
+sq.style.backgroundImage = `url('${resolveImage(sq.dataset.color, sq.dataset.type)}')`;
+
+  
   updateBlockVisual(i);
 }
 /* =========================================================================
@@ -1179,6 +1199,21 @@ function selectSquare(e){
   if(isResolving) return;
 
   const id = parseInt(e.currentTarget.id, 10);
+  if(candlePlaceMode){
+  if(candleInv <= 0) { candlePlaceMode = false; setupHUD(); return; }
+  if(isBlocked(id)) return; // нельзя на снег/лёд
+
+  // ставим свечку прямо в клетку
+  squares[id].dataset.type = SPECIAL.CANDLE;
+  if(!squares[id].dataset.color) squares[id].dataset.color = randomNormal();
+  squares[id].style.backgroundImage = `url('${resolveImage(squares[id].dataset.color, squares[id].dataset.type)}')`;
+
+  candleInv--;
+  candlePlaceMode = false;
+  setupHUD();
+  saveProgress();
+  return;
+}
   if(isBlocked(id)) return;
 
   if(selectedSquare === null){
@@ -1617,17 +1652,27 @@ async function applyMatches(matches, moveInfo){
 ============================================================================ */
 function moveDown(){
   for(let i = width*width - 1; i >= 0; i--){
+    // из снега/льда не двигаемся (сама клетка “заморожена”)
     if(isBlocked(i)) continue;
 
     const below = i + width;
     if(below >= width*width) continue;
-    if(isBlocked(below)) continue;
+
+    // ⛔ падение блокирует ТОЛЬКО снег (лёд НЕ блокирует)
+    const belowSq = squares[below];
+    const snowBlocksFall = (belowSq.dataset.block === BLOCK.SNOW && (+belowSq.dataset.turns || 0) > 0);
+    if(snowBlocksFall) continue;
 
     if(!hasCandy(below) && hasCandy(i)){
       squares[below].dataset.color = squares[i].dataset.color;
       squares[below].dataset.type  = squares[i].dataset.type;
       squares[below].style.backgroundImage = squares[i].style.backgroundImage;
+
       clearCell(i);
+
+      // если внизу лёд — визуал льда должен остаться
+      updateBlockVisual(below);
+      updateBlockVisual(i);
     }
   }
 }
