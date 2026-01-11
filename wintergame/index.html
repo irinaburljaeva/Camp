@@ -798,6 +798,7 @@ let squareIdBeingReplaced = null;
 let candleInv = 0;
 let candlePlaceMode = false;
 let isResolving = false;
+let introAutoShown = {};
   
 
 // ===== ЭНЕРГИЯ / ХОДЫ =====
@@ -844,6 +845,11 @@ function loadProgress(){
     SnowflakeActivated = !!data.SnowflakeActivated;
     CandleActivated = !!data.CandleActivated;
     candleInv = +data.candleInv || 0;
+
+    introAutoShown = (data.introAutoShown && typeof data.introAutoShown === 'object')
+      ? data.introAutoShown
+      : {}; // ✅
+
     saveProgress();
     return true;
   }catch(e){
@@ -975,6 +981,46 @@ function currentLevel(){
   // начиная с 11 уровня (levelIndex = 10) — генерим
   const id = levelIndex + 1;
   return getProceduralLevel(id);
+}
+  function getLevelById(id){
+  // 1..10
+  if(id >= 1 && id <= LEVELS.length) return LEVELS[id - 1];
+  // 11+
+  return getProceduralLevel(id);
+}
+
+function hasNewMechanicsComparedToPrev(lvl){
+  // уровень 1 всегда можно считать "новым"
+  if(lvl.id <= 1) return true;
+
+  const prev = getLevelById(lvl.id - 1);
+  if(!prev) return true;
+
+  const prevS = new Set(prev.specials || []);
+  const prevO = new Set(prev.obstacles || []);
+
+  const curS = lvl.specials || [];
+  const curO = lvl.obstacles || [];
+
+  const newSpecial = curS.some(x => !prevS.has(x));
+  const newObstacle = curO.some(x => !prevO.has(x));
+
+  return newSpecial || newObstacle;
+}
+
+function maybeAutoShowIntro(){
+  const lvl = currentLevel();
+
+  // уже показывали авто-инструкцию именно на этом уровне
+  if(introAutoShown[lvl.id]) return;
+
+  // нет новых механик => не показываем
+  if(!hasNewMechanicsComparedToPrev(lvl)) return;
+
+  // ✅ показываем и запоминаем
+  introAutoShown[lvl.id] = true;
+  saveProgress();
+  showIntro();
 }
 
 function resolveImage(colorKey, type){
@@ -1935,7 +1981,7 @@ function startLevel(resetScore){
 
   setupHUD();
   createBoard();
-  showIntro();
+  maybeAutoShowIntro();
 }
 
 function startGame(){
@@ -1965,7 +2011,6 @@ function startGame(){
 
   setupHUD();
   createBoard();
-  showIntro();
 
   saveProgress();
 }
