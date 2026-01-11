@@ -1033,11 +1033,13 @@ function setupHUD(){
     progressDisplay.textContent = `${score}/${lvl.target}`;
   }
 if(invRowEl){
-  // если свечек нет — прячем весь блок
-  if(candleInv <= 0){
-    invRowEl.style.display = 'none';
-  } else {
+  const lvlId = currentLevel().id;
+
+  // ✅ инвентарь показываем ТОЛЬКО с 9 уровня и только если есть свечки
+  if(lvlId >= 9 && candleInv > 0){
     invRowEl.style.display = 'flex';
+  } else {
+    invRowEl.style.display = 'none';
   }
 }
 
