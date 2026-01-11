@@ -1223,28 +1223,27 @@ function damageIceAt(i, amount=1){
   // 🔊 звук треска льда
   playIceSound();
 
-    if(hp === 0){
+  // ✅ ВАЖНО: обновляем картинку льда при ЛЮБОМ уроне (3→2→1)
+  updateBlockVisual(i);
+
+  if(hp === 0){
     // снимаем лёд
     sq.dataset.block = '';
     sq.dataset.icehp = '';
 
-    // если вдруг под льдом не было фишки — создаём
     if(!sq.dataset.color){
       setCell(sq, randomNormal(), 'normal');
     }
 
     if(levelHasSpecial(SPECIAL.CANDLE)){
       candleInv++;
-
       if(currentLevel().id === 8){
         CandleActivated = true;
       }
-
       saveProgress();
       setupHUD();
     }
 
-    // клетка после льда остаётся обычной
     sq.dataset.type = 'normal';
     sq.style.backgroundImage = `url('${resolveImage(sq.dataset.color, sq.dataset.type)}')`;
 
