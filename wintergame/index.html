@@ -520,22 +520,7 @@ h1{
   box-shadow: 0 0 0 6px rgba(255,255,255,.12);
 }
 
-.invCount{
-  min-width: 34px;
-  height: 34px;
-  padding: 0 10px;
-  border-radius: 999px;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  font-weight: 700;
-  color:#fff;
-
-  background: rgba(255,255,255,.18);
-  border: 1px solid rgba(255,255,255,.22);
-}
+.invCount{ display:none; }
 /* =========================
    АДАПТИВНОСТЬ ДЛЯ МАЛЕНЬКИХ ЭКРАНОВ
 ========================= */
@@ -629,7 +614,7 @@ h1{
     <button onclick="showIntro()">📜 Инструкция уровня</button>
   </div>
 
-  <div class="invRow">
+ <div class="invRow" id="invRow" style="display:none;">
     <div class="inv">
       <div class="invItem" id="candleInv" title="Свечка"></div>
       <div class="invCount" id="candleInvCount">0</div>
@@ -779,6 +764,7 @@ const coachVideo = document.getElementById('coachVideo');
 const coachHint  = document.getElementById('coachHint');
 const candleInvEl = document.getElementById('candleInv');
 const candleInvCountEl = document.getElementById('candleInvCount');
+const invRowEl = document.getElementById('invRow');
   
 let squares = [];
 let score = 0;
@@ -1046,9 +1032,23 @@ function setupHUD(){
   } else {
     progressDisplay.textContent = `${score}/${lvl.target}`;
   }
-  if(candleInvEl && candleInvCountEl){
-  candleInvEl.style.backgroundImage = `url('${IMG.candle}')`;
-  candleInvCountEl.textContent = String(candleInv);
+if(invRowEl){
+  // если свечек нет — прячем весь блок
+  if(candleInv <= 0){
+    invRowEl.style.display = 'none';
+  } else {
+    invRowEl.style.display = 'flex';
+  }
+}
+
+if(candleInvEl && candleInvCountEl){
+  if(candleInv > 0){
+    candleInvEl.style.backgroundImage = `url('${IMG.candle}')`; // ✅ PNG свечки
+    candleInvCountEl.textContent = String(candleInv);           // если счётчик нужен
+  } else {
+    candleInvEl.style.backgroundImage = '';                     // на всякий
+    candleInvCountEl.textContent = '0';
+  }
 
   candleInvEl.classList.toggle('disabled', candleInv <= 0);
   candleInvEl.classList.toggle('active', candlePlaceMode === true && candleInv > 0);
