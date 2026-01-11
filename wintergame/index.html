@@ -513,6 +513,45 @@ h1{
 }
 
 .invCount{ display:none; }
+
+    /* =========================
+   LEVEL TOAST (переход уровня)
+========================= */
+.levelToast{
+  position: fixed;
+  left: 50%;
+  top: 18%;
+  transform: translateX(-50%) translateY(-8px);
+  z-index: 80;
+
+  background: rgba(0,0,0,.72);
+  border: 1px solid rgba(255,255,255,.22);
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.35);
+
+  width: min(520px, 92vw);
+  text-align: center;
+
+  opacity: 0;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.levelToast.show{
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* лёгкое затемнение поля на переходе */
+.grid.level-transition{
+  filter: brightness(.82) saturate(.95);
+  transition: filter .2s ease;
+}
 /* =========================
    АДАПТИВНОСТЬ ДЛЯ МАЛЕНЬКИХ ЭКРАНОВ
 ========================= */
@@ -598,7 +637,7 @@ h1{
 </div>
 
   <div class="grid" id="grid"></div>
-
+<div class="levelToast" id="levelToast" aria-hidden="true"></div>
   <div class="btnbar">
   <div class="btnRow">
     <button onclick="restartLevel()">🔄 Заново </button>
@@ -771,6 +810,7 @@ const coachHint  = document.getElementById('coachHint');
 const candleInvEl = document.getElementById('candleInv');
 const candleInvCountEl = document.getElementById('candleInvCount');
 const invRowEl = document.getElementById('invRow');
+const levelToast = document.getElementById('levelToast');
   
 let squares = [];
 let score = 0;
@@ -871,6 +911,22 @@ function flashGrid(shake=false){
   }, 260);
 }
 
+  function showLevelToast(html, ms=950){
+  if(!levelToast) return;
+
+  levelToast.innerHTML = html;
+  levelToast.classList.add('show');
+  levelToast.setAttribute('aria-hidden','false');
+
+  // лёгкий "перебив" поля
+  grid.classList.add('level-transition');
+
+  setTimeout(()=>{
+    levelToast.classList.remove('show');
+    levelToast.setAttribute('aria-hidden','true');
+    grid.classList.remove('level-transition');
+  }, ms);
+}
 /* =========================================================================
    ЭНЕРГИЯ / ЗАРЯДКА
 ============================================================================ */
@@ -995,14 +1051,13 @@ function hasNewMechanicsComparedToPrev(lvl){
 function maybeAutoShowIntro(){
   const lvl = currentLevel();
 
-
-  if(introAutoShown[lvl.id]) return;
-
-  if(!hasNewMechanicsComparedToPrev(lvl)) return;
+  if(introAutoShown[lvl.id]) return false;
+  if(!hasNewMechanicsComparedToPrev(lvl)) return false;
 
   introAutoShown[lvl.id] = true;
   saveProgress();
   showIntro();
+  return true;
 }
 
 function resolveImage(colorKey, type){
@@ -1941,16 +1996,20 @@ function checkLevelComplete(){
     (score >= lvl.target);
 
   if(complete){
-    levelIndex++;         
-    startLevel(true);    
-    saveProgress();
-  }
+  const finishedId = lvl.id;
+
+  // небольшой победный импульс
+  flashGrid(true);
+
+  levelIndex++;
+  startLevel(true, finishedId);
+  saveProgress();
+}
 }
 
-function startLevel(resetScore){
+function startLevel(resetScore, finishedId=null){
   if(resetScore) score = 0;
 
-  // сбрасываем спец-цели только на тех уровнях, где они реально являются целью
   const id = currentLevel().id;
   if(id === 3) BombActivated = false;
   if(id === 4) SnowflakeActivated = false;
@@ -1958,7 +2017,22 @@ function startLevel(resetScore){
 
   setupHUD();
   createBoard();
-  maybeAutoShowIntro();
+
+  const introShown = maybeAutoShowIntro();
+
+  // ✅ если модалка не открылась — показываем понятный переход
+  if(!introShown){
+    const newId = currentLevel().id;
+    const html = `
+      <div style="font-size:16px; font-weight:700; margin-bottom:4px;">
+        ✅ Уровень ${finishedId ?? (newId-1)} пройден!
+      </div>
+      <div style="font-size:14px; opacity:.92;">
+        Начинается уровень <b>${newId}</b>
+      </div>
+    `;
+    showLevelToast(html, 1050);
+  }
 }
 
 function startGame(){
