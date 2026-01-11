@@ -720,7 +720,7 @@ const BLOCK = {
 // уровни
 const LEVELS = [
   { id:1,  target: 60,  intro:"Уровень 1: соберите 3 в ряд.", specials:[], obstacles:[] },
-  { id:2,  target: 80,  intro:"Уровень 2: соберите 4 в ряд, чтобы получить золотые следы", specials:[SPECIAL.LINE], obstacles:[] },
+  { id:2,  target: 80,  intro:"Уровень 2: соберите 4 в ряд, чтобы получить подарок", specials:[SPECIAL.LINE], obstacles:[] },
   { id:3,  target: 95,  intro:"Уровень 3: соберите L/T-комбинацию, чтобы получить мешок подарков", specials:[SPECIAL.LINE, SPECIAL.BOMB], obstacles:[] },
   { id:4,  target: 115, intro:"Уровень 4: соберите 5 в ряд, чтобы получить молнию", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[] },
   { id:5,  target: 135, intro:"Уровень 5: первое препятствие", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
@@ -1127,7 +1127,7 @@ function showIntro(){
   items.push('Каждое перемещение фишек тратит 1 ход. Когда ходы закончатся — понадобится “зарядиться”');
 
   const s = lvl.specials;
-  if(s.includes(SPECIAL.LINE))  items.push('4 в ряд → «Золотые следы». Передвиньте их следующим ходом → очистится строка.');
+  if(s.includes(SPECIAL.LINE))  items.push('4 в ряд → «Подарок». Передвиньте его следующим ходом → очистится строка.');
   if(s.includes(SPECIAL.BOMB))  items.push('L/T-комбинация → «Мешок подарков» (взрыв 3×3).');
   if(s.includes(SPECIAL.CLEAR)) items.push('5 в ряд → «Молния» (очищает весь экран).');
   if(lvl.obstacles.includes(BLOCK.SNOW)) items.push('Сугробы блокируют клетки на несколько ходов (их нельзя двигать).');
