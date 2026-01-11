@@ -740,6 +740,25 @@ const LEVELS = [
   { id:10, target: 240,  specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR, SPECIAL.CANDLE], obstacles:[BLOCK.SNOW, BLOCK.ICE] },
 ];
 
+  function getProceduralLevel(id){
+  // id = номер уровня (11, 12, 13, ...)
+  const n = Math.max(0, id - 10);
+
+  // цель растёт плавно (можете менять формулу)
+  const target = 240 + n * 25;
+
+  return {
+    id,
+    target,
+    intro: `Уровень ${id}: бесконечный режим ❄️
+Цель: набрать ${target} очков.
+Сугробы и лёд будут встречаться всё чаще — используйте спец-элементы.`,
+    // с 11 уровня — полный набор спецов
+    specials: [SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR, SPECIAL.CANDLE],
+    // и оба препятствия
+    obstacles: [BLOCK.SNOW, BLOCK.ICE],
+  };
+}
 const width = 8;
 
 const grid = document.getElementById('grid');
@@ -816,7 +835,7 @@ function loadProgress(){
     if(!raw) return false;
     const data = JSON.parse(raw);
 
-    levelIndex = Math.max(0, Math.min(LEVELS.length-1, +data.levelIndex || 0));
+    levelIndex = Math.max(0, (+data.levelIndex || 0));
     score = +data.score || 0;
     movesLeft = +data.movesLeft || MOVES_PER_LIFE;
     energy = +data.energy || 1;
@@ -950,7 +969,12 @@ function closeEnergyModal(){
    МОДЕЛЬ КЛЕТКИ (dataset)
 ============================================================================ */
 function currentLevel(){
-  return LEVELS[levelIndex] || LEVELS[LEVELS.length-1];
+  const predefined = LEVELS[levelIndex];
+  if(predefined) return predefined;
+
+  // начиная с 11 уровня (levelIndex = 10) — генерим
+  const id = levelIndex + 1;
+  return getProceduralLevel(id);
 }
 
 function resolveImage(colorKey, type){
@@ -1886,32 +1910,29 @@ function stabilizeNoInitialMatches(){
 
 function checkLevelComplete(){
   const lvl = currentLevel();
-  const complete = 
-  (lvl.id === 3) ? BombActivated : 
-  (lvl.id === 4) ? SnowflakeActivated :
-   (lvl.id === 8) ? CandleActivated : 
+
+  const complete =
+    (lvl.id === 3) ? BombActivated :
+    (lvl.id === 4) ? SnowflakeActivated :
+    (lvl.id === 8) ? CandleActivated :
     (score >= lvl.target);
+
   if(complete){
-    if(levelIndex < LEVELS.length-1){
-      levelIndex++;
-      startLevel(true);
-       saveProgress();
-    } else {
-      introTitle.textContent = 'Вы прошли все уровни! 🎉';
-      introText.textContent  = 'Можно играть дальше ради очков или начать заново.';
-      introList.innerHTML = '';
-      overlay.classList.add('show');
-      overlay.setAttribute('aria-hidden','false');
-    }
+    levelIndex++;         
+    startLevel(true);    
+    saveProgress();
   }
 }
 
 function startLevel(resetScore){
   if(resetScore) score = 0;
-  BombActivated = false;
-  SnowflakeActivated = false;
-  CandleActivated = false;
-  
+
+  // сбрасываем спец-цели только на тех уровнях, где они реально являются целью
+  const id = currentLevel().id;
+  if(id === 3) BombActivated = false;
+  if(id === 4) SnowflakeActivated = false;
+  if(id === 8) CandleActivated = false;
+
   setupHUD();
   createBoard();
   showIntro();
