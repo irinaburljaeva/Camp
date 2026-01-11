@@ -539,8 +539,7 @@ h1{
 
   <div class="grid" id="grid"></div>
 
-  <div class="btnbar">
-    <button onclick="startGame()">🔄 Новая игра</button>
+  <div class="btnbar"><button onclick="restartLevel()">🔄 Начать сначала </button>
     <button onclick="showIntro()">📜 Инструкция уровня</button>
   </div>
 
@@ -1748,6 +1747,27 @@ function startGame(){
   startLevel(true);
 }
 
+
+  function restartLevel(){
+  // перезапуск текущего уровня (НЕ меняем levelIndex)
+  score = 0;
+
+  // если хотите, чтобы ходы тоже обновлялись — оставьте так:
+  movesLeft = MOVES_PER_LIFE;
+
+  // сбрасываем цели уровня
+  BombActivated = false;
+  SnowflakeActivated = false;
+  CandleActivated = false;
+
+  selectedSquare = null;
+
+  setupHUD();
+  createBoard();
+  showIntro();
+
+  saveProgress();
+}
 /* =========================================================================
    ИНИЦИАЛИЗАЦИЯ
 ============================================================================ */
