@@ -1635,21 +1635,11 @@ function moveDown(){
 function generateNewCandies(){
   const lvl = currentLevel();
 
-  // ✅ с 9 уровня снег может "падать сверху" (если на уровне есть снег)
   const snowFromTop = (lvl.id >= 9) && lvl.obstacles.includes(BLOCK.SNOW);
-
-  // ✅ с 9 уровня может "падать сверху" единичный лёд (если на уровне есть лёд)
   const iceFromTop  = (lvl.id >= 9) && lvl.obstacles.includes(BLOCK.ICE);
 
-  // шанс снега — умеренный, растёт, но с потолком
-  const pSnow = snowFromTop
-    ? Math.min(0.22, 0.10 + (lvl.id - 9) * 0.03)  // 10% на 9, 13% на 10, ...
-    : 0;
-
-  // шанс льда — небольшой, тоже растёт, но максимум 10%
-  const pIce = iceFromTop
-    ? Math.min(0.10, 0.05 + (lvl.id - 9) * 0.02)  // 5% на 9, 7% на 10, ...
-    : 0;
+  const pSnow = snowFromTop ? Math.min(0.22, 0.10 + (lvl.id - 9) * 0.03) : 0;
+  const pIce  = iceFromTop  ? Math.min(0.10, 0.05 + (lvl.id - 9) * 0.02) : 0;
 
   for(let i=0;i<width;i++){
     if(isBlocked(i)) continue;
@@ -1657,7 +1647,6 @@ function generateNewCandies(){
     if(!hasCandy(i)){
       const r = Math.random();
 
-      // приоритет: снег → лёд → обычная фишка
       if(snowFromTop && r < pSnow){
         spawnSnowAt(i, 3);
       } 
@@ -1669,7 +1658,8 @@ function generateNewCandies(){
       }
     }
   }
-снег)
+
+  // ✅ заполняем "ловушки" под блоками (снег/лёд)
   for(let i = width; i < width*width; i++){
     if(isBlocked(i)) continue;
     if(hasCandy(i)) continue;
