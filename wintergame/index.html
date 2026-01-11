@@ -297,10 +297,25 @@ h1{
 ========================= */
 .btnbar{
   display:flex;
+  flex-direction:column;   /* ✅ два ряда */
   gap:8px;
   margin-top:10px;
+  width: min(680px, 100%);
+  align-items:center;
+}
+
+.btnRow{
+  display:flex;
+  gap:8px;
   flex-wrap:wrap;
   justify-content:center;
+  width:100%;
+}
+
+.invRow{
+  display:flex;
+  justify-content:center;
+  width:100%;
 }
 
 .btnbar button{
@@ -539,9 +554,19 @@ h1{
 
   <div class="grid" id="grid"></div>
 
-  <div class="btnbar"><button onclick="restartLevel()">🔄 Начать сначала </button>
+  <div class="btnbar">
+  <div class="btnRow">
+    <button onclick="restartLevel()">🔄 Начать сначала </button>
     <button onclick="showIntro()">📜 Инструкция уровня</button>
   </div>
+
+  <div class="invRow">
+    <div class="inv">
+      <div class="invItem" id="candleInv" title="Свечка"></div>
+      <div class="invCount" id="candleInvCount">0</div>
+    </div>
+  </div>
+</div>
 
   <!-- Модалка инструкций -->
   <div class="overlay" id="overlay" aria-hidden="true">
@@ -724,7 +749,7 @@ function saveProgress(){
       energy,
       BombActivated,
       SnowflakeActivated,
-      CandleActivated
+      CandleActivated,
       candleInv
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
