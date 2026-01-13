@@ -569,6 +569,32 @@ h1{
   .cloudField{ flex-wrap: wrap; }
   .cloudBtn{ width: 100%; }
 }
+.cloudSaved{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-width:0;
+}
+
+.cloudSavedText{
+  font-size:14px;
+  opacity:.95;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.cloudBtnGhost{
+  background: rgba(0,0,0,.12);
+  border-color: rgba(255,255,255,.22);
+  box-shadow: none;
+}
+.cloudBtnGhost:hover{
+  filter: brightness(1.06);
+}
+    
     /* =========================
    ИНВЕНТАРЬ (свечка)
 ========================= */
@@ -783,10 +809,17 @@ h1{
   <div class="headerWrap">
   <h1>Зимняя игра от ШАГАЙ ДОМА⚡️</h1>
 
-<div class="pill pillCloud">
-  <div class="cloudField">
-    <input id="emailInput" class="cloudInput" type="email" placeholder="Email для сохранения прогресса">
+<div class="pill pillCloud" id="pillCloud">
+  <!-- режим ввода -->
+  <div class="cloudField" id="cloudEdit">
+    <input id="emailInput" class="cloudInput" type="email" placeholder="Email для сохранения">
     <button id="emailCloudBtn" class="cloudBtn">Сохранить</button>
+  </div>
+
+  <!-- режим "сохранено" -->
+  <div class="cloudSaved" id="cloudSaved" style="display:none;">
+    <span class="cloudSavedText" id="cloudSavedText">Email сохранён ✅</span>
+    <button class="cloudBtn cloudBtnGhost" id="cloudEditBtn" type="button">Изменить</button>
   </div>
 </div>
   <div class="topbar">
@@ -1233,6 +1266,17 @@ const emailCloudBtnEl = document.getElementById('emailCloudBtn');
 if(emailInputEl){
   emailInputEl.value = getCloudEmail();
 }
+  updateEmailUI();
+
+const cloudEditBtnEl = document.getElementById('cloudEditBtn');
+if(cloudEditBtnEl){
+  cloudEditBtnEl.addEventListener('click', ()=>{
+    // очищаем сохранённый email и возвращаем режим ввода
+    storageRemove(CLOUD_EMAIL_KEY);
+    if(emailInputEl) emailInputEl.value = '';
+    updateEmailUI();
+  });
+}
 
 if(emailCloudBtnEl){
   emailCloudBtnEl.addEventListener('click', async ()=>{
@@ -1249,18 +1293,20 @@ if(emailCloudBtnEl){
 
     // если применили облако — перезагрузим страницу, чтобы твой существующий loadProgress отработал как обычно
     if(loaded.ok && loaded.applied){
-      alert('Нашли более свежий прогресс в облаке ✅ Открываю его…');
+      alert('Нашли более свежий прогресс ✅ Открываю его…');
       location.reload();
       return;
     }
 
     // 2) иначе — сохраним текущий локальный прогресс в облако
+   saveProgress(); 
     const saved = await saveLocalProgressToCloud();
     if(saved.ok){
-      alert('Готово ✅ Прогресс сохранён');
-    }else{
-      alert('Не получилось сохранить 😕');
-    }
+  alert('Готово ✅ Прогресс сохранён');
+  updateEmailUI(); // <-- добавили
+}else{
+  alert('Не получилось сохранить 😕');
+}
   });
 }
 
@@ -1277,6 +1323,32 @@ document.addEventListener('visibilitychange', ()=>{
     saveLocalProgressToCloud();
   }
 });
+
+  function updateEmailUI(){
+  const email = getCloudEmail();
+
+  const pill = document.getElementById('pillCloud');
+  const edit = document.getElementById('cloudEdit');
+  const saved = document.getElementById('cloudSaved');
+  const savedText = document.getElementById('cloudSavedText');
+
+  if(!pill || !edit || !saved) return;
+
+  if(email){
+    // скрываем ввод, показываем "сохранено"
+    edit.style.display = 'none';
+    saved.style.display = 'flex';
+
+    if(savedText){
+      // показываем какой email (аккуратно)
+      savedText.textContent = `Email сохранён ✅ ${email}`;
+    }
+  }else{
+    // показываем ввод
+    saved.style.display = 'none';
+    edit.style.display = 'flex';
+  }
+}
   
 /* =========================================================================
    УТИЛИТЫ
