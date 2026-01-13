@@ -1241,26 +1241,57 @@ async function cloudUpsertUser(email, progress){
   }
 }
 
-// Берём облако и, если оно новее, кладём в localStorage (SAVE_KEY)
-async function loadCloudToLocalIfNewer(email){
+// Синхронизация облако <-> локально
+// Правило:
+// - если в облаке уровень выше — берём облако
+// - если локально уровень выше — берём локальное
+// - если уровни равны — берём то, где ts больше
+// После выбора — записываем выбранное и в localStorage, и в Firestore (чтобы устройства выровнялись)
+async function syncCloudAndLocal(email){
   const r = await cloudGetUser(email);
-  if(!r.ok) return r;
-  if(!r.exists) return { ok:true, exists:false };
+  if(!r.ok) return { ok:false, reason:r.reason };
 
-  const cloudProgress = r.data?.progress;
-  if(!cloudProgress) return { ok:true, exists:true, applied:false, reason:'no-cloud-progress' };
+  const cloudProgress = r.data?.progress || null;
+  const localProgress = parseLocalProgress();
 
-  const local = parseLocalProgress();
-  const cloudTs = +cloudProgress.ts || 0;
-  const localTs = local ? (+local.ts || 0) : 0;
-
-  if(cloudTs > localTs){
-    storageSet(SAVE_KEY, JSON.stringify(cloudProgress));
-    return { ok:true, exists:true, applied:true };
+  // если в облаке ничего нет — пушим локальное (если есть)
+  if(!cloudProgress){
+    if(localProgress){
+      await cloudUpsertUser(email, localProgress);
+      return { ok:true, source:'local->cloud', appliedLocal:false };
+    }
+    // вообще ничего нет — пусть будет стартовый локальный
+    startGame();
+    saveProgress();
+    await cloudUpsertUser(email, parseLocalProgress());
+    return { ok:true, source:'new', appliedLocal:true };
   }
-  return { ok:true, exists:true, applied:false };
-}
 
+  // если локального нет — берём облако
+  if(!localProgress){
+    storageSet(SAVE_KEY, JSON.stringify(cloudProgress));
+    return { ok:true, source:'cloud', appliedLocal:true };
+  }
+
+  const cLevel = Number.isFinite(+cloudProgress.levelIndex) ? +cloudProgress.levelIndex : 0;
+  const lLevel = Number.isFinite(+localProgress.levelIndex) ? +localProgress.levelIndex : 0;
+  const cTs = +cloudProgress.ts || 0;
+  const lTs = +localProgress.ts || 0;
+
+  let chosen = cloudProgress;
+  let chosenSource = 'cloud';
+
+  if(lLevel > cLevel) { chosen = localProgress; chosenSource = 'local'; }
+  else if(lLevel === cLevel && lTs > cTs) { chosen = localProgress; chosenSource = 'local'; }
+
+  // применяем выбранное локально
+  storageSet(SAVE_KEY, JSON.stringify(chosen));
+
+  // и выравниваем облако
+  await cloudUpsertUser(email, chosen);
+
+  return { ok:true, source:chosenSource, appliedLocal:true };
+}
 // Применить то, что в localStorage, без reload
 function applyLocalProgressToGame(){
   setupHUD();
@@ -1291,7 +1322,6 @@ function updateEmailUI(){
 // один раз при старте
 updateEmailUI();
 
-// обработчик кнопки — отдельно
 if(emailCloudBtnEl){
   emailCloudBtnEl.addEventListener('click', async ()=>{
     const email = normalizeEmail(emailInputEl?.value);
@@ -1300,48 +1330,33 @@ if(emailCloudBtnEl){
       return;
     }
 
-    // ✅ СРАЗУ сохраняем email и прячем блок
+    // сохраняем email и прячем блок
     setCloudEmail(email);
     updateEmailUI();
 
-    const r = await cloudGetUser(email);
+    // синхронизация: выберет облако/локал по уровню и ts, затем выровняет Firestore
+    const s = await syncCloudAndLocal(email);
 
-    if(!r.ok){
+    if(!s.ok){
+      storageRemove(CLOUD_EMAIL_KEY);
+      updateEmailUI();
       alert('Не удалось подключиться к базе 😕');
       return;
     }
 
-    if(r.exists && r.data?.progress){
-      const applied = await loadCloudToLocalIfNewer(email);
-      if(applied.ok && applied.applied){
-        applyLocalProgressToGame();
-        alert('Прогресс загружен ✅');
-      }else{
-        if(!parseLocalProgress()){
-          startGame();
-          saveProgress();
-        }
-        await cloudUpsertUser(email, parseLocalProgress());
-        alert('Email привязан ✅');
-      }
-      return;
-    }
+    // применяем то, что теперь лежит в localStorage
+    applyLocalProgressToGame();
 
-    if(!parseLocalProgress()){
-      startGame();
-      saveProgress();
-    }else{
-      saveProgress();
-    }
-
-    const created = await cloudUpsertUser(email, parseLocalProgress());
-    if(created.ok){
-      alert('Готово ✅ Аккаунт создан, прогресс сохраняется');
-    }else{
-      alert('Не получилось создать запись 😕');
+    // короткое сообщение
+    if(s.source === 'cloud'){
+      alert('Прогресс загружен ✅');
+    } else if(s.source === 'local'){
+      alert('Прогресс сохранён ✅');
+    } else {
+      alert('Готово ✅ Аккаунт создан');
     }
   });
-} 
+}
 /* =========================================================================
    УТИЛИТЫ
 ============================================================================ */
@@ -2528,17 +2543,32 @@ function startGame(){
 /* =========================================================================
    ИНИЦИАЛИЗАЦИЯ
 ============================================================================ */
-setupHUD();
-
-if(loadProgress()){
+(async ()=>{
   setupHUD();
-  createBoard();
-} else {
-  // если прогресса нет — стартуем новую игру
-  startGame();
-  saveProgress(); // <- чтобы сразу записать базу, и дальше не было "пусто"
-}
 
+  const email = getCloudEmail();
+
+  // если email уже сохранён — пробуем подтянуть/выровнять прогресс
+  if(email){
+    const s = await syncCloudAndLocal(email);
+    if(s.ok){
+      applyLocalProgressToGame();
+      return;
+    } else {
+      // если не удалось — продолжаем локально как раньше
+      storageRemove(CLOUD_EMAIL_KEY);
+      updateEmailUI();
+    }
+  }
+
+  if(loadProgress()){
+    setupHUD();
+    createBoard();
+  } else {
+    startGame();
+    saveProgress();
+  }
+})();
 </script>
 </body>
 </html>
