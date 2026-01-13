@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ШАГАЙ ДОМА: Зимняя игра</title>
+
+  <style>
+
+*{ box-sizing:border-box; }
+
+body{
+  font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  background: url("/Camp/wintergame/IMG_3671.png") center/cover no-repeat fixed;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+
+  min-height:100svh;
+  margin:0;
+  color:#fff;
+  user-select:none;
+
+  padding:
+    max(8px, env(safe-area-inset-top))
+    max(8px, env(safe-area-inset-right))
+    max(8px, env(safe-area-inset-bottom))
+    max(8px, env(safe-area-inset-left));
+}
+
+.topbar, .btnbar, h1 { 
+  width: min(680px, 100%);
+}
+
+h1{
+  margin:0 0 6px;
+  text-align:center;
+  text-shadow:2px 2px 4px rgba(0,0,0,.3);
+  font-size:clamp(18px, 4.5vw, 28px);
+  line-height:1.2;
+}
+
+ /* =========================
+   ЗАГОЛОВОК + ПАНЕЛЬ 
+========================= */
+.headerWrap{
+  width: min(680px, 100%);
+  margin-top: 6px;
+  margin-bottom: 14px; 
+  padding: 10px 12px 12px; 
+  border-radius: 16px;
+
+  background: rgba(0,0,0,.16);            
+  box-shadow: 0 10px 26px rgba(0,0,0,.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}   
+
+    .coachWrap{
+  margin-top: 10px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: transparent;
+  border: 1px solid rgba(0,0,0,.08);
+  position: relative;
+}
+
+.coachVideo{
+  width: 100%;
+  height: 100%;
+  display: block;
+  aspect-ratio: 9 / 16;
+  background: transparent;
+}
+
+.coachHint{
+  padding: 8px 10px;
+  font-size: 14px;
+  opacity: .85;
+}
+
+/* =========================
+   ВЕРХНЯЯ ПАНЕЛЬ
+========================= */
+.topbar{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom:8px;
+}
+
+.pill{
+  background:rgba(255,255,255,.2);
+  padding:6px 12px;
+  border-radius:12px;
+  font-size:clamp(14px, 3.5vw, 16px);
+  box-shadow:0 4px 6px rgba(0,0,0,.1);
+  display:flex;
+  gap:6px;
+  align-items:center;
+  white-space:nowrap;
+}
+
+/* =========================
+   НАСТРОЙКИ ПОЛЯ (PNG 512×512, 8×8)
+========================= */
+:root{
+  --cols: 8;
+  --img: 512px;
+  --line: 2px;
+  
+  --board: min(92vw, 520px, calc(100svh - 280px));
+  
+  --gap: calc(var(--board) * (var(--line) / var(--img)));
+  --pad: var(--gap);
+  --icon: 86%;
+}
+
+/* =========================
+   GRID
+========================= */
+.grid{
+  position:relative;
+  overflow:hidden;
+
+  width: var(--board);
+  height: var(--board);
+  aspect-ratio: 1 / 1;
+
+  display:grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-template-rows: repeat(var(--cols), 1fr);
+
+  gap: var(--gap);
+  padding: var(--pad);
+
+  background-image: url("/Camp/wintergame/IMG_3672.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  
+  border-radius:10px;
+}
+
+/* =========================
+   КЛЕТКИ
+========================= */
+.cell{
+  width:100%;
+  height:100%;
+  
+  aspect-ratio: 1 / 1;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+
+  border-radius:12px;
+
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size: var(--icon) var(--icon);
+
+  transition: transform .18s ease, filter .18s ease, background-color .18s ease;
+}
+
+.cell:hover{
+  transform:scale(1.04);
+  background-color:rgba(255,255,255,.08);
+}
+
+.selected{
+  background-color:rgba(255,255,255,.28) !important;
+  transform:scale(1.06) !important;
+  outline:2px solid rgba(255,255,255,.45);
+  outline-offset:-2px;
+}
+
+/* =========================
+   АНИМАЦИИ
+========================= */
+.fade-out{ 
+  animation:fadeOut .45s forwards; 
+}
+
+@keyframes fadeOut{ 
+  to{ 
+    opacity:0; 
+    transform:scale(0); 
+  } 
+}
+
+/* =========================
+   СПЕЦ-ЭЛЕМЕНТЫ
+========================= */
+.cell[data-type="special_line"]{
+  filter:drop-shadow(0 0 10px rgba(255,215,0,.55));
+}
+
+.cell[data-type="special_bomb"]{
+  filter:drop-shadow(0 0 10px rgba(255,255,255,.35));
+}
+
+.cell[data-type="special_clear"]{
+  filter:drop-shadow(0 0 12px rgba(255,215,0,.75));
+}
+
+.cell[data-type="special_candle"]{
+  filter:drop-shadow(0 0 12px rgba(255,140,0,.65));
+}
+/* =========================
+   FX: более выраженная анимация  (мешок подарков)
+========================= */
+
+.cell.fx-hit{
+  animation: fxHit .38s ease-out both;
+  filter: brightness(1.15) saturate(1.1);
+}
+@keyframes fxHit{
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+
+.cell.fx-bomb{
+  z-index: 2;
+  animation: fxBombPop .62s cubic-bezier(.2, .9, .15, 1) both;
+  filter: drop-shadow(0 0 18px rgba(255, 210, 120, .85))
+          drop-shadow(0 0 28px rgba(255, 255, 255, .35));
+}
+
+@keyframes fxBombPop{
+  0%   { transform: scale(1) rotate(0deg); }
+  18%  { transform: scale(1.35) rotate(-8deg); }
+  38%  { transform: scale(1.08) rotate(7deg); }
+  55%  { transform: scale(1.22) rotate(-4deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.cell.fx-bomb::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width: 240%;
+  height: 240%;
+  transform: translate(-50%,-50%) scale(.25);
+  border-radius: 50%;
+  pointer-events:none;
+
+  background:
+    radial-gradient(circle,
+      rgba(255,255,255,.85) 0%,
+      rgba(255,220,140,.65) 22%,
+      rgba(255,160,60,.35) 45%,
+      rgba(255,255,255,0) 70%
+    );
+
+  opacity:0;
+  animation: fxBombBurst .62s ease-out both;
+  mix-blend-mode: screen;
+}
+
+@keyframes fxBombBurst{
+  0%   { opacity:0; transform: translate(-50%,-50%) scale(.25); }
+  20%  { opacity:1; transform: translate(-50%,-50%) scale(.75); }
+  55%  { opacity:.65; transform: translate(-50%,-50%) scale(1.05); }
+  100% { opacity:0; transform: translate(-50%,-50%) scale(1.35); }
+}
+    
+/* =========================
+   ПРЕПЯТСТВИЯ
+========================= */
+.cell[data-block="snow"],
+.cell[data-block="ice"]{
+  cursor:not-allowed;
+  filter:saturate(.9) brightness(.95);
+}
+
+/* =========================
+   КНОПКИ СНИЗУ
+========================= */
+.btnbar{
+  display:flex;
+  flex-direction:column;  
+  gap:8px;
+  margin-top:10px;
+  width: min(680px, 100%);
+  align-items:center;
+}
+
+.btnRow{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+  width:100%;
+}
+
+.invRow{
+  display:flex;
+  justify-content:center;
+  width:100%;
+}
+
+.btnbar button{
+  padding:10px 16px;
+  font-size:clamp(14px, 3.6vw, 16px);
+  font-weight: 700;
+  letter-spacing: .2px;
+
+  /* плотнее и контрастнее */
+  background: linear-gradient(180deg, rgba(0,0,0,.30), rgba(0,0,0,.18));
+  color:#fff;
+
+  border: 1px solid rgba(255,255,255,.30);
+  border-radius:16px;
+
+  box-shadow:
+    0 10px 26px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.18);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  /* читабельность текста */
+  text-shadow:
+    0 2px 10px rgba(0,0,0,.45),
+    0 1px 1px rgba(0,0,0,.35);
+
+  cursor:pointer;
+  transition: transform .15s, background .2s, border-color .2s, filter .2s;
+}
+
+.btnbar button:hover{
+  background: linear-gradient(180deg, rgba(0,0,0,.38), rgba(0,0,0,.22));
+  border-color: rgba(255,255,255,.45);
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.btnbar button:active{
+  transform: translateY(0) scale(.99);
+  filter: brightness(0.98);
+}
+
+/* =========================
+   МОДАЛКИ
+========================= */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+
+  display:none;
+  align-items:center;
+  justify-content:center;
+
+  padding:18px;
+  z-index:50;
+}
+
+.overlay.show{ 
+  display:flex; 
+}
+
+.modal{
+  width:min(560px, 95vw);
+  max-height:85vh;
+  overflow-y:auto;
+  
+  background:rgba(255,255,255,.96);
+  color:#1f2937;
+  border-radius:18px;
+  padding:18px 18px 14px;
+  box-shadow:0 16px 48px rgba(0,0,0,.35);
+}
+
+.modal h2{ 
+  margin:0 0 8px; 
+  font-size:20px; 
+}
+
+.modal p{ 
+  margin:0 0 10px; 
+  line-height:1.45; 
+}
+
+.modal ul{ 
+  margin:0 0 12px; 
+  padding-left:18px; 
+}
+
+.modal li{ 
+  margin:6px 0; 
+}
+
+.modal .actions{ 
+  display:flex; 
+  gap:10px; 
+  margin-top:10px; 
+}
+
+.modal button{
+  flex:1;
+  margin:0;
+  padding:10px 14px;
+  font-size:16px;
+  background:#ff6b6b;
+  color:#fff;
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(0,0,0,.18);
+  transition:background .2s, transform .15s;
+}
+
+.modal button:hover{ 
+  background:#ff4757; 
+  transform:translateY(-1px); 
+}
+
+.modal button:active{
+  transform:translateY(0);
+}
+
+.modal button:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+  transform:none !important;
+  box-shadow:none;
+}
+
+/* =========================
+   FX: вспышка по полю
+========================= */
+.grid::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:10px;
+  pointer-events:none;
+  opacity:0;
+
+  background: radial-gradient(circle at 50% 45%,
+    rgba(255,255,255,.55),
+    rgba(255,255,255,0) 55%
+  );
+
+  transition: opacity .18s ease;
+}
+
+.grid.fx-flash::after{ 
+  opacity:1; 
+}
+
+.grid.fx-shake{ 
+  animation: fxShake .28s ease-out both; 
+}
+
+@keyframes fxShake{
+  0%{ transform:translateX(0); }
+  25%{ transform:translateX(-5px); }
+  50%{ transform:translateX(5px); }
+  75%{ transform:translateX(-3px); }
+  100%{ transform:translateX(0); }
+}
+
+    /* =========================
+   ИНВЕНТАРЬ (свечка)
+========================= */
+.inv{
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  padding:0;             
+
+  background: transparent; 
+  border: none;           
+  box-shadow: none;       
+
+  backdrop-filter: none;  
+  -webkit-backdrop-filter: none;
+}
+
+.invItem{
+  width:46px;
+  height:46px;
+  border-radius:14px;
+
+  background-size: 86% 86%;
+  background-repeat:no-repeat;
+  background-position:center;
+
+  border: 1px solid rgba(255,255,255,.22);
+  background-color: rgba(255,255,255,.10);
+
+  cursor:pointer;
+  transition: transform .15s ease, background .2s ease, border-color .2s ease, opacity .2s ease;
+}
+
+.invItem:hover{
+  transform: translateY(-1px);
+  background-color: rgba(255,255,255,.16);
+  border-color: rgba(255,255,255,.34);
+}
+
+.invItem.disabled{
+  opacity:.35;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.invItem.active{
+  outline: 2px solid rgba(255,255,255,.70);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(255,255,255,.12);
+}
+
+.invCount{ display:none; }
+
+/* =========================
+   LEVEL TOAST (переход уровня) — glass style
+========================= */
+.levelToast{
+  position: fixed;
+  left: 50%;
+  top: calc(max(12px, env(safe-area-inset-top)) + 78px);
+  transform: translateX(-50%) translateY(-10px) scale(.98);
+  z-index: 80;
+
+  width: min(560px, 92vw);
+
+  padding: 12px 14px;
+  border-radius: 18px;
+
+  /* стекло как у панелей */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.10));
+  border: 1px solid rgba(255,255,255,.22);
+  box-shadow:
+    0 18px 50px rgba(0,0,0,.26),
+    inset 0 1px 0 rgba(255,255,255,.18);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  color:#fff;
+  text-align:center;
+  text-shadow: 0 2px 10px rgba(0,0,0,.28);
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition:
+    opacity .20s ease,
+    transform .22s cubic-bezier(.2, .9, .15, 1);
+}
+
+.levelToast.show{
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* типографика внутри */
+.levelToast .tTitle{
+  font-size: clamp(15px, 3.8vw, 17px);
+  font-weight: 800;
+  letter-spacing: .2px;
+  margin: 0 0 4px;
+}
+
+.levelToast .tSub{
+  font-size: clamp(13px, 3.4vw, 15px);
+  opacity: .92;
+  margin: 0;
+}
+
+.levelToast .pillMini{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-left:6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.20);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
+}
+
+/* лёгкое затемнение поля на переходе */
+.grid.level-transition{
+  filter: brightness(.86) saturate(.96);
+  transition: filter .18s ease;
+}
+
+/* на очень низких экранах — выше */
+@media (max-height: 650px){
+  .levelToast{
+    top: calc(max(8px, env(safe-area-inset-top)) + 62px);
+    border-radius: 16px;
+    padding: 10px 12px;
+  }
+}
+/* =========================
+   АДАПТИВНОСТЬ ДЛЯ МАЛЕНЬКИХ ЭКРАНОВ
+========================= */
+@media (max-height: 750px) {
+  :root {
+    --board: min(88vw, 480px, calc(100svh - 240px));
+  }
+  
+  h1{
+  margin: 4px 0 12px;  
+  text-align:center;
+  font-size:clamp(18px, 4.5vw, 28px);
+  line-height:1.2;
+
+ 
+  text-shadow:
+    0 2px 10px rgba(0,0,0,.45),
+    0 1px 2px rgba(0,0,0,.35);
+}
+
+.topbar{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+
+  margin: 0;      
+}
+
+.pill{
+  background:rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.22);
+  padding:7px 12px;
+  border-radius:14px;
+  font-size:clamp(14px, 3.5vw, 16px);
+
+  box-shadow:0 6px 14px rgba(0,0,0,.18);
+  display:flex;
+  gap:6px;
+  align-items:center;
+  white-space:nowrap;
+
+  text-shadow: 0 2px 8px rgba(0,0,0,.35);
+}
+  .btnbar {
+    margin-top:8px;
+    gap:6px;
+  }
+  
+  .btnbar button {
+    padding:7px 14px;
+    font-size:clamp(13px, 3vw, 15px);
+  }
+}
+
+@media (max-height: 650px) {
+  :root {
+    --board: min(85vw, 420px, calc(100svh - 200px));
+  }
+  
+  body {
+    padding: max(4px, env(safe-area-inset-top)) max(4px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom)) max(4px, env(safe-area-inset-left));
+  }
+  
+  h1 {
+    font-size:clamp(14px, 3.5vw, 18px);
+    margin-bottom:3px;
+  }
+}
+ </style>
+</head>
+
+<body>
+  <div class="headerWrap">
+  <h1>Зимняя игра от ШАГАЙ ДОМА⚡️</h1>
+
+  <div class="authBar">
+  <div id="authStatus" class="pill" style="justify-content:center;">Гость: сохранение на устройстве</div>
+
+  <div class="authRow" id="authRow">
+    <input id="emailInput" type="email" placeholder="Email для сохранения прогресса" autocomplete="email" />
+    <button id="sendLinkBtn" type="button">📩 Войти по email</button>
+  </div>
+
+  <div class="authRow" id="authedRow" style="display:none;">
+    <button id="logoutBtn" type="button">🚪 Выйти</button>
+  </div>
+</div>  
+  <div class="topbar">
+    <div class="pill">Уровень: <b id="level">1</b></div>
+    <div class="pill">Цель: <b id="progress">0/0</b></div>
+    <div class="pill">Ходы: <b id="moves">0</b></div>
+  </div>
+</div>
+
+  <div class="grid" id="grid"></div>
+<div class="levelToast" id="levelToast" aria-hidden="true"></div>
+  <div class="btnbar">
+  <div class="btnRow">
+    <button onclick="restartLevel()">🔄 Заново </button>
+    <button onclick="showIntro()">📜 Инструкция уровня</button>
+  </div>
+
+ <div class="invRow" id="invRow" style="display:none;">
+    <div class="inv">
+      <div class="invItem" id="candleInv" title="Свечка"></div>
+      <div class="invCount" id="candleInvCount">0</div>
+    </div>
+  </div>
+</div>
+
+  <!-- Модалка инструкций -->
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="modal">
+      <h2 id="introTitle">Уровень</h2>
+      <p id="introText"></p>
+      <ul id="introList"></ul>
+      <div class="actions">
+        <button id="introBtn">Понятно, играю!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка "Зарядка энергии" -->
+  <div class="overlay" id="energyOverlay" aria-hidden="true">
+    <div class="modal">
+      <h2>⚡ Закончились ходы?</h2>
+      <p id="energyText">
+        Время зарядить батарейку! Пошагайте в течение 30 секунд —
+        и появятся новые ходы в игре.
+      </p>
+        <div class="coachWrap" aria-hidden="true">
+    <video
+      id="coachVideo"
+      class="coachVideo"
+      playsinline
+      loop
+      preload="metadata"
+      poster="/Camp/wintergame/coach_poster.jpg"
+    >
+      <source src="/Camp/wintergame/coach.mp4" type="video/mp4" />
+    </video>
+
+    <div class="coachHint" id="coachHint">
+      Нажмите «Начать шагать», когда будете готовы 🎬
+    </div>
+  </div>
+
+           <div class="actions" style="margin-top:12px; display:flex; gap:10px;">
+        <button id="energyStartBtn">▶️ Начать шагать </button>
+        <button id="energyDoneBtn" disabled>✅ Готово — забрать ходы </button>
+      </div>
+
+      <p style="margin-top:10px; opacity:.85;">
+        Осталось: <b id="energyTimer">30</b> сек
+      </p>
+    </div>
+  </div>
+
+  
+<script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBXq4cdLjMvuoKinHgHEO-iz8vrxZqBuz4",
+    authDomain: "walk-walk-d8a14.firebaseapp.com",
+    projectId: "walk-walk-d8a14",
+    storageBucket: "walk-walk-d8a14.firebasestorage.app",
+    messagingSenderId: "1022340791272",
+    appId: "1:1022340791272:web:77f762027bd2e3d2dac25d"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+<script>
+/* =========================================================================
+   НАСТРОЙКА ПУТЕЙ К КАРТИНКАМ
+============================================================================ */
+const ASSET_PATH = '/Camp/wintergame/';
+
+const IMG = {
+  // обычные
+  snowflake: ASSET_PATH + 'IMG_3660.png',
+  thermos:   ASSET_PATH + 'IMG_3661.png',
+  steps:     ASSET_PATH + 'IMG_3662.png',
+  boots:     ASSET_PATH + 'IMG_3663.png',
+  mittens:   ASSET_PATH + 'IMG_3664.png',
+  tree:      ASSET_PATH + 'IMG_3659.png',
+
+  // спец
+  goldSteps:     ASSET_PATH + 'IMG_3655.png',
+  candle:        ASSET_PATH + 'IMG_3656.png',
+  giftBag:       ASSET_PATH + 'IMG_3657.png',
+  goldSnowflake: ASSET_PATH + 'IMG_3658.png',
+
+  // препятствия
+snowBlock: ASSET_PATH + '11.png',
+ice3:      ASSET_PATH + '12.png',
+ice2:      ASSET_PATH + '13.png',
+ice1:      ASSET_PATH + '14.png',
+  // фон/подложка
+  bg:    ASSET_PATH + 'IMG_3671.png',
+  board: ASSET_PATH + 'IMG_3672.png',
+};
+
+  // ---- ЗВУКИ ----
+const SFX = {
+  ice: new Audio(ASSET_PATH + 'ice.mp3'),
+};
+
+// настройки звука
+SFX.ice.volume = 0.4;       
+SFX.ice.preload = 'auto';
+
+const NORMAL_COLORS = ['snowflake','thermos','steps','boots','mittens','tree'];
+
+// типы спецов
+const SPECIAL = {
+  LINE:  'special_line',
+  BOMB:  'special_bomb',
+  CLEAR: 'special_clear',
+  CANDLE:'special_candle',
+};
+
+// препятствия
+const BLOCK = {
+  SNOW: 'snow',
+  ICE:  'ice',
+};
+
+// уровни
+const LEVELS = [
+  { id:1,  target: 60,  intro:"Уровень 1: соберите 3 в ряд.", specials:[], obstacles:[] },
+  { id:2,  target: 80,  intro:"Уровень 2: соберите 4 в ряд, чтобы получить подарок", specials:[SPECIAL.LINE], obstacles:[] },
+  { id:3,  target: 95,  intro:"Уровень 3: соберите L/T-комбинацию, чтобы получить мешок подарков", specials:[SPECIAL.LINE, SPECIAL.BOMB], obstacles:[] },
+  { id:4,  target: 115, intro:"Уровень 4: соберите 5 в ряд, чтобы получить молнию", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[] },
+  { id:5,  target: 135, intro:"Уровень 5: первое препятствие", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
+
+  { id:6,  target: 155, intro:"Уровень 6: используйте спец-элементы, чтобы освободить поле", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
+  { id:7,  target: 175, intro:"Уровень 7: сугробы попадаются чаще. Без спецэлементов тут не справиться", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR], obstacles:[BLOCK.SNOW] },
+  { id:8,  target: 195, intro:"Уровень 8: пришли холода! Появляются «ледяная клетка» и «свечка»", specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR, SPECIAL.CANDLE], obstacles:[BLOCK.ICE] },
+  { id:9,  target: 215, specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR, SPECIAL.CANDLE], obstacles:[BLOCK.SNOW, BLOCK.ICE] },
+  { id:10, target: 240,  specials:[SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR, SPECIAL.CANDLE], obstacles:[BLOCK.SNOW, BLOCK.ICE] },
+];
+
+  function getProceduralLevel(id){
+
+  const n = Math.max(0, id - 10);
+ const target = 240 + n * 25;
+
+  return {
+    id,
+    target,
+    intro: `Уровень ${id}:  ❄️
+Цель: набрать ${target} очков.`,
+
+    specials: [SPECIAL.LINE, SPECIAL.BOMB, SPECIAL.CLEAR, SPECIAL.CANDLE],
+    obstacles: [BLOCK.SNOW, BLOCK.ICE],
+  };
+}
+const width = 8;
+
+const grid = document.getElementById('grid');
+const levelDisplay = document.getElementById('level');
+const progressDisplay = document.getElementById('progress');
+
+const movesDisplay  = document.getElementById('moves');
+
+const overlay = document.getElementById('overlay');
+const introTitle = document.getElementById('introTitle');
+const introText  = document.getElementById('introText');
+const introList  = document.getElementById('introList');
+const introBtn   = document.getElementById('introBtn');
+
+// зарядка
+const energyOverlay  = document.getElementById('energyOverlay');
+const energyStartBtn = document.getElementById('energyStartBtn');
+const energyDoneBtn  = document.getElementById('energyDoneBtn');
+const energyTimerEl  = document.getElementById('energyTimer');
+const coachVideo = document.getElementById('coachVideo');
+const coachHint  = document.getElementById('coachHint');
+const candleInvEl = document.getElementById('candleInv');
+const candleInvCountEl = document.getElementById('candleInvCount');
+const invRowEl = document.getElementById('invRow');
+const levelToast = document.getElementById('levelToast');
+  
+let squares = [];
+let score = 0;
+let levelIndex = 0;
+  let BombActivated = false;
+  let SnowflakeActivated = false;
+  let CandleActivated = false;
+
+let selectedSquare = null;
+
+let squareIdBeingDragged = null;
+let squareIdBeingReplaced = null;
+let candleInv = 0;
+let candlePlaceMode = false;
+let isResolving = false;
+let introAutoShown = {};
+  
+
+// ===== ЭНЕРГИЯ / ХОДЫ =====
+const MOVES_PER_LIFE = 20;   
+let energy = 1;           
+let movesLeft = MOVES_PER_LIFE;
+
+let rechargeInterval = null;
+let rechargeSeconds = 30;
+
+/* =========================================================================
+   SAVE / LOAD (robust)
+   localStorage + cookie fallback + save on pagehide/visibilitychange
+============================================================================ */
+const SAVE_KEY = 'wintergame_progress_v2'; // <- новый ключ, чтобы не цеплять битые старые данные
+const SAVE_COOKIE_DAYS = 180;
+
+function storageSet(key, value){
+  // 1) localStorage
+  try{
+    localStorage.setItem(key, value);
+    return true;
+  }catch(e){
+    // 2) cookie fallback
+    try{
+      const maxAge = SAVE_COOKIE_DAYS * 24 * 60 * 60;
+      document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/; SameSite=Lax`;
+      return true;
+    }catch(e2){
+      return false;
+    }
+  }
+}
+
+function storageGet(key){
+  // 1) localStorage
+  try{
+    const v = localStorage.getItem(key);
+    if(v) return v;
+  }catch(e){}
+
+  // 2) cookie fallback
+  try{
+    const name = encodeURIComponent(key) + '=';
+    const parts = document.cookie.split(';');
+    for(let p of parts){
+      p = p.trim();
+      if(p.startsWith(name)){
+        return decodeURIComponent(p.slice(name.length));
+      }
+    }
+  }catch(e2){}
+  return null;
+}
+
+function storageRemove(key){
+  try{ localStorage.removeItem(key); }catch(e){}
+  try{ document.cookie = `${encodeURIComponent(key)}=; Max-Age=0; Path=/; SameSite=Lax`; }catch(e){}
+}
+
+function saveProgress(){
+  const data = {
+    v: 2,
+    ts: Date.now(),
+
+    levelIndex,
+    score,
+    movesLeft,
+    energy,
+
+    BombActivated,
+    SnowflakeActivated,
+    CandleActivated,
+
+    candleInv,
+
+    // ВАЖНО: вы используете это в maybeAutoShowIntro(), значит сохраняем
+    introAutoShown
+  };
+
+  const ok = storageSet(SAVE_KEY, JSON.stringify(data));
+  if(!ok){
+    console.warn('[wintergame] progress NOT saved (storage blocked)');
+  }
+}
+
+function loadProgress(){
+  try{
+    const raw = storageGet(SAVE_KEY);
+    if(!raw) return false;
+
+    const data = JSON.parse(raw);
+    if(!data || typeof data !== 'object') return false;
+
+    levelIndex = Math.max(0, Number.isFinite(+data.levelIndex) ? +data.levelIndex : 0);
+    score      = Number.isFinite(+data.score)      ? +data.score      : 0;
+    movesLeft  = Number.isFinite(+data.movesLeft)  ? +data.movesLeft  : MOVES_PER_LIFE;
+    energy     = Number.isFinite(+data.energy)     ? +data.energy     : 1;
+
+    BombActivated      = !!data.BombActivated;
+    SnowflakeActivated = !!data.SnowflakeActivated;
+    CandleActivated    = !!data.CandleActivated;
+
+    candleInv = Number.isFinite(+data.candleInv) ? +data.candleInv : 0;
+
+    introAutoShown = (data.introAutoShown && typeof data.introAutoShown === 'object')
+      ? data.introAutoShown
+      : {};
+
+    return true;
+  }catch(e){
+    console.warn('[wintergame] loadProgress failed, clearing', e);
+    // если данные битые — чистим, чтобы не падать вечно
+    storageRemove(SAVE_KEY);
+    return false;
+  }
+}
+
+function clearProgress(){
+  storageRemove(SAVE_KEY);
+}
+
+// КРИТИЧНО для мобилок: успеть сохранить при сворачивании/закрытии
+window.addEventListener('pagehide', saveProgress);
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'hidden') saveProgress();
+});
+/* =========================================================================
+   УТИЛИТЫ
+============================================================================ */
+function sleep(ms){ return new Promise(res=>setTimeout(res, ms)); }
+
+function addFxToCells(indices, cls){
+  indices.forEach(i=>{
+    const el = squares[i];
+    if(!el) return;
+    el.classList.add(cls);
+    setTimeout(()=>el.classList.remove(cls), 420);
+  });
+}
+
+function flashGrid(shake=false){
+  grid.classList.add('fx-flash');
+  if(shake) grid.classList.add('fx-shake');
+  setTimeout(()=>{
+    grid.classList.remove('fx-flash');
+    grid.classList.remove('fx-shake');
+  }, 260);
+}
+
+  function showLevelToast(html, ms=950){
+  if(!levelToast) return;
+
+  levelToast.innerHTML = html;
+  levelToast.classList.add('show');
+  levelToast.setAttribute('aria-hidden','false');
+
+  // лёгкий "перебив" поля
+  grid.classList.add('level-transition');
+
+  setTimeout(()=>{
+    levelToast.classList.remove('show');
+    levelToast.setAttribute('aria-hidden','true');
+    grid.classList.remove('level-transition');
+  }, ms);
+}
+/* =========================================================================
+   ЭНЕРГИЯ / ЗАРЯДКА
+============================================================================ */
+function lockGame(){ isResolving = true; }
+function unlockGame(){ isResolving = false; }
+
+function openEnergyModal(){
+  lockGame();
+
+  rechargeSeconds = 30;
+  energyTimerEl.textContent = rechargeSeconds;
+  energyDoneBtn.disabled = true;
+
+  if(rechargeInterval){
+    clearInterval(rechargeInterval);
+    rechargeInterval = null;
+  }
+
+  energyOverlay.classList.add('show');
+  energyOverlay.setAttribute('aria-hidden','false');
+
+  if(coachVideo){
+    coachVideo.pause();
+    coachVideo.currentTime = 0;
+  }
+  if(coachHint) coachHint.style.display = 'block';
+}
+
+function consumeMove(){
+  movesLeft = Math.max(0, movesLeft - 1);
+  setupHUD();
+  saveProgress();
+  if(movesLeft === 0) openEnergyModal();
+}
+
+energyStartBtn.onclick = () => {
+  if(rechargeInterval) return;
+
+  if(coachVideo){
+    coachVideo.playsInline = true;
+        coachVideo.muted = false;
+        coachVideo.volume = 1;   
+    coachVideo.play().catch(()=>{});
+  }
+  if(coachHint) coachHint.style.display = 'none';
+
+  energyDoneBtn.disabled = true;
+  rechargeSeconds = 30;
+  energyTimerEl.textContent = rechargeSeconds;
+
+  rechargeInterval = setInterval(()=>{
+    rechargeSeconds--;
+    energyTimerEl.textContent = rechargeSeconds;
+
+    if(rechargeSeconds <= 0){
+      clearInterval(rechargeInterval);
+      rechargeInterval = null;
+            if(coachVideo){
+        coachVideo.pause();
+      }
+      energyDoneBtn.disabled = false;
+    }
+  }, 1000);
+}
+  energyDoneBtn.onclick = () => {
+
+  movesLeft = MOVES_PER_LIFE;
+
+  setupHUD();
+  saveProgress();
+
+  closeEnergyModal(); 
+};
+  ;
+
+function closeEnergyModal(){
+  energyOverlay.classList.remove('show');
+  energyOverlay.setAttribute('aria-hidden','true');
+
+  if(coachVideo){
+    coachVideo.pause();
+    coachVideo.currentTime = 0;
+  }
+
+  unlockGame();
+}
+
+/* =========================================================================
+   МОДЕЛЬ КЛЕТКИ (dataset)
+============================================================================ */
+function currentLevel(){
+  const predefined = LEVELS[levelIndex];
+  if(predefined) return predefined;
+
+  const id = levelIndex + 1;
+  return getProceduralLevel(id);
+}
+  function getLevelById(id){
+  if(id >= 1 && id <= LEVELS.length) return LEVELS[id - 1];
+  return getProceduralLevel(id);
+}
+
+function hasNewMechanicsComparedToPrev(lvl){
+
+  if(lvl.id <= 1) return true;
+
+  const prev = getLevelById(lvl.id - 1);
+  if(!prev) return true;
+
+  const prevS = new Set(prev.specials || []);
+  const prevO = new Set(prev.obstacles || []);
+
+  const curS = lvl.specials || [];
+  const curO = lvl.obstacles || [];
+
+  const newSpecial = curS.some(x => !prevS.has(x));
+  const newObstacle = curO.some(x => !prevO.has(x));
+
+  return newSpecial || newObstacle;
+}
+
+function maybeAutoShowIntro(){
+  const lvl = currentLevel();
+
+  if(introAutoShown[lvl.id]) return false;
+  if(!hasNewMechanicsComparedToPrev(lvl)) return false;
+
+  introAutoShown[lvl.id] = true;
+  saveProgress();
+  showIntro();
+  return true;
+}
+
+function resolveImage(colorKey, type){
+  if(!colorKey) return '';
+  if(type === SPECIAL.LINE)   return IMG.goldSteps;
+  if(type === SPECIAL.BOMB)   return IMG.giftBag;
+  if(type === SPECIAL.CLEAR)  return IMG.goldSnowflake;
+  if(type === SPECIAL.CANDLE) return IMG.candle;
+  return IMG[colorKey] || '';
+}
+  function updateBlockVisual(i){
+  const sq = squares[i];
+
+  if(sq.dataset.block === BLOCK.SNOW){
+    sq.style.backgroundImage = `url('${IMG.snowBlock}')`;
+    return;
+  }
+
+  if(sq.dataset.block === BLOCK.ICE){
+    const hp = sq.dataset.icehp;
+    if(hp === '3') sq.style.backgroundImage = `url('${IMG.ice3}')`;
+    if(hp === '2') sq.style.backgroundImage = `url('${IMG.ice2}')`;
+    if(hp === '1') sq.style.backgroundImage = `url('${IMG.ice1}')`;
+    return;
+  }
+
+  const img = resolveImage(sq.dataset.color, sq.dataset.type);
+  sq.style.backgroundImage = img ? `url('${img}')` : '';
+}
+
+function setCell(square, colorKey, type='normal'){
+  square.dataset.color = colorKey || '';
+  square.dataset.type = type || 'normal';
+  const img = resolveImage(square.dataset.color, square.dataset.type);
+  square.style.backgroundImage = img ? `url('${img}')` : '';
+}
+
+function clearCell(i){
+  const sq = squares[i];
+  setCell(sq, '', 'normal');
+}
+
+function hasCandy(i){
+  return squares[i].dataset.color !== '';
+}
+
+function randomNormal(){
+  return NORMAL_COLORS[Math.floor(Math.random() * NORMAL_COLORS.length)];
+}
+
+function isBlocked(i){
+  const sq = squares[i];
+  return (sq.dataset.block === BLOCK.SNOW && (+sq.dataset.turns || 0) > 0)
+      || (sq.dataset.block === BLOCK.ICE  && (+sq.dataset.icehp || 0) > 0);
+}
+
+/* =========================================================================
+   HUD / ИНТРО
+============================================================================ */
+function setupHUD(){
+  const lvl = currentLevel();
+  levelDisplay.textContent = lvl.id;
+
+  // Цели уровней:
+  if(lvl.id === 3){
+    progressDisplay.textContent = BombActivated
+      ? 'Мешок подарков: ✅'
+      : 'Мешок подарков: 0/1';
+  } else if(lvl.id === 4){
+    progressDisplay.textContent = SnowflakeActivated
+      ? 'Золотая молния: ✅'
+      : 'Золотая молния: 0/1';
+      } else if(lvl.id === 8){
+    progressDisplay.textContent = CandleActivated
+      ? 'Свечка: ✅'
+      : 'Свечка: 0/1';
+  } else {
+    progressDisplay.textContent = `${score}/${lvl.target}`;
+  }
+if(invRowEl){
+  const lvlId = currentLevel().id;
+
+
+  if(lvlId >= 9 && candleInv > 0){
+    invRowEl.style.display = 'flex';
+  } else {
+    invRowEl.style.display = 'none';
+  }
+}
+
+if(candleInvEl && candleInvCountEl){
+  if(candleInv > 0){
+    candleInvEl.style.backgroundImage = `url('${IMG.candle}')`; 
+    candleInvCountEl.textContent = String(candleInv);          
+  } else {
+    candleInvEl.style.backgroundImage = '';                   
+    candleInvCountEl.textContent = '0';
+  }
+
+  candleInvEl.classList.toggle('disabled', candleInv <= 0);
+  candleInvEl.classList.toggle('active', candlePlaceMode === true && candleInv > 0);
+}
+
+  movesDisplay.textContent = movesLeft;
+}
+  if(candleInvEl){
+  candleInvEl.addEventListener('click', ()=>{
+    if(candleInv <= 0) return;
+    candlePlaceMode = !candlePlaceMode;
+    setupHUD();
+    saveProgress();
+  });
+}
+function showIntro(){
+  const lvl = currentLevel();
+  introTitle.textContent = `Уровень ${lvl.id}`;
+  introText.textContent = lvl.intro;
+
+  introList.innerHTML = '';
+  const items = [];
+  items.push('Соберите 3 одинаковых фишки подряд — они исчезнут, а новые упадут сверху.');
+  items.push('Каждое перемещение фишек тратит 1 ход. Когда ходы закончатся — понадобится “зарядиться”');
+
+  const s = lvl.specials;
+  if(s.includes(SPECIAL.LINE))  items.push('4 в ряд → «Подарок». Передвиньте его следующим ходом → очистится строка.');
+  if(s.includes(SPECIAL.BOMB))  items.push('L/T-комбинация → «Мешок подарков» (взрыв 3×3).');
+  if(s.includes(SPECIAL.CLEAR)) items.push('5 в ряд → «Молния» (очищает весь экран).');
+  if(lvl.obstacles.includes(BLOCK.SNOW)) items.push('Сугробы блокируют клетки на несколько ходов (их нельзя двигать).');
+  if(lvl.obstacles.includes(BLOCK.ICE))  items.push('Лёд ломается от золотых следов, мешка с подарками и молнии.');
+  if(s.includes(SPECIAL.CANDLE)) items.push('Растопи лёд — и ты получишь свечку. Размести её на ячейке со льдом, чтобы убрать один слой заморозки');
+
+  items.forEach(t=>{
+    const li = document.createElement('li');
+    li.textContent = t;
+    introList.appendChild(li);
+  });
+
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden','false');
+}
+
+introBtn.onclick = () => {
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden','true');
+};
+
+overlay.addEventListener('click', (e)=>{
+  if(e.target === overlay){
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden','true');
+  }
+});
+
+/* =========================================================================
+   ПРЕПЯТСТВИЯ
+============================================================================ */
+function placeObstacles(){
+  const lvl = currentLevel();
+
+  for(let i=0;i<squares.length;i++){
+    squares[i].dataset.block = '';
+    squares[i].dataset.turns = '';
+    squares[i].dataset.icehp = '';
+    squares[i].dataset.ice = '';
+  }
+
+  if(lvl.obstacles.includes(BLOCK.SNOW)){
+    const count = Math.min(10, 3 + Math.floor((lvl.id-5)*1.2));
+    dropSnow(count);
+  }
+
+  if(lvl.obstacles.includes(BLOCK.ICE)){
+    const iceCount = Math.min(5, 1 + Math.max(0, (lvl.id - 8)));
+    dropIce(iceCount);
+  }
+}
+
+function dropSnow(count){
+  let placed = 0;
+  while(placed < count){
+    const i = Math.floor(Math.random() * (width*width));
+    if(i < width) continue;
+    if(squares[i].dataset.block) continue;
+
+    squares[i].dataset.block = BLOCK.SNOW;
+    squares[i].dataset.turns = 3;
+
+    updateBlockVisual(i);
+    placed++;
+  }
+}
+
+function dropIce(count){
+  let placed = 0;
+  while(placed < count){
+    const i = Math.floor(Math.random() * (width*width));
+    if(i < width) continue;
+    if(squares[i].dataset.block) continue;
+
+    squares[i].dataset.block = BLOCK.ICE;
+    squares[i].dataset.icehp = '3';
+
+    updateBlockVisual(i);
+    placed++;
+  }
+}
+
+  function spawnSnowAt(i, turns=3){
+  const sq = squares[i];
+  if(!sq) return;
+  if(sq.dataset.block) return;      
+  if(i < 0 || i >= width*width) return;
+
+
+  sq.dataset.color = '';
+  sq.dataset.type  = 'normal';
+  sq.style.backgroundImage = '';   
+
+  sq.dataset.block = BLOCK.SNOW;
+  sq.dataset.turns = String(turns);
+
+  updateBlockVisual(i);              
+}
+
+  function spawnIceAt(i, hp=3){
+  const sq = squares[i];
+  if(!sq) return;
+  if(sq.dataset.block) return;
+  if(i < 0 || i >= width*width) return;
+
+
+  if(!sq.dataset.color){
+    setCell(sq, randomNormal(), 'normal');
+  }
+
+  sq.dataset.block = BLOCK.ICE;
+  sq.dataset.icehp = String(hp);
+
+  updateBlockVisual(i); 
+}
+function tickObstaclesAfterMove(){
+  for(let i=0;i<squares.length;i++){
+    const sq = squares[i];
+
+    if(sq.dataset.block === BLOCK.SNOW){
+      let t = +sq.dataset.turns;
+      t--;
+      sq.dataset.turns = t;
+
+      if(t <= 0){
+        sq.dataset.block = '';
+        sq.dataset.turns = '';
+        updateBlockVisual(i);
+      }
+    }
+  }
+}
+
+
+function damageIceAt(i, amount=1){
+  const sq = squares[i];
+  if(sq.dataset.block !== BLOCK.ICE) return;
+
+  let hp = +sq.dataset.icehp;
+  hp = Math.max(0, hp - amount);
+  sq.dataset.icehp = String(hp);
+
+  // 🔊 звук треска льда
+  playIceSound();
+
+
+  updateBlockVisual(i);
+
+  if(hp === 0){
+
+    sq.dataset.block = '';
+    sq.dataset.icehp = '';
+
+    if(!sq.dataset.color){
+      setCell(sq, randomNormal(), 'normal');
+    }
+
+    if(levelHasSpecial(SPECIAL.CANDLE)){
+      candleInv++;
+      if(currentLevel().id === 8){
+        CandleActivated = true;
+      }
+      saveProgress();
+      setupHUD();
+    }
+
+    sq.dataset.type = 'normal';
+    sq.style.backgroundImage = `url('${resolveImage(sq.dataset.color, sq.dataset.type)}')`;
+
+    updateBlockVisual(i);
+  }
+}
+
+  async function useCandleAt(center){
+  let affected = [];
+
+  const r0 = Math.floor(center/width);
+  const c0 = center % width;
+
+  for(let dr=-1; dr<=1; dr++){
+    for(let dc=-1; dc<=1; dc++){
+      const r = r0 + dr, c = c0 + dc;
+      if(r<0||r>=width||c<0||c>=width) continue;
+      affected.push(r*width + c);
+    }
+  }
+
+  addFxToCells([center], 'fx-candle');
+  addFxToCells(affected, 'fx-hit');
+  flashGrid(false);
+
+  await sleep(170);
+
+  for(const idx of affected){
+  
+    if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
+
+     if(!isBlocked(idx)) clearCell(idx);
+  }
+
+  addScore(12);
+  saveProgress();
+}
+/* =========================================================================
+   СОЗДАНИЕ ПОЛЯ
+============================================================================ */
+function createBoard(){
+  grid.innerHTML = '';
+  squares = [];
+
+  for(let i=0;i<width*width;i++){
+    const sq = document.createElement('div');
+    sq.className = 'cell';
+    sq.setAttribute('draggable', true);
+    sq.setAttribute('id', i);
+
+    sq.dataset.block = '';
+    sq.dataset.turns = '';
+    sq.dataset.icehp = '';
+    sq.dataset.ice = '';
+
+    setCell(sq, randomNormal(), 'normal');
+
+    sq.addEventListener('click', selectSquare);
+
+    sq.addEventListener('dragstart', dragStart);
+    sq.addEventListener('dragover', (e)=>e.preventDefault());
+    sq.addEventListener('dragenter', (e)=>e.preventDefault());
+    sq.addEventListener('drop', dragDrop);
+    sq.addEventListener('dragend', dragEnd);
+
+    grid.appendChild(sq);
+    squares.push(sq);
+  }
+
+  placeObstacles();
+  stabilizeNoInitialMatches();
+}
+
+/* =========================================================================
+   ВЫБОР / ПЕРЕСТАНОВКА
+============================================================================ */
+function selectSquare(e){
+  if(isResolving) return;
+
+  const id = parseInt(e.currentTarget.id, 10);
+  if(candlePlaceMode){
+  if(candleInv <= 0){
+    candlePlaceMode = false;
+    setupHUD();
+    return;
+  }
+
+  candleInv--;
+  candlePlaceMode = false;
+  setupHUD();
+  saveProgress();
+
+  (async ()=>{
+    if(isResolving) return;
+    isResolving = true;
+
+    await useCandleAt(id);
+    await resolveBoard();
+
+    isResolving = false;
+    checkLevelComplete();
+  })();
+
+  return;
+}
+  if(isBlocked(id)) return;
+
+  if(selectedSquare === null){
+    selectedSquare = id;
+    squares[id].classList.add('selected');
+    return;
+  }
+
+  if(selectedSquare === id){
+    squares[selectedSquare].classList.remove('selected');
+    selectedSquare = null;
+    return;
+  }
+
+  const validMoves = [selectedSquare-1, selectedSquare+1, selectedSquare-width, selectedSquare+width];
+  const isAdjacent = validMoves.includes(id);
+
+  if(isAdjacent){
+    if(selectedSquare % width === 0 && id === selectedSquare - 1) return;
+    if(selectedSquare % width === width-1 && id === selectedSquare + 1) return;
+    if(isBlocked(id)) return;
+
+    squares[selectedSquare].classList.remove('selected');
+    const from = selectedSquare;
+    selectedSquare = null;
+
+    doMove(from, id);
+  } else {
+    squares[selectedSquare].classList.remove('selected');
+    selectedSquare = id;
+    squares[id].classList.add('selected');
+  }
+}
+
+function dragStart(){
+  if(isResolving) return;
+  const id = parseInt(this.id,10);
+  if(isBlocked(id)) return;
+  squareIdBeingDragged = this.id;
+}
+
+function dragDrop(){
+  if(isResolving) return;
+  const id = parseInt(this.id,10);
+  if(isBlocked(id)) return;
+  squareIdBeingReplaced = this.id;
+}
+
+function dragEnd(){
+  if(isResolving) { squareIdBeingDragged=null; squareIdBeingReplaced=null; return; }
+  if(squareIdBeingDragged === null || squareIdBeingReplaced === null) return;
+
+  const from = parseInt(squareIdBeingDragged,10);
+  const to   = parseInt(squareIdBeingReplaced,10);
+
+  squareIdBeingDragged = null;
+  squareIdBeingReplaced = null;
+
+  if(isBlocked(from) || isBlocked(to)) return;
+
+  const validMoves = [from-1, from+1, from-width, from+width];
+  let validMove = validMoves.includes(to);
+
+  if(from % width === 0 && to === from - 1) validMove = false;
+  if(from % width === width-1 && to === from + 1) validMove = false;
+
+  if(!validMove) return;
+
+  doMove(from, to);
+}
+
+/* =========================================================================
+   ХОД
+============================================================================ */
+function doSwap(a,b){
+  const A = squares[a], B = squares[b];
+
+  const tempColor = A.dataset.color;
+  const tempType  = A.dataset.type;
+
+  A.dataset.color = B.dataset.color;
+  A.dataset.type  = B.dataset.type;
+  B.dataset.color = tempColor;
+  B.dataset.type  = tempType;
+
+  A.style.backgroundImage = A.dataset.color ? `url('${resolveImage(A.dataset.color, A.dataset.type)}')` : '';
+  B.style.backgroundImage = B.dataset.color ? `url('${resolveImage(B.dataset.color, B.dataset.type)}')` : '';
+}
+
+async function doMove(from,to){
+  if(isResolving) return;
+  isResolving = true;
+
+  doSwap(from,to);
+  tickObstaclesAfterMove();
+
+  let activated = false;
+  if(squares[to].dataset.type !== 'normal'){
+    activated = await activateSpecialAt(to);
+  } else if(squares[from].dataset.type !== 'normal'){
+    activated = await activateSpecialAt(from);
+  }
+
+  if(activated){
+    consumeMove();
+    await resolveBoard();
+    isResolving = false;
+    checkLevelComplete();
+    return;
+  }
+
+  const matches = findAllMatches();
+  if(matches.length === 0){
+    doSwap(from,to);
+    isResolving = false;
+    return;
+  }
+
+  consumeMove();
+  await applyMatches(matches, {from, to});
+  await resolveBoard();
+
+  isResolving = false;
+  checkLevelComplete();
+}
+
+/* =========================================================================
+   АКТИВАЦИЯ СПЕЦ-ЭЛЕМЕНТОВ
+============================================================================ */
+async function activateSpecialAt(i){
+  const sq = squares[i];
+  const type = sq.dataset.type;
+  if(type === 'normal') return false;
+  if(isBlocked(i)) return false;
+
+  let affected = [];
+
+  if(type === SPECIAL.LINE){
+    const col = i % width;
+    for(let r=0; r<width;r++) affected.push(r*width + col);
+
+    addFxToCells([i], 'fx-line');
+    addFxToCells(affected, 'fx-hit');
+    flashGrid(false);
+
+    await sleep(160);
+
+    for(const idx of affected){
+      if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
+      if(!isBlocked(idx)) clearCell(idx);
+    }
+    clearCell(i);
+    addScore(8);
+    return true;
+  }
+
+  if(type === SPECIAL.BOMB){
+    const r0 = Math.floor(i/width);
+    const c0 = i % width;
+    for(let dr=-1; dr<=1; dr++){
+      for(let dc=-1; dc<=1; dc++){
+        const r = r0 + dr, c = c0 + dc;
+        if(r<0||r>=width||c<0||c>=width) continue;
+        affected.push(r*width + c);
+      }
+    }
+
+    addFxToCells([i], 'fx-bomb');
+    addFxToCells(affected, 'fx-hit');
+    flashGrid(false);
+
+    await sleep(170);
+
+    for(const idx of affected){
+      if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
+      if(!isBlocked(idx)) clearCell(idx);
+    }
+    clearCell(i);
+    addScore(10);
+    if(currentLevel().id === 3) BombActivated = true;
+      return true;
+  }
+
+  if(type === SPECIAL.CLEAR){
+    affected = Array.from({length: width*width}, (_,k)=>k);
+
+    flashGrid(true);
+    addFxToCells([i], 'fx-hit');
+
+    for(let p=0; p<affected.length; p+=8){
+      addFxToCells(affected.slice(p, p+8), 'fx-hit');
+      await sleep(18);
+    }
+
+    for(let idx=0; idx<width*width; idx++){
+      if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
+      if(!isBlocked(idx)) clearCell(idx);
+    }
+    addScore(16);
+      if(currentLevel().id === 4) SnowflakeActivated = true;
+     saveProgress();
+    return true;
+  }
+
+  if(type === SPECIAL.CANDLE){
+    const r0 = Math.floor(i/width);
+    const c0 = i % width;
+    for(let dr=-1; dr<=1; dr++){
+      for(let dc=-1; dc<=1; dc++){
+        const r = r0 + dr, c = c0 + dc;
+        if(r<0||r>=width||c<0||c>=width) continue;
+        affected.push(r*width + c);
+      }
+    }
+
+    addFxToCells([i], 'fx-candle');
+    addFxToCells(affected, 'fx-hit');
+    flashGrid(false);
+
+    await sleep(170);
+
+    for(const idx of affected){
+      if(squares[idx].dataset.block === BLOCK.ICE) damageIceAt(idx, 1);
+      if(!isBlocked(idx)) clearCell(idx);
+    }
+    clearCell(i);
+    addScore(12);
+     saveProgress();
+    return true;
+  }
+
+  return false;
+}
+
+/* =========================================================================
+   ПОИСК МАТЧЕЙ
+============================================================================ */
+function findAllMatches(){
+  const groups = [];
+
+  // строки
+  for(let r=0;r<width;r++){
+    let c=0;
+    while(c<width){
+      const idx = r*width + c;
+      const key = squares[idx].dataset.color;
+      const type = squares[idx].dataset.type;
+
+      if(!key || type !== 'normal' || isBlocked(idx)){
+        c++;
+        continue;
+      }
+
+      let run = [idx];
+      let cc = c+1;
+      while(cc<width){
+        const j = r*width + cc;
+        if(squares[j].dataset.color === key && squares[j].dataset.type === 'normal' && !isBlocked(j)){
+          run.push(j);
+          cc++;
+        } else break;
+      }
+
+      if(run.length >= 3){
+        groups.push({cells:run, kind:'row', len:run.length, colorKey:key});
+      }
+      c = cc;
+    }
+  }
+
+  // колонки
+  for(let c=0;c<width;c++){
+    let r=0;
+    while(r<width){
+      const idx = r*width + c;
+      const key = squares[idx].dataset.color;
+      const type = squares[idx].dataset.type;
+
+      if(!key || type !== 'normal' || isBlocked(idx)){
+        r++;
+        continue;
+      }
+
+      let run = [idx];
+      let rr = r+1;
+      while(rr<width){
+        const j = rr*width + c;
+        if(squares[j].dataset.color === key && squares[j].dataset.type === 'normal' && !isBlocked(j)){
+          run.push(j);
+          rr++;
+        } else break;
+      }
+
+      if(run.length >= 3){
+        groups.push({cells:run, kind:'col', len:run.length, colorKey:key});
+      }
+      r = rr;
+    }
+  }
+
+  // L/T
+  const cellToGroups = new Map();
+  groups.forEach((g, gi)=>{
+    g.cells.forEach(i=>{
+      if(!cellToGroups.has(i)) cellToGroups.set(i, []);
+      cellToGroups.get(i).push(gi);
+    });
+  });
+
+  const ltGroups = [];
+  cellToGroups.forEach((giList, cell)=>{
+    if(giList.length >= 2){
+      const keys = new Set(giList.map(gi=>groups[gi].colorKey));
+      if(keys.size === 1){
+        const union = new Set();
+        giList.forEach(gi => groups[gi].cells.forEach(x=>union.add(x)));
+        ltGroups.push({cells:[...union], kind:'lt', len:union.size, colorKey:[...keys][0], pivot:cell});
+      }
+    }
+  });
+
+  if(ltGroups.length){
+    const blockedGroupIdx = new Set();
+    ltGroups.forEach(lt=>{
+      groups.forEach((g, gi)=>{
+        if(g.colorKey !== lt.colorKey) return;
+        const inter = g.cells.some(x=>lt.cells.includes(x));
+        if(inter) blockedGroupIdx.add(gi);
+      });
+    });
+    const filtered = groups.filter((g,gi)=>!blockedGroupIdx.has(gi));
+    return [...filtered, ...ltGroups];
+  }
+
+  return groups;
+}
+
+/* =========================================================================
+   СПАВН СПЕЦОВ И ОЧИСТКА
+============================================================================ */
+function levelHasSpecial(type){
+  return currentLevel().specials.includes(type);
+}
+
+function addScore(n){
+  score += n;
+  setupHUD(); 
+  saveProgress();
+}
+
+async function applyMatches(matches, moveInfo){
+  const toClear = new Set();
+
+  function chooseSpawnCell(group){
+    const {from, to} = moveInfo || {};
+    if(typeof to === 'number' && group.cells.includes(to)) return to;
+    if(typeof from === 'number' && group.cells.includes(from)) return from;
+    return group.cells[Math.floor(group.cells.length/2)];
+  }
+
+  const spawns = [];
+
+  for(const g of matches){
+    if(g.kind === 'lt'){
+      if(levelHasSpecial(SPECIAL.BOMB)){
+        spawns.push({ at: (g.pivot ?? chooseSpawnCell(g)), type: SPECIAL.BOMB });
+      }
+      g.cells.forEach(i=>toClear.add(i));
+      continue;
+    }
+
+    if(g.len >= 5){
+      if(levelHasSpecial(SPECIAL.CLEAR)){
+        spawns.push({ at: chooseSpawnCell(g), type: SPECIAL.CLEAR });
+      }
+      g.cells.forEach(i=>toClear.add(i));
+      continue;
+    }
+
+    if(g.len === 4){
+      if(levelHasSpecial(SPECIAL.LINE)){
+        const spawnAt = chooseSpawnCell(g);
+              spawns.push({ at: spawnAt, type: SPECIAL.LINE });
+        }
+      
+      g.cells.forEach(i=>toClear.add(i));
+      continue;
+    }
+
+    g.cells.forEach(i=>toClear.add(i));
+  }
+
+  const spawnCells = new Set(spawns.map(s=>s.at));
+  const clearList = [...toClear].filter(i=>!spawnCells.has(i));
+
+  clearList.forEach(i=>squares[i].classList.add('fade-out'));
+  await sleep(220);
+
+  for(const i of clearList){
+    if(squares[i].dataset.block === BLOCK.ICE) damageIceAt(i, 1);
+    if(!isBlocked(i)) clearCell(i);
+    squares[i].classList.remove('fade-out');
+  }
+
+  for(const s of spawns){
+    if(isBlocked(s.at)) continue;
+    if(!squares[s.at].dataset.color) squares[s.at].dataset.color = randomNormal();
+    squares[s.at].dataset.type = s.type;
+    squares[s.at].style.backgroundImage = `url('${resolveImage(squares[s.at].dataset.color, squares[s.at].dataset.type)}')`;
+  }
+
+  addScore(clearList.length);
+}
+
+  function playIceSound(){
+  try{
+    // перезапуск
+    SFX.ice.pause();
+    SFX.ice.currentTime = 0;
+
+    const p = SFX.ice.play();
+    if(p && typeof p.catch === 'function') p.catch(()=>{});
+
+
+    setTimeout(()=>{
+      try{
+        SFX.ice.pause();
+        SFX.ice.currentTime = 0;
+      }catch(e){}
+    }, 1200);
+
+  }catch(e){}
+}
+/* =========================================================================
+   ГРАВИТАЦИЯ + КАСКАДЫ
+============================================================================ */
+function moveDown(){
+  for(let i = width*width - 1; i >= 0; i--){
+    if(isBlocked(i)) continue;
+
+    const below = i + width;
+    if(below >= width*width) continue;
+
+
+    const belowSq = squares[below];
+    const snowBlocksFall = (belowSq.dataset.block === BLOCK.SNOW && (+belowSq.dataset.turns || 0) > 0);
+    if(snowBlocksFall) continue;
+
+    if(!hasCandy(below) && hasCandy(i)){
+      squares[below].dataset.color = squares[i].dataset.color;
+      squares[below].dataset.type  = squares[i].dataset.type;
+      squares[below].style.backgroundImage = squares[i].style.backgroundImage;
+
+      clearCell(i);
+
+      updateBlockVisual(below);
+      updateBlockVisual(i);
+    }
+  }
+}
+
+function generateNewCandies(){
+  const lvl = currentLevel();
+
+  const snowFromTop = (lvl.id >= 9) && lvl.obstacles.includes(BLOCK.SNOW);
+  const iceFromTop  = (lvl.id >= 9) && lvl.obstacles.includes(BLOCK.ICE);
+
+  const pSnow = snowFromTop ? Math.min(0.22, 0.10 + (lvl.id - 9) * 0.03) : 0;
+  const pIce  = iceFromTop  ? Math.min(0.10, 0.05 + (lvl.id - 9) * 0.02) : 0;
+
+  for(let i=0;i<width;i++){
+    if(isBlocked(i)) continue;
+
+    if(!hasCandy(i)){
+      const r = Math.random();
+
+      if(snowFromTop && r < pSnow){
+        spawnSnowAt(i, 3);
+      } 
+      else if(iceFromTop && r < (pSnow + pIce)){
+        spawnIceAt(i, 3);
+      } 
+      else {
+        setCell(squares[i], randomNormal(), 'normal');
+      }
+    }
+  }
+
+  for(let i = width; i < width*width; i++){
+    if(isBlocked(i)) continue;
+    if(hasCandy(i)) continue;
+
+    const above = i - width;
+    if(above >= 0 && isBlocked(above)){
+      setCell(squares[i], randomNormal(), 'normal');
+    }
+  }
+}
+
+async function resolveBoard(){
+  for(let step=0; step<25; step++){
+    for(let k=0;k<10;k++){
+      moveDown();
+      generateNewCandies();
+      await sleep(40);
+    }
+
+    const matches = findAllMatches();
+    if(matches.length === 0) break;
+
+    await applyMatches(matches, null);
+    await sleep(90);
+  }
+}
+
+/* =========================================================================
+   СТАРТ / ПЕРЕХОД УРОВНЯ
+============================================================================ */
+function stabilizeNoInitialMatches(){
+  for(let tries=0; tries<30; tries++){
+    const matches = findAllMatches();
+    if(matches.length === 0) return;
+
+    matches.forEach(g=>{
+      const pick = g.cells[Math.floor(Math.random()*g.cells.length)];
+      if(!isBlocked(pick)){
+        setCell(squares[pick], randomNormal(), 'normal');
+      }
+    });
+  }
+}
+
+function checkLevelComplete(){
+  const lvl = currentLevel();
+
+  const complete =
+    (lvl.id === 3) ? BombActivated :
+    (lvl.id === 4) ? SnowflakeActivated :
+    (lvl.id === 8) ? CandleActivated :
+    (score >= lvl.target);
+
+  if(complete){
+  const finishedId = lvl.id;
+
+  // небольшой победный импульс
+  flashGrid(true);
+
+  levelIndex++;
+  startLevel(true, finishedId);
+  saveProgress();
+}
+}
+
+function startLevel(resetScore, finishedId=null){
+  if(resetScore) score = 0;
+
+  const id = currentLevel().id;
+  if(id === 3) BombActivated = false;
+  if(id === 4) SnowflakeActivated = false;
+  if(id === 8) CandleActivated = false;
+
+  setupHUD();
+  createBoard();
+
+  const introShown = maybeAutoShowIntro();
+
+  // ✅ если модалка не открылась — показываем понятный переход
+  if(!introShown){
+    const newId = currentLevel().id;
+    const html = `
+      <div style="font-size:16px; font-weight:700; margin-bottom:4px;">
+        ✅ Уровень ${finishedId ?? (newId-1)} пройден!
+      </div>
+      <div style="font-size:14px; opacity:.92;">
+        Уверены, вы справитесь с <b>${newId}</b> уровнем.
+      </div>
+    `;
+    showLevelToast(html, 1050);
+  }
+}
+
+function startGame(){
+  levelIndex = 0;
+  score = 0;
+
+  energy = 1;
+  movesLeft = MOVES_PER_LIFE;
+
+  startLevel(true);
+}
+
+
+  function restartLevel(){
+  // перезапуск текущего уровня (НЕ меняем levelIndex)
+  score = 0;
+
+  movesLeft = MOVES_PER_LIFE;
+
+  // сбрасываем цели уровня
+  BombActivated = false;
+  SnowflakeActivated = false;
+  CandleActivated = false;
+
+  selectedSquare = null;
+
+  setupHUD();
+  createBoard();
+
+  saveProgress();
+}
+/* =========================================================================
+   ИНИЦИАЛИЗАЦИЯ
+============================================================================ */
+setupHUD();
+
+if(loadProgress()){
+  setupHUD();
+  createBoard();
+} else {
+  // если прогресса нет — стартуем новую игру
+  startGame();
+  saveProgress(); // <- чтобы сразу записать базу, и дальше не было "пусто"
+}
+
+</script>
+</body>
+</html>
