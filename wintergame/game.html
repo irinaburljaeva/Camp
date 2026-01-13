@@ -475,6 +475,105 @@ h1{
 }
 
     /* =========================
+   CLOUD EMAIL (UI)
+========================= */
+.pill.pillCloud{
+  gap:10px;
+  padding:8px 10px;
+}
+
+.cloudField{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.cloudInput{
+  width: 240px;
+  max-width: 56vw;
+  padding: 7px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.26);
+  background: rgba(0,0,0,.22);
+  color:#fff;
+
+  font-size: 14px;
+  line-height: 1;
+  outline: none;
+
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+}
+
+.cloudInput::placeholder{
+  color: rgba(255,255,255,.72);
+}
+
+.cloudInput:focus{
+  border-color: rgba(255,255,255,.45);
+  background: rgba(0,0,0,.28);
+}
+
+.cloudBtn{
+  padding: 7px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.30);
+
+  background: linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.18));
+  color:#fff;
+
+  font-weight: 800;
+  letter-spacing: .2px;
+
+  cursor:pointer;
+
+  box-shadow:
+    0 10px 26px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.16);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  text-shadow:
+    0 2px 10px rgba(0,0,0,.45),
+    0 1px 1px rgba(0,0,0,.35);
+
+  transition: transform .15s, filter .2s, border-color .2s, background .2s;
+}
+
+.cloudBtn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  border-color: rgba(255,255,255,.45);
+}
+
+.cloudBtn:active{
+  transform: translateY(0) scale(.99);
+  filter: brightness(.98);
+}
+
+.cloudBtn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  transform:none !important;
+  box-shadow:none;
+}
+
+/* на очень узких — переносим на новую строку внутри pill */
+@media (max-width: 430px){
+  .pill.pillCloud{
+    width: 100%;
+    justify-content: space-between;
+  }
+  .cloudField{
+    width: 100%;
+    justify-content: space-between;
+  }
+  .cloudInput{
+    width: 100%;
+    max-width: none;
+  }
+}
+    /* =========================
    ИНВЕНТАРЬ (свечка)
 ========================= */
 .inv{
@@ -688,18 +787,12 @@ h1{
   <div class="headerWrap">
   <h1>Зимняя игра от ШАГАЙ ДОМА⚡️</h1>
 
-  <div class="authBar">
-  <div id="authStatus" class="pill" style="justify-content:center;">Гость: сохранение на устройстве</div>
-
-  <div class="authRow" id="authRow">
-    <input id="emailInput" type="email" placeholder="Email для сохранения прогресса" autocomplete="email" />
-    <button id="sendLinkBtn" type="button">📩 Войти по email</button>
+<div class="pill pillCloud">
+  <div class="cloudField">
+    <input id="emailInput" class="cloudInput" type="email" placeholder="Email для сохранения">
+    <button id="emailCloudBtn" class="cloudBtn">Сохранить</button>
   </div>
-
-  <div class="authRow" id="authedRow" style="display:none;">
-    <button id="logoutBtn" type="button">🚪 Выйти</button>
-  </div>
-</div>  
+</div>
   <div class="topbar">
     <div class="pill">Уровень: <b id="level">1</b></div>
     <div class="pill">Цель: <b id="progress">0/0</b></div>
@@ -1042,6 +1135,153 @@ window.addEventListener('pagehide', saveProgress);
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState === 'hidden') saveProgress();
 });
+
+  /* =========================================================================
+   CLOUD SAVE (email -> Firestore) — не трогаем saveProgress/loadProgress
+============================================================================ */
+
+const CLOUD_EMAIL_KEY = 'wintergame_email_cloud_v1';
+const CLOUD_COLLECTION = 'wintergame_users';
+
+function normalizeEmail(s){
+  return String(s || '').trim().toLowerCase();
+}
+
+function emailToDocId(email){
+  const e = normalizeEmail(email);
+  if(!e) return null;
+  // base64url
+  const b64 = btoa(unescape(encodeURIComponent(e)))
+    .replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
+  return b64;
+}
+
+function getCloudEmail(){
+  return normalizeEmail(storageGet(CLOUD_EMAIL_KEY) || '');
+}
+
+function setCloudEmail(email){
+  storageSet(CLOUD_EMAIL_KEY, normalizeEmail(email));
+}
+
+function readLocalProgressRaw(){
+  // НЕ трогаем твою логику: просто читаем то, что уже сохраняется
+  return storageGet(SAVE_KEY);
+}
+
+function parseLocalProgress(){
+  try{
+    const raw = readLocalProgressRaw();
+    if(!raw) return null;
+    const data = JSON.parse(raw);
+    if(!data || typeof data !== 'object') return null;
+    return data;
+  }catch(e){
+    return null;
+  }
+}
+
+async function saveLocalProgressToCloud(){
+  const email = getCloudEmail();
+  const docId = emailToDocId(email);
+  if(!docId) return { ok:false, reason:'no-email' };
+
+  const progress = parseLocalProgress();
+  if(!progress) return { ok:false, reason:'no-local-progress' };
+
+  try{
+    await db.collection(CLOUD_COLLECTION).doc(docId).set({
+      email,
+      lastSeenAt: firebase.firestore.FieldValue.serverTimestamp(),
+      progress
+    }, { merge:true });
+
+    return { ok:true };
+  }catch(e){
+    console.warn('[wintergame] cloud save failed', e);
+    return { ok:false, reason:'error', error:e };
+  }
+}
+
+async function loadCloudToLocalIfNewer(){
+  const email = getCloudEmail();
+  const docId = emailToDocId(email);
+  if(!docId) return { ok:false, reason:'no-email' };
+
+  try{
+    const snap = await db.collection(CLOUD_COLLECTION).doc(docId).get();
+    if(!snap.exists) return { ok:false, reason:'no-cloud-data' };
+
+    const cloud = snap.data();
+    if(!cloud || !cloud.progress) return { ok:false, reason:'no-cloud-progress' };
+
+    const local = parseLocalProgress();
+    const cloudTs = +cloud.progress.ts || 0;
+    const localTs = local ? (+local.ts || 0) : 0;
+
+    // если в облаке прогресс новее — перезапишем локальный, чтобы игра подхватила как обычно
+    if(cloudTs > localTs){
+      storageSet(SAVE_KEY, JSON.stringify(cloud.progress));
+      return { ok:true, applied:true };
+    }
+
+    return { ok:true, applied:false };
+  }catch(e){
+    console.warn('[wintergame] cloud load failed', e);
+    return { ok:false, reason:'error', error:e };
+  }
+}
+const emailInputEl = document.getElementById('emailInput');
+const emailCloudBtnEl = document.getElementById('emailCloudBtn');
+
+if(emailInputEl){
+  emailInputEl.value = getCloudEmail();
+}
+
+if(emailCloudBtnEl){
+  emailCloudBtnEl.addEventListener('click', async ()=>{
+    const email = normalizeEmail(emailInputEl?.value);
+    if(!email){
+      alert('Введите email 🙂');
+      return;
+    }
+
+    setCloudEmail(email);
+
+    // 1) сначала попробуем подтянуть из облака, если там новее
+    const loaded = await loadCloudToLocalIfNewer();
+
+    // если применили облако — перезагрузим страницу, чтобы твой существующий loadProgress отработал как обычно
+    if(loaded.ok && loaded.applied){
+      alert('Нашли более свежий прогресс в облаке ✅ Открываю его…');
+      location.reload();
+      return;
+    }
+
+    // 2) иначе — сохраним текущий локальный прогресс в облако
+    const saved = await saveLocalProgressToCloud();
+    if(saved.ok){
+      alert('Готово ✅ Прогресс сохранён');
+    }else{
+      alert('Не получилось сохранить 😕');
+    }
+  });
+}
+
+// Автосейв в облако при уходе со страницы (если email задан)
+window.addEventListener('pagehide', ()=>{
+  if(getCloudEmail()){
+    // берём уже сохранённый локально прогресс — твоя логика не меняется
+    saveLocalProgressToCloud();
+  }
+});
+
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'hidden' && getCloudEmail()){
+    saveLocalProgressToCloud();
+  }
+});
+  
 /* =========================================================================
    УТИЛИТЫ
 ============================================================================ */
