@@ -839,6 +839,8 @@ h1{
     </div>
   </div>
 </div>
+  <button onclick="openLeaders()">🏆 Лидеры</button>
+  
 
   <!-- Модалка инструкций -->
   <div class="overlay" id="overlay" aria-hidden="true">
@@ -888,7 +890,22 @@ h1{
     </div>
   </div>
 
-  
+  <!-- Модалка лидерборда -->
+<div class="overlay" id="leadersOverlay" aria-hidden="true">
+  <div class="modal">
+    <h2>🏆 Таблица лидеров</h2>
+    <p style="opacity:.85; margin-bottom:12px;">
+      Топ игроков по пройденным уровням
+    </p>
+
+    <div id="leadersList" style="display:flex; flex-direction:column; gap:10px;"></div>
+
+    <div class="actions">
+      <button onclick="closeLeaders()">Закрыть</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
 
@@ -1355,6 +1372,142 @@ if(emailCloudBtnEl){
     } else {
       alert('Готово ✅ Аккаунт создан');
     }
+  });
+}
+
+  /* =========================================================================
+   LEADERBOARD (public, no full emails)
+============================================================================ */
+const LEADERS_COLLECTION = 'wintergame_leaderboard';
+
+function maskEmail(email){
+  email = normalizeEmail(email);
+  const at = email.indexOf('@');
+  if(at <= 0) return '***';
+
+  const name = email.slice(0, at);
+  const domain = email.slice(at + 1);
+
+  if(name.length <= 3){
+    return name[0] + '***@' + domain;
+  }
+
+  const head = name.slice(0, 3);
+  const tail = name.slice(-2);
+  return `${head}*****${tail}@${domain}`;
+}
+
+async function upsertLeaderboard(email, progress){
+  const docId = emailToDocId(email);
+  if(!docId) return { ok:false, reason:'no-email' };
+
+  // сколько уровней "пройдено": levelIndex = индекс текущего уровня (0-based)
+  // то есть "пройдено" = levelIndex
+  const levelReached = Math.max(0, Number.isFinite(+progress?.levelIndex) ? +progress.levelIndex : 0);
+
+  try{
+    await db.collection(LEADERS_COLLECTION).doc(docId).set({
+      maskedEmail: maskEmail(email),
+      levelReached,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge:true });
+
+    return { ok:true };
+  }catch(e){
+    console.warn('[wintergame] leaderboard upsert failed', e);
+    return { ok:false, reason:'error', error:e };
+  }
+}
+
+async function fetchLeaders(limit=20){
+  try{
+    const snap = await db.collection(LEADERS_COLLECTION)
+      .orderBy('levelReached', 'desc')
+      .orderBy('updatedAt', 'desc')
+      .limit(limit)
+      .get();
+
+    const rows = [];
+    snap.forEach(doc=>{
+      const d = doc.data() || {};
+      rows.push({
+        maskedEmail: d.maskedEmail || '***',
+        levelReached: Number.isFinite(+d.levelReached) ? +d.levelReached : 0
+      });
+    });
+    return { ok:true, rows };
+  }catch(e){
+    console.warn('[wintergame] fetch leaders failed', e);
+    return { ok:false, reason:'error', error:e };
+  }
+}
+
+function renderLeaders(rows){
+  const box = document.getElementById('leadersList');
+  if(!box) return;
+
+  if(!rows || rows.length === 0){
+    box.innerHTML = `<div style="opacity:.8;">Пока нет данных 😌</div>`;
+    return;
+  }
+
+  box.innerHTML = rows.map((r, idx)=>{
+    const place = idx + 1;
+    return `
+      <div style="
+        display:flex; align-items:center; justify-content:space-between;
+        gap:10px; padding:10px 12px; border-radius:14px;
+        background: rgba(0,0,0,.06);
+        border: 1px solid rgba(0,0,0,.08);
+      ">
+        <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+          <div style="
+            width:28px; height:28px; border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:800; background: rgba(255,186,8,.25);
+          ">${place}</div>
+          <div style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            ${r.maskedEmail}
+          </div>
+        </div>
+
+        <div style="font-weight:800; white-space:nowrap;">
+          Уровней: ${r.levelReached}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* UI open/close */
+async function openLeaders(){
+  const ov = document.getElementById('leadersOverlay');
+  if(!ov) return;
+
+  ov.classList.add('show');
+  ov.setAttribute('aria-hidden','false');
+  renderLeaders(null);
+
+  const r = await fetchLeaders(20);
+  if(!r.ok){
+    renderLeaders([]);
+    return;
+  }
+  renderLeaders(r.rows);
+}
+
+function closeLeaders(){
+  const ov = document.getElementById('leadersOverlay');
+  if(!ov) return;
+  ov.classList.remove('show');
+  ov.setAttribute('aria-hidden','true');
+}
+
+/* close by background click */
+const leadersOverlayEl = document.getElementById('leadersOverlay');
+if(leadersOverlayEl){
+  leadersOverlayEl.addEventListener('click', (e)=>{
+    if(e.target === leadersOverlayEl) closeLeaders();
   });
 }
 /* =========================================================================
@@ -2480,6 +2633,11 @@ function checkLevelComplete(){
   if(email){
     cloudUpsertUser(email, parseLocalProgress());
   }
+    if(email){
+  const p = parseLocalProgress();
+  cloudUpsertUser(email, p);
+  upsertLeaderboard(email, p); // <-- добавили
+}
 }
 }
 
