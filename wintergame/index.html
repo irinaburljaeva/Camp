@@ -896,11 +896,123 @@ let movesLeft = MOVES_PER_LIFE;
 let rechargeInterval = null;
 let rechargeSeconds = 30;
 
-/* SAVE / LOAD (localStorage) ... */
-const SAVE_KEY = 'wintergame_progress_v1';
-function saveProgress(){...}
-function loadProgress(){...}
-function clearProgress(){...}
+/* =========================================================================
+   SAVE / LOAD (robust)
+   localStorage + cookie fallback + save on pagehide/visibilitychange
+============================================================================ */
+const SAVE_KEY = 'wintergame_progress_v2'; // <- новый ключ, чтобы не цеплять битые старые данные
+const SAVE_COOKIE_DAYS = 180;
+
+function storageSet(key, value){
+  // 1) localStorage
+  try{
+    localStorage.setItem(key, value);
+    return true;
+  }catch(e){
+    // 2) cookie fallback
+    try{
+      const maxAge = SAVE_COOKIE_DAYS * 24 * 60 * 60;
+      document.cookie = `${encodeURIComponent(key)}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/; SameSite=Lax`;
+      return true;
+    }catch(e2){
+      return false;
+    }
+  }
+}
+
+function storageGet(key){
+  // 1) localStorage
+  try{
+    const v = localStorage.getItem(key);
+    if(v) return v;
+  }catch(e){}
+
+  // 2) cookie fallback
+  try{
+    const name = encodeURIComponent(key) + '=';
+    const parts = document.cookie.split(';');
+    for(let p of parts){
+      p = p.trim();
+      if(p.startsWith(name)){
+        return decodeURIComponent(p.slice(name.length));
+      }
+    }
+  }catch(e2){}
+  return null;
+}
+
+function storageRemove(key){
+  try{ localStorage.removeItem(key); }catch(e){}
+  try{ document.cookie = `${encodeURIComponent(key)}=; Max-Age=0; Path=/; SameSite=Lax`; }catch(e){}
+}
+
+function saveProgress(){
+  const data = {
+    v: 2,
+    ts: Date.now(),
+
+    levelIndex,
+    score,
+    movesLeft,
+    energy,
+
+    BombActivated,
+    SnowflakeActivated,
+    CandleActivated,
+
+    candleInv,
+
+    // ВАЖНО: вы используете это в maybeAutoShowIntro(), значит сохраняем
+    introAutoShown
+  };
+
+  const ok = storageSet(SAVE_KEY, JSON.stringify(data));
+  if(!ok){
+    console.warn('[wintergame] progress NOT saved (storage blocked)');
+  }
+}
+
+function loadProgress(){
+  try{
+    const raw = storageGet(SAVE_KEY);
+    if(!raw) return false;
+
+    const data = JSON.parse(raw);
+    if(!data || typeof data !== 'object') return false;
+
+    levelIndex = Math.max(0, Number.isFinite(+data.levelIndex) ? +data.levelIndex : 0);
+    score      = Number.isFinite(+data.score)      ? +data.score      : 0;
+    movesLeft  = Number.isFinite(+data.movesLeft)  ? +data.movesLeft  : MOVES_PER_LIFE;
+    energy     = Number.isFinite(+data.energy)     ? +data.energy     : 1;
+
+    BombActivated      = !!data.BombActivated;
+    SnowflakeActivated = !!data.SnowflakeActivated;
+    CandleActivated    = !!data.CandleActivated;
+
+    candleInv = Number.isFinite(+data.candleInv) ? +data.candleInv : 0;
+
+    introAutoShown = (data.introAutoShown && typeof data.introAutoShown === 'object')
+      ? data.introAutoShown
+      : {};
+
+    return true;
+  }catch(e){
+    console.warn('[wintergame] loadProgress failed, clearing', e);
+    // если данные битые — чистим, чтобы не падать вечно
+    storageRemove(SAVE_KEY);
+    return false;
+  }
+}
+
+function clearProgress(){
+  storageRemove(SAVE_KEY);
+}
+
+// КРИТИЧНО для мобилок: успеть сохранить при сворачивании/закрытии
+window.addEventListener('pagehide', saveProgress);
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'hidden') saveProgress();
+});
 /* =========================================================================
    УТИЛИТЫ
 ============================================================================ */
