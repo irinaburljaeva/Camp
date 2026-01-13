@@ -1179,10 +1179,8 @@ function normalizeEmail(s){
 function emailToDocId(email){
   const e = normalizeEmail(email);
   if(!e) return null;
-  // base64url
-  const b64 = btoa(unescape(encodeURIComponent(e)))
-    .replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
-  return b64;
+  // Firestore doc id: email можно использовать напрямую (нельзя только '/')
+  return e;
 }
 
 function getCloudEmail(){
