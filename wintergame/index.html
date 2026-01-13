@@ -896,57 +896,11 @@ let movesLeft = MOVES_PER_LIFE;
 let rechargeInterval = null;
 let rechargeSeconds = 30;
 
-  /* =========================================================================
-   SAVE / LOAD (localStorage)
-============================================================================ */
+/* SAVE / LOAD (localStorage) ... */
 const SAVE_KEY = 'wintergame_progress_v1';
-
-function saveProgress(){
-  try{
-    const data = {
-      levelIndex,
-      score,
-      movesLeft,
-      energy,
-      BombActivated,
-      SnowflakeActivated,
-      CandleActivated,
-      candleInv
-    };
-    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-  }catch(e){}
-}
-
-function loadProgress(){
-  try{
-    const raw = localStorage.getItem(SAVE_KEY);
-    if(!raw) return false;
-    const data = JSON.parse(raw);
-
-    levelIndex = Math.max(0, (+data.levelIndex || 0));
-    score = +data.score || 0;
-    movesLeft = +data.movesLeft || MOVES_PER_LIFE;
-    energy = +data.energy || 1;
-
-    BombActivated = !!data.BombActivated;
-    SnowflakeActivated = !!data.SnowflakeActivated;
-    CandleActivated = !!data.CandleActivated;
-    candleInv = +data.candleInv || 0;
-
-    introAutoShown = (data.introAutoShown && typeof data.introAutoShown === 'object')
-      ? data.introAutoShown
-      : {}; // ✅
-
-    saveProgress();
-    return true;
-  }catch(e){
-    return false;
-  }
-}
-
-function clearProgress(){
-  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
-}
+function saveProgress(){...}
+function loadProgress(){...}
+function clearProgress(){...}
 /* =========================================================================
    УТИЛИТЫ
 ============================================================================ */
@@ -2127,11 +2081,15 @@ function startGame(){
    ИНИЦИАЛИЗАЦИЯ
 ============================================================================ */
 setupHUD();
-  if(loadProgress()){
-    setupHUD();
-    createBoard();
-  } else { 
-startGame();
+
+if(loadProgress()){
+  setupHUD();
+  createBoard();
+} else {
+  // если прогресса нет — стартуем новую игру
+  startGame();
+  saveProgress(); // <- чтобы сразу записать базу, и дальше не было "пусто"
+}
 
   }
 </script>
