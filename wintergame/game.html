@@ -809,25 +809,20 @@ h1{
   <div class="headerWrap">
   <h1>Зимняя игра от ШАГАЙ ДОМА⚡️</h1>
 
-<div class="pill pillCloud" id="pillCloud">
-  <!-- режим ввода -->
-  <div class="cloudField" id="cloudEdit">
-    <input id="emailInput" class="cloudInput" type="email" placeholder="Email для сохранения">
-    <button id="emailCloudBtn" class="cloudBtn">Сохранить</button>
-  </div>
+  <!-- email (скрывается целиком, если email уже сохранён) -->
+    <div class="pill pillCloud" id="pillCloud">
+      <div class="cloudField" id="cloudEdit">
+        <input id="emailInput" class="cloudInput" type="email" placeholder="Email для сохранения">
+        <button id="emailCloudBtn" class="cloudBtn" type="button">Сохранить</button>
+      </div>
+    </div>
 
-  <!-- режим "сохранено" -->
-  <div class="cloudSaved" id="cloudSaved" style="display:none;">
-    <span class="cloudSavedText" id="cloudSavedText">Email сохранён ✅</span>
-    <button class="cloudBtn cloudBtnGhost" id="cloudEditBtn" type="button">Изменить</button>
+     <div class="topbar">
+      <div class="pill">Уровень: <b id="level">1</b></div>
+      <div class="pill">Цель: <b id="progress">0/0</b></div>
+      <div class="pill">Ходы: <b id="moves">0</b></div>
+    </div>
   </div>
-</div>
-  <div class="topbar">
-    <div class="pill">Уровень: <b id="level">1</b></div>
-    <div class="pill">Цель: <b id="progress">0/0</b></div>
-    <div class="pill">Ходы: <b id="moves">0</b></div>
-  </div>
-</div>
 
   <div class="grid" id="grid"></div>
 <div class="levelToast" id="levelToast" aria-hidden="true"></div>
