@@ -885,6 +885,11 @@ h1{
       <div class="pill">Уровень: <b id="level">1</b></div>
       <div class="pill">Цель: <b id="progress">0/0</b></div>
       <div class="pill">Ходы: <b id="moves">0</b></div>
+        <!-- ✅ ЛИДЕРЫ: отдельной строкой, ниже -->
+  <div class="btnRow">
+    <button class="leadersBtn" type="button" onclick="openLeaders()">🏆 Лидеры</button>
+  </div>
+</div>
     </div>
   </div>
 
@@ -905,11 +910,7 @@ h1{
     </div>
   </div>
 
-  <!-- ✅ ЛИДЕРЫ: отдельной строкой, ниже -->
-  <div class="btnRow">
-    <button class="leadersBtn" type="button" onclick="openLeaders()">🏆 Лидеры</button>
-  </div>
-</div>
+ 
 
   <!-- Модалка инструкций -->
   <div class="overlay" id="overlay" aria-hidden="true">
@@ -958,7 +959,6 @@ h1{
       </p>
     </div>
   </div>
-
   <!-- Модалка лидерборда -->
 <div class="overlay" id="leadersOverlay" aria-hidden="true">
   <div class="modal">
@@ -974,6 +974,7 @@ h1{
     </div>
   </div>
 </div>
+
 
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
