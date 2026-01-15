@@ -788,6 +788,70 @@ h1{
   }
 }
 
+    /* =========================
+   ЛИДЕРЫ — кнопка (как остальные, но шире)
+========================= */
+.leadersBtn{
+  width: min(520px, 100%);
+}
+
+/* =========================
+   ЛИДЕРБОРД — красивый список
+========================= */
+.leadersList{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.leaderRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+
+  padding:10px 12px;
+  border-radius:14px;
+
+  background: rgba(0,0,0,.08);
+  border: 1px solid rgba(0,0,0,.10);
+}
+
+.leaderLeft{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.leaderPlace{
+  width:28px;
+  height:28px;
+  border-radius:10px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-weight:900;
+  background: rgba(255,186,8,.28);
+  border: 1px solid rgba(255,186,8,.25);
+}
+
+.leaderEmail{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+
+  font-weight:700;
+}
+
+.leaderScore{
+  font-weight:900;
+  white-space:nowrap;
+}
+
 @media (max-height: 650px) {
   :root {
     --board: min(85vw, 420px, calc(100svh - 200px));
@@ -826,21 +890,26 @@ h1{
 
   <div class="grid" id="grid"></div>
 <div class="levelToast" id="levelToast" aria-hidden="true"></div>
-  <div class="btnbar">
+</div>
+
+<div class="btnbar">
   <div class="btnRow">
     <button onclick="restartLevel()">🔄 Заново </button>
     <button onclick="showIntro()">📜 Инструкция уровня</button>
   </div>
 
- <div class="invRow" id="invRow" style="display:none;">
+  <div class="invRow" id="invRow" style="display:none;">
     <div class="inv">
       <div class="invItem" id="candleInv" title="Свечка"></div>
       <div class="invCount" id="candleInvCount">0</div>
     </div>
   </div>
+
+  <!-- ✅ ЛИДЕРЫ: отдельной строкой, ниже -->
+  <div class="btnRow">
+    <button class="leadersBtn" type="button" onclick="openLeaders()">🏆 Лидеры</button>
+  </div>
 </div>
-  <button onclick="openLeaders()">🏆 Лидеры</button>
-  
 
   <!-- Модалка инструкций -->
   <div class="overlay" id="overlay" aria-hidden="true">
@@ -898,7 +967,7 @@ h1{
       Топ игроков по пройденным уровням
     </p>
 
-    <div id="leadersList" style="display:flex; flex-direction:column; gap:10px;"></div>
+<div id="leadersList" class="leadersList"></div>
 
     <div class="actions">
       <button onclick="closeLeaders()">Закрыть</button>
