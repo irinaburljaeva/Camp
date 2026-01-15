@@ -1493,7 +1493,6 @@ async function fetchLeaders(limit=20){
   try{
     const snap = await db.collection(LEADERS_COLLECTION)
       .orderBy('levelReached', 'desc')
-      .orderBy('updatedAt', 'desc')
       .limit(limit)
       .get();
 
@@ -2698,15 +2697,11 @@ function checkLevelComplete(){
   // сохраняем локально (как и раньше)
   saveProgress();
 
-  // ⬇️ НОВОЕ: если введён email — сохраняем в Firestore
-  const email = getCloudEmail();
-  if(email){
-    cloudUpsertUser(email, parseLocalProgress());
-  }
-    if(email){
+const email = getCloudEmail();
+if(email){
   const p = parseLocalProgress();
   cloudUpsertUser(email, p);
-  upsertLeaderboard(email, p); // <-- добавили
+  upsertLeaderboard(email, p);
 }
 }
 }
