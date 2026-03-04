@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>ШАГАЙ ДОМА — Лови цветы</title>
+
+<style>
+
+body{
+    background:#fff;
+    font-family:Arial;
+    text-align:center;
+}
+
+canvas{
+    background:#f5f5f5;
+    border:3px solid #CF2C02;
+}
+
+#overlay{
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background:rgba(0,0,0,0.7);
+    color:white;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    font-size:28px;
+}
+
+button{
+    padding:12px 25px;
+    font-size:18px;
+    margin-top:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>🌸 ШАГАЙ ДОМА — Лови цветы</h2>
+
+<canvas id="game" width="400" height="600"></canvas>
+
+<div id="overlay">
+    <div>Чтобы продолжить — пошагайте!</div>
+    <div style="font-size:18px;margin-top:10px">
+        Сделайте 50 шагов на месте
+    </div>
+    <button onclick="resumeGame()">Я пошагала 👣</button>
+</div>
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let score = 0;
+let lives = 3;
+
+let player = {
+    x:200,
+    y:520,
+    width:50,
+    height:50
+};
+
+let flowers = [];
+
+function spawnFlower(){
+
+    flowers.push({
+        x: Math.random()*350,
+        y: -20,
+        speed: 2 + Math.random()*2
+    });
+
+}
+
+setInterval(spawnFlower,1000);
+
+document.addEventListener("keydown",function(e){
+
+    if(e.key==="ArrowLeft") player.x-=30;
+    if(e.key==="ArrowRight") player.x+=30;
+
+});
+
+function drawPlayer(){
+
+    ctx.fillStyle="#CF2C02";
+    ctx.fillRect(player.x,player.y,player.width,player.height);
+
+}
+
+function drawFlowers(){
+
+    ctx.font="30px Arial";
+
+    flowers.forEach((f,i)=>{
+
+        ctx.fillText("🌸",f.x,f.y);
+
+        f.y+=f.speed;
+
+        if(
+            f.y > player.y &&
+            f.x > player.x &&
+            f.x < player.x + player.width
+        ){
+
+            score++;
+            flowers.splice(i,1);
+
+        }
+
+        if(f.y>600){
+
+            flowers.splice(i,1);
+            lives--;
+
+            if(lives<=0){
+
+                pauseGame();
+
+            }
+
+        }
+
+    });
+
+}
+
+function drawUI(){
+
+    ctx.fillStyle="black";
+    ctx.font="18px Arial";
+
+    ctx.fillText("Очки: "+score,10,20);
+    ctx.fillText("Жизни: "+lives,300,20);
+
+}
+
+function update(){
+
+    ctx.clearRect(0,0,400,600);
+
+    drawPlayer();
+    drawFlowers();
+    drawUI();
+
+    requestAnimationFrame(update);
+
+}
+
+function pauseGame(){
+
+    document.getElementById("overlay").style.display="flex";
+
+}
+
+function resumeGame(){
+
+    lives = 3;
+    document.getElementById("overlay").style.display="none";
+
+}
+
+update();
+
+</script>
+
+</body>
+</html>
