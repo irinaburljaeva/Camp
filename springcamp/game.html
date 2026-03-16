@@ -50,6 +50,41 @@ canvas {
     display: block;
 }
 
+.controls {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 15px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.control-btn {
+    padding: 20px;
+    font-size: 18px;
+    background: linear-gradient(135deg, #FFDE59, #FF9F1C);
+    border: 3px solid #CF2C02;
+    border-radius: 15px;
+    color: #78350f;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(255, 159, 28, 0.4);
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+}
+
+.control-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 8px rgba(255, 159, 28, 0.4);
+}
+
+.control-btn.active {
+    background: linear-gradient(135deg, #CF2C02, #FF9F1C);
+    color: white;
+}
+
 #overlay {
     position: absolute;
     top: 0;
@@ -75,20 +110,12 @@ canvas {
     font-size: 36px;
     font-weight: bold;
     margin-bottom: 20px;
-    animation: pulse 1.5s ease-in-out infinite;
 }
 
 .overlay-text {
     font-size: 20px;
     margin: 10px 0;
     max-width: 300px;
-}
-
-.step-counter {
-    font-size: 48px;
-    font-weight: bold;
-    margin: 20px 0;
-    color: #FFDE59;
 }
 
 button {
@@ -110,10 +137,6 @@ button:hover {
     box-shadow: 0 12px 25px rgba(255, 159, 28, 0.5);
 }
 
-button:active {
-    transform: translateY(0);
-}
-
 .stats {
     margin-top: 20px;
     display: flex;
@@ -128,23 +151,6 @@ button:active {
     padding: 10px 20px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
-@keyframes fall {
-    from { transform: translateY(-20px) rotate(0deg); }
-    to { transform: translateY(600px) rotate(360deg); }
-}
-
-.instructions {
-    margin-top: 20px;
-    font-size: 14px;
-    color: #666;
-    max-width: 400px;
 }
 
 @media (max-width: 480px) {
@@ -164,22 +170,36 @@ button:active {
 <body>
 
 <h1>🌸 ШАГАЙ ДОМА — Лови цветы</h1>
-<p class="subtitle">Двигайся стрелками ← → и лови падающие цветы!</p>
+<p class="subtitle">Перемещайся по 4 позициям и лови цветы!</p>
 
 <div class="game-container">
-    <canvas id="game" width="400" height="600"></canvas>
+    <canvas id="game" width="600" height="500"></canvas>
     
     <div id="overlay">
         <div class="overlay-title">⏸️ Пауза на шаги!</div>
         <div class="overlay-text">
             Чтобы продолжить игру — пошагайте на месте
         </div>
-        <div class="step-counter" id="stepCounter">50 шагов</div>
-        <div class="overlay-text">
-            Или нажмите кнопку, если уже сделали
+        <div class="overlay-text" style="font-size:48px; color:#FFDE59; margin:20px 0;">
+            50 шагов
         </div>
         <button onclick="resumeGame()">Я пошагала 👣 Продолжить!</button>
     </div>
+</div>
+
+<div class="controls">
+    <button class="control-btn" id="btn-tl" onmousedown="setPosition(0)" onmouseup="clearActive()" ontouchstart="setPosition(0)" ontouchend="clearActive()">
+        ↖️ Верх-Лево<br><small>Q</small>
+    </button>
+    <button class="control-btn" id="btn-tr" onmousedown="setPosition(1)" onmouseup="clearActive()" ontouchstart="setPosition(1)" ontouchend="clearActive()">
+        ↗️ Верх-Право<br><small>W</small>
+    </button>
+    <button class="control-btn" id="btn-bl" onmousedown="setPosition(2)" onmouseup="clearActive()" ontouchstart="setPosition(2)" ontouchend="clearActive()">
+        ↙️ Низ-Лево<br><small>A</small>
+    </button>
+    <button class="control-btn" id="btn-br" onmousedown="setPosition(3)" onmouseup="clearActive()" ontouchstart="setPosition(3)" ontouchend="clearActive()">
+        ↘️ Низ-Право<br><small>S</small>
+    </button>
 </div>
 
 <div class="stats">
@@ -191,10 +211,9 @@ button:active {
     </div>
 </div>
 
-<p class="instructions">
-    💡 Управление: стрелки ← → на клавиатуре<br>
-    🎯 Цель: поймай как можно больше цветов!<br>
-    ⚠️ У тебя 3 жизни — не упусти цветы!
+<p style="margin-top:20px; color:#666; font-size:14px;">
+    💡 Управление: Q-W-A-S или кнопки<br>
+    🎯 Лови цветы в 4 позициях — не упусти ни одного!
 </p>
 
 <script>
@@ -207,204 +226,194 @@ let level = 1;
 let bestScore = parseInt(localStorage.getItem('flowerGameBest')) || 0;
 let isPaused = false;
 let gameSpeed = 1;
+let currentPosition = 2; // 0=TL, 1=TR, 2=BL, 3=BR
 
-// Обновляем рекорд на экране
 document.getElementById('bestScore').textContent = bestScore;
 document.getElementById('level').textContent = level;
 
-let player = {
-    x: 175,
-    y: 520,
-    width: 50,
-    height: 50,
-    speed: 25
-};
+// Позиции персонажа (корзины)
+const positions = [
+    { x: 100, y: 150 },  // Top-Left
+    { x: 450, y: 150 },  // Top-Right
+    { x: 100, y: 350 },  // Bottom-Left
+    { x: 450, y: 350 }   // Bottom-Right
+];
+
+// Желоба для цветов
+const lanes = [
+    { startX: 50, startY: 20, endX: 120, endY: 180, position: 0 },   // TL
+    { startX: 550, startY: 20, endX: 480, endY: 180, position: 1 },  // TR
+    { startX: 50, startY: 480, endX: 120, endY: 380, position: 2 },  // BL
+    { startX: 550, startY: 480, endX: 480, endY: 380, position: 3 }  // BR
+];
 
 let flowers = [];
-let particles = []; // Для эффектов
 
-const flowerEmojis = ['🌸', '🌺', '🌻', '🌼', '🌷', '🏵️'];
+const flowerEmojis = ['🌸', '🌺', '🌻', '🌼', '🌷'];
 
 function spawnFlower() {
     if (isPaused) return;
     
+    const lane = lanes[Math.floor(Math.random() * 4)];
     const emoji = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
     
     flowers.push({
-        x: Math.random() * 350,
-        y: -30,
-        speed: (2 + Math.random() * 2) * gameSpeed,
+        lane: lane.position,
+        progress: 0,
+        speed: (0.8 + Math.random() * 0.4) * gameSpeed,
         emoji: emoji,
-        rotation: Math.random() * 360
+        caught: false
     });
 }
 
-let spawnInterval = setInterval(spawnFlower, 1000);
+// Спавн цветов
+setInterval(spawnFlower, 1500 / gameSpeed);
 
-// Управление
+// Управление клавиатурой
 document.addEventListener("keydown", function(e) {
     if (isPaused) return;
     
-    if (e.key === "ArrowLeft" && player.x > 0) {
-        player.x -= player.speed;
-    }
-    if (e.key === "ArrowRight" && player.x < canvas.width - player.width) {
-        player.x += player.speed;
-    }
+    const key = e.key.toLowerCase();
+    if (key === 'q') setPosition(0);
+    if (key === 'w') setPosition(1);
+    if (key === 'a') setPosition(2);
+    if (key === 's') setPosition(3);
 });
 
-// Мобильное управление (касание)
-let touchStartX = 0;
-canvas.addEventListener('touchstart', (e) => {
-    touchStartX = e.touches[0].clientX;
-});
+document.addEventListener("keyup", clearActive);
 
-canvas.addEventListener('touchmove', (e) => {
+function setPosition(pos) {
     if (isPaused) return;
-    e.preventDefault();
+    currentPosition = pos;
     
-    const touchX = e.touches[0].clientX;
-    const rect = canvas.getBoundingClientRect();
-    const canvasX = touchX - rect.left;
-    
-    player.x = Math.max(0, Math.min(canvas.width - player.width, canvasX - player.width / 2));
-});
+    // Визуальная подсветка
+    document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+    const buttons = ['btn-tl', 'btn-tr', 'btn-bl', 'btn-br'];
+    document.getElementById(buttons[pos]).classList.add('active');
+}
 
-function createParticles(x, y) {
-    for (let i = 0; i < 10; i++) {
-        particles.push({
-            x: x,
-            y: y,
-            vx: (Math.random() - 0.5) * 5,
-            vy: (Math.random() - 0.5) * 5,
-            life: 20,
-            color: `hsl(${Math.random() * 360}, 70%, 60%)`
-        });
-    }
+function clearActive() {
+    document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
 }
 
 function drawPlayer() {
+    const pos = positions[currentPosition];
+    
     // Рисуем корзину
     ctx.fillStyle = "#CF2C02";
     ctx.strokeStyle = "#8B1E00";
     ctx.lineWidth = 3;
     
-    // Основа корзины
     ctx.beginPath();
-    ctx.moveTo(player.x, player.y + player.height);
-    ctx.lineTo(player.x + 10, player.y);
-    ctx.lineTo(player.x + player.width - 10, player.y);
-    ctx.lineTo(player.x + player.width, player.y + player.height);
-    ctx.closePath();
+    ctx.arc(pos.x, pos.y, 35, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
     
-    // Узор корзины
-    ctx.strokeStyle = "#FFF";
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 3; i++) {
-        const spacing = player.width / 4;
+    // Детали корзины
+    ctx.fillStyle = "#FFF";
+    ctx.font = "40px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("🧺", pos.x, pos.y);
+}
+
+function drawLanes() {
+    ctx.strokeStyle = "rgba(207, 44, 2, 0.2)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    
+    lanes.forEach(lane => {
         ctx.beginPath();
-        ctx.moveTo(player.x + spacing * (i + 1), player.y + 5);
-        ctx.lineTo(player.x + spacing * (i + 1), player.y + player.height - 5);
+        ctx.moveTo(lane.startX, lane.startY);
+        ctx.lineTo(lane.endX, lane.endY);
         ctx.stroke();
-    }
+    });
+    
+    ctx.setLineDash([]);
 }
 
 function drawFlowers() {
-    ctx.font = "35px Arial";
+    ctx.font = "30px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     
-    flowers.forEach((f, i) => {
-        ctx.save();
-        ctx.translate(f.x + 15, f.y);
-        ctx.rotate((f.rotation * Math.PI) / 180);
-        ctx.fillText(f.emoji, -15, 0);
-        ctx.restore();
+    flowers.forEach((flower, i) => {
+        if (flower.caught) return;
         
-        f.y += f.speed;
-        f.rotation += 2;
+        const lane = lanes[flower.lane];
+        flower.progress += flower.speed;
         
-        // Проверка поимки
-        if (
-            f.y > player.y - 10 &&
-            f.y < player.y + player.height &&
-            f.x > player.x - 20 &&
-            f.x < player.x + player.width - 10
-        ) {
-            score++;
-            createParticles(f.x + 15, f.y);
-            flowers.splice(i, 1);
-            
-            // Сохраняем рекорд
-            if (score > bestScore) {
-                bestScore = score;
-                localStorage.setItem('flowerGameBest', bestScore);
-                document.getElementById('bestScore').textContent = bestScore;
-            }
-            
-            // Увеличиваем уровень каждые 10 очков
-            if (score % 10 === 0) {
-                level = Math.floor(score / 10) + 1;
-                gameSpeed = 1 + (level - 1) * 0.2;
-                document.getElementById('level').textContent = level;
+        // Интерполяция по желобу
+        const t = flower.progress / 100;
+        const x = lane.startX + (lane.endX - lane.startX) * t;
+        const y = lane.startY + (lane.endY - lane.startY) * t;
+        
+        ctx.fillText(flower.emoji, x, y);
+        
+        // Проверка поимки (когда цветок достиг конца желоба)
+        if (flower.progress >= 100) {
+            if (currentPosition === flower.lane) {
+                // Поймали!
+                score++;
+                flower.caught = true;
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    localStorage.setItem('flowerGameBest', bestScore);
+                    document.getElementById('bestScore').textContent = bestScore;
+                }
+                
+                // Увеличение уровня
+                if (score % 15 === 0) {
+                    level = Math.floor(score / 15) + 1;
+                    gameSpeed = 1 + (level - 1) * 0.15;
+                    document.getElementById('level').textContent = level;
+                }
+            } else {
+                // Упустили
+                lives--;
+                flower.caught = true;
+                
+                if (lives <= 0) {
+                    pauseGame();
+                }
             }
         }
         
-        // Цветок упал
-        if (f.y > 600) {
+        // Удаляем пойманные цветы
+        if (flower.caught) {
             flowers.splice(i, 1);
-            lives--;
-            
-            if (lives <= 0) {
-                pauseGame();
-            }
         }
     });
-}
-
-function drawParticles() {
-    particles.forEach((p, i) => {
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.life / 20;
-        ctx.fillRect(p.x, p.y, 4, 4);
-        
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life--;
-        
-        if (p.life <= 0) {
-            particles.splice(i, 1);
-        }
-    });
-    ctx.globalAlpha = 1;
 }
 
 function drawUI() {
     ctx.fillStyle = "#CF2C02";
-    ctx.font = "bold 20px Arial";
+    ctx.font = "bold 24px Arial";
+    ctx.textAlign = "left";
     
     // Очки
-    ctx.fillText("🏆 Очки: " + score, 15, 30);
+    ctx.fillText("🏆 " + score, 20, 40);
     
     // Жизни
-    ctx.fillText("❤️ ".repeat(lives), canvas.width - 100, 30);
+    ctx.textAlign = "right";
+    ctx.fillText("❤️ ".repeat(lives), canvas.width - 20, 40);
     
     // Уровень
+    ctx.textAlign = "center";
     ctx.fillStyle = "#FF9F1C";
-    ctx.fillText("Уровень " + level, 15, 60);
+    ctx.fillText("Уровень " + level, canvas.width / 2, 40);
 }
 
 function update() {
-    if (isPaused) {
-        requestAnimationFrame(update);
-        return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (!isPaused) {
+        drawLanes();
+        drawFlowers();
+        drawPlayer();
     }
     
-    ctx.clearRect(0, 0, 400, 600);
-    
-    drawPlayer();
-    drawFlowers();
-    drawParticles();
     drawUI();
     
     requestAnimationFrame(update);
@@ -426,3 +435,4 @@ update();
 
 </body>
 </html>
+
