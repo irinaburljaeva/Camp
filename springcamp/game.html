@@ -285,18 +285,48 @@ let currentPosition = 2; // 0=левый верх, 1=правый верх, 2=л
 
 document.getElementById('bestScore').textContent = bestScore;
 
-// Желоба (откуда падают цветы)
+// Желоба - диагональные пути для цветов
 const lanes = [
-    { x: 100, startY: 50, type: 'left' },   // Левый желоб
-    { x: 500, startY: 50, type: 'right' }   // Правый желоб
+    // Левая сторона - верхний желоб
+    { 
+        startX: 50, 
+        startY: 50, 
+        endX: 150, 
+        endY: 280, 
+        position: 0 
+    },
+    // Правая сторона - верхний желоб
+    { 
+        startX: 550, 
+        startY: 50, 
+        endX: 450, 
+        endY: 280, 
+        position: 1 
+    },
+    // Левая сторона - нижний желоб
+    { 
+        startX: 50, 
+        startY: 150, 
+        endX: 150, 
+        endY: 340, 
+        position: 2 
+    },
+    // Правая сторона - нижний желоб
+    { 
+        startX: 550, 
+        startY: 150, 
+        endX: 450, 
+        endY: 340, 
+        position: 3 
+    }
 ];
 
-// Позиции персонажа внизу
+// Позиции для ловли
 const catchPositions = [
-    { x: 100, y: 320, lane: 0, level: 'top' },     // Левый верхний
-    { x: 500, y: 320, lane: 1, level: 'top' },     // Правый верхний
-    { x: 100, y: 360, lane: 0, level: 'bottom' },  // Левый нижний
-    { x: 500, y: 360, lane: 1, level: 'bottom' }   // Правый нижний
+    { x: 150, y: 280 },  // Левый верхний
+    { x: 450, y: 280 },  // Правый верхний
+    { x: 150, y: 340 },  // Левый нижний
+    { x: 450, y: 340 }   // Правый нижний
 ];
 
 let flowers = [];
@@ -305,22 +335,19 @@ const flowerEmojis = ['🌸', '🌺', '🌻', '🌼', '🌷', '🏵️'];
 function spawnFlower() {
     if (isPaused) return;
     
-    const laneIndex = Math.floor(Math.random() * 2); // 0 или 1
+    const laneIndex = Math.floor(Math.random() * 4);
     const lane = lanes[laneIndex];
-    const level = Math.random() > 0.5 ? 'top' : 'bottom';
     
     flowers.push({
-        x: lane.x,
-        y: lane.startY,
         laneIndex: laneIndex,
-        level: level,
-        speed: (1.5 + Math.random() * 0.5) * gameSpeed,
+        progress: 0,
+        speed: (0.8 + Math.random() * 0.4) * gameSpeed,
         emoji: flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)],
         caught: false
     });
 }
 
-setInterval(spawnFlower, 1200);
+setInterval(spawnFlower, 1400);
 
 // Управление клавиатурой
 document.addEventListener("keydown", function(e) {
@@ -339,37 +366,39 @@ function setPosition(pos) {
 }
 
 function drawBackground() {
-    // Рисуем желоба (лестницы)
+    // Рисуем диагональные желоба
     ctx.strokeStyle = '#8B6F47';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 4;
+    ctx.setLineDash([8, 4]);
     
-    // Левый желоб
-    ctx.beginPath();
-    ctx.moveTo(80, 50);
-    ctx.lineTo(120, 50);
-    ctx.lineTo(120, 300);
-    ctx.lineTo(80, 300);
-    ctx.stroke();
-    
-    // Правый желоб
-    ctx.beginPath();
-    ctx.moveTo(480, 50);
-    ctx.lineTo(520, 50);
-    ctx.lineTo(520, 300);
-    ctx.lineTo(480, 300);
-    ctx.stroke();
-    
-    // Перекладины
-    for (let i = 0; i < 6; i++) {
-        const y = 70 + i * 40;
+    lanes.forEach(lane => {
         ctx.beginPath();
-        ctx.moveTo(80, y);
-        ctx.lineTo(120, y);
+        ctx.moveTo(lane.startX, lane.startY);
+        ctx.lineTo(lane.endX, lane.endY);
         ctx.stroke();
-        
+    });
+    
+    ctx.setLineDash([]);
+    
+    // Рисуем упрощенные лесенки по бокам
+    ctx.strokeStyle = '#A0826D';
+    ctx.lineWidth = 2;
+    
+    // Левая лесенка
+    for (let i = 0; i < 4; i++) {
+        const y = 100 + i * 70;
         ctx.beginPath();
-        ctx.moveTo(480, y);
-        ctx.lineTo(520, y);
+        ctx.moveTo(40, y);
+        ctx.lineTo(80, y);
+        ctx.stroke();
+    }
+    
+    // Правая лесенка
+    for (let i = 0; i < 4; i++) {
+        const y = 100 + i * 70;
+        ctx.beginPath();
+        ctx.moveTo(520, y);
+        ctx.lineTo(560, y);
         ctx.stroke();
     }
 }
@@ -377,9 +406,9 @@ function drawBackground() {
 function drawPlayer() {
     const pos = catchPositions[currentPosition];
     
-    // Рисуем девушку с корзиной
+    // Рисуем корзину
     ctx.fillStyle = "#CF2C02";
-    ctx.font = "50px Arial";
+    ctx.font = "45px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("🧺", pos.x, pos.y);
@@ -388,27 +417,36 @@ function drawPlayer() {
     ctx.strokeStyle = "#FF9F1C";
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 30, 0, Math.PI * 2);
+    ctx.arc(pos.x, pos.y, 28, 0, Math.PI * 2);
     ctx.stroke();
 }
 
 function drawFlowers() {
-    ctx.font = "35px Arial";
+    ctx.font = "32px Arial";
     ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     
     flowers.forEach((flower, i) => {
         if (flower.caught) return;
         
-        ctx.fillText(flower.emoji, flower.x, flower.y);
-        flower.y += flower.speed;
+        const lane = lanes[flower.laneIndex];
+        flower.progress += flower.speed;
+        
+        // Интерполяция по диагонали
+        const t = flower.progress / 100;
+        const x = lane.startX + (lane.endX - lane.startX) * t;
+        const y = lane.startY + (lane.endY - lane.startY) * t;
+        
+        // Небольшое вращение для эффекта
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate((flower.progress * 3) * Math.PI / 180);
+        ctx.fillText(flower.emoji, 0, 0);
+        ctx.restore();
         
         // Проверка поимки
-        const targetPos = catchPositions.find(p => 
-            p.lane === flower.laneIndex && p.level === flower.level
-        );
-        
-        if (flower.y >= targetPos.y - 20 && flower.y <= targetPos.y + 20) {
-            if (currentPosition === catchPositions.indexOf(targetPos)) {
+        if (flower.progress >= 95) {
+            if (currentPosition === flower.laneIndex) {
                 // Поймали!
                 score++;
                 flower.caught = true;
@@ -421,13 +459,13 @@ function drawFlowers() {
                 
                 // Увеличение скорости
                 if (score % 10 === 0) {
-                    gameSpeed += 0.1;
+                    gameSpeed += 0.15;
                 }
             }
         }
         
         // Цветок упал
-        if (flower.y > 390) {
+        if (flower.progress >= 100) {
             if (!flower.caught) {
                 lives--;
                 if (lives <= 0) {
@@ -440,7 +478,7 @@ function drawFlowers() {
 }
 
 function drawUI() {
-    // Цифровой счетчик как на оригинале
+    // Цифровой счетчик
     ctx.fillStyle = "#2a2a2a";
     ctx.font = "bold 32px 'Courier New', monospace";
     ctx.textAlign = "right";
@@ -452,9 +490,9 @@ function drawUI() {
     ctx.font = "24px Arial";
     for (let i = 0; i < 3; i++) {
         if (i < lives) {
-            ctx.fillText("❤️", 560 + (i * 25), 60);
+            ctx.fillText("❤️", 540 + (i * 30), 60);
         } else {
-            ctx.fillText("🤍", 560 + (i * 25), 60);
+            ctx.fillText("🤍", 540 + (i * 30), 60);
         }
     }
 }
