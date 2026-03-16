@@ -13,7 +13,7 @@
 }
 
 body {
-    background: linear-gradient(135deg, #FFF8E5 0%, #FFE8B3 100%);
+    background: linear-gradient(135deg, #d4a574 0%, #c9965f 100%);
     font-family: 'Arial', sans-serif;
     text-align: center;
     padding: 20px;
@@ -25,80 +25,121 @@ body {
 }
 
 h1 {
-    color: #CF2C02;
-    font-size: 2.2em;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    color: #8B4513;
+    font-size: 2em;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
-.subtitle {
-    color: #666;
-    font-size: 1em;
-    margin-bottom: 20px;
+.game-wrapper {
+    background: linear-gradient(135deg, #e8d4b8 0%, #d4c4a8 100%);
+    padding: 30px;
+    border-radius: 30px;
+    box-shadow: 
+        inset 0 0 30px rgba(0,0,0,0.1),
+        0 15px 50px rgba(0,0,0,0.4);
+    border: 8px solid #8B6F47;
 }
 
-.game-container {
-    position: relative;
-    display: inline-block;
+.screen-border {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 20px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
 }
 
 canvas {
-    background: linear-gradient(180deg, #E8F5FF 0%, #FFF8E5 100%);
-    border: 5px solid #CF2C02;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(207, 44, 2, 0.3);
+    background: linear-gradient(180deg, #b8c5d0 0%, #a8b5c0 50%, #98a5b0 100%);
+    border: 3px solid #1a1a1a;
+    border-radius: 10px;
     display: block;
+    box-shadow: 
+        inset 0 2px 10px rgba(0,0,0,0.3),
+        0 0 30px rgba(255,255,255,0.1);
 }
 
-.controls {
-    margin-top: 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+.game-title {
+    background: #2a2a2a;
+    color: #d4a574;
+    padding: 10px 30px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
+
+.controls-panel {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+    gap: 30px;
+}
+
+.control-side {
+    display: flex;
+    flex-direction: column;
     gap: 15px;
-    max-width: 300px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .control-btn {
-    padding: 20px;
-    font-size: 18px;
-    background: linear-gradient(135deg, #FFDE59, #FF9F1C);
-    border: 3px solid #CF2C02;
-    border-radius: 15px;
-    color: #78350f;
-    font-weight: bold;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle at 30% 30%, #d64545, #a03030);
+    border: 5px solid #7a7a7a;
+    border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 5px 15px rgba(255, 159, 28, 0.4);
-    transition: all 0.2s ease;
+    box-shadow: 
+        0 8px 15px rgba(0,0,0,0.4),
+        inset 0 -3px 8px rgba(0,0,0,0.3),
+        inset 0 3px 8px rgba(255,255,255,0.2);
+    transition: all 0.1s ease;
+    position: relative;
     touch-action: manipulation;
 }
 
 .control-btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 8px rgba(255, 159, 28, 0.4);
+    transform: translateY(3px);
+    box-shadow: 
+        0 4px 8px rgba(0,0,0,0.4),
+        inset 0 2px 10px rgba(0,0,0,0.5);
 }
 
-.control-btn.active {
-    background: linear-gradient(135deg, #CF2C02, #FF9F1C);
-    color: white;
+.control-btn::before {
+    content: '';
+    position: absolute;
+    top: 15%;
+    left: 15%;
+    width: 30%;
+    height: 30%;
+    background: radial-gradient(circle, rgba(255,255,255,0.4), transparent);
+    border-radius: 50%;
 }
+
+.arrow-indicator {
+    position: absolute;
+    font-size: 24px;
+    color: #333;
+}
+
+.arrow-top { top: -30px; left: 50%; transform: translateX(-50%); }
+.arrow-bottom { bottom: -30px; left: 50%; transform: translateX(-50%); }
 
 #overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(207, 44, 2, 0.95);
-    color: white;
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+    background: rgba(42, 42, 42, 0.95);
+    color: #d4a574;
     display: none;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     font-size: 24px;
-    border-radius: 20px;
+    border-radius: 10px;
     z-index: 10;
 }
 
@@ -110,58 +151,58 @@ canvas {
     font-size: 36px;
     font-weight: bold;
     margin-bottom: 20px;
+    color: #FF9F1C;
 }
 
-.overlay-text {
-    font-size: 20px;
-    margin: 10px 0;
-    max-width: 300px;
-}
-
-button {
+.resume-btn {
     padding: 15px 35px;
     font-size: 20px;
     margin-top: 20px;
-    background: linear-gradient(135deg, #FFDE59, #FF9F1C);
-    border: none;
+    background: radial-gradient(circle at 30% 30%, #d64545, #a03030);
+    border: 3px solid #7a7a7a;
     border-radius: 50px;
-    color: #78350f;
+    color: white;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 8px 20px rgba(255, 159, 28, 0.4);
-    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    transition: all 0.2s ease;
 }
 
-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 25px rgba(255, 159, 28, 0.5);
+.resume-btn:active {
+    transform: translateY(2px);
 }
 
 .stats {
     margin-top: 20px;
     display: flex;
-    gap: 30px;
+    gap: 20px;
     justify-content: center;
-    font-size: 18px;
-    color: #CF2C02;
+    font-size: 16px;
+    color: #2a2a2a;
 }
 
 .stat-item {
-    background: white;
-    padding: 10px 20px;
+    background: rgba(255,255,255,0.3);
+    padding: 8px 15px;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 2px solid #8B6F47;
+    font-weight: bold;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+    .game-wrapper {
+        padding: 15px;
+    }
+    
     canvas {
         width: 100%;
-        max-width: 350px;
+        max-width: 500px;
         height: auto;
     }
     
-    h1 {
-        font-size: 1.5em;
+    .control-btn {
+        width: 60px;
+        height: 60px;
     }
 }
 </style>
@@ -169,51 +210,66 @@ button:hover {
 
 <body>
 
-<h1>🌸 ШАГАЙ ДОМА — Лови цветы</h1>
-<p class="subtitle">Перемещайся по 4 позициям и лови цветы!</p>
+<h1>ШАГАЙ ДОМА</h1>
 
-<div class="game-container">
-    <canvas id="game" width="600" height="500"></canvas>
+<div class="game-wrapper">
+    <div class="game-title">ИГРА НА ЭКРАНЕ</div>
     
-    <div id="overlay">
-        <div class="overlay-title">⏸️ Пауза на шаги!</div>
-        <div class="overlay-text">
-            Чтобы продолжить игру — пошагайте на месте
+    <div class="screen-border" style="position: relative;">
+        <canvas id="game" width="600" height="400"></canvas>
+        
+        <div id="overlay">
+            <div class="overlay-title">⏸️ ПАУЗА</div>
+            <div style="font-size: 20px; margin: 10px 0; max-width: 400px;">
+                Чтобы продолжить — пошагайте на месте
+            </div>
+            <div style="font-size: 48px; color: #FF9F1C; margin: 20px 0;">
+                50 шагов
+            </div>
+            <button class="resume-btn" onclick="resumeGame()">ПРОДОЛЖИТЬ 👣</button>
         </div>
-        <div class="overlay-text" style="font-size:48px; color:#FFDE59; margin:20px 0;">
-            50 шагов
+    </div>
+    
+    <div class="controls-panel">
+        <div class="control-side">
+            <div style="position: relative;">
+                <span class="arrow-indicator arrow-top">▲</span>
+                <button class="control-btn" id="btn-left-top" 
+                    onmousedown="setPosition(0)" 
+                    ontouchstart="setPosition(0)"></button>
+            </div>
+            <div style="position: relative;">
+                <button class="control-btn" id="btn-left-bottom" 
+                    onmousedown="setPosition(2)" 
+                    ontouchstart="setPosition(2)"></button>
+                <span class="arrow-indicator arrow-bottom">▼</span>
+            </div>
         </div>
-        <button onclick="resumeGame()">Я пошагала 👣 Продолжить!</button>
+        
+        <div class="stats">
+            <div class="stat-item">🏆 Рекорд: <span id="bestScore">0</span></div>
+        </div>
+        
+        <div class="control-side">
+            <div style="position: relative;">
+                <span class="arrow-indicator arrow-top">▲</span>
+                <button class="control-btn" id="btn-right-top" 
+                    onmousedown="setPosition(1)" 
+                    ontouchstart="setPosition(1)"></button>
+            </div>
+            <div style="position: relative;">
+                <button class="control-btn" id="btn-right-bottom" 
+                    onmousedown="setPosition(3)" 
+                    ontouchstart="setPosition(3)"></button>
+                <span class="arrow-indicator arrow-bottom">▼</span>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="controls">
-    <button class="control-btn" id="btn-tl" onmousedown="setPosition(0)" onmouseup="clearActive()" ontouchstart="setPosition(0)" ontouchend="clearActive()">
-        ↖️ Верх-Лево<br><small>Q</small>
-    </button>
-    <button class="control-btn" id="btn-tr" onmousedown="setPosition(1)" onmouseup="clearActive()" ontouchstart="setPosition(1)" ontouchend="clearActive()">
-        ↗️ Верх-Право<br><small>W</small>
-    </button>
-    <button class="control-btn" id="btn-bl" onmousedown="setPosition(2)" onmouseup="clearActive()" ontouchstart="setPosition(2)" ontouchend="clearActive()">
-        ↙️ Низ-Лево<br><small>A</small>
-    </button>
-    <button class="control-btn" id="btn-br" onmousedown="setPosition(3)" onmouseup="clearActive()" ontouchstart="setPosition(3)" ontouchend="clearActive()">
-        ↘️ Низ-Право<br><small>S</small>
-    </button>
-</div>
-
-<div class="stats">
-    <div class="stat-item">
-        🏆 Рекорд: <span id="bestScore">0</span>
-    </div>
-    <div class="stat-item">
-        🔥 Уровень: <span id="level">1</span>
-    </div>
-</div>
-
-<p style="margin-top:20px; color:#666; font-size:14px;">
-    💡 Управление: Q-W-A-S или кнопки<br>
-    🎯 Лови цветы в 4 позициях — не упусти ни одного!
+<p style="margin-top: 20px; color: #2a2a2a; font-size: 14px; max-width: 500px;">
+    💡 Управление: Левая сторона (Q/A) | Правая сторона (W/S) или кнопками<br>
+    🎯 Лови падающие цветы — не пропусти ни одного!
 </p>
 
 <script>
@@ -222,137 +278,137 @@ const ctx = canvas.getContext("2d");
 
 let score = 0;
 let lives = 3;
-let level = 1;
 let bestScore = parseInt(localStorage.getItem('flowerGameBest')) || 0;
 let isPaused = false;
 let gameSpeed = 1;
-let currentPosition = 2; // 0=TL, 1=TR, 2=BL, 3=BR
+let currentPosition = 2; // 0=левый верх, 1=правый верх, 2=левый низ, 3=правый низ
 
 document.getElementById('bestScore').textContent = bestScore;
-document.getElementById('level').textContent = level;
 
-// Позиции персонажа (корзины)
-const positions = [
-    { x: 100, y: 150 },  // Top-Left
-    { x: 450, y: 150 },  // Top-Right
-    { x: 100, y: 350 },  // Bottom-Left
-    { x: 450, y: 350 }   // Bottom-Right
+// Желоба (откуда падают цветы)
+const lanes = [
+    { x: 100, startY: 50, type: 'left' },   // Левый желоб
+    { x: 500, startY: 50, type: 'right' }   // Правый желоб
 ];
 
-// Желоба для цветов
-const lanes = [
-    { startX: 50, startY: 20, endX: 120, endY: 180, position: 0 },   // TL
-    { startX: 550, startY: 20, endX: 480, endY: 180, position: 1 },  // TR
-    { startX: 50, startY: 480, endX: 120, endY: 380, position: 2 },  // BL
-    { startX: 550, startY: 480, endX: 480, endY: 380, position: 3 }  // BR
+// Позиции персонажа внизу
+const catchPositions = [
+    { x: 100, y: 320, lane: 0, level: 'top' },     // Левый верхний
+    { x: 500, y: 320, lane: 1, level: 'top' },     // Правый верхний
+    { x: 100, y: 360, lane: 0, level: 'bottom' },  // Левый нижний
+    { x: 500, y: 360, lane: 1, level: 'bottom' }   // Правый нижний
 ];
 
 let flowers = [];
-
-const flowerEmojis = ['🌸', '🌺', '🌻', '🌼', '🌷'];
+const flowerEmojis = ['🌸', '🌺', '🌻', '🌼', '🌷', '🏵️'];
 
 function spawnFlower() {
     if (isPaused) return;
     
-    const lane = lanes[Math.floor(Math.random() * 4)];
-    const emoji = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
+    const laneIndex = Math.floor(Math.random() * 2); // 0 или 1
+    const lane = lanes[laneIndex];
+    const level = Math.random() > 0.5 ? 'top' : 'bottom';
     
     flowers.push({
-        lane: lane.position,
-        progress: 0,
-        speed: (0.8 + Math.random() * 0.4) * gameSpeed,
-        emoji: emoji,
+        x: lane.x,
+        y: lane.startY,
+        laneIndex: laneIndex,
+        level: level,
+        speed: (1.5 + Math.random() * 0.5) * gameSpeed,
+        emoji: flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)],
         caught: false
     });
 }
 
-// Спавн цветов
-setInterval(spawnFlower, 1500 / gameSpeed);
+setInterval(spawnFlower, 1200);
 
 // Управление клавиатурой
 document.addEventListener("keydown", function(e) {
     if (isPaused) return;
     
     const key = e.key.toLowerCase();
-    if (key === 'q') setPosition(0);
-    if (key === 'w') setPosition(1);
-    if (key === 'a') setPosition(2);
-    if (key === 's') setPosition(3);
+    if (key === 'q') setPosition(0); // Левый верх
+    if (key === 'a') setPosition(2); // Левый низ
+    if (key === 'w') setPosition(1); // Правый верх
+    if (key === 's') setPosition(3); // Правый низ
 });
-
-document.addEventListener("keyup", clearActive);
 
 function setPosition(pos) {
     if (isPaused) return;
     currentPosition = pos;
-    
-    // Визуальная подсветка
-    document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
-    const buttons = ['btn-tl', 'btn-tr', 'btn-bl', 'btn-br'];
-    document.getElementById(buttons[pos]).classList.add('active');
 }
 
-function clearActive() {
-    document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+function drawBackground() {
+    // Рисуем желоба (лестницы)
+    ctx.strokeStyle = '#8B6F47';
+    ctx.lineWidth = 3;
+    
+    // Левый желоб
+    ctx.beginPath();
+    ctx.moveTo(80, 50);
+    ctx.lineTo(120, 50);
+    ctx.lineTo(120, 300);
+    ctx.lineTo(80, 300);
+    ctx.stroke();
+    
+    // Правый желоб
+    ctx.beginPath();
+    ctx.moveTo(480, 50);
+    ctx.lineTo(520, 50);
+    ctx.lineTo(520, 300);
+    ctx.lineTo(480, 300);
+    ctx.stroke();
+    
+    // Перекладины
+    for (let i = 0; i < 6; i++) {
+        const y = 70 + i * 40;
+        ctx.beginPath();
+        ctx.moveTo(80, y);
+        ctx.lineTo(120, y);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(480, y);
+        ctx.lineTo(520, y);
+        ctx.stroke();
+    }
 }
 
 function drawPlayer() {
-    const pos = positions[currentPosition];
+    const pos = catchPositions[currentPosition];
     
-    // Рисуем корзину
+    // Рисуем девушку с корзиной
     ctx.fillStyle = "#CF2C02";
-    ctx.strokeStyle = "#8B1E00";
-    ctx.lineWidth = 3;
-    
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 35, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    
-    // Детали корзины
-    ctx.fillStyle = "#FFF";
-    ctx.font = "40px Arial";
+    ctx.font = "50px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("🧺", pos.x, pos.y);
-}
-
-function drawLanes() {
-    ctx.strokeStyle = "rgba(207, 44, 2, 0.2)";
-    ctx.lineWidth = 2;
-    ctx.setLineDash([5, 5]);
     
-    lanes.forEach(lane => {
-        ctx.beginPath();
-        ctx.moveTo(lane.startX, lane.startY);
-        ctx.lineTo(lane.endX, lane.endY);
-        ctx.stroke();
-    });
-    
-    ctx.setLineDash([]);
+    // Индикатор текущей позиции
+    ctx.strokeStyle = "#FF9F1C";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 30, 0, Math.PI * 2);
+    ctx.stroke();
 }
 
 function drawFlowers() {
-    ctx.font = "30px Arial";
+    ctx.font = "35px Arial";
     ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
     
     flowers.forEach((flower, i) => {
         if (flower.caught) return;
         
-        const lane = lanes[flower.lane];
-        flower.progress += flower.speed;
+        ctx.fillText(flower.emoji, flower.x, flower.y);
+        flower.y += flower.speed;
         
-        // Интерполяция по желобу
-        const t = flower.progress / 100;
-        const x = lane.startX + (lane.endX - lane.startX) * t;
-        const y = lane.startY + (lane.endY - lane.startY) * t;
+        // Проверка поимки
+        const targetPos = catchPositions.find(p => 
+            p.lane === flower.laneIndex && p.level === flower.level
+        );
         
-        ctx.fillText(flower.emoji, x, y);
-        
-        // Проверка поимки (когда цветок достиг конца желоба)
-        if (flower.progress >= 100) {
-            if (currentPosition === flower.lane) {
+        if (flower.y >= targetPos.y - 20 && flower.y <= targetPos.y + 20) {
+            if (currentPosition === catchPositions.indexOf(targetPos)) {
                 // Поймали!
                 score++;
                 flower.caught = true;
@@ -363,59 +419,56 @@ function drawFlowers() {
                     document.getElementById('bestScore').textContent = bestScore;
                 }
                 
-                // Увеличение уровня
-                if (score % 15 === 0) {
-                    level = Math.floor(score / 15) + 1;
-                    gameSpeed = 1 + (level - 1) * 0.15;
-                    document.getElementById('level').textContent = level;
-                }
-            } else {
-                // Упустили
-                lives--;
-                flower.caught = true;
-                
-                if (lives <= 0) {
-                    pauseGame();
+                // Увеличение скорости
+                if (score % 10 === 0) {
+                    gameSpeed += 0.1;
                 }
             }
         }
         
-        // Удаляем пойманные цветы
-        if (flower.caught) {
+        // Цветок упал
+        if (flower.y > 390) {
+            if (!flower.caught) {
+                lives--;
+                if (lives <= 0) {
+                    pauseGame();
+                }
+            }
             flowers.splice(i, 1);
         }
     });
 }
 
 function drawUI() {
-    ctx.fillStyle = "#CF2C02";
-    ctx.font = "bold 24px Arial";
-    ctx.textAlign = "left";
-    
-    // Очки
-    ctx.fillText("🏆 " + score, 20, 40);
-    
-    // Жизни
+    // Цифровой счетчик как на оригинале
+    ctx.fillStyle = "#2a2a2a";
+    ctx.font = "bold 32px 'Courier New', monospace";
     ctx.textAlign = "right";
-    ctx.fillText("❤️ ".repeat(lives), canvas.width - 20, 40);
     
-    // Уровень
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#FF9F1C";
-    ctx.fillText("Уровень " + level, canvas.width / 2, 40);
+    const scoreStr = score.toString().padStart(4, '0');
+    ctx.fillText(scoreStr, 580, 30);
+    
+    // Жизни (сердечки)
+    ctx.font = "24px Arial";
+    for (let i = 0; i < 3; i++) {
+        if (i < lives) {
+            ctx.fillText("❤️", 560 + (i * 25), 60);
+        } else {
+            ctx.fillText("🤍", 560 + (i * 25), 60);
+        }
+    }
 }
 
 function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     if (!isPaused) {
-        drawLanes();
+        drawBackground();
         drawFlowers();
         drawPlayer();
     }
     
     drawUI();
-    
     requestAnimationFrame(update);
 }
 
@@ -435,4 +488,5 @@ update();
 
 </body>
 </html>
+
 
