@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ШАГАЙ ДОМА — Лови цветы 🌸</title>
-
 <style>
 * {
     margin: 0;
@@ -14,7 +13,7 @@
 
 body {
     background: linear-gradient(135deg, #d4a574 0%, #c9965f 100%);
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif;
     text-align: center;
     padding: 20px;
     min-height: 100vh;
@@ -35,7 +34,7 @@ h1 {
     background: linear-gradient(135deg, #e8d4b8 0%, #d4c4a8 100%);
     padding: 30px;
     border-radius: 30px;
-    box-shadow: 
+    box-shadow:
         inset 0 0 30px rgba(0,0,0,0.1),
         0 15px 50px rgba(0,0,0,0.4);
     border: 8px solid #8B6F47;
@@ -49,11 +48,11 @@ h1 {
 }
 
 canvas {
-    background: linear-gradient(180deg, #b8c5d0 0%, #a8b5c0 50%, #98a5b0 100%);
+    background: #000;
     border: 3px solid #1a1a1a;
     border-radius: 10px;
     display: block;
-    box-shadow: 
+    box-shadow:
         inset 0 2px 10px rgba(0,0,0,0.3),
         0 0 30px rgba(255,255,255,0.1);
 }
@@ -73,6 +72,7 @@ canvas {
 .controls-panel {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-top: 25px;
     gap: 30px;
 }
@@ -90,7 +90,7 @@ canvas {
     border: 5px solid #7a7a7a;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 
+    box-shadow:
         0 8px 15px rgba(0,0,0,0.4),
         inset 0 -3px 8px rgba(0,0,0,0.3),
         inset 0 3px 8px rgba(255,255,255,0.2);
@@ -101,7 +101,7 @@ canvas {
 
 .control-btn:active {
     transform: translateY(3px);
-    box-shadow: 
+    box-shadow:
         0 4px 8px rgba(0,0,0,0.4),
         inset 0 2px 10px rgba(0,0,0,0.5);
 }
@@ -216,7 +216,6 @@ canvas {
 }
 
 .stats {
-    margin-top: 20px;
     display: flex;
     gap: 20px;
     justify-content: center;
@@ -245,43 +244,53 @@ canvas {
     border: 2px solid #8B6F47;
 }
 
+.controls-hint {
+    margin-top: 20px;
+    color: #2a2a2a;
+    font-size: 14px;
+    max-width: 560px;
+    line-height: 1.5;
+}
+
 @media (max-width: 768px) {
     .game-wrapper {
         padding: 15px;
     }
-    
+
     canvas {
         width: 100%;
         max-width: 500px;
         height: auto;
     }
-    
+
     .control-btn {
         width: 60px;
         height: 60px;
     }
-    
+
     .level-buttons {
         flex-direction: column;
+    }
+
+    .controls-panel {
+        gap: 15px;
     }
 }
 </style>
 </head>
-
 <body>
 
 <h1>ШАГАЙ ДОМА</h1>
 
 <div class="game-wrapper">
-    <div class="game-title">ИГРА НА ЭКРАНЕ</div>
-    
+    <div class="game-title">ЛОВИ ЦВЕТЫ</div>
+
     <div class="screen-border" style="position: relative;">
         <canvas id="game" width="600" height="400"></canvas>
-        
-        <!-- Экран выбора уровня -->
+
         <div id="levelSelect" class="show">
             <div class="overlay-title">🌸 Выбери уровень сложности</div>
-            
+
             <div class="level-buttons">
                 <div>
                     <button class="level-btn easy" onclick="startGame('easy')">
@@ -291,25 +300,24 @@ canvas {
                         Для новичков и разминки
                     </div>
                 </div>
-                
+
                 <div>
                     <button class="level-btn hard" onclick="startGame('hard')">
                         🔥 БЫСТРЫЙ
                     </button>
                     <div class="level-description">
-                        Для опытных шагалок!
+                        Для опытных шагалок
                     </div>
                 </div>
             </div>
-            
+
             <div style="margin-top: 30px; font-size: 16px; opacity: 0.7;">
-                💡 Управление: Q-W-A-S или кнопками
+                💡 Управление: Q/A слева, W/S справа
             </div>
         </div>
-        
-        <!-- Пауза -->
+
         <div id="overlay">
-            <div class="overlay-title">⏸️ ПАУЗА</div>
+            <div class="overlay-title">⏸ ПАУЗА</div>
             <div style="font-size: 20px; margin: 10px 0; max-width: 400px;">
                 Чтобы продолжить — пошагайте на месте
             </div>
@@ -321,40 +329,41 @@ canvas {
                 В МЕНЮ
             </button>
         </div>
-        
+
         <div class="difficulty-badge" id="difficultyBadge" style="display: none;"></div>
     </div>
-    
+
     <div class="controls-panel">
         <div class="control-side">
             <div style="position: relative;">
                 <span class="arrow-indicator arrow-top">▲</span>
-                <button class="control-btn" id="btn-left-top" 
-                    onmousedown="setPosition(0)" 
+                <button class="control-btn" id="btn-left-top"
+                    onmousedown="setPosition(0)"
                     ontouchstart="setPosition(0)"></button>
             </div>
             <div style="position: relative;">
-                <button class="control-btn" id="btn-left-bottom" 
-                    onmousedown="setPosition(2)" 
+                <button class="control-btn" id="btn-left-bottom"
+                    onmousedown="setPosition(2)"
                     ontouchstart="setPosition(2)"></button>
                 <span class="arrow-indicator arrow-bottom">▼</span>
             </div>
         </div>
-        
+
         <div class="stats">
             <div class="stat-item">🏆 Рекорд: <span id="bestScore">0</span></div>
+            <div class="stat-item">🌸 Счёт: <span id="currentScore">0</span></div>
         </div>
-        
+
         <div class="control-side">
             <div style="position: relative;">
                 <span class="arrow-indicator arrow-top">▲</span>
-                <button class="control-btn" id="btn-right-top" 
-                    onmousedown="setPosition(1)" 
+                <button class="control-btn" id="btn-right-top"
+                    onmousedown="setPosition(1)"
                     ontouchstart="setPosition(1)"></button>
             </div>
             <div style="position: relative;">
-                <button class="control-btn" id="btn-right-bottom" 
-                    onmousedown="setPosition(3)" 
+                <button class="control-btn" id="btn-right-bottom"
+                    onmousedown="setPosition(3)"
                     ontouchstart="setPosition(3)"></button>
                 <span class="arrow-indicator arrow-bottom">▼</span>
             </div>
@@ -362,9 +371,9 @@ canvas {
     </div>
 </div>
 
-<p style="margin-top: 20px; color: #2a2a2a; font-size: 14px; max-width: 500px;">
-    💡 Управление: Левая сторона (Q/A) | Правая сторона (W/S) или кнопками<br>
-    🎯 Лови падающие цветы — не пропусти ни одного!
+<p class="controls-hint">
+    💡 Левая сторона: <b>Q</b> — верх, <b>A</b> — низ. Правая сторона: <b>W</b> — верх, <b>S</b> — низ.<br>
+    🎯 Ловите падающие цветы и не пропускайте их.
 </p>
 
 <script>
@@ -382,8 +391,18 @@ let currentDifficulty = null;
 let baseSpeed = 1;
 let spawnInterval = null;
 let currentPosition = 2;
+let isGameOver = false;
 
-// Настройки сложности
+const bg3Lives = new Image();
+const bg2Lives = new Image();
+const bg1Life = new Image();
+const bgGameOver = new Image();
+
+bg3Lives.src = "Camp/springcamp/1.jpg";
+bg2Lives.src = "Camp/springcamp/2.jpg";
+bg1Life.src = "Camp/springcamp/3.jpg";
+bgGameOver.src = "Camp/springcamp/4.jpg";
+
 const difficulties = {
     easy: {
         name: 'ЛЕГКИЙ 🌼',
@@ -400,50 +419,67 @@ const difficulties = {
 };
 
 document.getElementById('bestScore').textContent = bestScore;
+document.getElementById('currentScore').textContent = score;
 
-// Желоба - диагональные пути для цветов
 const lanes = [
-    { startX: 50, startY: 50, endX: 150, endY: 280, position: 0 },
-    { startX: 550, startY: 50, endX: 450, endY: 280, position: 1 },
-    { startX: 50, startY: 150, endX: 150, endY: 340, position: 2 },
-    { startX: 550, startY: 150, endX: 450, endY: 340, position: 3 }
+    { startX: 70,  startY: 70,  endX: 190, endY: 280, position: 0 },
+    { startX: 530, startY: 70,  endX: 410, endY: 280, position: 1 },
+    { startX: 70,  startY: 145, endX: 190, endY: 340, position: 2 },
+    { startX: 530, startY: 145, endX: 410, endY: 340, position: 3 }
 ];
 
-// Позиции для ловли
 const catchPositions = [
-    { x: 150, y: 280 },
-    { x: 450, y: 280 },
-    { x: 150, y: 340 },
-    { x: 450, y: 340 }
+    { x: 190, y: 280 },
+    { x: 410, y: 280 },
+    { x: 190, y: 340 },
+    { x: 410, y: 340 }
 ];
 
 let flowers = [];
 const flowerEmojis = ['🌸', '🌺', '🌻', '🌼', '🌷', '🏵️'];
 
+function getCurrentBackground() {
+    if (isGameOver) return bgGameOver;
+    if (lives === 3) return bg3Lives;
+    if (lives === 2) return bg2Lives;
+    if (lives === 1) return bg1Life;
+    return bgGameOver;
+}
+
+function drawBackgroundImage() {
+    const bg = getCurrentBackground();
+
+    if (bg.complete && bg.naturalWidth > 0) {
+        ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = "#f3e7d0";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+}
+
 function startGame(difficulty) {
     currentDifficulty = difficulty;
     const config = difficulties[difficulty];
     baseSpeed = config.baseSpeed;
-    
-    // Показываем бейдж сложности
+
     document.getElementById('difficultyBadge').textContent = config.name;
     document.getElementById('difficultyBadge').style.display = 'block';
-    
-    // Скрываем меню выбора
+
     document.getElementById('levelSelect').classList.remove('show');
-    
-    // Сбрасываем игру
+
     score = 0;
     lives = 3;
     flowers = [];
     isPaused = false;
     isGameStarted = true;
-    
-    // Загружаем рекорд для этой сложности
+    isGameOver = false;
+    currentPosition = 2;
+
+    document.getElementById('currentScore').textContent = score;
+
     const savedBest = difficulty === 'easy' ? bestScoreEasy : bestScoreHard;
     document.getElementById('bestScore').textContent = savedBest;
-    
-    // Запускаем спавн цветов
+
     if (spawnInterval) clearInterval(spawnInterval);
     spawnInterval = setInterval(spawnFlower, config.spawnDelay);
 }
@@ -451,29 +487,28 @@ function startGame(difficulty) {
 function backToMenu() {
     isGameStarted = false;
     isPaused = false;
+    isGameOver = false;
     flowers = [];
     score = 0;
     lives = 3;
-    
+
     if (spawnInterval) {
         clearInterval(spawnInterval);
         spawnInterval = null;
     }
-    
+
+    document.getElementById('currentScore').textContent = score;
     document.getElementById('overlay').classList.remove('show');
     document.getElementById('levelSelect').classList.add('show');
     document.getElementById('difficultyBadge').style.display = 'none';
-    
-    // Показываем общий рекорд
     document.getElementById('bestScore').textContent = bestScore;
 }
 
 function spawnFlower() {
-    if (isPaused || !isGameStarted) return;
-    
+    if (isPaused || !isGameStarted || isGameOver) return;
+
     const laneIndex = Math.floor(Math.random() * 4);
-    const lane = lanes[laneIndex];
-    
+
     flowers.push({
         laneIndex: laneIndex,
         progress: 0,
@@ -483,10 +518,9 @@ function spawnFlower() {
     });
 }
 
-// Управление клавиатурой
 document.addEventListener("keydown", function(e) {
-    if (isPaused || !isGameStarted) return;
-    
+    if (isPaused || !isGameStarted || isGameOver) return;
+
     const key = e.key.toLowerCase();
     if (key === 'q') setPosition(0);
     if (key === 'a') setPosition(2);
@@ -495,84 +529,48 @@ document.addEventListener("keydown", function(e) {
 });
 
 function setPosition(pos) {
-    if (isPaused || !isGameStarted) return;
+    if (isPaused || !isGameStarted || isGameOver) return;
     currentPosition = pos;
-}
-
-function drawBackground() {
-    ctx.strokeStyle = '#8B6F47';
-    ctx.lineWidth = 4;
-    ctx.setLineDash([8, 4]);
-    
-    lanes.forEach(lane => {
-        ctx.beginPath();
-        ctx.moveTo(lane.startX, lane.startY);
-        ctx.lineTo(lane.endX, lane.endY);
-        ctx.stroke();
-    });
-    
-    ctx.setLineDash([]);
-    
-    ctx.strokeStyle = '#A0826D';
-    ctx.lineWidth = 2;
-    
-    for (let i = 0; i < 4; i++) {
-        const y = 100 + i * 70;
-        ctx.beginPath();
-        ctx.moveTo(40, y);
-        ctx.lineTo(80, y);
-        ctx.stroke();
-        
-        ctx.beginPath();
-        ctx.moveTo(520, y);
-        ctx.lineTo(560, y);
-        ctx.stroke();
-    }
 }
 
 function drawPlayer() {
     const pos = catchPositions[currentPosition];
-    
+
     ctx.fillStyle = "#CF2C02";
-    ctx.font = "45px Arial";
+    ctx.font = "42px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("🧺", pos.x, pos.y);
-    
-    ctx.strokeStyle = "#FF9F1C";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 28, 0, Math.PI * 2);
-    ctx.stroke();
 }
 
 function drawFlowers() {
-    ctx.font = "32px Arial";
+    ctx.font = "30px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    
-    flowers.forEach((flower, i) => {
-        if (flower.caught) return;
-        
+
+    for (let i = flowers.length - 1; i >= 0; i--) {
+        const flower = flowers[i];
+        if (flower.caught) continue;
+
         const lane = lanes[flower.laneIndex];
         flower.progress += flower.speed;
-        
+
         const t = flower.progress / 100;
         const x = lane.startX + (lane.endX - lane.startX) * t;
         const y = lane.startY + (lane.endY - lane.startY) * t;
-        
+
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate((flower.progress * 3) * Math.PI / 180);
         ctx.fillText(flower.emoji, 0, 0);
         ctx.restore();
-        
-        if (flower.progress >= 95) {
+
+        if (flower.progress >= 95 && !flower.caught) {
             if (currentPosition === flower.laneIndex) {
                 score++;
                 flower.caught = true;
-                
-                // Обновляем рекорды
+                document.getElementById('currentScore').textContent = score;
+
                 const currentBest = currentDifficulty === 'easy' ? bestScoreEasy : bestScoreHard;
                 if (score > currentBest) {
                     if (currentDifficulty === 'easy') {
@@ -582,72 +580,68 @@ function drawFlowers() {
                         bestScoreHard = score;
                         localStorage.setItem('flowerGameBestHard', score);
                     }
-                    
-                    // Обновляем общий рекорд
+
                     if (score > bestScore) {
                         bestScore = score;
                         localStorage.setItem('flowerGameBest', score);
                     }
-                    
+
                     document.getElementById('bestScore').textContent = score;
                 }
-                
-                // Увеличение скорости
+
                 if (score % 10 === 0) {
                     baseSpeed += difficulties[currentDifficulty].speedIncrease;
                 }
             }
         }
-        
+
         if (flower.progress >= 100) {
             if (!flower.caught) {
                 lives--;
+
                 if (lives <= 0) {
-                    pauseGame();
+                    lives = 0;
+                    gameOver();
                 }
             }
             flowers.splice(i, 1);
         }
-    });
+    }
 }
 
 function drawUI() {
+    if (!isGameStarted) return;
+
     ctx.fillStyle = "#2a2a2a";
-    ctx.font = "bold 32px 'Courier New', monospace";
+    ctx.font = "bold 30px 'Courier New', monospace";
     ctx.textAlign = "right";
-    
+
     const scoreStr = score.toString().padStart(4, '0');
-    ctx.fillText(scoreStr, 580, 30);
-    
-    ctx.font = "24px Arial";
-    for (let i = 0; i < 3; i++) {
-        if (i < lives) {
-            ctx.fillText("❤️", 540 + (i * 30), 60);
-        } else {
-            ctx.fillText("🤍", 540 + (i * 30), 60);
-        }
-    }
+    ctx.fillText(scoreStr, 575, 38);
 }
 
-function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    if (isGameStarted && !isPaused) {
-        drawBackground();
-        drawFlowers();
-        drawPlayer();
-    }
-    
-    if (isGameStarted) {
-        drawUI();
-    }
-    
-    requestAnimationFrame(update);
-}
-
-function pauseGame() {
+function gameOver() {
+    isGameOver = true;
     isPaused = true;
-    document.getElementById("overlay").classList.add("show");
+
+    if (spawnInterval) {
+        clearInterval(spawnInterval);
+        spawnInterval = null;
+    }
+
+    setTimeout(() => {
+        document.getElementById("overlay").classList.add("show");
+        document.querySelector("#overlay .overlay-title").textContent = "ИГРА ОКОНЧЕНА";
+        document.querySelector("#overlay div:nth-child(2)").textContent = `Ваш счёт: ${score}`;
+        document.querySelector("#overlay div:nth-child(3)").textContent = "Попробуете ещё раз?";
+        document.querySelector("#overlay .resume-btn").textContent = "ИГРАТЬ СНОВА";
+        document.querySelector("#overlay .resume-btn").onclick = restartGame;
+    }, 300);
+}
+
+function restartGame() {
+    document.getElementById("overlay").classList.remove("show");
+    startGame(currentDifficulty);
 }
 
 function resumeGame() {
@@ -656,10 +650,26 @@ function resumeGame() {
     document.getElementById("overlay").classList.remove("show");
 }
 
+function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (isGameStarted) {
+        drawBackgroundImage();
+
+        if (!isGameOver) {
+            drawFlowers();
+            drawPlayer();
+        }
+
+        drawUI();
+    }
+
+    requestAnimationFrame(update);
+}
+
 update();
 </script>
 
 </body>
 </html>
-
 
