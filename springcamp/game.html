@@ -2,177 +2,426 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>ШАГАЙ ДОМА — Лови цветы</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ШАГАЙ ДОМА — Лови цветы 🌸</title>
 
 <style>
-
-body{
-    background:#fff;
-    font-family:Arial;
-    text-align:center;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-canvas{
-    background:#f5f5f5;
-    border:3px solid #CF2C02;
+body {
+    background: linear-gradient(135deg, #FFF8E5 0%, #FFE8B3 100%);
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-#overlay{
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    background:rgba(0,0,0,0.7);
-    color:white;
-    display:none;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    font-size:28px;
+h1 {
+    color: #CF2C02;
+    font-size: 2.2em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
 
-button{
-    padding:12px 25px;
-    font-size:18px;
-    margin-top:20px;
+.subtitle {
+    color: #666;
+    font-size: 1em;
+    margin-bottom: 20px;
 }
 
+.game-container {
+    position: relative;
+    display: inline-block;
+}
+
+canvas {
+    background: linear-gradient(180deg, #E8F5FF 0%, #FFF8E5 100%);
+    border: 5px solid #CF2C02;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(207, 44, 2, 0.3);
+    display: block;
+}
+
+#overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(207, 44, 2, 0.95);
+    color: white;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-size: 24px;
+    border-radius: 20px;
+    z-index: 10;
+}
+
+#overlay.show {
+    display: flex;
+}
+
+.overlay-title {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.overlay-text {
+    font-size: 20px;
+    margin: 10px 0;
+    max-width: 300px;
+}
+
+.step-counter {
+    font-size: 48px;
+    font-weight: bold;
+    margin: 20px 0;
+    color: #FFDE59;
+}
+
+button {
+    padding: 15px 35px;
+    font-size: 20px;
+    margin-top: 20px;
+    background: linear-gradient(135deg, #FFDE59, #FF9F1C);
+    border: none;
+    border-radius: 50px;
+    color: #78350f;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(255, 159, 28, 0.4);
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(255, 159, 28, 0.5);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.stats {
+    margin-top: 20px;
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    font-size: 18px;
+    color: #CF2C02;
+}
+
+.stat-item {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes fall {
+    from { transform: translateY(-20px) rotate(0deg); }
+    to { transform: translateY(600px) rotate(360deg); }
+}
+
+.instructions {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
+    max-width: 400px;
+}
+
+@media (max-width: 480px) {
+    canvas {
+        width: 100%;
+        max-width: 350px;
+        height: auto;
+    }
+    
+    h1 {
+        font-size: 1.5em;
+    }
+}
 </style>
 </head>
 
 <body>
 
-<h2>🌸 ШАГАЙ ДОМА — Лови цветы</h2>
+<h1>🌸 ШАГАЙ ДОМА — Лови цветы</h1>
+<p class="subtitle">Двигайся стрелками ← → и лови падающие цветы!</p>
 
-<canvas id="game" width="400" height="600"></canvas>
-
-<div id="overlay">
-    <div>Чтобы продолжить — пошагайте!</div>
-    <div style="font-size:18px;margin-top:10px">
-        Сделайте 50 шагов на месте
+<div class="game-container">
+    <canvas id="game" width="400" height="600"></canvas>
+    
+    <div id="overlay">
+        <div class="overlay-title">⏸️ Пауза на шаги!</div>
+        <div class="overlay-text">
+            Чтобы продолжить игру — пошагайте на месте
+        </div>
+        <div class="step-counter" id="stepCounter">50 шагов</div>
+        <div class="overlay-text">
+            Или нажмите кнопку, если уже сделали
+        </div>
+        <button onclick="resumeGame()">Я пошагала 👣 Продолжить!</button>
     </div>
-    <button onclick="resumeGame()">Я пошагала 👣</button>
 </div>
 
-<script>
+<div class="stats">
+    <div class="stat-item">
+        🏆 Рекорд: <span id="bestScore">0</span>
+    </div>
+    <div class="stat-item">
+        🔥 Уровень: <span id="level">1</span>
+    </div>
+</div>
 
+<p class="instructions">
+    💡 Управление: стрелки ← → на клавиатуре<br>
+    🎯 Цель: поймай как можно больше цветов!<br>
+    ⚠️ У тебя 3 жизни — не упусти цветы!
+</p>
+
+<script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 let score = 0;
 let lives = 3;
+let level = 1;
+let bestScore = parseInt(localStorage.getItem('flowerGameBest')) || 0;
+let isPaused = false;
+let gameSpeed = 1;
+
+// Обновляем рекорд на экране
+document.getElementById('bestScore').textContent = bestScore;
+document.getElementById('level').textContent = level;
 
 let player = {
-    x:200,
-    y:520,
-    width:50,
-    height:50
+    x: 175,
+    y: 520,
+    width: 50,
+    height: 50,
+    speed: 25
 };
 
 let flowers = [];
+let particles = []; // Для эффектов
 
-function spawnFlower(){
+const flowerEmojis = ['🌸', '🌺', '🌻', '🌼', '🌷', '🏵️'];
 
+function spawnFlower() {
+    if (isPaused) return;
+    
+    const emoji = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
+    
     flowers.push({
-        x: Math.random()*350,
-        y: -20,
-        speed: 2 + Math.random()*2
+        x: Math.random() * 350,
+        y: -30,
+        speed: (2 + Math.random() * 2) * gameSpeed,
+        emoji: emoji,
+        rotation: Math.random() * 360
     });
-
 }
 
-setInterval(spawnFlower,1000);
+let spawnInterval = setInterval(spawnFlower, 1000);
 
-document.addEventListener("keydown",function(e){
-
-    if(e.key==="ArrowLeft") player.x-=30;
-    if(e.key==="ArrowRight") player.x+=30;
-
+// Управление
+document.addEventListener("keydown", function(e) {
+    if (isPaused) return;
+    
+    if (e.key === "ArrowLeft" && player.x > 0) {
+        player.x -= player.speed;
+    }
+    if (e.key === "ArrowRight" && player.x < canvas.width - player.width) {
+        player.x += player.speed;
+    }
 });
 
-function drawPlayer(){
+// Мобильное управление (касание)
+let touchStartX = 0;
+canvas.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+});
 
-    ctx.fillStyle="#CF2C02";
-    ctx.fillRect(player.x,player.y,player.width,player.height);
+canvas.addEventListener('touchmove', (e) => {
+    if (isPaused) return;
+    e.preventDefault();
+    
+    const touchX = e.touches[0].clientX;
+    const rect = canvas.getBoundingClientRect();
+    const canvasX = touchX - rect.left;
+    
+    player.x = Math.max(0, Math.min(canvas.width - player.width, canvasX - player.width / 2));
+});
 
+function createParticles(x, y) {
+    for (let i = 0; i < 10; i++) {
+        particles.push({
+            x: x,
+            y: y,
+            vx: (Math.random() - 0.5) * 5,
+            vy: (Math.random() - 0.5) * 5,
+            life: 20,
+            color: `hsl(${Math.random() * 360}, 70%, 60%)`
+        });
+    }
 }
 
-function drawFlowers(){
+function drawPlayer() {
+    // Рисуем корзину
+    ctx.fillStyle = "#CF2C02";
+    ctx.strokeStyle = "#8B1E00";
+    ctx.lineWidth = 3;
+    
+    // Основа корзины
+    ctx.beginPath();
+    ctx.moveTo(player.x, player.y + player.height);
+    ctx.lineTo(player.x + 10, player.y);
+    ctx.lineTo(player.x + player.width - 10, player.y);
+    ctx.lineTo(player.x + player.width, player.y + player.height);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    
+    // Узор корзины
+    ctx.strokeStyle = "#FFF";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 3; i++) {
+        const spacing = player.width / 4;
+        ctx.beginPath();
+        ctx.moveTo(player.x + spacing * (i + 1), player.y + 5);
+        ctx.lineTo(player.x + spacing * (i + 1), player.y + player.height - 5);
+        ctx.stroke();
+    }
+}
 
-    ctx.font="30px Arial";
-
-    flowers.forEach((f,i)=>{
-
-        ctx.fillText("🌸",f.x,f.y);
-
-        f.y+=f.speed;
-
-        if(
-            f.y > player.y &&
-            f.x > player.x &&
-            f.x < player.x + player.width
-        ){
-
+function drawFlowers() {
+    ctx.font = "35px Arial";
+    
+    flowers.forEach((f, i) => {
+        ctx.save();
+        ctx.translate(f.x + 15, f.y);
+        ctx.rotate((f.rotation * Math.PI) / 180);
+        ctx.fillText(f.emoji, -15, 0);
+        ctx.restore();
+        
+        f.y += f.speed;
+        f.rotation += 2;
+        
+        // Проверка поимки
+        if (
+            f.y > player.y - 10 &&
+            f.y < player.y + player.height &&
+            f.x > player.x - 20 &&
+            f.x < player.x + player.width - 10
+        ) {
             score++;
-            flowers.splice(i,1);
-
-        }
-
-        if(f.y>600){
-
-            flowers.splice(i,1);
-            lives--;
-
-            if(lives<=0){
-
-                pauseGame();
-
+            createParticles(f.x + 15, f.y);
+            flowers.splice(i, 1);
+            
+            // Сохраняем рекорд
+            if (score > bestScore) {
+                bestScore = score;
+                localStorage.setItem('flowerGameBest', bestScore);
+                document.getElementById('bestScore').textContent = bestScore;
             }
-
+            
+            // Увеличиваем уровень каждые 10 очков
+            if (score % 10 === 0) {
+                level = Math.floor(score / 10) + 1;
+                gameSpeed = 1 + (level - 1) * 0.2;
+                document.getElementById('level').textContent = level;
+            }
         }
-
+        
+        // Цветок упал
+        if (f.y > 600) {
+            flowers.splice(i, 1);
+            lives--;
+            
+            if (lives <= 0) {
+                pauseGame();
+            }
+        }
     });
-
 }
 
-function drawUI(){
-
-    ctx.fillStyle="black";
-    ctx.font="18px Arial";
-
-    ctx.fillText("Очки: "+score,10,20);
-    ctx.fillText("Жизни: "+lives,300,20);
-
+function drawParticles() {
+    particles.forEach((p, i) => {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life / 20;
+        ctx.fillRect(p.x, p.y, 4, 4);
+        
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        
+        if (p.life <= 0) {
+            particles.splice(i, 1);
+        }
+    });
+    ctx.globalAlpha = 1;
 }
 
-function update(){
+function drawUI() {
+    ctx.fillStyle = "#CF2C02";
+    ctx.font = "bold 20px Arial";
+    
+    // Очки
+    ctx.fillText("🏆 Очки: " + score, 15, 30);
+    
+    // Жизни
+    ctx.fillText("❤️ ".repeat(lives), canvas.width - 100, 30);
+    
+    // Уровень
+    ctx.fillStyle = "#FF9F1C";
+    ctx.fillText("Уровень " + level, 15, 60);
+}
 
-    ctx.clearRect(0,0,400,600);
-
+function update() {
+    if (isPaused) {
+        requestAnimationFrame(update);
+        return;
+    }
+    
+    ctx.clearRect(0, 0, 400, 600);
+    
     drawPlayer();
     drawFlowers();
+    drawParticles();
     drawUI();
-
+    
     requestAnimationFrame(update);
-
 }
 
-function pauseGame(){
-
-    document.getElementById("overlay").style.display="flex";
-
+function pauseGame() {
+    isPaused = true;
+    document.getElementById("overlay").classList.add("show");
 }
 
-function resumeGame(){
-
+function resumeGame() {
     lives = 3;
-    document.getElementById("overlay").style.display="none";
-
+    isPaused = false;
+    document.getElementById("overlay").classList.remove("show");
 }
 
 update();
-
 </script>
 
 </body>
