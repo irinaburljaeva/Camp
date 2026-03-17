@@ -655,6 +655,7 @@ function drawBackgroundImage() {
 }
 
 // ── Игрок (девушка с корзинкой) ──
+// ── Игрок (девушка с корзинкой) ──
 function drawPlayer() {
     const pos   = catchPositions[currentPosition];
     const img   = (lastMoveDir === 'up') ? imgUp : imgDown;
@@ -662,7 +663,18 @@ function drawPlayer() {
     const pw    = ph * 0.55;
 
     if (img.complete && img.naturalWidth > 0) {
-        ctx.drawImage(img, pos.x - pw/2, pos.y - ph*0.75, pw, ph);
+        ctx.save();
+        
+        // Позиции 0 и 2 — это левая сторона, нужно отразить
+        if (currentPosition === 0 || currentPosition === 2) {
+            ctx.translate(pos.x + pw/2, pos.y - ph*0.75);
+            ctx.scale(-1, 1); // отражаем по горизонтали
+            ctx.drawImage(img, 0, 0, pw, ph);
+        } else {
+            ctx.drawImage(img, pos.x - pw/2, pos.y - ph*0.75, pw, ph);
+        }
+        
+        ctx.restore();
     } else {
         ctx.font = `${Math.round(H*0.10)}px Arial`;
         ctx.textAlign = "center";
@@ -670,6 +682,7 @@ function drawPlayer() {
         ctx.fillText("🧺", pos.x, pos.y);
     }
 }
+
 
 // ── Цветы ──
 function drawFlowers() {
