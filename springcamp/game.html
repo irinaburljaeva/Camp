@@ -607,6 +607,14 @@ const bgGO = new Image(); bgGO.src = "4.jpg";
 const imgUp   = new Image(); imgUp.src   = "up.png";
 const imgDown = new Image(); imgDown.src = "down.png";
 
+// ── Загрузка изображений цветов ──
+const flowerImages = [];
+for (let i = 1; i <= 6; i++) {
+    const img = new Image();
+    img.src = `flower${i}.png`;
+    flowerImages.push(img);
+}
+
 // ── Сложности ──
 const difficulties = {
     easy: { name:'ИГРА А 🌼', baseSpeed:0.5, spawnDelay:2000, speedIncrease:0.08 },
@@ -655,7 +663,6 @@ function drawBackgroundImage() {
 }
 
 // ── Игрок (девушка с корзинкой) ──
-// ── Игрок (девушка с корзинкой) ──
 function drawPlayer() {
     const pos   = catchPositions[currentPosition];
     const img   = (lastMoveDir === 'up') ? imgUp : imgDown;
@@ -683,12 +690,9 @@ function drawPlayer() {
     }
 }
 
-
 // ── Цветы ──
 function drawFlowers() {
-    ctx.font = `${Math.round(H*0.08)}px Arial`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    const flowerSize = H * 0.08; // размер цветка
 
     for (let i = flowers.length - 1; i >= 0; i--) {
         const flower = flowers[i];
@@ -704,9 +708,21 @@ function drawFlowers() {
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate((flower.progress * 3) * Math.PI / 180);
-        ctx.fillText(flower.emoji, 0, 0);
+        
+        // Рисуем изображение цветка, если загружено
+        if (flower.image && flower.image.complete && flower.image.naturalWidth > 0) {
+            ctx.drawImage(flower.image, -flowerSize/2, -flowerSize/2, flowerSize, flowerSize);
+        } else {
+            // Запасной вариант — эмодзи
+            ctx.font = `${Math.round(flowerSize)}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(flower.emoji, 0, 0);
+        }
+        
         ctx.restore();
 
+        // Поймали?
         if (flower.progress >= 95) {
             if (currentPosition === flower.laneIndex) {
                 score++;
@@ -724,6 +740,7 @@ function drawFlowers() {
             }
         }
 
+        // Пропустили?
         if (flower.progress >= 100) {
             if (!flower.caught) {
                 lives--;
@@ -737,11 +754,13 @@ function drawFlowers() {
 // ── Спавн ──
 function spawnFlower() {
     if (isPaused || !isGameStarted || isGameOver) return;
+    const randomIndex = Math.floor(Math.random() * 6);
     flowers.push({
         laneIndex: Math.floor(Math.random() * 4),
         progress:  0,
         speed:     (0.8 + Math.random() * 0.4) * baseSpeed,
-        emoji:     flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)],
+        emoji:     flowerEmojis[randomIndex],
+        image:     flowerImages[randomIndex], // добавляем изображение
         caught:    false
     });
 }
@@ -855,6 +874,7 @@ function update() {
 }
 
 update();
+
 </script>
 </body>
 </html>
