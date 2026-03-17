@@ -648,16 +648,8 @@ function drawPlayer() {
     const ph    = H * 0.40;
     const pw    = ph * 0.55;
     
-    // Определяем базовую позицию для нижних позиций (2 и 3)
-    // Верхние позиции (0 и 1) должны быть выше
-    let bottomY;
-    if (currentPosition === 0 || currentPosition === 1) {
-        // Верхние позиции - персонаж выше
-        bottomY = pos.y + ph * 0.15;  // немного выше точки ловли
-    } else {
-        // Нижние позиции - персонаж на своем месте
-        bottomY = pos.y;
-    }
+    // Низ персонажа должен быть ниже точки ловли
+    const bottomY = pos.y + ph * 0.10;  // опускаем персонажа ниже точки ловли
 
     if (img.complete && img.naturalWidth > 0) {
         ctx.save();
