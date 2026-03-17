@@ -648,8 +648,10 @@ function drawPlayer() {
     const ph    = H * 0.40;
     const pw    = ph * 0.55;
     
-    // Низ персонажа должен быть ниже точки ловли
-    const bottomY = pos.y + ph * 0.10;  // опускаем персонажа ниже точки ловли
+    // Фиксированная позиция на уровне травы для ВСЕХ позиций
+    // Используем нижнюю позицию как базовую для всех
+    const groundLevel = H * 0.88;  // уровень травы
+    const bottomY = groundLevel;   // все персонажи стоят на одном уровне
 
     if (img.complete && img.naturalWidth > 0) {
         ctx.save();
