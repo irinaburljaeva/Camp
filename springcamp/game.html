@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>ШАГАЙ ДОМА — Лови цветы 🌸</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -11,19 +11,20 @@ body {
     background: linear-gradient(135deg, #d4a574 0%, #c9965f 100%);
     font-family: Arial, sans-serif;
     text-align: center;
-    padding: 20px;
+    padding: 10px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    overflow-x: hidden;
 }
 
 /* ── Общая обёртка корпуса ── */
 .console-body {
     background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%);
     border-radius: 30px 30px 50% 50% / 30px 30px 60px 60px;
-    padding: 28px 32px 36px;
+    padding: 20px 24px 28px;
     box-shadow:
         0 20px 60px rgba(0,0,0,0.5),
         inset 0 2px 6px rgba(255,255,255,0.6),
@@ -31,16 +32,17 @@ body {
     border: 3px solid #b8a888;
     position: relative;
     width: fit-content;
+    max-width: 100%;
 }
 
 /* ── Заголовок ── */
 .console-title-top {
     font-family: 'Arial Black', Arial, sans-serif;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 900;
-    letter-spacing: 8px;
+    letter-spacing: 6px;
     color: #5a4a2a;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     text-transform: uppercase;
 }
 
@@ -48,7 +50,7 @@ body {
 .console-middle {
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 12px;
 }
 
 /* ── Левая панель со стрелкой ── */
@@ -64,13 +66,13 @@ body {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
 }
 
 .right-arrow-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 /* ── Экран ── */
@@ -78,16 +80,19 @@ body {
     position: relative;
     background: #1a1a1a;
     border-radius: 14px;
-    padding: 12px;
+    padding: 10px;
     box-shadow:
         inset 0 0 20px rgba(0,0,0,0.9),
         0 4px 12px rgba(0,0,0,0.4);
+    max-width: 100%;
 }
 
 canvas {
     display: block;
     border-radius: 8px;
     border: 2px solid #111;
+    max-width: 100%;
+    height: auto;
 }
 
 /* ── Нижняя панель управления ── */
@@ -95,14 +100,15 @@ canvas {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 22px;
-    padding: 0 10px;
+    margin-top: 18px;
+    padding: 0 5px;
+    width: 100%;
 }
 
 .control-side {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
 }
 
@@ -125,33 +131,33 @@ canvas {
 
 /* левая стрелка вверх */
 .arrow-btn.left-up {
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-bottom: 34px solid #4a3a1a;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 28px solid #4a3a1a;
 }
 /* левая стрелка вниз */
 .arrow-btn.left-down {
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-top: 34px solid #4a3a1a;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-top: 28px solid #4a3a1a;
 }
 /* правая стрелка вверх */
 .arrow-btn.right-up {
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-bottom: 34px solid #4a3a1a;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 28px solid #4a3a1a;
 }
 /* правая стрелка вниз */
 .arrow-btn.right-down {
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-top: 34px solid #4a3a1a;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-top: 28px solid #4a3a1a;
 }
 
 /* ── Красная круглая кнопка ── */
 .red-btn {
-    width: 62px;
-    height: 62px;
+    width: 52px;
+    height: 52px;
     background: radial-gradient(circle at 35% 30%, #e84040, #9a1a1a);
     border: 4px solid #6a0a0a;
     border-radius: 50%;
@@ -182,10 +188,10 @@ canvas {
     background: linear-gradient(180deg, #d8cdb0 0%, #c0b490 100%);
     border: 2px solid #9a8a6a;
     border-radius: 20px;
-    padding: 6px 18px;
-    font-size: 11px;
+    padding: 5px 14px;
+    font-size: 10px;
     font-weight: 900;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     color: #3a2a0a;
     cursor: pointer;
     box-shadow:
@@ -203,25 +209,25 @@ canvas {
 /* ── Надпись снизу ── */
 .console-title-bottom {
     font-family: 'Arial Black', Arial, sans-serif;
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 900;
-    letter-spacing: 10px;
+    letter-spacing: 8px;
     color: #5a4a2a;
-    margin-top: 20px;
+    margin-top: 16px;
     text-transform: uppercase;
 }
 
 /* ── Рекорд/счёт ── */
 .stats {
     display: flex;
-    gap: 14px;
+    gap: 10px;
     justify-content: center;
-    font-size: 13px;
+    font-size: 12px;
     color: #4a3a1a;
 }
 .stat-item {
     background: rgba(255,255,255,0.3);
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 8px;
     border: 2px solid #8B6F47;
     font-weight: bold;
@@ -230,37 +236,37 @@ canvas {
 /* ── Оверлеи ── */
 #overlay, #levelSelect {
     position: absolute;
-    top: 12px; left: 12px; right: 12px; bottom: 12px;
+    top: 10px; left: 10px; right: 10px; bottom: 10px;
     background: rgba(30,24,12,0.96);
     color: #d4a574;
     display: none;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    font-size: 20px;
+    font-size: 18px;
     border-radius: 8px;
     z-index: 10;
-    padding: 20px;
+    padding: 15px;
 }
 #overlay.show, #levelSelect.show { display: flex; }
 
 .overlay-title {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: bold;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     color: #FF9F1C;
     text-align: center;
 }
 .level-buttons {
     display: flex;
-    gap: 16px;
-    margin-top: 20px;
+    gap: 14px;
+    margin-top: 16px;
     flex-wrap: wrap;
     justify-content: center;
 }
 .level-btn {
-    padding: 16px 32px;
-    font-size: 18px;
+    padding: 14px 28px;
+    font-size: 16px;
     border: 3px solid #7a7a7a;
     border-radius: 12px;
     color: white;
@@ -268,19 +274,19 @@ canvas {
     cursor: pointer;
     box-shadow: 0 6px 16px rgba(0,0,0,0.4);
     transition: all 0.2s ease;
-    min-width: 160px;
+    min-width: 140px;
 }
 .level-btn.easy { background: radial-gradient(circle at 30% 30%, #4CAF50, #388E3C); }
 .level-btn.hard { background: radial-gradient(circle at 30% 30%, #FF6B6B, #C92A2A); }
 .level-btn:hover { transform: translateY(-2px); }
 .level-btn:active { transform: translateY(1px); }
 
-.level-description { font-size: 12px; margin-top: 8px; opacity: 0.8; text-align: center; }
+.level-description { font-size: 11px; margin-top: 6px; opacity: 0.8; text-align: center; }
 
 .resume-btn {
-    padding: 12px 28px;
-    font-size: 17px;
-    margin-top: 16px;
+    padding: 10px 24px;
+    font-size: 15px;
+    margin-top: 14px;
     background: radial-gradient(circle at 30% 30%, #d64545, #a03030);
     border: 3px solid #7a7a7a;
     border-radius: 40px;
@@ -293,18 +299,167 @@ canvas {
 .resume-btn:active { transform: translateY(2px); }
 
 .controls-hint {
-    margin-top: 16px;
+    margin-top: 14px;
     color: #5a4a2a;
-    font-size: 12px;
+    font-size: 11px;
     max-width: 560px;
-    line-height: 1.6;
+    line-height: 1.5;
+    padding: 0 10px;
 }
 
+/* ── МОБИЛЬНАЯ АДАПТАЦИЯ ── */
 @media (max-width: 680px) {
-    canvas { width: 320px; height: 213px; }
-    .console-middle { gap: 10px; }
-    .red-btn { width: 46px; height: 46px; }
-    .level-buttons { flex-direction: column; }
+    body { padding: 5px; }
+    
+    .console-body {
+        padding: 12px 16px 20px;
+        border-radius: 20px 20px 40% 40% / 20px 20px 50px 50px;
+    }
+    
+    .console-title-top {
+        font-size: 8px;
+        letter-spacing: 3px;
+        margin-bottom: 8px;
+    }
+    
+    .console-middle {
+        gap: 6px;
+    }
+    
+    .screen-wrap {
+        padding: 6px;
+    }
+    
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    .arrow-btn.left-up, .arrow-btn.right-up {
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+        border-bottom: 20px solid #4a3a1a;
+    }
+    
+    .arrow-btn.left-down, .arrow-btn.right-down {
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+        border-top: 20px solid #4a3a1a;
+    }
+    
+    .red-btn {
+        width: 38px;
+        height: 38px;
+        border: 3px solid #6a0a0a;
+    }
+    
+    .game-btn {
+        padding: 4px 10px;
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+    
+    .control-side {
+        gap: 6px;
+    }
+    
+    .controls-panel {
+        margin-top: 12px;
+    }
+    
+    .stats {
+        gap: 6px;
+        font-size: 10px;
+    }
+    
+    .stat-item {
+        padding: 4px 8px;
+    }
+    
+    .console-title-bottom {
+        font-size: 10px;
+        letter-spacing: 5px;
+        margin-top: 12px;
+    }
+    
+    .controls-hint {
+        font-size: 10px;
+        margin-top: 10px;
+    }
+    
+    .overlay-title {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+    
+    #overlay, #levelSelect {
+        font-size: 14px;
+        padding: 12px;
+    }
+    
+    .level-buttons {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 12px;
+    }
+    
+    .level-btn {
+        padding: 12px 24px;
+        font-size: 14px;
+        min-width: 120px;
+    }
+    
+    .level-description {
+        font-size: 10px;
+    }
+    
+    .resume-btn {
+        padding: 8px 20px;
+        font-size: 13px;
+        margin-top: 10px;
+    }
+    
+    #overlayExtra {
+        font-size: 28px !important;
+    }
+    
+    #overlayMsg {
+        font-size: 14px !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .console-title-top {
+        font-size: 7px;
+        letter-spacing: 2px;
+    }
+    
+    .arrow-btn.left-up, .arrow-btn.right-up {
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-bottom: 16px solid #4a3a1a;
+    }
+    
+    .arrow-btn.left-down, .arrow-btn.right-down {
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 16px solid #4a3a1a;
+    }
+    
+    .red-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .game-btn {
+        font-size: 7px;
+        padding: 3px 8px;
+    }
+    
+    .console-title-bottom {
+        font-size: 9px;
+        letter-spacing: 4px;
+    }
 }
 </style>
 </head>
@@ -347,7 +502,7 @@ canvas {
                         <div class="level-description">Для опытных шагалок</div>
                     </div>
                 </div>
-                <div style="margin-top: 20px; font-size: 13px; opacity: 0.7;">
+                <div style="margin-top: 16px; font-size: 12px; opacity: 0.7;">
                     💡 Q/A — лево, W/S — право
                 </div>
             </div>
@@ -355,10 +510,10 @@ canvas {
             <!-- Пауза / Игра окончена -->
             <div id="overlay">
                 <div class="overlay-title" id="overlayTitle">⏸ ПАУЗА</div>
-                <div id="overlayMsg" style="font-size: 17px; margin: 8px 0; max-width: 340px; text-align:center;">
+                <div id="overlayMsg" style="font-size: 15px; margin: 8px 0; max-width: 300px; text-align:center;">
                     Пошагайте на месте, чтобы продолжить
                 </div>
-                <div id="overlayExtra" style="font-size: 40px; color: #FF9F1C; margin: 12px 0;">50 шагов</div>
+                <div id="overlayExtra" style="font-size: 32px; color: #FF9F1C; margin: 10px 0;">50 шагов</div>
                 <button class="resume-btn" id="overlayMainBtn" onclick="resumeGame()">ПРОДОЛЖИТЬ 👣</button>
                 <button class="resume-btn" onclick="backToMenu()"
                     style="background: radial-gradient(circle at 30% 30%, #888, #555); margin-top: 8px;">
@@ -380,7 +535,7 @@ canvas {
                         ontouchstart="setPosition(3)"
                         title="Низ-право (S)"></button>
                 </div>
-                <div style="display:flex; flex-direction:column; gap:8px; margin-left: 8px;">
+                <div style="display:flex; flex-direction:column; gap:6px; margin-left: 6px;">
                     <button class="game-btn" onclick="startGame('easy')">ИГРА А</button>
                     <button class="game-btn" onclick="startGame('hard')">ИГРА Б</button>
                     <button class="game-btn" onclick="pauseGame()">ПАУЗА</button>
@@ -441,7 +596,7 @@ let currentDifficulty = null;
 let baseSpeed      = 1;
 let spawnInterval  = null;
 let currentPosition = 2;
-let lastMoveDir    = 'down'; // 'up' | 'down' — для выбора спрайта девушки
+let lastMoveDir    = 'down';
 
 // ── Загрузка изображений ──
 const bg3  = new Image(); bg3.src  = "1.jpg";
@@ -451,6 +606,7 @@ const bgGO = new Image(); bgGO.src = "4.jpg";
 
 const imgUp   = new Image(); imgUp.src   = "up.png";
 const imgDown = new Image(); imgDown.src = "down.png";
+
 // ── Сложности ──
 const difficulties = {
     easy: { name:'ИГРА А 🌼', baseSpeed:0.5, spawnDelay:2000, speedIncrease:0.08 },
@@ -494,7 +650,7 @@ function drawBackgroundImage() {
     } else {
         ctx.fillStyle = "#f3e7d0";
         ctx.fillRect(0, 0, W, H);
-        bg.onload = () => {}; // перерисуется в следующем кадре
+        bg.onload = () => {};
     }
 }
 
@@ -502,13 +658,12 @@ function drawBackgroundImage() {
 function drawPlayer() {
     const pos   = catchPositions[currentPosition];
     const img   = (lastMoveDir === 'up') ? imgUp : imgDown;
-    const ph    = H * 0.40;   // высота спрайта — 40% высоты поля
-    const pw    = ph * 0.55;  // пропорция
+    const ph    = H * 0.40;
+    const pw    = ph * 0.55;
 
     if (img.complete && img.naturalWidth > 0) {
         ctx.drawImage(img, pos.x - pw/2, pos.y - ph*0.75, pw, ph);
     } else {
-        // запасной вариант — корзинка
         ctx.font = `${Math.round(H*0.10)}px Arial`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -539,7 +694,6 @@ function drawFlowers() {
         ctx.fillText(flower.emoji, 0, 0);
         ctx.restore();
 
-        // Поймали?
         if (flower.progress >= 95) {
             if (currentPosition === flower.laneIndex) {
                 score++;
@@ -557,7 +711,6 @@ function drawFlowers() {
             }
         }
 
-        // Пропустили?
         if (flower.progress >= 100) {
             if (!flower.caught) {
                 lives--;
@@ -592,8 +745,6 @@ document.addEventListener("keydown", function(e) {
 
 function setPosition(pos) {
     if (isPaused || !isGameStarted || isGameOver) return;
-    // определяем направление для спрайта
-    // 0,1 = верхние позиции, 2,3 = нижние
     const wasUpper = (currentPosition <= 1);
     const nowUpper = (pos <= 1);
     if (nowUpper && !wasUpper) lastMoveDir = 'up';
@@ -683,7 +834,7 @@ function update() {
             drawFlowers();
             drawPlayer();
         } else {
-            drawBackgroundImage(); // показываем 4.jpg
+            drawBackgroundImage();
         }
     }
 
