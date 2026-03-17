@@ -251,12 +251,12 @@ canvas {
 #overlay.show, #levelSelect.show { display: flex; }
 
 .overlay-title {
-    font-size: 26px;
+    font-size: 22px;
     font-weight: bold;
-    margin-bottom: 0;
+    margin-bottom: 16px;
     color: #FF9F1C;
     text-align: center;
-    line-height: 1.3;
+    line-height: 1.2;
 }
 
 .resume-btn {
@@ -285,12 +285,91 @@ canvas {
 
 /* ── МОБИЛЬНАЯ АДАПТАЦИЯ ── */
 @media (max-width: 680px) {
+    body { padding: 5px; }
+    
+    .console-body {
+        padding: 12px 16px 20px;
+        border-radius: 20px 20px 40% 40% / 20px 20px 50px 50px;
+    }
+    
+    .console-title-top {
+        font-size: 8px;
+        letter-spacing: 3px;
+        margin-bottom: 8px;
+    }
+    
+    .console-middle {
+        gap: 6px;
+    }
+    
+    .screen-wrap {
+        padding: 6px;
+    }
+    
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    .arrow-btn.left-up, .arrow-btn.right-up {
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+        border-bottom: 20px solid #4a3a1a;
+    }
+    
+    .arrow-btn.left-down, .arrow-btn.right-down {
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+        border-top: 20px solid #4a3a1a;
+    }
+    
+    .red-btn {
+        width: 38px;
+        height: 38px;
+        border: 3px solid #6a0a0a;
+    }
+    
+    .game-btn {
+        padding: 4px 10px;
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+    
+    .control-side {
+        gap: 6px;
+    }
+    
+    .controls-panel {
+        margin-top: 12px;
+    }
+    
+    .stats {
+        gap: 6px;
+        font-size: 10px;
+    }
+    
+    .stat-item {
+        padding: 4px 8px;
+    }
+    
+    .console-title-bottom {
+        font-size: 10px;
+        letter-spacing: 5px;
+        margin-top: 12px;
+    }
+    
+    .controls-hint {
+        font-size: 10px;
+        margin-top: 10px;
+    }
+    
     .overlay-title {
-        font-size: 20px;
+        font-size: 18px;
+        margin-bottom: 12px;
     }
     
     #overlay, #levelSelect {
-        font-size: 13px;
+        font-size: 12px;
         padding: 16px;
     }
     
@@ -306,29 +385,8 @@ canvas {
     }
     
     #overlayMsg {
-        font-size: 13px !important;
+        font-size: 12px !important;
         margin: 6px 0 !important;
-    }
-}
-
-@media (max-width: 400px) {
-    .overlay-title {
-        font-size: 18px;
-    }
-    
-    .resume-btn {
-        padding: 8px 18px;
-        font-size: 13px;
-    }
-}
-
-    
-    #overlayExtra {
-        font-size: 28px !important;
-    }
-    
-    #overlayMsg {
-        font-size: 14px !important;
     }
 }
 
@@ -364,6 +422,15 @@ canvas {
         font-size: 9px;
         letter-spacing: 4px;
     }
+    
+    .overlay-title {
+        font-size: 16px;
+    }
+    
+    .resume-btn {
+        padding: 8px 18px;
+        font-size: 13px;
+    }
 }
 </style>
 </head>
@@ -393,22 +460,21 @@ canvas {
         <div class="screen-wrap" style="position: relative;">
             <canvas id="game" width="480" height="320"></canvas>
 
-       <!-- Выбор уровня -->
-<div id="levelSelect" class="show">
-    <div class="overlay-title">🌸 Выбери уровень сложности</div>
-    <div style="margin-top: 20px; font-size: 14px; opacity: 0.9; max-width: 300px; text-align: center; line-height: 1.6;">
-        Нажмите кнопку <b>ИГРА А</b> для легкого уровня или <b>ИГРА Б</b> для сложного
-    </div>
-    <div style="margin-top: 20px; font-size: 12px; opacity: 0.7;">
-        💡 Управление: Q/A — лево, W/S — право
-    </div>
-</div>
-
+            <!-- Выбор уровня -->
+            <div id="levelSelect" class="show">
+                <div class="overlay-title">🌸 Выбери уровень</div>
+                <div style="margin-top: 16px; font-size: 13px; opacity: 0.9; max-width: 280px; text-align: center; line-height: 1.5;">
+                    Нажми <b>ИГРА А</b> для легкого уровня или <b>ИГРА Б</b> для сложного
+                </div>
+                <div style="margin-top: 16px; font-size: 11px; opacity: 0.7;">
+                    💡 Q/A — лево, W/S — право
+                </div>
+            </div>
 
             <!-- Пауза / Игра окончена -->
             <div id="overlay">
                 <div class="overlay-title" id="overlayTitle">⏸ ПАУЗА</div>
-                <div id="overlayMsg" style="font-size: 15px; margin: 8px 0; max-width: 300px; text-align:center;">
+                <div id="overlayMsg" style="font-size: 15px; margin: 8px 0; max-width: 280px; text-align:center;">
                     Пошагайте на месте, чтобы продолжить
                 </div>
                 <div id="overlayExtra" style="font-size: 32px; color: #FF9F1C; margin: 10px 0;">50 шагов</div>
@@ -519,21 +585,20 @@ const difficulties = {
     hard: { name:'ИГРА Б 🔥', baseSpeed:0.8, spawnDelay:1400, speedIncrease:0.15 }
 };
 
-// ── Жёлоба ──
+// ── Жёлоба ── (более пологие углы)
 const W = canvas.width, H = canvas.height;
 const lanes = [
-    { startX: W*0.10, startY: H*0.16, endX: W*0.31, endY: H*0.62 },
-    { startX: W*0.90, startY: H*0.16, endX: W*0.69, endY: H*0.62 },
-    { startX: W*0.10, startY: H*0.40, endX: W*0.31, endY: H*0.82 },
-    { startX: W*0.90, startY: H*0.40, endX: W*0.69, endY: H*0.82 }
+    { startX: W*0.10, startY: H*0.20, endX: W*0.31, endY: H*0.58 },
+    { startX: W*0.90, startY: H*0.20, endX: W*0.69, endY: H*0.58 },
+    { startX: W*0.10, startY: H*0.45, endX: W*0.31, endY: H*0.78 },
+    { startX: W*0.90, startY: H*0.45, endX: W*0.69, endY: H*0.78 }
 ];
 const catchPositions = [
-    { x: W*0.31, y: H*0.62 },
-    { x: W*0.69, y: H*0.62 },
-    { x: W*0.31, y: H*0.82 },
-    { x: W*0.69, y: H*0.82 }
+    { x: W*0.31, y: H*0.58 },
+    { x: W*0.69, y: H*0.58 },
+    { x: W*0.31, y: H*0.78 },
+    { x: W*0.69, y: H*0.78 }
 ];
-
 
 let flowers = [];
 const flowerEmojis = ['🌸','🌺','🌻','🌼','🌷','🏵️'];
@@ -561,11 +626,11 @@ function drawBackgroundImage() {
     }
 }
 
-// ── Игрок (девушка с корзинкой) ──
+// ── Игрок (девушка с корзинкой) ── (опущен ниже)
 function drawPlayer() {
     const pos   = catchPositions[currentPosition];
     const img   = (lastMoveDir === 'up') ? imgUp : imgDown;
-    const ph    = H * 0.35;   // уменьшили высоту с 0.40 до 0.35
+    const ph    = H * 0.30;   // уменьшили высоту с 0.35 до 0.30
     const pw    = ph * 0.55;
 
     if (img.complete && img.naturalWidth > 0) {
@@ -573,11 +638,11 @@ function drawPlayer() {
         
         // Позиции 0 и 2 — это левая сторона, нужно отразить
         if (currentPosition === 0 || currentPosition === 2) {
-            ctx.translate(pos.x + pw/2, pos.y - ph*0.65); // уменьшили смещение с 0.75 до 0.65
+            ctx.translate(pos.x + pw/2, pos.y - ph*0.55); // уменьшили смещение
             ctx.scale(-1, 1);
             ctx.drawImage(img, 0, 0, pw, ph);
         } else {
-            ctx.drawImage(img, pos.x - pw/2, pos.y - ph*0.65, pw, ph); // уменьшили смещение с 0.75 до 0.65
+            ctx.drawImage(img, pos.x - pw/2, pos.y - ph*0.55, pw, ph);
         }
         
         ctx.restore();
@@ -589,10 +654,9 @@ function drawPlayer() {
     }
 }
 
-
 // ── Цветы ──
 function drawFlowers() {
-    const flowerSize = H * 0.12; // увеличили с 0.08 до 0.12
+    const flowerSize = H * 0.12;
 
     for (let i = flowers.length - 1; i >= 0; i--) {
         const flower = flowers[i];
@@ -609,11 +673,9 @@ function drawFlowers() {
         ctx.translate(x, y);
         ctx.rotate((flower.progress * 3) * Math.PI / 180);
         
-        // Рисуем изображение цветка, если загружено
         if (flower.image && flower.image.complete && flower.image.naturalWidth > 0) {
             ctx.drawImage(flower.image, -flowerSize/2, -flowerSize/2, flowerSize, flowerSize);
         } else {
-            // Запасной вариант — эмодзи
             ctx.font = `${Math.round(flowerSize)}px Arial`;
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
@@ -622,7 +684,6 @@ function drawFlowers() {
         
         ctx.restore();
 
-        // Поймали?
         if (flower.progress >= 95) {
             if (currentPosition === flower.laneIndex) {
                 score++;
@@ -640,7 +701,6 @@ function drawFlowers() {
             }
         }
 
-        // Пропустили?
         if (flower.progress >= 100) {
             if (!flower.caught) {
                 lives--;
@@ -651,7 +711,6 @@ function drawFlowers() {
     }
 }
 
-
 // ── Спавн ──
 function spawnFlower() {
     if (isPaused || !isGameStarted || isGameOver) return;
@@ -661,7 +720,7 @@ function spawnFlower() {
         progress:  0,
         speed:     (0.8 + Math.random() * 0.4) * baseSpeed,
         emoji:     flowerEmojis[randomIndex],
-        image:     flowerImages[randomIndex], // добавляем изображение
+        image:     flowerImages[randomIndex],
         caught:    false
     });
 }
@@ -775,8 +834,6 @@ function update() {
 }
 
 update();
-
 </script>
 </body>
 </html>
-
