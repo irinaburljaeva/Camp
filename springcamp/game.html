@@ -624,17 +624,18 @@ const difficulties = {
 // ── Жёлоба ──
 const W = canvas.width, H = canvas.height;
 const lanes = [
-    { startX: W*0.10, startY: H*0.16, endX: W*0.31, endY: H*0.70 },
-    { startX: W*0.90, startY: H*0.16, endX: W*0.69, endY: H*0.70 },
-    { startX: W*0.10, startY: H*0.35, endX: W*0.31, endY: H*0.86 },
-    { startX: W*0.90, startY: H*0.35, endX: W*0.69, endY: H*0.86 }
+    { startX: W*0.10, startY: H*0.16, endX: W*0.31, endY: H*0.62 },
+    { startX: W*0.90, startY: H*0.16, endX: W*0.69, endY: H*0.62 },
+    { startX: W*0.10, startY: H*0.40, endX: W*0.31, endY: H*0.82 },
+    { startX: W*0.90, startY: H*0.40, endX: W*0.69, endY: H*0.82 }
 ];
 const catchPositions = [
-    { x: W*0.31, y: H*0.70 },
-    { x: W*0.69, y: H*0.70 },
-    { x: W*0.31, y: H*0.86 },
-    { x: W*0.69, y: H*0.86 }
+    { x: W*0.31, y: H*0.62 },
+    { x: W*0.69, y: H*0.62 },
+    { x: W*0.31, y: H*0.82 },
+    { x: W*0.69, y: H*0.82 }
 ];
+
 
 let flowers = [];
 const flowerEmojis = ['🌸','🌺','🌻','🌼','🌷','🏵️'];
@@ -666,7 +667,7 @@ function drawBackgroundImage() {
 function drawPlayer() {
     const pos   = catchPositions[currentPosition];
     const img   = (lastMoveDir === 'up') ? imgUp : imgDown;
-    const ph    = H * 0.40;
+    const ph    = H * 0.35;   // уменьшили высоту с 0.40 до 0.35
     const pw    = ph * 0.55;
 
     if (img.complete && img.naturalWidth > 0) {
@@ -674,11 +675,11 @@ function drawPlayer() {
         
         // Позиции 0 и 2 — это левая сторона, нужно отразить
         if (currentPosition === 0 || currentPosition === 2) {
-            ctx.translate(pos.x + pw/2, pos.y - ph*0.75);
-            ctx.scale(-1, 1); // отражаем по горизонтали
+            ctx.translate(pos.x + pw/2, pos.y - ph*0.65); // уменьшили смещение с 0.75 до 0.65
+            ctx.scale(-1, 1);
             ctx.drawImage(img, 0, 0, pw, ph);
         } else {
-            ctx.drawImage(img, pos.x - pw/2, pos.y - ph*0.75, pw, ph);
+            ctx.drawImage(img, pos.x - pw/2, pos.y - ph*0.65, pw, ph); // уменьшили смещение с 0.75 до 0.65
         }
         
         ctx.restore();
@@ -689,6 +690,7 @@ function drawPlayer() {
         ctx.fillText("🧺", pos.x, pos.y);
     }
 }
+
 
 // ── Цветы ──
 function drawFlowers() {
