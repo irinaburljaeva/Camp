@@ -8,7 +8,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    background:  #ffffff;
+    background: #ffffff;
     font-family: Arial, sans-serif;
     text-align: center;
     padding: 10px;
@@ -279,6 +279,10 @@ canvas {
     white-space: nowrap;
 }
 .resume-btn:active { transform: translateY(2px); }
+.resume-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 .controls-hint {
     margin-top: 14px;
@@ -287,6 +291,10 @@ canvas {
     max-width: 560px;
     line-height: 1.5;
     padding: 0 10px;
+}
+
+#overlayExtra video {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 /* ── МОБИЛЬНАЯ АДАПТАЦИЯ ── */
@@ -443,8 +451,6 @@ canvas {
         font-size: 20px !important;
     }
 }
-
-
 </style>
 </head>
 <body>
@@ -560,6 +566,13 @@ canvas {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+// ── Вибрация при потере жизни ──
+function vibrateOnLifeLoss() {
+    if ('vibrate' in navigator) {
+        navigator.vibrate([100, 50, 100]);
+    }
+}
+
 // ── Состояние игры ──
 let score = 0;
 let lives = 3;
@@ -598,7 +611,7 @@ const difficulties = {
     hard: { name:'ИГРА Б 🔥', baseSpeed:0.8, spawnDelay:1400, speedIncrease:0.15 }
 };
 
-// ── Жёлоба ── (более пологие углы)
+// ── Жёлоба ──
 const W = canvas.width, H = canvas.height;
 const lanes = [
     { startX: W*0.10, startY: H*0.20, endX: W*0.31, endY: H*0.58 },
@@ -644,19 +657,15 @@ function drawPlayer() {
     const pos   = catchPositions[currentPosition];
     const img   = (lastMoveDir === 'up') ? imgUp : imgDown;
     
-    // Увеличенная высота персонажа
     const ph    = H * 0.45;
     const pw    = ph * 0.55;
     
-    // Фиксированная позиция на уровне травы для ВСЕХ позиций
-    // Используем нижнюю позицию как базовую для всех
-    const groundLevel = H * 0.88;  // уровень травы
-    const bottomY = groundLevel;   // все персонажи стоят на одном уровне
+    const groundLevel = H * 0.88;
+    const bottomY = groundLevel;
 
     if (img.complete && img.naturalWidth > 0) {
         ctx.save();
         
-        // Позиции 0 и 2 — это левая сторона, нужно отразить
         if (currentPosition === 0 || currentPosition === 2) {
             ctx.translate(pos.x + pw/2, bottomY - ph);
             ctx.scale(-1, 1);
@@ -673,7 +682,6 @@ function drawPlayer() {
         ctx.fillText("🧺", pos.x, pos.y);
     }
 }
-
 
 // ── Цветы ──
 function drawFlowers() {
@@ -725,6 +733,7 @@ function drawFlowers() {
         if (flower.progress >= 100) {
             if (!flower.caught) {
                 lives--;
+                vibrateOnLifeLoss(); // вибрация при потере жизни
                 if (lives <= 0) { lives = 0; gameOver(); }
             }
             flowers.splice(i, 1);
@@ -792,6 +801,9 @@ function resetOverlayToPause() {
     document.getElementById('overlayExtra').textContent    = '50 шагов';
     const btn = document.getElementById('overlayMainBtn');
     btn.textContent = 'ПРОДОЛЖИТЬ 👣';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
     btn.onclick = resumeGame;
 }
 
@@ -814,12 +826,31 @@ function gameOver() {
     if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; }
 
     setTimeout(() => {
-        document.getElementById('overlayTitle').textContent  = '❌ ИГРА ОКОНЧЕНА';
-        document.getElementById('overlayMsg').textContent    = `Ваш счёт: ${score}`;
-        document.getElementById('overlayExtra').textContent  = 'Попробуете ещё раз?';
+        document.getElementById('overlayTitle').textContent  = '💪 Кардио-разминка!';
+        document.getElementById('overlayMsg').innerHTML      = `Ваш счёт: ${score}<br><br>Выполните минутную разминку перед следующей игрой`;
+        document.getElementById('overlayExtra').innerHTML    = '<video id="cardioVideo" style="width: 100%; max-width: 280px; border-radius: 8px; margin: 10px 0;" controls autoplay><source src="cardio.mp4" type="video/mp4">Ваш браузер не поддерживает видео.</video>';
+        
         const btn = document.getElementById('overlayMainBtn');
         btn.textContent = 'ИГРАТЬ СНОВА 🌸';
-        btn.onclick = () => startGame(currentDifficulty);
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+        
+        let countdown = 60;
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                btn.textContent = `ПОДОЖДИТЕ ${countdown} сек ⏱️`;
+            } else {
+                clearInterval(countdownInterval);
+                btn.textContent = 'ИГРАТЬ СНОВА 🌸';
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btn.onclick = () => startGame(currentDifficulty);
+            }
+        }, 1000);
+        
         document.getElementById("overlay").classList.add("show");
     }, 400);
 }
@@ -858,3 +889,5 @@ update();
 </script>
 </body>
 </html>
+
+
