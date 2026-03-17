@@ -644,23 +644,31 @@ function drawPlayer() {
     const pos   = catchPositions[currentPosition];
     const img   = (lastMoveDir === 'up') ? imgUp : imgDown;
     
-    // Фиксированная высота персонажа и привязка к нижней точке
-    const ph    = H * 0.40;   // увеличили высоту персонажа
+    // Увеличенная высота персонажа
+    const ph    = H * 0.40;
     const pw    = ph * 0.55;
     
-    // Фиксированная нижняя точка для всех позиций
-    const bottomY = pos.y;  // низ персонажа всегда на одной линии
+    // Определяем базовую позицию для нижних позиций (2 и 3)
+    // Верхние позиции (0 и 1) должны быть выше
+    let bottomY;
+    if (currentPosition === 0 || currentPosition === 1) {
+        // Верхние позиции - персонаж выше
+        bottomY = pos.y + ph * 0.15;  // немного выше точки ловли
+    } else {
+        // Нижние позиции - персонаж на своем месте
+        bottomY = pos.y;
+    }
 
     if (img.complete && img.naturalWidth > 0) {
         ctx.save();
         
         // Позиции 0 и 2 — это левая сторона, нужно отразить
         if (currentPosition === 0 || currentPosition === 2) {
-            ctx.translate(pos.x + pw/2, bottomY - ph);  // bottomY минус высота
+            ctx.translate(pos.x + pw/2, bottomY - ph);
             ctx.scale(-1, 1);
             ctx.drawImage(img, 0, 0, pw, ph);
         } else {
-            ctx.drawImage(img, pos.x - pw/2, bottomY - ph, pw, ph);  // bottomY минус высота
+            ctx.drawImage(img, pos.x - pw/2, bottomY - ph, pw, ph);
         }
         
         ctx.restore();
