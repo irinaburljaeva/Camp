@@ -574,23 +574,17 @@ canvas {
         <div class="screen-wrap" style="position: relative;">
             <canvas id="game" width="480" height="320"></canvas>
 
-            <!-- Выбор уровня -->
-            <div id="levelSelect" class="show">
-                <div class="overlay-title">🌸 Выбери уровень</div>
-                <div class="level-buttons">
-                    <div>
-                        <button class="level-btn easy" onclick="startGame('easy')">🌼 ИГРА А</button>
-                        <div class="level-description">Для новичков и разминки</div>
-                    </div>
-                    <div>
-                        <button class="level-btn hard" onclick="startGame('hard')">🔥 ИГРА Б</button>
-                        <div class="level-description">Для опытных шагалок</div>
-                    </div>
-                </div>
-                <div style="margin-top: 16px; font-size: 12px; opacity: 0.7;">
-                    💡 Q/A — лево, W/S — право
-                </div>
-            </div>
+       <!-- Выбор уровня -->
+<div id="levelSelect" class="show">
+    <div class="overlay-title">🌸 Выбери уровень сложности</div>
+    <div style="margin-top: 20px; font-size: 14px; opacity: 0.9; max-width: 300px; text-align: center; line-height: 1.6;">
+        Нажмите кнопку <b>ИГРА А</b> для легкого уровня или <b>ИГРА Б</b> для сложного
+    </div>
+    <div style="margin-top: 20px; font-size: 12px; opacity: 0.7;">
+        💡 Управление: Q/A — лево, W/S — право
+    </div>
+</div>
+
 
             <!-- Пауза / Игра окончена -->
             <div id="overlay">
