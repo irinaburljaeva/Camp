@@ -253,49 +253,10 @@ canvas {
 .overlay-title {
     font-size: 26px;
     font-weight: bold;
-    margin-bottom: 20px;
+    margin-bottom: 0;
     color: #FF9F1C;
     text-align: center;
     line-height: 1.3;
-}
-
-.level-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 20px;
-    width: 100%;
-    max-width: 280px;
-}
-
-.level-btn {
-    padding: 16px 32px;
-    font-size: 18px;
-    border: 3px solid #7a7a7a;
-    border-radius: 12px;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-    transition: all 0.2s ease;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.level-btn.easy { background: radial-gradient(circle at 30% 30%, #4CAF50, #388E3C); }
-.level-btn.hard { background: radial-gradient(circle at 30% 30%, #FF6B6B, #C92A2A); }
-.level-btn:hover { transform: translateY(-2px); }
-.level-btn:active { transform: translateY(1px); }
-
-.level-description { 
-    font-size: 12px; 
-    margin-top: 4px; 
-    opacity: 0.7; 
-    text-align: center;
-    color: #d4a574;
 }
 
 .resume-btn {
@@ -303,14 +264,13 @@ canvas {
     font-size: 16px;
     margin-top: 16px;
     background: radial-gradient(circle at 30% 30%, #d64545, #a03030);
-    border: 3px solid #7a7a7a;
+    border: none;
     border-radius: 40px;
     color: white;
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 6px 16px rgba(0,0,0,0.4);
     transition: all 0.2s ease;
-    border: none;
 }
 .resume-btn:active { transform: translateY(2px); }
 
@@ -325,108 +285,13 @@ canvas {
 
 /* ── МОБИЛЬНАЯ АДАПТАЦИЯ ── */
 @media (max-width: 680px) {
-    body { padding: 5px; }
-    
-    .console-body {
-        padding: 12px 16px 20px;
-        border-radius: 20px 20px 40% 40% / 20px 20px 50px 50px;
-    }
-    
-    .console-title-top {
-        font-size: 8px;
-        letter-spacing: 3px;
-        margin-bottom: 8px;
-    }
-    
-    .console-middle {
-        gap: 6px;
-    }
-    
-    .screen-wrap {
-        padding: 6px;
-    }
-    
-    canvas {
-        width: 100% !important;
-        height: auto !important;
-    }
-    
-    .arrow-btn.left-up, .arrow-btn.right-up {
-        border-left: 12px solid transparent;
-        border-right: 12px solid transparent;
-        border-bottom: 20px solid #4a3a1a;
-    }
-    
-    .arrow-btn.left-down, .arrow-btn.right-down {
-        border-left: 12px solid transparent;
-        border-right: 12px solid transparent;
-        border-top: 20px solid #4a3a1a;
-    }
-    
-    .red-btn {
-        width: 38px;
-        height: 38px;
-        border: 3px solid #6a0a0a;
-    }
-    
-    .game-btn {
-        padding: 4px 10px;
-        font-size: 8px;
-        letter-spacing: 1px;
-    }
-    
-    .control-side {
-        gap: 6px;
-    }
-    
-    .controls-panel {
-        margin-top: 12px;
-    }
-    
-    .stats {
-        gap: 6px;
-        font-size: 10px;
-    }
-    
-    .stat-item {
-        padding: 4px 8px;
-    }
-    
-    .console-title-bottom {
-        font-size: 10px;
-        letter-spacing: 5px;
-        margin-top: 12px;
-    }
-    
-    .controls-hint {
-        font-size: 10px;
-        margin-top: 10px;
-    }
-    
     .overlay-title {
-        font-size: 22px;
-        margin-bottom: 16px;
+        font-size: 20px;
     }
     
     #overlay, #levelSelect {
-        font-size: 14px;
+        font-size: 13px;
         padding: 16px;
-    }
-    
-    .level-buttons {
-        gap: 12px;
-        margin-top: 16px;
-        max-width: 240px;
-    }
-    
-    .level-btn {
-        padding: 14px 24px;
-        font-size: 16px;
-    }
-    
-    .level-description {
-        font-size: 11px;
-        margin-top: 3px;
     }
     
     .resume-btn {
@@ -447,54 +312,8 @@ canvas {
 }
 
 @media (max-width: 400px) {
-    .console-title-top {
-        font-size: 7px;
-        letter-spacing: 2px;
-    }
-    
-    .arrow-btn.left-up, .arrow-btn.right-up {
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-bottom: 16px solid #4a3a1a;
-    }
-    
-    .arrow-btn.left-down, .arrow-btn.right-down {
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-top: 16px solid #4a3a1a;
-    }
-    
-    .red-btn {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .game-btn {
-        font-size: 7px;
-        padding: 3px 8px;
-    }
-    
-    .console-title-bottom {
-        font-size: 9px;
-        letter-spacing: 4px;
-    }
-    
     .overlay-title {
         font-size: 18px;
-        margin-bottom: 12px;
-    }
-    
-    .level-buttons {
-        max-width: 200px;
-    }
-    
-    .level-btn {
-        padding: 12px 20px;
-        font-size: 14px;
-    }
-    
-    .level-description {
-        font-size: 10px;
     }
     
     .resume-btn {
