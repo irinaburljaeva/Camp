@@ -825,35 +825,75 @@ function gameOver() {
     isGameOver = true; isPaused = true;
     if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; }
 
+    // ЭТАП 1: Показываем сообщение о необходимости разминки
     setTimeout(() => {
-        document.getElementById('overlayTitle').textContent  = '💪 Кардио-разминка!';
-        document.getElementById('overlayMsg').innerHTML      = `Ваш счёт: ${score}<br><br>Выполните минутную разминку перед следующей игрой`;
-        document.getElementById('overlayExtra').innerHTML    = '<video id="cardioVideo" style="width: 100%; max-width: 280px; border-radius: 8px; margin: 10px 0;" controls autoplay><source src="cardio.mp4" type="video/mp4">Ваш браузер не поддерживает видео.</video>';
+        document.getElementById('overlayTitle').textContent  = '😟 Ой, все жизни кончились!';
+        document.getElementById('overlayMsg').innerHTML      = `Ваш счёт: <b>${score}</b>`;
+        document.getElementById('overlayExtra').innerHTML    = 'Чтобы сыграть заново, пошагайте 1 минуту вместе с Настей.<br><br>Готовы?';
         
         const btn = document.getElementById('overlayMainBtn');
-        btn.textContent = 'ИГРАТЬ СНОВА 🌸';
-        btn.disabled = true;
-        btn.style.opacity = '0.5';
-        btn.style.cursor = 'not-allowed';
-        
-        let countdown = 60;
-        const countdownInterval = setInterval(() => {
-            countdown--;
-            if (countdown > 0) {
-                btn.textContent = `ПОДОЖДИТЕ ${countdown} сек ⏱️`;
-            } else {
-                clearInterval(countdownInterval);
-                btn.textContent = 'ИГРАТЬ СНОВА 🌸';
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.style.cursor = 'pointer';
-                btn.onclick = () => startGame(currentDifficulty);
-            }
-        }, 1000);
+        btn.textContent = 'НАЧАТЬ РАЗМИНКУ 💪';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.onclick = startCardioWorkout; // переходим к видео
         
         document.getElementById("overlay").classList.add("show");
     }, 400);
 }
+
+// ── Начало кардио-разминки ──
+function startCardioWorkout() {
+    document.getElementById('overlayTitle').textContent  = '💪 Кардио-разминка';
+    document.getElementById('overlayMsg').innerHTML      = 'Повторяйте движения за Настей!';
+    
+    const videoHTML = '<video id="cardioVideo" style="width: 100%; max-width: 280px; border-radius: 8px; margin: 10px 0;" autoplay><source src="cardio.mp4" type="video/mp4">Ваш браузер не поддерживает видео.</video>';
+    document.getElementById('overlayExtra').innerHTML = videoHTML;
+    
+    const btn = document.getElementById('overlayMainBtn');
+    btn.textContent = 'ПРОПУСТИТЬ ⏭️';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+    btn.onclick = () => startGame(currentDifficulty);
+    
+    // Отслеживаем окончание видео
+    const video = document.getElementById('cardioVideo');
+    if (video) {
+        video.addEventListener('ended', function() {
+            // Видео закончилось - автоматически начинаем игру
+            startGame(currentDifficulty);
+        });
+        
+        // Если видео не загрузилось, показываем таймер
+        video.addEventListener('error', function() {
+            startCountdownTimer();
+        });
+    } else {
+        // Если видео не загрузилось, показываем таймер
+        startCountdownTimer();
+    }
+}
+
+// ── Таймер обратного отсчета (если видео не загрузилось) ──
+function startCountdownTimer() {
+    const btn = document.getElementById('overlayMainBtn');
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.style.cursor = 'not-allowed';
+    
+    let countdown = 60;
+    const countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+            btn.textContent = `ПОДОЖДИТЕ ${countdown} сек ⏱️`;
+        } else {
+            clearInterval(countdownInterval);
+            startGame(currentDifficulty);
+        }
+    }, 1000);
+}
+
 
 // ── В меню ──
 function backToMenu() {
