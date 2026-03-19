@@ -491,6 +491,54 @@ canvas {
 </style>
 </head>
 <body>
+<!-- Экран авторизации -->
+<div id="authScreen" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+    <div style="background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%); padding: 30px; border-radius: 20px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+        <h2 style="color: #5a4a2a; margin-bottom: 20px; text-align: center; font-family: 'Arial Black', Arial, sans-serif;">🌸 ШАГАЙ ДОМА</h2>
+        
+        <div id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Email" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #9a8a6a; border-radius: 8px; font-size: 14px;">
+            <input type="password" id="loginPassword" placeholder="Пароль" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #9a8a6a; border-radius: 8px; font-size: 14px;">
+            <button onclick="login()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #4CAF50, #388E3C); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">ВОЙТИ</button>
+            <button onclick="showRegister()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;">РЕГИСТРАЦИЯ</button>
+        </div>
+        
+        <div id="registerForm" style="display: none;">
+            <input type="email" id="registerEmail" placeholder="Email" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #9a8a6a; border-radius: 8px; font-size: 14px;">
+            <input type="text" id="registerName" placeholder="Ваше имя" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #9a8a6a; border-radius: 8px; font-size: 14px;">
+            <input type="password" id="registerPassword" placeholder="Пароль (мин. 6 символов)" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #9a8a6a; border-radius: 8px; font-size: 14px;">
+            <button onclick="register()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #4CAF50, #388E3C); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">СОЗДАТЬ АККАУНТ</button>
+            <button onclick="showLogin()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #888, #555); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;">НАЗАД</button>
+        </div>
+        
+        <div id="authError" style="color: #d32f2f; text-align: center; margin-top: 10px; font-size: 14px;"></div>
+    </div>
+</div>
+
+<!-- Кнопка лидерборда -->
+<button id="leaderboardBtn" onclick="showLeaderboard()" style="position: fixed; top: 20px; right: 20px; padding: 12px 20px; background: linear-gradient(135deg, #ffd700, #ffed4e); color: #5a4a2a; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 100; display: none;">
+    🏆 ЛИДЕРБОРД
+</button>
+
+<!-- Экран лидерборда -->
+<div id="leaderboardScreen" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 1000; overflow-y: auto; padding: 20px;">
+    <div style="max-width: 600px; margin: 0 auto; background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%); padding: 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+        <h2 style="color: #5a4a2a; margin-bottom: 20px; text-align: center; font-family: 'Arial Black', Arial, sans-serif;">🏆 ЛИДЕРБОРД</h2>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button onclick="loadLeaderboard('easy')" id="leaderEasyBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #4CAF50, #388E3C); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">ИГРА А</button>
+            <button onclick="loadLeaderboard('hard')" id="leaderHardBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">ИГРА Б</button>
+        </div>
+        
+        <div id="leaderboardList" style="background: rgba(255,255,255,0.5); border-radius: 10px; padding: 15px; margin-bottom: 20px; max-height: 400px; overflow-y: auto;">
+            <p style="text-align: center; color: #5a4a2a;">Загрузка...</p>
+        </div>
+        
+        <button onclick="closeLeaderboard()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #888, #555); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;">ЗАКРЫТЬ</button>
+        
+        <button onclick="logoutUser()" style="width: 100%; padding: 10px; background: transparent; color: #d32f2f; border: 2px solid #d32f2f; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px;">ВЫЙТИ ИЗ АККАУНТА</button>
+    </div>
+</div>
 
 <div class="console-body">
 
@@ -1016,6 +1064,207 @@ function update() {
 }
 
 update();
+
+    // Firebase imports и функции
+import { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, collection, addDoc, query, orderBy, limit, getDocs, setDoc, doc, getDoc } from './firebase-config.js';
+
+let currentUser = null;
+let currentLeaderboardMode = 'easy';
+
+// Проверка авторизации
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        currentUser = user;
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('leaderboardBtn').style.display = 'block';
+        console.log('Пользователь авторизован:', user.email);
+    } else {
+        currentUser = null;
+        document.getElementById('authScreen').style.display = 'flex';
+        document.getElementById('leaderboardBtn').style.display = 'none';
+    }
+});
+
+// Вход
+async function login() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const errorDiv = document.getElementById('authError');
+    
+    if (!email || !password) {
+        errorDiv.textContent = 'Заполните все поля';
+        return;
+    }
+    
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        errorDiv.textContent = '';
+    } catch (error) {
+        if (error.code === 'auth/invalid-credential') {
+            errorDiv.textContent = 'Неверный email или пароль';
+        } else if (error.code === 'auth/user-not-found') {
+            errorDiv.textContent = 'Пользователь не найден';
+        } else {
+            errorDiv.textContent = 'Ошибка входа: ' + error.message;
+        }
+    }
+}
+
+// Регистрация
+async function register() {
+    const email = document.getElementById('registerEmail').value;
+    const name = document.getElementById('registerName').value;
+    const password = document.getElementById('registerPassword').value;
+    const errorDiv = document.getElementById('authError');
+    
+    if (!email || !name || !password) {
+        errorDiv.textContent = 'Заполните все поля';
+        return;
+    }
+    
+    if (password.length < 6) {
+        errorDiv.textContent = 'Пароль должен быть минимум 6 символов';
+        return;
+    }
+    
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Сохраняем имя пользователя в Firestore
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+            name: name,
+            email: email,
+            createdAt: new Date()
+        });
+        
+        errorDiv.textContent = '';
+    } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+            errorDiv.textContent = 'Email уже используется';
+        } else if (error.code === 'auth/invalid-email') {
+            errorDiv.textContent = 'Неверный формат email';
+        } else {
+            errorDiv.textContent = 'Ошибка регистрации: ' + error.message;
+        }
+    }
+}
+
+// Переключение форм
+function showRegister() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+    document.getElementById('authError').textContent = '';
+}
+
+function showLogin() {
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('authError').textContent = '';
+}
+
+// Выход
+async function logoutUser() {
+    if (confirm('Вы уверены, что хотите выйти?')) {
+        await signOut(auth);
+        closeLeaderboard();
+    }
+}
+
+// Сохранение результата в Firebase
+async function saveScore(difficulty, score) {
+    if (!currentUser) return;
+    
+    try {
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        const userName = userDoc.exists() ? userDoc.data().name : 'Игрок';
+        
+        await addDoc(collection(db, 'scores'), {
+            userId: currentUser.uid,
+            userName: userName,
+            difficulty: difficulty,
+            score: score,
+            timestamp: new Date()
+        });
+        
+        console.log('Результат сохранен!');
+    } catch (error) {
+        console.error('Ошибка сохранения результата:', error);
+    }
+}
+
+// Показать лидерборд
+function showLeaderboard() {
+    document.getElementById('leaderboardScreen').style.display = 'block';
+    loadLeaderboard(currentLeaderboardMode);
+}
+
+function closeLeaderboard() {
+    document.getElementById('leaderboardScreen').style.display = 'none';
+}
+
+// Загрузка лидерборда
+async function loadLeaderboard(difficulty) {
+    currentLeaderboardMode = difficulty;
+    const listDiv = document.getElementById('leaderboardList');
+    listDiv.innerHTML = '<p style="text-align: center; color: #5a4a2a;">Загрузка...</p>';
+    
+    // Обновляем стили кнопок
+    document.getElementById('leaderEasyBtn').style.opacity = difficulty === 'easy' ? '1' : '0.6';
+    document.getElementById('leaderHardBtn').style.opacity = difficulty === 'hard' ? '1' : '0.6';
+    
+    try {
+        const q = query(
+            collection(db, 'scores'),
+            orderBy('score', 'desc'),
+            limit(50)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const scores = [];
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.difficulty === difficulty) {
+                scores.push(data);
+            }
+        });
+        
+        if (scores.length === 0) {
+            listDiv.innerHTML = '<p style="text-align: center; color: #5a4a2a;">Пока нет результатов</p>';
+            return;
+        }
+        
+        let html = '';
+        scores.slice(0, 10).forEach((scoreData, index) => {
+            const isCurrentUser = currentUser && scoreData.userId === currentUser.uid;
+            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+            
+            html += `
+                <div style="padding: 12px; margin-bottom: 8px; background: ${isCurrentUser ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.7)'}; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: ${isCurrentUser ? '2px solid #ffd700' : 'none'};">
+                    <span style="font-weight: bold; color: #5a4a2a; min-width: 30px;">${medal}</span>
+                    <span style="flex: 1; margin-left: 10px; color: #5a4a2a; font-weight: ${isCurrentUser ? 'bold' : 'normal'};">${scoreData.userName}</span>
+                    <span style="font-weight: bold; color: #4CAF50; font-size: 18px;">🌸 ${scoreData.score}</span>
+                </div>
+            `;
+        });
+        
+        listDiv.innerHTML = html;
+    } catch (error) {
+        console.error('Ошибка загрузки лидерборда:', error);
+        listDiv.innerHTML = '<p style="text-align: center; color: #d32f2f;">Ошибка загрузки</p>';
+    }
+}
+
+// Сделайте функции глобальными
+window.login = login;
+window.register = register;
+window.showRegister = showRegister;
+window.showLogin = showLogin;
+window.logoutUser = logoutUser;
+window.showLeaderboard = showLeaderboard;
+window.closeLeaderboard = closeLeaderboard;
+window.loadLeaderboard = loadLeaderboard;
+
 </script>
 </body>
 </html>
