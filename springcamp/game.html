@@ -393,18 +393,18 @@ canvas {
         margin-top: 10px;
     }
     
-    #overlayExtra {
-        font-size: 22px !important;
-        margin: 6px 0 !important;
-    }
-    
-    #overlayMsg {
-        font-size: 12px !important;
-        margin: 6px 0 !important;
-        max-width: 90%;
-    }
+#overlayMsg {
+    font-size: 13px !important;
+    margin: 8px 0 !important;
+    max-width: 90%;
+    line-height: 1.4 !important;
 }
 
+#overlayExtra {
+    font-size: 16px !important;
+    margin: 8px 0 !important;
+}
+    
 @media (max-width: 400px) {
     .console-title-top {
         font-size: 7px;
@@ -660,7 +660,7 @@ function drawPlayer() {
     const ph    = H * 0.45;
     const pw    = ph * 0.55;
     
-    const groundLevel = H * 0.90;
+    const groundLevel = H * 0.100;
     const bottomY = groundLevel;
 
     if (img.complete && img.naturalWidth > 0) {
@@ -820,6 +820,7 @@ function resumeGame() {
     document.getElementById("overlay").classList.remove("show");
 }
 
+
 // ── Игра окончена ──
 function gameOver() {
     isGameOver = true; isPaused = true;
@@ -827,9 +828,9 @@ function gameOver() {
 
     // ЭТАП 1: Показываем сообщение о необходимости разминки
     setTimeout(() => {
-        document.getElementById('overlayTitle').textContent  = '😟 Ой, все жизни кончились!';
-        document.getElementById('overlayMsg').innerHTML      = `Ваш счёт: <b>${score}</b>`;
-        document.getElementById('overlayExtra').innerHTML    = 'Чтобы сыграть заново, пошагайте 1 минуту вместе с Настей.<br><br>Готовы?';
+        document.getElementById('overlayTitle').textContent  = '😟 Все жизни кончились!';
+        document.getElementById('overlayMsg').innerHTML      = `Ваш счёт: <b>${score}</b><br><br>Чтобы сыграть заново, пошагайте<br>1 минуту вместе с Настей.`;
+        document.getElementById('overlayExtra').innerHTML    = '<div style="font-size: 18px; color: #FF9F1C; margin: 12px 0;">Готовы?</div>';
         
         const btn = document.getElementById('overlayMainBtn');
         btn.textContent = 'НАЧАТЬ РАЗМИНКУ 💪';
@@ -840,6 +841,58 @@ function gameOver() {
         
         document.getElementById("overlay").classList.add("show");
     }, 400);
+}
+
+// ── Начало кардио-разминки ──
+function startCardioWorkout() {
+    document.getElementById('overlayTitle').textContent  = '💪 Кардио-разминка';
+    document.getElementById('overlayMsg').innerHTML      = 'Повторяйте движения за Настей!';
+    
+    const videoHTML = '<video id="cardioVideo" style="width: 100%; max-width: 260px; border-radius: 8px; margin: 8px 0;" autoplay><source src="cardio.mp4" type="video/mp4">Ваш браузер не поддерживает видео.</video>';
+    document.getElementById('overlayExtra').innerHTML = videoHTML;
+    
+    const btn = document.getElementById('overlayMainBtn');
+    btn.textContent = 'ПРОПУСТИТЬ ⏭️';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+    btn.onclick = () => startGame(currentDifficulty);
+    
+    // Отслеживаем окончание видео
+    const video = document.getElementById('cardioVideo');
+    if (video) {
+        video.addEventListener('ended', function() {
+            // Видео закончилось - автоматически начинаем игру
+            startGame(currentDifficulty);
+        });
+        
+        // Если видео не загрузилось, показываем таймер
+        video.addEventListener('error', function() {
+            startCountdownTimer();
+        });
+    } else {
+        // Если видео не загрузилось, показываем таймер
+        startCountdownTimer();
+    }
+}
+
+// ── Таймер обратного отсчета (если видео не загрузилось) ──
+function startCountdownTimer() {
+    const btn = document.getElementById('overlayMainBtn');
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.style.cursor = 'not-allowed';
+    
+    let countdown = 60;
+    const countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+            btn.textContent = `ПОДОЖДИТЕ ${countdown} сек ⏱️`;
+        } else {
+            clearInterval(countdownInterval);
+            startGame(currentDifficulty);
+        }
+    }, 1000);
 }
 
 // ── Начало кардио-разминки ──
