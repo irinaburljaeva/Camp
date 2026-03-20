@@ -392,21 +392,19 @@ font-size: 14px;
 
 /* Лидерборд */
 .leaderboard-screen {
-display: none;
-position: fixed;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
+display: block;
+position: static;
+width: 100%;
+margin-top: 20px;
+padding: 0;
+background: transparent;
+}
 background: rgba(0,0,0,0.95);
 z-index: 1500;
 overflow-y: auto;
 padding: 20px;
 }
 
-.leaderboard-screen.show {
-display: block;
-}
 
 .leaderboard-content {
 max-width: 600px;
@@ -602,33 +600,7 @@ letter-spacing: 2px;
 
 </div>
 
-<!-- Кнопка лидерборда -->
 
-<button id="leaderboardBtn" onclick="openLeaderboard()" style="position: fixed; top: 20px; right: 20px; padding: 12px 20px; background: linear-gradient(135deg, #ffd700, #ffed4e); color: #5a4a2a; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 100;">
-    🏆 ЛИДЕРБОРД
-</button>
-
-<!-- Экран лидерборда -->
-
-<div id="leaderboardScreen" class="leaderboard-screen">
-    <div class="leaderboard-content">
-        <h2 style="color: #5a4a2a; margin-bottom: 20px; text-align: center; font-family: 'Arial Black', Arial, sans-serif;">🏆 ЛИДЕРБОРД</h2>
-
-    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <button onclick="loadLeaderboard('easy')" id="leaderEasyBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #4CAF50, #388E3C); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">ИГРА А</button>
-        <button onclick="loadLeaderboard('hard')" id="leaderHardBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">ИГРА Б</button>
-    </div>
-    
-    <div id="leaderboardList" style="background: rgba(255,255,255,0.5); border-radius: 10px; padding: 15px; margin-bottom: 20px; max-height: 400px; overflow-y: auto;">
-        <p style="text-align: center; color: #5a4a2a;">Загрузка...</p>
-    </div>
-    
-    <button onclick="closeLeaderboard()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #888, #555); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;">ЗАКРЫТЬ</button>
-    
-    <button id="logoutBtn" onclick="logoutUser()" style="width: 100%; padding: 10px; background: transparent; color: #d32f2f; border: 2px solid #d32f2f; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; display: none;">ВЫЙТИ</button>
-</div>
-
-</div>
 
 <div class="console-body">
     <div class="console-title-top">ИГРА &nbsp; НА &nbsp; ЭКРАНЕ</div>
@@ -725,6 +697,28 @@ letter-spacing: 2px;
     💡 Левая сторона: <b>Q</b> — верх, <b>A</b> — низ &nbsp;|&nbsp; Правая сторона: <b>W</b> — верх, <b>S</b> — низ<br>
     🎯 Ловите падающие цветы — не пропускайте ни одного!
 </p>
+    
+<!-- Экран лидерборда -->
+
+<div id="leaderboardScreen" class="leaderboard-screen">
+    <div class="leaderboard-content">
+        <h2 style="color: #5a4a2a; margin-bottom: 20px; text-align: center; font-family: 'Arial Black', Arial, sans-serif;">🏆 ЛИДЕРБОРД</h2>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button onclick="loadLeaderboard('easy')" id="leaderEasyBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #4CAF50, #388E3C); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">ИГРА А</button>
+        <button onclick="loadLeaderboard('hard')" id="leaderHardBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">ИГРА Б</button>
+    </div>
+    
+    <div id="leaderboardList" style="background: rgba(255,255,255,0.5); border-radius: 10px; padding: 15px; margin-bottom: 20px; max-height: 400px; overflow-y: auto;">
+        <p style="text-align: center; color: #5a4a2a;">Загрузка...</p>
+    </div>
+    
+    <button onclick="closeLeaderboard()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #888, #555); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;">ЗАКРЫТЬ</button>
+    
+    <button id="logoutBtn" onclick="logoutUser()" style="width: 100%; padding: 10px; background: transparent; color: #d32f2f; border: 2px solid #d32f2f; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; display: none;">ВЫЙТИ</button>
+</div>
+
+</div>
 
 <script type="module">
 import { auth, db, signInAnonymously, onAuthStateChanged, signOut, collection, addDoc, query, orderBy, limit, getDocs, setDoc, doc, getDoc, where } from 'https://irinabulrjaeva.github.io/backend/camp/firebase-config.js';
