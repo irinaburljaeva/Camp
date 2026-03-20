@@ -391,14 +391,14 @@ let currentPosition = 2, lastMoveDir = 'down';
 
 // ── Ветер ──
 let windActive = false, windTimeout = null, windScheduleTimeout = null;
-const WIND_BOOST = 1.15;
+const WIND_BOOST = 1.30;
 
 function startWindCycle() {
     const delay = (15 + Math.random() * 25) * 1000;
     windScheduleTimeout = setTimeout(() => {
         if (!isGameStarted || isPaused || isGameOver) { startWindCycle(); return; }
         windActive = true;
-        windTimeout = setTimeout(() => { windActive = false; startWindCycle(); }, 3000);
+        windTimeout = setTimeout(() => { windActive = false; startWindCycle(); }, 5500);
     }, delay);
 }
 
@@ -411,12 +411,38 @@ function stopWind() {
 function drawWindIndicator() {
     if (!windActive) return;
     ctx.save();
-    ctx.font = 'bold 14px Arial';
-    ctx.fillStyle = 'rgba(255, 220, 100, 0.9)';
+
+    // Полупрозрачный синеватый оверлей — «туман ветра»
+    ctx.fillStyle = 'rgba(180, 210, 255, 0.10)';
+    ctx.fillRect(0, 0, W, H);
+
+    // Несколько анимированных линий-порывов
+    const t = Date.now() / 80;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 6; i++) {
+        const y = ((t * (0.6 + i * 0.15) + i * 55) % H);
+        const len = 30 + i * 18;
+        const x = (t * (1.2 + i * 0.2) + i * 80) % W;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + len, y + 4);
+        ctx.stroke();
+    }
+
+    // Надпись с иконкой
+    ctx.font = 'bold 13px Arial';
     ctx.textAlign = 'center';
+    // Тень
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillText('💨 ВЕТЕР!', W / 2 + 1, 23);
+    // Текст
+    ctx.fillStyle = 'rgba(255, 230, 80, 0.95)';
     ctx.fillText('💨 ВЕТЕР!', W / 2, 22);
+
     ctx.restore();
 }
+
 
 // ── Загрузка изображений ──
 const bg3=new Image(); bg3.src="1.jpg";
