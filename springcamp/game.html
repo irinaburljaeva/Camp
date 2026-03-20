@@ -5,8 +5,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>ШАГАЙ ДОМА — собери букет</title>
+
+<!-- 1. Шрифты: Orbitron для заголовков консоли -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
+<!-- 2. Twemoji — единый рендер эмодзи на всех платформах -->
+
+<script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Twemoji — размер inline-эмодзи */
+img.emoji {
+    height: 1em; width: 1em;
+    margin: 0 .05em 0 .1em;
+    vertical-align: -0.1em;
+    display: inline;
+}
 
 body {
 background: #ffffff; font-family: Arial, sans-serif; text-align: center;
@@ -22,9 +41,11 @@ box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 2px 6px rgba(255,255,255,0.6), 
 border: 3px solid #b8a888; position: relative; width: fit-content; max-width: 100%;
 }
 
+/* Orbitron для заголовков консоли */
 .console-title-top {
-font-family: ‘Arial Black’, Arial, sans-serif; font-size: 11px; font-weight: 900;
-letter-spacing: 6px; color: #5a4a2a; margin-bottom: 12px; text-transform: uppercase;
+font-family: 'Orbitron', 'Arial Black', Arial, sans-serif;
+font-size: 10px; font-weight: 900;
+letter-spacing: 5px; color: #5a4a2a; margin-bottom: 12px; text-transform: uppercase;
 }
 
 .console-middle { display: flex; align-items: center; gap: 12px; }
@@ -59,27 +80,46 @@ box-shadow: 0 6px 12px rgba(0,0,0,0.45), inset 0 3px 6px rgba(255,255,255,0.2), 
 transition: all 0.1s ease; touch-action: manipulation; position: relative;
 }
 .red-btn::before {
-content: ‘’; position: absolute; top: 16%; left: 16%; width: 28%; height: 28%;
+content: ''; position: absolute; top: 16%; left: 16%; width: 28%; height: 28%;
 background: radial-gradient(circle, rgba(255,255,255,0.45), transparent); border-radius: 50%;
 }
 .red-btn:active { transform: translateY(3px); box-shadow: 0 3px 6px rgba(0,0,0,0.45), inset 0 3px 8px rgba(0,0,0,0.4); }
 
+/* Orbitron для кнопок-игры */
 .game-btn {
 background: linear-gradient(180deg, #d8cdb0 0%, #c0b490 100%);
 border: 2px solid #9a8a6a; border-radius: 20px; padding: 5px 14px;
-font-size: 10px; font-weight: 900; letter-spacing: 1.5px; color: #3a2a0a;
+font-family: 'Orbitron', Arial, sans-serif;
+font-size: 9px; font-weight: 700; letter-spacing: 1px; color: #3a2a0a;
 cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 1px 3px rgba(255,255,255,0.5);
 transition: all 0.1s ease; touch-action: manipulation; white-space: nowrap;
 }
 .game-btn:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
+/* Orbitron для нижнего заголовка */
 .console-title-bottom {
-font-family: ‘Arial Black’, Arial, sans-serif; font-size: 13px; font-weight: 900;
-letter-spacing: 8px; color: #5a4a2a; margin-top: 16px; text-transform: uppercase;
+font-family: 'Orbitron', 'Arial Black', Arial, sans-serif;
+font-size: 12px; font-weight: 900;
+letter-spacing: 6px; color: #5a4a2a; margin-top: 16px; text-transform: uppercase;
 }
 
+/* 3. Счётчики — улучшенные */
 .stats { display: flex; gap: 10px; justify-content: center; font-size: 12px; color: #4a3a1a; }
-.stat-item { background: rgba(255,255,255,0.3); padding: 5px 10px; border-radius: 8px; border: 2px solid #8B6F47; font-weight: bold; }
+.stat-item {
+background: rgba(20,10,5,0.15);
+padding: 5px 12px; border-radius: 8px;
+border: 2px solid #8B6F47;
+font-family: 'Orbitron', Arial, sans-serif;
+font-size: 11px; font-weight: 700;
+color: #3a2a0a;
+box-shadow: inset 0 1px 3px rgba(0,0,0,0.15), 0 1px 2px rgba(255,255,255,0.4);
+transition: box-shadow 0.2s, transform 0.1s;
+}
+/* Пульс при обновлении рекорда — добавляется JS-классом */
+.stat-item.pulse {
+box-shadow: 0 0 10px rgba(232,64,64,0.6), inset 0 1px 3px rgba(0,0,0,0.15);
+transform: scale(1.08);
+}
 
 /* Все оверлеи внутри канваса */
 #overlay, #levelSelect, #leaderboardOverlay {
@@ -89,13 +129,13 @@ display: none; flex-direction: column; align-items: center;
 justify-content: flex-start;
 font-size: 18px; border-radius: 8px; z-index: 10;
 padding: 14px 12px; overflow-y: auto;
-font-family: -apple-system, BlinkMacSystemFont, ‘Segoe UI’, Roboto, ‘Helvetica Neue’, Arial, sans-serif;
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 #overlay.show, #levelSelect.show, #leaderboardOverlay.show { display: flex; }
 
 .overlay-title {
-font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #e84040;
-
+font-family: 'Orbitron', Arial, sans-serif;
+font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #e84040;
 text-align: center; line-height: 1.3; max-width: 100%;
 text-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;
 }
@@ -123,7 +163,6 @@ font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.2); flex-shrink: 0;
 
 #overlayExtra video { box-shadow: 0 4px 12px rgba(0,0,0,0.3); max-width: 100%; }
 
-/* Строка лидерборда внутри оверлея */
 .lb-row {
 padding: 8px 10px; margin-bottom: 6px;
 background: rgba(255,255,255,0.12);
@@ -132,11 +171,11 @@ flex-shrink: 0; width: 100%;
 }
 .lb-row.lb-mine { background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.5); }
 
-/* Табы ИГРА А / ИГРА Б внутри лидерборда */
 .lb-tabs { display: flex; gap: 8px; margin-bottom: 10px; width: 100%; flex-shrink: 0; }
 .lb-tab {
 flex: 1; padding: 7px; border: none; border-radius: 16px;
-font-size: 11px; font-weight: 900; cursor: pointer; transition: opacity 0.15s;
+font-family: 'Orbitron', Arial, sans-serif;
+font-size: 10px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
 }
 .lb-tab.easy { background: linear-gradient(135deg,#4CAF50,#388E3C); color: white; }
 .lb-tab.hard { background: linear-gradient(135deg,#ff6b6b,#ee5a6f); color: white; }
@@ -154,7 +193,6 @@ cursor: pointer; white-space: nowrap;
 box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 20;
 }
 
-/* Полноэкранная модалка для видео разминки */
 .cardio-modal {
 display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
 background: #000; z-index: 3000;
@@ -188,7 +226,7 @@ background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%);
 padding: 30px; border-radius: 20px; max-width: 400px; width: 100%;
 box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
-.auth-content h2 { color: #5a4a2a; margin-bottom: 15px; text-align: center; font-family: ‘Arial Black’, Arial, sans-serif; }
+.auth-content h2 { color: #5a4a2a; margin-bottom: 15px; text-align: center; font-family: 'Arial Black', Arial, sans-serif; }
 .auth-content p { color: #5a4a2a; margin-bottom: 20px; text-align: center; font-size: 14px; }
 .auth-content input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #9a8a6a; border-radius: 8px; font-size: 14px; }
 .auth-content button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
@@ -199,21 +237,21 @@ box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 @media (max-width: 680px) {
 body { padding: 5px; }
 .console-body { padding: 12px 16px 20px; border-radius: 20px 20px 40% 40% / 20px 20px 50px 50px; }
-.console-title-top { font-size: 8px; letter-spacing: 3px; margin-bottom: 8px; }
+.console-title-top { font-size: 7px; letter-spacing: 3px; margin-bottom: 8px; }
 .console-middle { gap: 6px; }
 .screen-wrap { padding: 6px; }
 canvas { width: 100% !important; height: auto !important; }
 .arrow-btn.left-up, .arrow-btn.right-up { border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 20px solid #4a3a1a; }
 .arrow-btn.left-down, .arrow-btn.right-down { border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 20px solid #4a3a1a; }
 .red-btn { width: 38px; height: 38px; border: 3px solid #6a0a0a; }
-.game-btn { padding: 4px 10px; font-size: 8px; letter-spacing: 1px; }
+.game-btn { padding: 4px 8px; font-size: 7px; letter-spacing: 0.5px; }
 .control-side { gap: 6px; }
 .controls-panel { margin-top: 12px; }
 .stats { gap: 6px; font-size: 10px; }
-.stat-item { padding: 4px 8px; }
-.console-title-bottom { font-size: 10px; letter-spacing: 5px; margin-top: 12px; }
+.stat-item { padding: 4px 8px; font-size: 9px; }
+.console-title-bottom { font-size: 9px; letter-spacing: 4px; margin-top: 12px; }
 .controls-hint { font-size: 10px; margin-top: 10px; }
-.overlay-title { font-size: 15px; margin-bottom: 6px; }
+.overlay-title { font-size: 13px; margin-bottom: 6px; }
 #overlay, #levelSelect, #leaderboardOverlay { font-size: 12px; padding: 10px; }
 .resume-btn { padding: 8px 18px; font-size: 11px; margin-top: 6px; }
 #overlayMsg { font-size: 11px !important; margin: 4px 0 !important; line-height: 1.3 !important; }
@@ -221,13 +259,13 @@ canvas { width: 100% !important; height: auto !important; }
 }
 
 @media (max-width: 400px) {
-.console-title-top { font-size: 7px; letter-spacing: 2px; }
+.console-title-top { font-size: 6px; letter-spacing: 2px; }
 .arrow-btn.left-up, .arrow-btn.right-up { border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 16px solid #4a3a1a; }
 .arrow-btn.left-down, .arrow-btn.right-down { border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 16px solid #4a3a1a; }
 .red-btn { width: 32px; height: 32px; }
-.game-btn { font-size: 7px; padding: 3px 8px; }
-.console-title-bottom { font-size: 9px; letter-spacing: 4px; }
-.overlay-title { font-size: 13px; }
+.game-btn { font-size: 6px; padding: 3px 7px; }
+.console-title-bottom { font-size: 8px; letter-spacing: 3px; }
+.overlay-title { font-size: 12px; }
 .resume-btn { padding: 7px 14px; font-size: 10px; }
 #overlayExtra { font-size: 12px !important; }
 #overlayMsg { font-size: 10px !important; }
@@ -237,8 +275,6 @@ canvas { width: 100% !important; height: auto !important; }
 </head>
 <body>
 
-<!-- Полноэкранная модалка для видео разминки -->
-
 <div id="cardioModal" class="cardio-modal">
     <video id="cardioVideoFull" playsinline webkit-playsinline autoplay
         style="width:100%;height:100%;object-fit:contain;">
@@ -246,8 +282,6 @@ canvas { width: 100% !important; height: auto !important; }
     </video>
     <button class="cardio-modal-btn" id="cardioPlayBtn">ИГРАТЬ! 🎮</button>
 </div>
-
-<!-- Модалка авторизации -->
 
 <div id="authModal" class="auth-modal">
     <div class="auth-content">
@@ -264,11 +298,11 @@ canvas { width: 100% !important; height: auto !important; }
 <div class="console-body">
     <div class="console-title-top">ИГРА &nbsp; НА &nbsp; ЭКРАНЕ</div>
 
-
+```
 <div class="console-middle">
     <div class="left-panel">
-        <button class="arrow-btn left-up"   onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)" title="Прокрутить вверх"></button>
-        <button class="arrow-btn left-down" onmousedown="scrollOverlay(80)"  ontouchstart="scrollOverlay(80)"  title="Прокрутить вниз"></button>
+        <button class="arrow-btn left-up"   onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)"></button>
+        <button class="arrow-btn left-down" onmousedown="scrollOverlay(80)"  ontouchstart="scrollOverlay(80)"></button>
     </div>
 
     <div class="screen-wrap" style="position: relative;">
@@ -280,25 +314,24 @@ canvas { width: 100% !important; height: auto !important; }
                 Нажми <b>ИГРА А</b> для легкого уровня или <b>ИГРА Б</b> для сложного
             </div>
             <div style="margin-top: 16px; font-size: 11px; opacity: 0.7;">
-                💡 С компьютера: Q/A — лево, W/S — право, с телефона: жми на красные рычажки
+                С компьютера: Q/A — лево, W/S — право, с телефона: жми на красные рычажки
             </div>
         </div>
 
         <div id="overlay">
-            <div class="overlay-title" id="overlayTitle">⏸ ПАУЗА</div>
+            <div class="overlay-title" id="overlayTitle">ПАУЗА</div>
             <div id="overlayMsg" style="font-size: 15px; margin: 8px 0; max-width: 280px; text-align:center;">
                 Пошагайте на месте, чтобы продолжить
             </div>
             <div id="overlayExtra" style="font-size: 32px; color: #FF9F1C; margin: 10px 0;">50 шагов</div>
-            <button class="resume-btn" id="overlayMainBtn" onclick="resumeGame()">ПРОДОЛЖИТЬ 👣</button>
+            <button class="resume-btn" id="overlayMainBtn" onclick="resumeGame()">ПРОДОЛЖИТЬ</button>
             <button class="resume-btn" onclick="backToMenu()" style="background: radial-gradient(circle at 30% 30%, #888, #555); margin-top: 8px;">
                 В МЕНЮ
             </button>
         </div>
 
-        <!-- Лидерборд теперь внутри канваса -->
         <div id="leaderboardOverlay">
-            <div class="overlay-title">🏆 ЧЕМПИОНЫ </div>
+            <div class="overlay-title">ЧЕМПИОНЫ</div>
             <div class="lb-tabs">
                 <button class="lb-tab easy" id="lbTabEasy" onclick="loadLeaderboard('easy')">ИГРА А</button>
                 <button class="lb-tab hard inactive" id="lbTabHard" onclick="loadLeaderboard('hard')">ИГРА Б</button>
@@ -314,14 +347,14 @@ canvas { width: 100% !important; height: auto !important; }
     <div class="right-panel">
         <div class="right-arrow-row">
             <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-                <button class="arrow-btn right-up"   onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)" title="Прокрутить вверх"></button>
-                <button class="arrow-btn right-down" onmousedown="scrollOverlay(80)"  ontouchstart="scrollOverlay(80)"  title="Прокрутить вниз"></button>
+                <button class="arrow-btn right-up"   onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)"></button>
+                <button class="arrow-btn right-down" onmousedown="scrollOverlay(80)"  ontouchstart="scrollOverlay(80)"></button>
             </div>
             <div style="display:flex; flex-direction:column; gap:6px; margin-left: 6px;">
                 <button class="game-btn" onclick="startGame('easy')">ИГРА А</button>
                 <button class="game-btn" onclick="startGame('hard')">ИГРА Б</button>
                 <button class="game-btn" onclick="pauseGame()">ПАУЗА</button>
-                <button class="game-btn" onclick="openLeaderboard()">🏆 ТОП</button>
+                <button class="game-btn" onclick="openLeaderboard()">ТОП</button>
             </div>
         </div>
     </div>
@@ -333,9 +366,10 @@ canvas { width: 100% !important; height: auto !important; }
         <div class="red-btn" onmousedown="setPosition(2)" ontouchstart="setPosition(2)"></div>
     </div>
     <div>
+        <!-- 3. Счётчики: Orbitron + пульс-анимация через JS -->
         <div class="stats">
-            <div class="stat-item">🏆 <span id="bestScore">0</span></div>
-            <div class="stat-item">🌸 <span id="currentScore">0</span></div>
+            <div class="stat-item" id="statBest">РЕК <span id="bestScore">0</span></div>
+            <div class="stat-item" id="statCurrent">🌸 <span id="currentScore">0</span></div>
         </div>
     </div>
     <div class="control-side">
@@ -345,7 +379,7 @@ canvas { width: 100% !important; height: auto !important; }
 </div>
 
 <div class="console-title-bottom">ШАГАЙ &nbsp; ДОМА</div>
-
+```
 
 </div>
 
@@ -376,11 +410,22 @@ let currentUser = null;
 let playerName = localStorage.getItem('flowerGamePlayerName') || '';
 let currentLeaderboardMode = 'easy';
 
+// Twemoji — парсим после загрузки DOM
+document.addEventListener('DOMContentLoaded', () => {
+    twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
+});
+
+// Пульс-анимация счётчика при обновлении рекорда
+function pulseStatBest() {
+    const el = document.getElementById('statBest');
+    el.classList.add('pulse');
+    setTimeout(() => el.classList.remove('pulse'), 400);
+}
+
 function vibrateOnLifeLoss() {
     if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
 }
 
-// ── Прокрутка активного оверлея (включая лидерборд) ──
 window.scrollOverlay = function(amount) {
     const overlay = document.getElementById('overlay');
     const levelSelect = document.getElementById('levelSelect');
@@ -394,7 +439,6 @@ window.scrollOverlay = function(amount) {
     }
 }
 
-// ── Состояние игры ──
 let score = 0, lives = 3;
 let bestScore     = parseInt(localStorage.getItem('flowerGameBest'))     || 0;
 let bestScoreEasy = parseInt(localStorage.getItem('flowerGameBestEasy')) || 0;
@@ -403,7 +447,6 @@ let isPaused = false, isGameStarted = false, isGameOver = false;
 let currentDifficulty = null, baseSpeed = 1, spawnInterval = null;
 let currentPosition = 2, lastMoveDir = 'down';
 
-// ── Ветер ──
 let windActive = false, windTimeout = null, windScheduleTimeout = null;
 let windWasActive = false;
 const WIND_BOOST = 1.30;
@@ -439,26 +482,24 @@ function drawWindIndicator() {
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + len, y + 4); ctx.stroke();
     }
     ctx.font = 'bold 13px Arial'; ctx.textAlign = 'center';
-    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillText('💨 ВЕТЕР!', W / 2 + 1, 23);
-    ctx.fillStyle = 'rgba(232, 64, 64, 0.95)'; ctx.fillText('💨 ВЕТЕР!', W / 2, 22);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillText('ВЕТЕР!', W / 2 + 1, 23);
+    ctx.fillStyle = 'rgba(232, 64, 64, 0.95)'; ctx.fillText('ВЕТЕР!', W / 2, 22);
     ctx.restore();
 }
 
-// ── Поделиться ──
 function shareResult() {
-    const windLine = windWasActive ? '\nДаже ветер не помешал 😄' : '';
-    const text = `🌸 Я собрала букет из ${score} цветов в игре от «ШАГАЙ ДОМА⚡️»${windLine}\n\nПопробуй побить мой рекорд 👇🏻\nhttps://walk-walk.ru/spring_camp?utm_source=getcourse&utm_medium=game&utm_campaign=springgame`;
+    const windLine = windWasActive ? '\nДаже ветер не помешал!' : '';
+    const text = `Я собрала букет из ${score} цветов в игре от «ШАГАЙ ДОМА»${windLine}\n\nПопробуй побить мой рекорд:\nhttps://walk-walk.ru/spring_camp?utm_source=getcourse&utm_medium=game&utm_campaign=springgame`;
     if (navigator.share) {
         navigator.share({ text }).catch(() => {});
     } else {
         navigator.clipboard.writeText(text).then(() => {
             const btn = document.getElementById('shareBtn');
-            if (btn) { btn.textContent = '✅ Скопировано!'; setTimeout(() => { btn.textContent = '📤 Поделиться результатом'; }, 2500); }
+            if (btn) { btn.textContent = 'Скопировано!'; setTimeout(() => { btn.textContent = 'Поделиться результатом'; }, 2500); }
         }).catch(() => {});
     }
 }
 
-// ── Изображения ──
 const bg3=new Image(); bg3.src="1.jpg";
 const bg2=new Image(); bg2.src="2.jpg";
 const bg1=new Image(); bg1.src="3.jpg";
@@ -469,8 +510,8 @@ const flowerImages=[];
 for(let i=1;i<=6;i++){const img=new Image();img.src=`flower${i}.png`;flowerImages.push(img);}
 
 const difficulties = {
-    easy:{name:'ИГРА А 🌼',baseSpeed:0.5,spawnDelay:2000,speedIncrease:0.08},
-    hard:{name:'ИГРА Б 🔥',baseSpeed:0.8,spawnDelay:1400,speedIncrease:0.15}
+    easy:{baseSpeed:0.5,spawnDelay:2000,speedIncrease:0.08},
+    hard:{baseSpeed:0.8,spawnDelay:1400,speedIncrease:0.15}
 };
 
 const W=canvas.width, H=canvas.height;
@@ -495,7 +536,6 @@ onAuthStateChanged(auth,async(user)=>{
     else{try{await signInAnonymously(auth);}catch(e){console.error(e);}}
 });
 
-// ── Авторизация ──
 window.openLeaderboard=function(){
     if(!playerName)document.getElementById('authModal').classList.add('show');
     else showLeaderboard();
@@ -538,7 +578,6 @@ async function saveScore(difficulty,scoreVal){
     }catch(e){console.error(e);}
 }
 
-// ── Лидерборд — теперь внутри канваса ──
 function showLeaderboard(){
     document.getElementById('leaderboardOverlay').classList.add('show');
     loadLeaderboard(currentLeaderboardMode);
@@ -564,11 +603,11 @@ window.loadLeaderboard=async function(difficulty){
         let html='';
         scores.forEach((sd,i)=>{
             const isCur=currentUser&&sd.userId===currentUser.uid&&sd.userName===playerName;
-            const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
+            const medal=i===0?'1':i===1?'2':i===2?'3':`${i+1}`;
             html+=`<div class="lb-row${isCur?' lb-mine':''}">
-                <span style="font-weight:bold;color:#ffd700;min-width:26px;font-size:13px;">${medal}</span>
+                <span style="font-family:'Orbitron',Arial;font-weight:bold;color:#e84040;min-width:26px;font-size:12px;">${medal}</span>
                 <span style="flex:1;margin-left:8px;color:#f5e6d3;font-size:12px;font-weight:${isCur?'bold':'normal'};text-align:left;">${sd.userName}</span>
-                <span style="font-weight:bold;color:#4CAF50;font-size:14px;">🌸${sd.score}</span>
+                <span style="font-family:'Orbitron',Arial;font-weight:bold;color:#4CAF50;font-size:13px;">${sd.score}</span>
             </div>`;
         });
         listDiv.innerHTML=html;
@@ -577,8 +616,6 @@ window.loadLeaderboard=async function(difficulty){
         listDiv.innerHTML=`<p style="text-align:center;color:#ff6b6b;font-size:12px;">Ошибка загрузки</p>`;
     }
 }
-
-// ── Игровая логика ──
 
 function getCurrentBackground(){
     if(isGameOver||lives<=0)return bgGO;
@@ -623,6 +660,7 @@ function drawFlowers(){
                 else{bestScoreHard=score;localStorage.setItem('flowerGameBestHard',score);}
                 if(score>bestScore){bestScore=score;localStorage.setItem('flowerGameBest',score);}
                 document.getElementById('bestScore').textContent=score;
+                pulseStatBest(); // пульс при новом рекорде
             }
             if(score%10===0)baseSpeed+=difficulties[currentDifficulty].speedIncrease;
         }
@@ -668,17 +706,16 @@ window.startGame=function(difficulty){
     resetOverlayToPause();
     if(spawnInterval)clearInterval(spawnInterval);
     spawnInterval=setInterval(spawnFlower,difficulties[difficulty].spawnDelay);
-    stopWind();
-    windWasActive=false;
+    stopWind();windWasActive=false;
     setTimeout(startWindCycle,10000);
 }
 
 function resetOverlayToPause(){
-    document.getElementById('overlayTitle').textContent='⏸ ПАУЗА';
+    document.getElementById('overlayTitle').textContent='ПАУЗА';
     document.getElementById('overlayMsg').textContent='Пошагайте на месте, чтобы продолжить';
     document.getElementById('overlayExtra').textContent='50 шагов';
     const btn=document.getElementById('overlayMainBtn');
-    btn.textContent='ПРОДОЛЖИТЬ 👣';btn.disabled=false;
+    btn.textContent='ПРОДОЛЖИТЬ';btn.disabled=false;
     btn.style.opacity='1';btn.style.cursor='pointer';btn.style.display='';
     btn.onclick=window.resumeGame;
     const menuBtn=document.querySelector('#overlay .resume-btn:last-of-type');
@@ -702,11 +739,11 @@ function gameOver(){
     stopWind();
     if(currentUser&&playerName&&score>0)saveScore(currentDifficulty,score);
     setTimeout(()=>{
-        document.getElementById('overlayTitle').textContent='😟 Все жизни кончились!';
+        document.getElementById('overlayTitle').textContent='Жизни кончились!';
         document.getElementById('overlayMsg').innerHTML=`Ваш счёт: <b>${score}</b><br><br>Чтобы сыграть заново, пошагайте<br>1 минуту вместе с Настей.`;
         document.getElementById('overlayExtra').innerHTML='<div style="font-size:18px;color:#FF9F1C;margin:12px 0;">Готовы?</div>';
         const btn=document.getElementById('overlayMainBtn');
-        btn.textContent='НАЧАТЬ РАЗМИНКУ 💪';btn.disabled=false;
+        btn.textContent='НАЧАТЬ РАЗМИНКУ';btn.disabled=false;
         btn.style.opacity='1';btn.style.cursor='pointer';btn.style.display='';
         btn.onclick=startCardioWorkout;
         const existingShare=document.getElementById('shareBtn');
@@ -714,7 +751,7 @@ function gameOver(){
             const shareBtn=document.createElement('button');
             shareBtn.id='shareBtn';shareBtn.className='resume-btn';
             shareBtn.style.cssText='background:linear-gradient(135deg,#4CAF50,#388E3C);margin-top:8px;';
-            shareBtn.textContent='📤 Поделиться результатом';
+            shareBtn.textContent='Поделиться результатом';
             shareBtn.onclick=shareResult;
             btn.parentNode.insertBefore(shareBtn,btn.nextSibling);
         }
@@ -742,11 +779,11 @@ function startCardioWorkout(){
     playBtn.onclick=()=>{
         modal.classList.remove('show');
         showMenuBtn();
-        document.getElementById('overlayTitle').textContent='🌸 Отличная работа!';
+        document.getElementById('overlayTitle').textContent='Отличная работа!';
         document.getElementById('overlayMsg').innerHTML='Разминка завершена. Готовы играть?';
         document.getElementById('overlayExtra').innerHTML='';
         const btn=document.getElementById('overlayMainBtn');
-        btn.style.display='';btn.textContent='ИГРАТЬ! 🎮';
+        btn.style.display='';btn.textContent='ИГРАТЬ!';
         btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';
         btn.onclick=()=>window.startGame(currentDifficulty);
         document.getElementById('overlay').classList.add('show');
@@ -759,7 +796,7 @@ function startCountdownTimer(){
     let countdown=60;
     const iv=setInterval(()=>{
         countdown--;
-        if(countdown>0){btn.textContent=`ПОДОЖДИТЕ ${countdown} сек ⏱️`;}
+        if(countdown>0){btn.textContent=`ПОДОЖДИТЕ ${countdown} сек`;}
         else{clearInterval(iv);showMenuBtn();window.startGame(currentDifficulty);}
     },1000);
 }
