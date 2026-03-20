@@ -6,14 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>ШАГАЙ ДОМА — собери букет</title>
 
-<!-- 1. Шрифты: Orbitron для заголовков консоли -->
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
-
-
-<!-- 2. Twemoji — единый рендер эмодзи на всех платформах -->
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 
@@ -29,7 +24,7 @@ img.emoji {
 
 body {
     background: #ffffff;
-    font-family: 'Orbitron', Arial, sans-serif;
+    font-family: 'Russo One', Arial, sans-serif;
     text-align: center;
     padding: 10px; min-height: 100vh; display: flex; flex-direction: column;
     align-items: center; justify-content: center; overflow-x: hidden;
@@ -43,6 +38,7 @@ body {
     border: 3px solid #b8a888; position: relative; width: fit-content; max-width: 100%;
 }
 
+/* Press Start 2P — только заголовки консоли */
 .console-title-top {
     font-family: 'Press Start 2P', monospace;
     font-size: 8px; font-weight: 400;
@@ -91,23 +87,25 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
 }
 .red-btn:active { transform: translateY(3px); box-shadow: 0 3px 6px rgba(0,0,0,0.45), inset 0 3px 8px rgba(0,0,0,0.4); }
 
+/* Press Start 2P — кнопки панели справа */
 .game-btn {
     background: linear-gradient(180deg, #d8cdb0 0%, #c0b490 100%);
-    border: 2px solid #9a8a6a; border-radius: 20px; padding: 5px 14px;
-    font-family: 'Orbitron', Arial, sans-serif;
-    font-size: 9px; font-weight: 700; letter-spacing: 1px; color: #3a2a0a;
+    border: 2px solid #9a8a6a; border-radius: 20px; padding: 6px 12px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px; font-weight: 400; letter-spacing: 1px; color: #3a2a0a;
     cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 1px 3px rgba(255,255,255,0.5);
     transition: all 0.1s ease; touch-action: manipulation; white-space: nowrap;
 }
 .game-btn:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
+/* Russo One — счётчики */
 .stats { display: flex; gap: 10px; justify-content: center; }
 .stat-item {
     background: rgba(20,10,5,0.15);
     padding: 5px 12px; border-radius: 8px;
     border: 2px solid #8B6F47;
-    font-family: 'Orbitron', Arial, sans-serif;
-    font-size: 11px; font-weight: 700; color: #3a2a0a;
+    font-family: 'Russo One', Arial, sans-serif;
+    font-size: 12px; color: #3a2a0a;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.15), 0 1px 2px rgba(255,255,255,0.4);
     transition: box-shadow 0.2s, transform 0.15s;
 }
@@ -116,6 +114,7 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
     transform: scale(1.08);
 }
 
+/* Оверлеи — Russo One */
 #overlay, #levelSelect, #leaderboardOverlay {
     position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
     background: rgba(20,16,10,0.95); color: #f5e6d3;
@@ -123,24 +122,26 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
     justify-content: flex-start;
     border-radius: 8px; z-index: 10;
     padding: 14px 12px; overflow-y: auto;
-    font-family: 'Orbitron', Arial, sans-serif;
+    font-family: 'Russo One', Arial, sans-serif;
     font-size: 13px;
 }
 #overlay.show, #levelSelect.show, #leaderboardOverlay.show { display: flex; }
 
+/* Russo One — заголовки оверлеев */
 .overlay-title {
-    font-family: 'Orbitron', Arial, sans-serif;
-    font-size: 15px; font-weight: 700; margin-bottom: 8px; color: #e84040;
+    font-family: 'Russo One', Arial, sans-serif;
+    font-size: 16px; font-weight: 400; margin-bottom: 8px; color: #e84040;
     text-align: center; line-height: 1.4; max-width: 100%;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;
 }
 
+/* Russo One — кнопки внутри оверлеев */
 .resume-btn {
     padding: 10px 22px; margin-top: 8px;
     background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
     border: none; border-radius: 25px; color: #ffffff;
-    font-family: 'Orbitron', Arial, sans-serif;
-    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    font-family: 'Russo One', Arial, sans-serif;
+    font-size: 13px; font-weight: 400; letter-spacing: 0.5px;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(255,107,107,0.4); transition: all 0.2s ease;
     white-space: nowrap; flex-shrink: 0;
@@ -152,14 +153,17 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
 #overlayMsg {
     font-size: 12px; margin: 6px 0; max-width: 90%; text-align: center;
     color: #e8d4b8; line-height: 1.6; font-weight: 400; flex-shrink: 0;
+    font-family: 'Russo One', Arial, sans-serif;
 }
 
 #overlayExtra {
     font-size: 16px; color: #FF9F1C; margin: 6px 0;
-    font-weight: 700; flex-shrink: 0;
+    font-family: 'Russo One', Arial, sans-serif;
+    flex-shrink: 0;
 }
 #overlayExtra video { box-shadow: 0 4px 12px rgba(0,0,0,0.3); max-width: 100%; }
 
+/* Лидерборд */
 .lb-row {
     padding: 8px 10px; margin-bottom: 6px;
     background: rgba(255,255,255,0.12);
@@ -171,8 +175,8 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
 .lb-tabs { display: flex; gap: 8px; margin-bottom: 10px; width: 100%; flex-shrink: 0; }
 .lb-tab {
     flex: 1; padding: 7px; border: none; border-radius: 16px;
-    font-family: 'Orbitron', Arial, sans-serif;
-    font-size: 10px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+    font-family: 'Russo One', Arial, sans-serif;
+    font-size: 11px; font-weight: 400; cursor: pointer; transition: opacity 0.15s;
 }
 .lb-tab.easy { background: linear-gradient(135deg,#4CAF50,#388E3C); color: white; }
 .lb-tab.hard { background: linear-gradient(135deg,#ff6b6b,#ee5a6f); color: white; }
@@ -208,8 +212,8 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
 
 .controls-hint {
     margin-top: 14px; color: #5a4a2a;
-    font-family: 'Orbitron', Arial, sans-serif;
-    font-size: 10px; font-weight: 400;
+    font-family: 'Russo One', Arial, sans-serif;
+    font-size: 11px;
     max-width: 560px; line-height: 1.8; padding: 0 10px;
 }
 
@@ -227,11 +231,11 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
 }
 .auth-content h2 {
     color: #5a4a2a; margin-bottom: 15px; text-align: center;
-    font-family: 'Orbitron', Arial, sans-serif; font-size: 13px; font-weight: 700;
+    font-family: 'Russo One', Arial, sans-serif; font-size: 15px;
 }
 .auth-content p {
     color: #5a4a2a; margin-bottom: 20px; text-align: center;
-    font-family: 'Orbitron', Arial, sans-serif; font-size: 11px; line-height: 1.6;
+    font-family: 'Russo One', Arial, sans-serif; font-size: 12px; line-height: 1.6;
 }
 .auth-content input {
     width: 100%; padding: 12px; margin-bottom: 15px;
@@ -240,14 +244,14 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
 }
 .auth-content button {
     width: 100%; padding: 14px; border: none; border-radius: 10px;
-    font-family: 'Orbitron', Arial, sans-serif;
-    font-size: 12px; font-weight: 700; cursor: pointer; margin-bottom: 10px;
+    font-family: 'Russo One', Arial, sans-serif;
+    font-size: 14px; cursor: pointer; margin-bottom: 10px;
 }
 .auth-btn-primary { background: linear-gradient(135deg, #4CAF50, #388E3C); color: white; }
 .auth-btn-secondary { background: linear-gradient(135deg, #888, #555); color: white; }
 .auth-error {
     color: #d32f2f; text-align: center; margin-top: 10px;
-    font-family: 'Orbitron', Arial, sans-serif; font-size: 11px;
+    font-family: 'Russo One', Arial, sans-serif; font-size: 12px;
 }
 
 @media (max-width: 680px) {
@@ -261,17 +265,17 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
     .arrow-btn.left-up, .arrow-btn.right-up { border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 20px solid #4a3a1a; }
     .arrow-btn.left-down, .arrow-btn.right-down { border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 20px solid #4a3a1a; }
     .red-btn { width: 38px; height: 38px; border: 3px solid #6a0a0a; }
-    .game-btn { padding: 4px 8px; font-size: 7px; letter-spacing: 0.5px; }
+    .game-btn { padding: 4px 8px; font-size: 6px; letter-spacing: 0.5px; }
     .control-side { gap: 6px; }
     .controls-panel { margin-top: 12px; }
     .stats { gap: 6px; }
-    .stat-item { padding: 4px 8px; font-size: 9px; }
-    .overlay-title { font-size: 12px; margin-bottom: 6px; }
+    .stat-item { padding: 4px 8px; font-size: 10px; }
+    .overlay-title { font-size: 13px; margin-bottom: 6px; }
     #overlay, #levelSelect, #leaderboardOverlay { font-size: 11px; padding: 10px; }
-    .resume-btn { padding: 8px 16px; font-size: 10px; margin-top: 6px; }
+    .resume-btn { padding: 8px 16px; font-size: 11px; margin-top: 6px; }
     #overlayMsg { font-size: 10px !important; margin: 4px 0 !important; line-height: 1.5 !important; }
     #overlayExtra { font-size: 13px !important; margin: 4px 0 !important; }
-    .controls-hint { font-size: 9px; }
+    .controls-hint { font-size: 10px; }
 }
 
 @media (max-width: 400px) {
@@ -280,15 +284,13 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
     .arrow-btn.left-up, .arrow-btn.right-up { border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 16px solid #4a3a1a; }
     .arrow-btn.left-down, .arrow-btn.right-down { border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 16px solid #4a3a1a; }
     .red-btn { width: 32px; height: 32px; }
-    .game-btn { font-size: 6px; padding: 3px 7px; }
-    .overlay-title { font-size: 11px; }
-    .resume-btn { padding: 7px 14px; font-size: 9px; }
+    .game-btn { font-size: 5px; padding: 3px 7px; }
+    .overlay-title { font-size: 12px; }
+    .resume-btn { padding: 7px 14px; font-size: 10px; }
     #overlayExtra { font-size: 12px !important; }
     #overlayMsg { font-size: 9px !important; }
-    .controls-hint { font-size: 8px; }
+    .controls-hint { font-size: 9px; }
 }
-
-
 </style>
 
 </head>
@@ -299,7 +301,7 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
         style="width:100%;height:100%;object-fit:contain;">
         <source src="cardio.mp4" type="video/mp4">
     </video>
-    <button class="cardio-modal-btn" id="cardioPlayBtn">ИГРАТЬ! 🎮</button>
+    <button class="cardio-modal-btn" id="cardioPlayBtn">ИГРАТЬ!</button>
 </div>
 
 <div id="authModal" class="auth-modal">
@@ -317,6 +319,7 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
 <div class="console-body">
     <div class="console-title-top">ИГРА &nbsp; НА &nbsp; ЭКРАНЕ</div>
 
+```
 <div class="console-middle">
     <div class="left-panel">
         <button class="arrow-btn left-up"   onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)"></button>
@@ -358,7 +361,7 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
                 <p style="text-align:center;color:#e8d4b8;font-size:13px;">Загрузка...</p>
             </div>
             <button class="resume-btn" onclick="closeLeaderboard()" style="background:linear-gradient(135deg,#888,#555);margin-top:10px;">ЗАКРЫТЬ</button>
-            <button id="logoutBtn" onclick="logoutUser()" style="background:transparent;color:#ff6b6b;border:2px solid #ff6b6b;border-radius:25px;padding:8px 18px;font-size:11px;font-weight:bold;cursor:pointer;margin-top:8px;display:none;flex-shrink:0;">ВЫЙТИ</button>
+            <button id="logoutBtn" onclick="logoutUser()" style="background:transparent;color:#ff6b6b;border:2px solid #ff6b6b;border-radius:25px;padding:8px 18px;font-size:11px;font-weight:bold;cursor:pointer;margin-top:8px;display:none;flex-shrink:0;font-family:'Russo One',Arial;">ВЫЙТИ</button>
         </div>
     </div>
 
@@ -384,10 +387,9 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
         <div class="red-btn" onmousedown="setPosition(2)" ontouchstart="setPosition(2)"></div>
     </div>
     <div>
-        <!-- 3. Счётчики: Orbitron + пульс-анимация через JS -->
         <div class="stats">
-            <div class="stat-item" id="statBest"> 🏆 <span id="bestScore">0</span></div>
-            <div class="stat-item" id="statCurrent">🌸 <span id="currentScore">0</span></div>
+            <div class="stat-item" id="statBest">&#9733; <span id="bestScore">0</span></div>
+            <div class="stat-item" id="statCurrent">&#10048; <span id="currentScore">0</span></div>
         </div>
     </div>
     <div class="control-side">
@@ -397,7 +399,7 @@ canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 
 </div>
 
 <div class="console-title-bottom">ШАГАЙ &nbsp; ДОМА</div>
-
+```
 
 </div>
 
@@ -428,12 +430,10 @@ let currentUser = null;
 let playerName = localStorage.getItem('flowerGamePlayerName') || '';
 let currentLeaderboardMode = 'easy';
 
-// Twemoji — парсим после загрузки DOM
 document.addEventListener('DOMContentLoaded', () => {
     twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
 });
 
-// Пульс-анимация счётчика при обновлении рекорда
 function pulseStatBest() {
     const el = document.getElementById('statBest');
     el.classList.add('pulse');
@@ -499,7 +499,9 @@ function drawWindIndicator() {
         const x = (t * (1.2 + i * 0.2) + i * 80) % W;
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + len, y + 4); ctx.stroke();
     }
-    ctx.font = 'bold 13px Arial'; ctx.textAlign = 'center';
+    // Press Start 2P для надписи ВЕТЕР! на канвасе
+    ctx.font = "bold 11px 'Press Start 2P', monospace";
+    ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillText('ВЕТЕР!', W / 2 + 1, 23);
     ctx.fillStyle = 'rgba(232, 64, 64, 0.95)'; ctx.fillText('ВЕТЕР!', W / 2, 22);
     ctx.restore();
@@ -622,10 +624,11 @@ window.loadLeaderboard=async function(difficulty){
         scores.forEach((sd,i)=>{
             const isCur=currentUser&&sd.userId===currentUser.uid&&sd.userName===playerName;
             const medal=i===0?'1':i===1?'2':i===2?'3':`${i+1}`;
+            // Числа без font-family — наследуют Russo One
             html+=`<div class="lb-row${isCur?' lb-mine':''}">
-                <span style="font-family:'Orbitron',Arial;font-weight:bold;color:#e84040;min-width:26px;font-size:12px;">${medal}</span>
+                <span style="font-weight:bold;color:#e84040;min-width:26px;font-size:13px;">${medal}</span>
                 <span style="flex:1;margin-left:8px;color:#f5e6d3;font-size:12px;font-weight:${isCur?'bold':'normal'};text-align:left;">${sd.userName}</span>
-                <span style="font-family:'Orbitron',Arial;font-weight:bold;color:#4CAF50;font-size:13px;">${sd.score}</span>
+                <span style="font-weight:bold;color:#4CAF50;font-size:14px;">${sd.score}</span>
             </div>`;
         });
         listDiv.innerHTML=html;
@@ -678,7 +681,7 @@ function drawFlowers(){
                 else{bestScoreHard=score;localStorage.setItem('flowerGameBestHard',score);}
                 if(score>bestScore){bestScore=score;localStorage.setItem('flowerGameBest',score);}
                 document.getElementById('bestScore').textContent=score;
-                pulseStatBest(); // пульс при новом рекорде
+                pulseStatBest();
             }
             if(score%10===0)baseSpeed+=difficulties[currentDifficulty].speedIncrease;
         }
