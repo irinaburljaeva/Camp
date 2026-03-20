@@ -888,20 +888,32 @@ window.logoutUser = async function() {
     }
 }
 
-// ── Сохранение результата ──
+// ── Сохранение результата (обновляем максимальный) ──
 async function saveScore(difficulty, score) {
     if (!currentUser || !playerName) return;
     
     try {
-        await addDoc(collection(db, 'scores'), {
-            userId: currentUser.uid,
-            userName: playerName,
-            difficulty: difficulty,
-            score: score,
-            timestamp: new Date()
-        });
+        // Уникальный ID для каждого пользователя + сложность
+        const scoreDocId = `${currentUser.uid}_${difficulty}`;
+        const scoreRef = doc(db, 'scores', scoreDocId);
         
-        console.log('Результат сохранен!');
+        // Получаем текущий рекорд
+        const currentDoc = await getDoc(scoreRef);
+        
+        if (!currentDoc.exists() || currentDoc.data().score < score) {
+            // Сохраняем новый рекорд
+            await setDoc(scoreRef, {
+                userId: currentUser.uid,
+                userName: playerName,
+                difficulty: difficulty,
+                score: score,
+                timestamp: new Date()
+            });
+            
+            console.log('Новый рекорд сохранен!');
+        } else {
+            console.log('Результат ниже текущего рекорда');
+        }
     } catch (error) {
         console.error('Ошибка сохранения результата:', error);
     }
