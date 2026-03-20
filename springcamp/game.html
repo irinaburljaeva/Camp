@@ -132,7 +132,34 @@ font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.2); flex-shrink: 0;
 }
 
 #overlayExtra video { box-shadow: 0 4px 12px rgba(0,0,0,0.3); max-width: 100%; }
+/* Контейнер для видео разминки */
+.video-wrap {
+    position: relative;
+    width: 100%;
+    flex-shrink: 0;
+}
+.video-wrap video {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+/* Кнопка «ИГРАТЬ» поверх видео по центру */
+.video-play-overlay {
+    display: none;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    color: white; border: none; border-radius: 25px;
+    padding: 12px 28px; font-size: 15px; font-weight: 700;
+    cursor: pointer; white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    z-index: 20;
+}
 
+    
 .controls-hint {
 margin-top: 14px; color: #5a4a2a; font-size: 11px;
 max-width: 560px; line-height: 1.5; padding: 0 10px;
@@ -221,7 +248,7 @@ canvas { width: 100% !important; height: auto !important; }
 <div class="console-body">
     <div class="console-title-top">ИГРА &nbsp; НА &nbsp; ЭКРАНЕ</div>
 
-```
+
 <div class="console-middle">
     <div class="left-panel">
         <button class="arrow-btn left-up" onmousedown="setPosition(0)" ontouchstart="setPosition(0)" title="Верх-лево (Q)"></button>
@@ -736,46 +763,47 @@ function gameOver() {
 }
 
 function startCardioWorkout() {
-    document.getElementById('overlayTitle').textContent  = '💪 Кардио-разминка';
-    document.getElementById('overlayMsg').innerHTML      = 'Повторяйте движения за Настей!';
-    const videoHTML = '<video id="cardioVideo" style="width: 100%; max-width: 280px; border-radius: 8px; margin: 10px 0;" autoplay><source src="cardio.mp4" type="video/mp4"></video>';
-    document.getElementById('overlayExtra').innerHTML = videoHTML;
+    document.getElementById('overlayTitle').textContent = '💪 Кардио-разминка';
+    document.getElementById('overlayMsg').innerHTML     = 'Повторяйте движения за Настей!';
+
+    // Видео в обёртке — без кнопки «Пропустить», без автофуллскрина на iOS
+    document.getElementById('overlayExtra').innerHTML = `
+        <div class="video-wrap">
+            <video id="cardioVideo"
+                playsinline
+                webkit-playsinline
+                autoplay
+                style="width:100%;height:auto;border-radius:8px;display:block;">
+                <source src="cardio.mp4" type="video/mp4">
+            </video>
+            <button class="video-play-overlay" id="videoPlayBtn"
+                onclick="window.startGame(currentDifficulty)">
+                ИГРАТЬ! 🎮
+            </button>
+        </div>
+    `;
+
+    // Прячем кнопку overlayMainBtn во время видео
     const btn = document.getElementById('overlayMainBtn');
-    btn.textContent = 'ПРОПУСТИТЬ ⏭️';
-    btn.onclick = () => {
-        showMenuBtn();
-        window.startGame(currentDifficulty);
-    };
+    btn.style.display = 'none';
+
     const video = document.getElementById('cardioVideo');
     if (video) {
         video.addEventListener('ended', () => {
             showMenuBtn();
-            btn.textContent = 'ИГРАТЬ! 🎮';
-            btn.onclick = () => window.startGame(currentDifficulty);
+            // Показываем кнопку поверх видео
+            document.getElementById('videoPlayBtn').style.display = 'block';
         });
-        video.addEventListener('error', () => startCountdownTimer());
+        video.addEventListener('error', () => {
+            btn.style.display = '';
+            startCountdownTimer();
+        });
     } else {
+        btn.style.display = '';
         startCountdownTimer();
     }
 }
 
-function startCountdownTimer() {
-    const btn = document.getElementById('overlayMainBtn');
-    btn.disabled = true;
-    btn.style.opacity = '0.5';
-    btn.style.cursor = 'not-allowed';
-    let countdown = 60;
-    const countdownInterval = setInterval(() => {
-        countdown--;
-        if (countdown > 0) {
-            btn.textContent = `ПОДОЖДИТЕ ${countdown} сек ⏱️`;
-        } else {
-            clearInterval(countdownInterval);
-            showMenuBtn();
-            window.startGame(currentDifficulty);
-        }
-    }, 1000);
-}
 
 function showMenuBtn() {
     const menuBtn = document.querySelector('#overlay .resume-btn:last-of-type');
