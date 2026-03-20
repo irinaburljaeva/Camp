@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Карта лагеря — кликабельные зоны</title>
+  <style>
+    :root { --brand:#CF2C02; --brand2:#FFBA08; --brand3:#E85D04; }
+    * { box-sizing:border-box }
+    html,body{ margin:0; background:#fff; font-family:system-ui, Arial, sans-serif; }
+    .map{ max-width:1200px; margin:0 auto; }
+    svg{ display:block; width:100%; height:auto; }
+    image{ pointer-events:none; } /* клики проходят сквозь */
+
+   
+    .hotspot{
+      fill:transparent; stroke:transparent; stroke-width:2;
+      cursor:pointer; vector-effect:non-scaling-stroke;
+      transform-box: fill-box; transform-origin: center;
+    }
+
+    /* Ripple */
+    .ripple{
+      fill:none; stroke:var(--brand); stroke-width:3; opacity:.6;
+      animation:ripple .45s ease-out forwards; pointer-events:none;
+    }
+    @keyframes ripple{
+      from{ r:0; opacity:.6 } to{ r:70; opacity:0 }
+    }
+
+    /* Искры */
+    .spark{
+      fill: currentColor; opacity:.9;
+      animation: spark .6s ease-out forwards; pointer-events:none;
+    }
+    @keyframes spark{
+      from{ transform: translate(0,0) scale(1); opacity:.9 }
+      to  { transform: translate(var(--dx),var(--dy)) scale(.4); opacity:0 }
+    }
+
+    /* Убираем синий хайлайт на мобилках */
+    a, svg, image, .hotspot{ -webkit-tap-highlight-color: transparent; outline: none; }
+  </style>
+</head>
+<body>
+  <div class="map">
+    <svg id="camp" viewBox="0 0 1536 1156" preserveAspectRatio="xMidYMid meet" aria-label="Интерактивная карта лагеря">
+      <image href="camp-map.png" width="1536" height="1156" />
+
+      <!-- СТОЛОВАЯ (звук: kitchen.mp3, 3 сек) -->
+      <a href="https://my.walk-walk.ru/teach/control/stream/view/id/935354355"
+         target="_blank" rel="noopener" aria-label="Столовая" data-sound="kitchen">
+        <title>Столовая</title>
+        <rect class="hotspot" data-type="label" x="183.61602783203125" y="366.9920349121094" width="332.9919738769531" height="92.01593017578125" rx="16"/>
+        <polygon class="hotspot" data-type="house" points="345.6000061035156,198.80001831054688 570.6000061035156,198.80001831054688 730.6240234375,315.64801025390625 356.864013671875,385.2799987792969 315.6000061035156,313.8000183105469"/>
+      </a>
+
+      <!-- СПОРТЗАЛ  -->
+      <a href="https://my.walk-walk.ru/teach/control/stream/view/id/935354358"
+         target="_blank" rel="noopener" aria-label="Спортивный зал" data-sound="sport">
+        <title>Спортивный зал</title>
+        <rect class="hotspot" data-type="label" x="621.2960205078125" y="528.8800659179688" width="375" height="88" rx="16"/>
+        <polygon class="hotspot" data-type="house" points="584.1919555664062,388.35198974609375 782.8479614257812,361.7279968261719 829.9519653320312,530.6880493164062 580.0960083007812,577.7919921875 502.27197265625,492.79998779296875"/>
+      </a>
+
+      <!-- ДИСКОТЕКА -->
+      <a href="https://my.walk-walk.ru/teach/control/stream/view/id/935354360"
+         target="_blank" rel="noopener" aria-label="Дискотека" data-sound="disco">
+        <title>Дискотека</title>
+        <rect class="hotspot" data-type="label" x="956.927978515625" y="357.1359558105469" width="402.4161376953125" height="92.65603637695312" rx="16"/>
+        <polygon class="hotspot" data-type="house" points="987.64794921875,189.6959991455078 1236.47998046875,234.75201416015625 1117.6959228515625,497.91998291015625 887.2960205078125,412.9280090332031"/>
+      </a>
+
+      <!-- ПАЛАТЫ (звук: rooms.mp3, 3 сек) -->
+      <a href="https://my.walk-walk.ru/teach/control/stream/view/id/935354353"
+         target="_blank" rel="noopener" aria-label="Палаты" data-sound="rooms">
+        <title>Палаты</title>
+        <rect class="hotspot" data-type="label" x="110.70404052734375" y="649.8399658203125" width="330" height="88" rx="16"/>
+        <polygon class="hotspot" data-type="house" points="166.33599853515625,489.31195068359375 406.33599853515625,489.31195068359375 592.3839721679688,638.2080078125 127.48798370361328,641.2799682617188"/>
+      </a>
+
+      <!-- ЛЕДЯНАЯ ГОРКА -->
+      <a href="https://my.walk-walk.ru/teach/control/stream/view/id/935354355"
+         target="_blank" rel="noopener" aria-label="Беседка" data-sound="gorka">
+        <title>Библиотека</title>
+        <rect class="hotspot" data-type="label" x="116.46401977539062" y="1011.1680908203125" width="300" height="88" rx="16"/>
+        <polygon class="hotspot" data-type="house" points="182,884 267.7760009765625,831.7440185546875 409.0879821777344,964.864013671875 185.85598754882812,1006.8480224609375"/>
+      </a>
+
+      <!-- КИНОЗАЛ (звук: cinema.mp3, 3 сек) -->
+      <a href="https://my.walk-walk.ru/teach/control/stream/view/id/935354357"
+         target="_blank" rel="noopener" aria-label="Кинозал" data-sound="cinema">
+        <title>Кинозал</title>
+        <rect class="hotspot" data-type="label" x="1053.887939453125" y="622.8639526367188" width="331" height="88" rx="16"/>
+        <polygon class="hotspot" data-type="house" points="1145.3441162109375,482.55999755859375 1329.6640625,461.0559997558594 1338.8800048828125,628.9920043945312 1137.50390625,617.2160034179688"/>
+      </a>
+
+     
+      <!-- Лед -->
+      <a href="#" aria-label="Костёр" data-sound="ice">
+        <title>Лед</title>
+        <rect class="hotspot" data-type="label" x="705" y="720" width="260" height="80" rx="16"/>
+        <polygon class="hotspot" data-type="fire"
+                 points="760,675 790,625 820,675 845,665 835,695 855,715 820,720 805,745 785,720 750,710"/>
+      </a>
+      <!-- УТКИ (звук: ducks.mp3, 3 сек) — правее Комнаты отдыха, справа снизу -->
+<a href="#" aria-label="Утки" data-sound="ducks">
+  <title>Утки</title>
+  <!-- Подгоните при необходимости: cx (вправо/влево), cy (вверх/вниз) -->
+  <ellipse class="hotspot" cx="1380" cy="1000" rx="110" ry="70"/>
+</a>
+      <!-- слой для эффектов -->
+      <g id="fx"></g>
+    </svg>
+  </div>
+
+  <script>
+    const svg  = document.getElementById('camp');
+    const fx   = document.getElementById('fx');
+    const colors = ['var(--brand)','var(--brand2)','var(--brand3)'];
+
+    /* ====== АУДИО ====== */
+    const soundFiles = {
+      kitchen: 'kitchen.mp3',
+      sport:   'sport.mp3',
+      disco:   'tell.mp3',
+      rooms:   'rooms.mp3',
+      birds:   'birds.mp3',
+      cinema:  'cinema.mp3',
+      relax:   'relax.mp3',
+      fire:    'fire.mp3',
+      ducks:   'ducks.mp3',
+      ice: 'ice.mp3',
+      gorka: 'gorka.mp3'
+    };
+
+    // создаём аудио-объекты
+    const sounds = {};
+    for (const key in soundFiles){
+      const a = new Audio(soundFiles[key]);
+      a.preload = 'auto';
+      a.volume = 0.9;
+      sounds[key] = a;
+    }
+
+ let audioUnlocked = false;
+
+const unlock = () => {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+
+  Object.values(sounds).forEach(a => {
+    try {
+      a.muted = true;              // важно: чтобы не было слышно
+      a.currentTime = 0;
+      a.play().then(() => {
+        a.pause();
+        a.currentTime = 0;
+        a.muted = false;
+      }).catch(() => {
+        a.muted = false;
+      });
+    } catch(_) {
+      a.muted = false;
+    }
+  });
+};
+
+document.addEventListener('pointerdown', unlock, { once:true, passive:true });
+
+    // ограничение звучания до 3 секунд для всех звуков
+    const MAX_PLAY_MS = 3000;
+    const pauseTimers = {};
+
+    function playSound(key){
+  const a = sounds[key];
+  if(!a) return;
+
+  stopAllExcept(key); // ✅ чтобы не было одновременного проигрывания
+
+  try {
+    if (pauseTimers[key]) clearTimeout(pauseTimers[key]);
+
+    a.currentTime = 0;
+    a.play().catch(()=>{});
+
+    pauseTimers[key] = setTimeout(()=>{
+      a.pause();
+      a.currentTime = 0;
+    }, MAX_PLAY_MS);
+  } catch(e){}
+}
+
+    function stopAllExcept(exceptKey){
+  for (const k in sounds){
+    if (k === exceptKey) continue;
+    try{
+      sounds[k].pause();
+      sounds[k].currentTime = 0;
+    }catch(_){}
+    if (pauseTimers[k]) {
+      clearTimeout(pauseTimers[k]);
+      pauseTimers[k] = null;
+    }
+  }
+}
+
+    
+    /* ====== ЭФФЕКТЫ ====== */
+    function svgPoint(evt){
+      const pt = svg.createSVGPoint();
+      const e = evt.touches ? evt.touches[0] : evt;
+      pt.x = e.clientX; pt.y = e.clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    function ripple(x,y){
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('class','ripple');
+      c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 0);
+      fx.appendChild(c);
+      setTimeout(()=>c.remove(), 520);
+    }
+
+    function sparks(x,y,count=12){
+      for(let i=0;i<count;i++){
+        const dx = (Math.random()*120-60), dy=(Math.random()*120-60);
+        const s = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        s.setAttribute('class','spark');
+        s.setAttribute('cx', x); s.setAttribute('cy', y);
+        s.setAttribute('r', 3 + Math.random()*2);
+        s.style.setProperty('--dx', dx+'px');
+        s.style.setProperty('--dy', dy+'px');
+        s.style.color = colors[Math.floor(Math.random()*colors.length)];
+        fx.appendChild(s);
+        setTimeout(()=>s.remove(), 700);
+      }
+    }
+
+    /* ====== КЛИК ====== */
+    svg.addEventListener('click', (e)=>{
+      const anchor = e.target.closest('a');
+      if(!anchor) return;
+      e.preventDefault();
+
+      // вибрация
+      if(navigator.vibrate) navigator.vibrate(15);
+
+      // эффекты
+      const p = svgPoint(e);
+      ripple(p.x, p.y);
+      sparks(p.x, p.y, 14);
+
+      // звук по data-sound
+      const key = anchor.dataset.sound;
+      if(key) playSound(key);
+
+      // переход (если есть валидный href и не "#")
+      const href = anchor.getAttribute('href');
+      const target = anchor.getAttribute('target') || '_self';
+      setTimeout(()=>{
+        if(!href || href === '#') return;
+        if(target==='_blank'){ window.open(href,'_blank','noopener'); }
+        else{ location.href = href; }
+      }, 320);
+    }, {passive:false});
+  </script>
+</body>
+          </html>
