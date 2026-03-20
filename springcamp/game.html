@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -8,637 +9,722 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    background: #ffffff;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 10px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow-x: hidden;
+background: #ffffff;
+font-family: Arial, sans-serif;
+text-align: center;
+padding: 10px;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+overflow-x: hidden;
 }
 
-/* ── Общая обёртка корпуса ── */
 .console-body {
-    background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%);
-    border-radius: 30px 30px 50% 50% / 30px 30px 60px 60px;
-    padding: 20px 24px 28px;
-    box-shadow:
-        0 20px 60px rgba(0,0,0,0.5),
-        inset 0 2px 6px rgba(255,255,255,0.6),
-        inset 0 -4px 12px rgba(0,0,0,0.15);
-    border: 3px solid #b8a888;
-    position: relative;
-    width: fit-content;
-    max-width: 100%;
+background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%);
+border-radius: 30px 30px 50% 50% / 30px 30px 60px 60px;
+padding: 20px 24px 28px;
+box-shadow:
+0 20px 60px rgba(0,0,0,0.5),
+inset 0 2px 6px rgba(255,255,255,0.6),
+inset 0 -4px 12px rgba(0,0,0,0.15);
+border: 3px solid #b8a888;
+position: relative;
+width: fit-content;
+max-width: 100%;
 }
 
-/* ── Заголовок ── */
 .console-title-top {
-    font-family: 'Arial Black', Arial, sans-serif;
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 6px;
-    color: #5a4a2a;
-    margin-bottom: 12px;
-    text-transform: uppercase;
+font-family: ‘Arial Black’, Arial, sans-serif;
+font-size: 11px;
+font-weight: 900;
+letter-spacing: 6px;
+color: #5a4a2a;
+margin-bottom: 12px;
+text-transform: uppercase;
 }
 
-/* ── Средняя зона: стрелки + экран + кнопки ИГРА/ПАУЗА ── */
 .console-middle {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+display: flex;
+align-items: center;
+gap: 12px;
 }
 
-/* ── Левая панель со стрелкой ── */
 .left-panel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 6px;
 }
 
-/* ── Правая панель: ИГРА А / ИГРА Б / ПАУЗА ── */
 .right-panel {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+gap: 8px;
 }
 
 .right-arrow-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+display: flex;
+align-items: center;
+gap: 6px;
 }
 
-/* ── Экран ── */
 .screen-wrap {
-    position: relative;
-    background: #1a1a1a;
-    border-radius: 14px;
-    padding: 10px;
-    box-shadow:
-        inset 0 0 20px rgba(0,0,0,0.9),
-        0 4px 12px rgba(0,0,0,0.4);
-    max-width: 100%;
+position: relative;
+background: #1a1a1a;
+border-radius: 14px;
+padding: 10px;
+box-shadow:
+inset 0 0 20px rgba(0,0,0,0.9),
+0 4px 12px rgba(0,0,0,0.4);
+max-width: 100%;
 }
 
 canvas {
-    display: block;
-    border-radius: 8px;
-    border: 2px solid #111;
-    max-width: 100%;
-    height: auto;
+display: block;
+border-radius: 8px;
+border: 2px solid #111;
+max-width: 100%;
+height: auto;
 }
 
-/* ── Нижняя панель управления ── */
 .controls-panel {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 18px;
-    padding: 0 5px;
-    width: 100%;
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-top: 18px;
+padding: 0 5px;
+width: 100%;
 }
 
 .control-side {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
+display: flex;
+flex-direction: column;
+gap: 10px;
+align-items: center;
 }
 
-/* ── Кнопка-стрелка (треугольная, плоская) ── */
 .arrow-btn {
-    width: 0;
-    height: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    touch-action: manipulation;
-    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4));
-    transition: filter 0.1s, transform 0.1s;
+width: 0;
+height: 0;
+background: none;
+border: none;
+cursor: pointer;
+padding: 0;
+touch-action: manipulation;
+filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4));
+transition: filter 0.1s, transform 0.1s;
 }
 .arrow-btn:active {
-    transform: scale(0.9);
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+transform: scale(0.9);
+filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
 }
 
-/* левая стрелка вверх */
 .arrow-btn.left-up {
-    border-left: 16px solid transparent;
-    border-right: 16px solid transparent;
-    border-bottom: 28px solid #4a3a1a;
+border-left: 16px solid transparent;
+border-right: 16px solid transparent;
+border-bottom: 28px solid #4a3a1a;
 }
-/* левая стрелка вниз */
 .arrow-btn.left-down {
-    border-left: 16px solid transparent;
-    border-right: 16px solid transparent;
-    border-top: 28px solid #4a3a1a;
+border-left: 16px solid transparent;
+border-right: 16px solid transparent;
+border-top: 28px solid #4a3a1a;
 }
-/* правая стрелка вверх */
 .arrow-btn.right-up {
-    border-left: 16px solid transparent;
-    border-right: 16px solid transparent;
-    border-bottom: 28px solid #4a3a1a;
+border-left: 16px solid transparent;
+border-right: 16px solid transparent;
+border-bottom: 28px solid #4a3a1a;
 }
-/* правая стрелка вниз */
 .arrow-btn.right-down {
-    border-left: 16px solid transparent;
-    border-right: 16px solid transparent;
-    border-top: 28px solid #4a3a1a;
+border-left: 16px solid transparent;
+border-right: 16px solid transparent;
+border-top: 28px solid #4a3a1a;
 }
 
-/* ── Красная круглая кнопка ── */
 .red-btn {
-    width: 52px;
-    height: 52px;
-    background: radial-gradient(circle at 35% 30%, #e84040, #9a1a1a);
-    border: 4px solid #6a0a0a;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow:
-        0 6px 12px rgba(0,0,0,0.45),
-        inset 0 3px 6px rgba(255,255,255,0.2),
-        inset 0 -3px 6px rgba(0,0,0,0.3);
-    transition: all 0.1s ease;
-    touch-action: manipulation;
-    position: relative;
+width: 52px;
+height: 52px;
+background: radial-gradient(circle at 35% 30%, #e84040, #9a1a1a);
+border: 4px solid #6a0a0a;
+border-radius: 50%;
+cursor: pointer;
+box-shadow:
+0 6px 12px rgba(0,0,0,0.45),
+inset 0 3px 6px rgba(255,255,255,0.2),
+inset 0 -3px 6px rgba(0,0,0,0.3);
+transition: all 0.1s ease;
+touch-action: manipulation;
+position: relative;
 }
 .red-btn::before {
-    content: '';
-    position: absolute;
-    top: 16%; left: 16%;
-    width: 28%; height: 28%;
-    background: radial-gradient(circle, rgba(255,255,255,0.45), transparent);
-    border-radius: 50%;
+content: ‘’;
+position: absolute;
+top: 16%; left: 16%;
+width: 28%; height: 28%;
+background: radial-gradient(circle, rgba(255,255,255,0.45), transparent);
+border-radius: 50%;
 }
 .red-btn:active {
-    transform: translateY(3px);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.45), inset 0 3px 8px rgba(0,0,0,0.4);
+transform: translateY(3px);
+box-shadow: 0 3px 6px rgba(0,0,0,0.45), inset 0 3px 8px rgba(0,0,0,0.4);
 }
 
-/* ── Кнопки ИГРА А / ИГРА Б / ПАУЗА ── */
 .game-btn {
-    background: linear-gradient(180deg, #d8cdb0 0%, #c0b490 100%);
-    border: 2px solid #9a8a6a;
-    border-radius: 20px;
-    padding: 5px 14px;
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 1.5px;
-    color: #3a2a0a;
-    cursor: pointer;
-    box-shadow:
-        0 4px 8px rgba(0,0,0,0.3),
-        inset 0 1px 3px rgba(255,255,255,0.5);
-    transition: all 0.1s ease;
-    touch-action: manipulation;
-    white-space: nowrap;
+background: linear-gradient(180deg, #d8cdb0 0%, #c0b490 100%);
+border: 2px solid #9a8a6a;
+border-radius: 20px;
+padding: 5px 14px;
+font-size: 10px;
+font-weight: 900;
+letter-spacing: 1.5px;
+color: #3a2a0a;
+cursor: pointer;
+box-shadow:
+0 4px 8px rgba(0,0,0,0.3),
+inset 0 1px 3px rgba(255,255,255,0.5);
+transition: all 0.1s ease;
+touch-action: manipulation;
+white-space: nowrap;
 }
 .game-btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+transform: translateY(2px);
+box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-/* ── Надпись снизу ── */
 .console-title-bottom {
-    font-family: 'Arial Black', Arial, sans-serif;
-    font-size: 13px;
-    font-weight: 900;
-    letter-spacing: 8px;
-    color: #5a4a2a;
-    margin-top: 16px;
-    text-transform: uppercase;
+font-family: ‘Arial Black’, Arial, sans-serif;
+font-size: 13px;
+font-weight: 900;
+letter-spacing: 8px;
+color: #5a4a2a;
+margin-top: 16px;
+text-transform: uppercase;
 }
 
-/* ── Рекорд/счёт ── */
 .stats {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    font-size: 12px;
-    color: #4a3a1a;
+display: flex;
+gap: 10px;
+justify-content: center;
+font-size: 12px;
+color: #4a3a1a;
 }
 .stat-item {
-    background: rgba(255,255,255,0.3);
-    padding: 5px 10px;
-    border-radius: 8px;
-    border: 2px solid #8B6F47;
-    font-weight: bold;
+background: rgba(255,255,255,0.3);
+padding: 5px 10px;
+border-radius: 8px;
+border: 2px solid #8B6F47;
+font-weight: bold;
 }
 
-/* ── Оверлеи ── */
 #overlay, #levelSelect {
-    position: absolute;
-    top: 10px; 
-    left: 10px; 
-    right: 10px; 
-    bottom: 10px;
-    background: rgba(20,16,10,0.95);
-    color: #f5e6d3;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    font-size: 18px;
-    border-radius: 8px;
-    z-index: 10;
-    padding: 16px;
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+position: absolute;
+top: 10px;
+left: 10px;
+right: 10px;
+bottom: 10px;
+background: rgba(20,16,10,0.95);
+color: #f5e6d3;
+display: none;
+justify-content: center;
+align-items: center;
+flex-direction: column;
+font-size: 18px;
+border-radius: 8px;
+z-index: 10;
+padding: 16px;
+overflow: hidden;
+font-family: -apple-system, BlinkMacSystemFont, ‘Segoe UI’, Roboto, ‘Helvetica Neue’, Arial, sans-serif;
 }
 #overlay.show, #levelSelect.show { display: flex; }
 
 .overlay-title {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 14px;
-    color: #ffd700;
-    text-align: center;
-    line-height: 1.3;
-    max-width: 100%;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+font-size: 22px;
+font-weight: 700;
+margin-bottom: 14px;
+color: #ffd700;
+text-align: center;
+line-height: 1.3;
+max-width: 100%;
+text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .resume-btn {
-    padding: 12px 28px;
-    font-size: 15px;
-    margin-top: 12px;
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-    border: none;
-    border-radius: 25px;
-    color: #ffffff;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(255,107,107,0.4);
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    letter-spacing: 0.3px;
+padding: 12px 28px;
+font-size: 15px;
+margin-top: 12px;
+background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+border: none;
+border-radius: 25px;
+color: #ffffff;
+font-weight: 600;
+cursor: pointer;
+box-shadow: 0 4px 12px rgba(255,107,107,0.4);
+transition: all 0.2s ease;
+white-space: nowrap;
+font-family: -apple-system, BlinkMacSystemFont, ‘Segoe UI’, Roboto, sans-serif;
+letter-spacing: 0.3px;
 }
 .resume-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(255,107,107,0.5);
+transform: translateY(-1px);
+box-shadow: 0 6px 16px rgba(255,107,107,0.5);
 }
-.resume-btn:active { 
-    transform: translateY(1px); 
-    box-shadow: 0 2px 8px rgba(255,107,107,0.3);
+.resume-btn:active {
+transform: translateY(1px);
+box-shadow: 0 2px 8px rgba(255,107,107,0.3);
 }
 .resume-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
+opacity: 0.6;
+cursor: not-allowed;
+transform: none;
 }
 
-/* Стили для текста в оверлее */
 #overlayMsg {
-    font-size: 15px;
-    margin: 10px 0;
-    max-width: 280px;
-    text-align: center;
-    color: #e8d4b8;
-    line-height: 1.5;
-    font-weight: 400;
+font-size: 15px;
+margin: 10px 0;
+max-width: 280px;
+text-align: center;
+color: #e8d4b8;
+line-height: 1.5;
+font-weight: 400;
 }
 
 #overlayExtra {
-    font-size: 20px;
-    color: #ffd700;
-    margin: 12px 0;
-    font-weight: 600;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+font-size: 20px;
+color: #ffd700;
+margin: 12px 0;
+font-weight: 600;
+text-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .controls-hint {
-    margin-top: 14px;
-    color: #5a4a2a;
-    font-size: 11px;
-    max-width: 560px;
-    line-height: 1.5;
-    padding: 0 10px;
+margin-top: 14px;
+color: #5a4a2a;
+font-size: 11px;
+max-width: 560px;
+line-height: 1.5;
+padding: 0 10px;
 }
 
 #overlayExtra video {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-/* ── МОБИЛЬНАЯ АДАПТАЦИЯ ── */
-@media (max-width: 680px) {
-    body { padding: 5px; }
-    
-    .console-body {
-        padding: 12px 16px 20px;
-        border-radius: 20px 20px 40% 40% / 20px 20px 50px 50px;
-    }
-    
-    .console-title-top {
-        font-size: 8px;
-        letter-spacing: 3px;
-        margin-bottom: 8px;
-    }
-    
-    .console-middle {
-        gap: 6px;
-    }
-    
-    .screen-wrap {
-        padding: 6px;
-    }
-    
-    canvas {
-        width: 100% !important;
-        height: auto !important;
-    }
-    
-    .arrow-btn.left-up, .arrow-btn.right-up {
-        border-left: 12px solid transparent;
-        border-right: 12px solid transparent;
-        border-bottom: 20px solid #4a3a1a;
-    }
-    
-    .arrow-btn.left-down, .arrow-btn.right-down {
-        border-left: 12px solid transparent;
-        border-right: 12px solid transparent;
-        border-top: 20px solid #4a3a1a;
-    }
-    
-    .red-btn {
-        width: 38px;
-        height: 38px;
-        border: 3px solid #6a0a0a;
-    }
-    
-    .game-btn {
-        padding: 4px 10px;
-        font-size: 8px;
-        letter-spacing: 1px;
-    }
-    
-    .control-side {
-        gap: 6px;
-    }
-    
-    .controls-panel {
-        margin-top: 12px;
-    }
-    
-    .stats {
-        gap: 6px;
-        font-size: 10px;
-    }
-    
-    .stat-item {
-        padding: 4px 8px;
-    }
-    
-    .console-title-bottom {
-        font-size: 10px;
-        letter-spacing: 5px;
-        margin-top: 12px;
-    }
-    
-    .controls-hint {
-        font-size: 10px;
-        margin-top: 10px;
-    }
-    
-    .overlay-title {
-        font-size: 18px;
-        margin-bottom: 10px;
-    }
-    
-    #overlay, #levelSelect {
-        font-size: 13px;
-        padding: 14px 12px;
-    }
-    
-    .resume-btn {
-        padding: 10px 22px;
-        font-size: 13px;
-        margin-top: 10px;
-    }
-    
-    #overlayMsg {
-        font-size: 12px !important;
-        margin: 8px 0 !important;
-        max-width: 90%;
-        line-height: 1.4 !important;
-    }
+/* Модалка авторизации для лидерборда */
+.auth-modal {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0,0,0,0.95);
+z-index: 2000;
+align-items: center;
+justify-content: center;
+padding: 20px;
+}
 
-    #overlayExtra {
-        font-size: 15px !important;
-        margin: 8px 0 !important;
-    }
+.auth-modal.show {
+display: flex;
+}
+
+.auth-content {
+background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%);
+padding: 30px;
+border-radius: 20px;
+max-width: 400px;
+width: 100%;
+box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.auth-content h2 {
+color: #5a4a2a;
+margin-bottom: 15px;
+text-align: center;
+font-family: ‘Arial Black’, Arial, sans-serif;
+}
+
+.auth-content p {
+color: #5a4a2a;
+margin-bottom: 20px;
+text-align: center;
+font-size: 14px;
+}
+
+.auth-content input {
+width: 100%;
+padding: 12px;
+margin-bottom: 15px;
+border: 2px solid #9a8a6a;
+border-radius: 8px;
+font-size: 14px;
+}
+
+.auth-content button {
+width: 100%;
+padding: 14px;
+border: none;
+border-radius: 10px;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+margin-bottom: 10px;
+}
+
+.auth-btn-primary {
+background: linear-gradient(135deg, #4CAF50, #388E3C);
+color: white;
+}
+
+.auth-btn-secondary {
+background: linear-gradient(135deg, #888, #555);
+color: white;
+}
+
+.auth-error {
+color: #d32f2f;
+text-align: center;
+margin-top: 10px;
+font-size: 14px;
+}
+
+/* Лидерборд */
+.leaderboard-screen {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0,0,0,0.95);
+z-index: 1500;
+overflow-y: auto;
+padding: 20px;
+}
+
+.leaderboard-screen.show {
+display: block;
+}
+
+.leaderboard-content {
+max-width: 600px;
+margin: 0 auto;
+background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%);
+padding: 30px;
+border-radius: 20px;
+box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+@media (max-width: 680px) {
+body { padding: 5px; }
+
+```
+.console-body {
+    padding: 12px 16px 20px;
+    border-radius: 20px 20px 40% 40% / 20px 20px 50px 50px;
+}
+
+.console-title-top {
+    font-size: 8px;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+}
+
+.console-middle {
+    gap: 6px;
+}
+
+.screen-wrap {
+    padding: 6px;
+}
+
+canvas {
+    width: 100% !important;
+    height: auto !important;
+}
+
+.arrow-btn.left-up, .arrow-btn.right-up {
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 20px solid #4a3a1a;
+}
+
+.arrow-btn.left-down, .arrow-btn.right-down {
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 20px solid #4a3a1a;
+}
+
+.red-btn {
+    width: 38px;
+    height: 38px;
+    border: 3px solid #6a0a0a;
+}
+
+.game-btn {
+    padding: 4px 10px;
+    font-size: 8px;
+    letter-spacing: 1px;
+}
+
+.control-side {
+    gap: 6px;
+}
+
+.controls-panel {
+    margin-top: 12px;
+}
+
+.stats {
+    gap: 6px;
+    font-size: 10px;
+}
+
+.stat-item {
+    padding: 4px 8px;
+}
+
+.console-title-bottom {
+    font-size: 10px;
+    letter-spacing: 5px;
+    margin-top: 12px;
+}
+
+.controls-hint {
+    font-size: 10px;
+    margin-top: 10px;
+}
+
+.overlay-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+#overlay, #levelSelect {
+    font-size: 13px;
+    padding: 14px 12px;
+}
+
+.resume-btn {
+    padding: 10px 22px;
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+#overlayMsg {
+    font-size: 12px !important;
+    margin: 8px 0 !important;
+    max-width: 90%;
+    line-height: 1.4 !important;
+}
+
+#overlayExtra {
+    font-size: 15px !important;
+    margin: 8px 0 !important;
+}
+```
+
 }
 
 @media (max-width: 400px) {
-    .console-title-top {
-        font-size: 7px;
-        letter-spacing: 2px;
-    }
-    
-    .arrow-btn.left-up, .arrow-btn.right-up {
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-bottom: 16px solid #4a3a1a;
-    }
-    
-    .arrow-btn.left-down, .arrow-btn.right-down {
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-top: 16px solid #4a3a1a;
-    }
-    
-    .red-btn {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .game-btn {
-        font-size: 7px;
-        padding: 3px 8px;
-    }
-    
-    .console-title-bottom {
-        font-size: 9px;
-        letter-spacing: 4px;
-    }
-    
-    .overlay-title {
-        font-size: 16px;
-    }
-    
-    .resume-btn {
-        padding: 9px 18px;
-        font-size: 12px;
-    }
-    
-    #overlayExtra {
-        font-size: 14px !important;
-    }
-    
-    #overlayMsg {
-        font-size: 11px !important;
-    }
+.console-title-top {
+font-size: 7px;
+letter-spacing: 2px;
+}
+
+```
+.arrow-btn.left-up, .arrow-btn.right-up {
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 16px solid #4a3a1a;
+}
+
+.arrow-btn.left-down, .arrow-btn.right-down {
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 16px solid #4a3a1a;
+}
+
+.red-btn {
+    width: 32px;
+    height: 32px;
+}
+
+.game-btn {
+    font-size: 7px;
+    padding: 3px 8px;
+}
+
+.console-title-bottom {
+    font-size: 9px;
+    letter-spacing: 4px;
+}
+
+.overlay-title {
+    font-size: 16px;
+}
+
+.resume-btn {
+    padding: 9px 18px;
+    font-size: 12px;
+}
+
+#overlayExtra {
+    font-size: 14px !important;
+}
+
+#overlayMsg {
+    font-size: 11px !important;
+}
+```
+
 }
 
 </style>
 </head>
 <body>
-<!-- Экран авторизации -->
-<div id="authScreen" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; align-items: center; justify-content: center;">
-    <div style="background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%); padding: 30px; border-radius: 20px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-        <h2 style="color: #5a4a2a; margin-bottom: 20px; text-align: center; font-family: 'Arial Black', Arial, sans-serif;">🌸 ШАГАЙ ДОМА</h2>
-        
-        <div id="loginForm">
-            <input type="email" id="loginEmail" placeholder="Email" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #9a8a6a; border-radius: 8px; font-size: 14px;">
-            <input type="password" id="loginPassword" placeholder="Пароль" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #9a8a6a; border-radius: 8px; font-size: 14px;">
-            <button onclick="login()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #4CAF50, #388E3C); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">ВОЙТИ</button>
-            <button onclick="showRegister()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;">РЕГИСТРАЦИЯ</button>
-        </div>
-        
-        <div id="registerForm" style="display: none;">
-            <input type="email" id="registerEmail" placeholder="Email" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #9a8a6a; border-radius: 8px; font-size: 14px;">
-            <input type="text" id="registerName" placeholder="Ваше имя" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #9a8a6a; border-radius: 8px; font-size: 14px;">
-            <input type="password" id="registerPassword" placeholder="Пароль (мин. 6 символов)" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #9a8a6a; border-radius: 8px; font-size: 14px;">
-            <button onclick="register()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #4CAF50, #388E3C); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">СОЗДАТЬ АККАУНТ</button>
-            <button onclick="showLogin()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #888, #555); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;">НАЗАД</button>
-        </div>
-        
-        <div id="authError" style="color: #d32f2f; text-align: center; margin-top: 10px; font-size: 14px;"></div>
-    </div>
+
+<!-- Модалка авторизации (только для лидерборда) -->
+
+<div id="authModal" class="auth-modal">
+    <div class="auth-content">
+        <h2>🌸 Войти для лидерборда</h2>
+        <p>Введите ваш email, чтобы сохранить результаты и участвовать в лидерборде</p>
+
+```
+    <input type="email" id="authEmail" placeholder="Ваш email" />
+    <input type="text" id="authName" placeholder="Ваше имя" />
+    
+    <button class="auth-btn-primary" onclick="loginForLeaderboard()">ВОЙТИ</button>
+    <button class="auth-btn-secondary" onclick="closeAuthModal()">ЗАКРЫТЬ</button>
+    
+    <div id="authError" class="auth-error"></div>
+</div>
+```
+
 </div>
 
 <!-- Кнопка лидерборда -->
-<button id="leaderboardBtn" onclick="showLeaderboard()" style="position: fixed; top: 20px; right: 20px; padding: 12px 20px; background: linear-gradient(135deg, #ffd700, #ffed4e); color: #5a4a2a; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 100; display: none;">
+
+<button id="leaderboardBtn" onclick="openLeaderboard()" style="position: fixed; top: 20px; right: 20px; padding: 12px 20px; background: linear-gradient(135deg, #ffd700, #ffed4e); color: #5a4a2a; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 100;">
     🏆 ЛИДЕРБОРД
 </button>
 
 <!-- Экран лидерборда -->
-<div id="leaderboardScreen" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 1000; overflow-y: auto; padding: 20px;">
-    <div style="max-width: 600px; margin: 0 auto; background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%); padding: 30px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+
+<div id="leaderboardScreen" class="leaderboard-screen">
+    <div class="leaderboard-content">
         <h2 style="color: #5a4a2a; margin-bottom: 20px; text-align: center; font-family: 'Arial Black', Arial, sans-serif;">🏆 ЛИДЕРБОРД</h2>
-        
-        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <button onclick="loadLeaderboard('easy')" id="leaderEasyBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #4CAF50, #388E3C); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">ИГРА А</button>
-            <button onclick="loadLeaderboard('hard')" id="leaderHardBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">ИГРА Б</button>
-        </div>
-        
-        <div id="leaderboardList" style="background: rgba(255,255,255,0.5); border-radius: 10px; padding: 15px; margin-bottom: 20px; max-height: 400px; overflow-y: auto;">
-            <p style="text-align: center; color: #5a4a2a;">Загрузка...</p>
-        </div>
-        
-        <button onclick="closeLeaderboard()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #888, #555); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;">ЗАКРЫТЬ</button>
-        
-        <button onclick="logoutUser()" style="width: 100%; padding: 10px; background: transparent; color: #d32f2f; border: 2px solid #d32f2f; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px;">ВЫЙТИ ИЗ АККАУНТА</button>
+
+```
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button onclick="loadLeaderboard('easy')" id="leaderEasyBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #4CAF50, #388E3C); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">ИГРА А</button>
+        <button onclick="loadLeaderboard('hard')" id="leaderHardBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">ИГРА Б</button>
     </div>
+    
+    <div id="leaderboardList" style="background: rgba(255,255,255,0.5); border-radius: 10px; padding: 15px; margin-bottom: 20px; max-height: 400px; overflow-y: auto;">
+        <p style="text-align: center; color: #5a4a2a;">Загрузка...</p>
+    </div>
+    
+    <button onclick="closeLeaderboard()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #888, #555); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;">ЗАКРЫТЬ</button>
+    
+    <button id="logoutBtn" onclick="logoutUser()" style="width: 100%; padding: 10px; background: transparent; color: #d32f2f; border: 2px solid #d32f2f; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; display: none;">ВЫЙТИ</button>
+</div>
+```
+
 </div>
 
 <div class="console-body">
-
-    <!-- Верхняя надпись -->
     <div class="console-title-top">ИГРА &nbsp; НА &nbsp; ЭКРАНЕ</div>
 
-    <!-- Средняя зона: стрелка влево + экран + кнопки справа -->
-    <div class="console-middle">
-
-        <!-- Левая стрелка (одна, большая) -->
-        <div class="left-panel">
-            <button class="arrow-btn left-up"
-                onmousedown="setPosition(0)"
-                ontouchstart="setPosition(0)"
-                title="Верх-лево (Q)"></button>
-            <button class="arrow-btn left-down"
-                onmousedown="setPosition(2)"
-                ontouchstart="setPosition(2)"
-                title="Низ-лево (A)"></button>
-        </div>
-
-        <!-- Экран -->
-        <div class="screen-wrap" style="position: relative;">
-            <canvas id="game" width="480" height="320"></canvas>
-
-            <!-- Выбор уровня -->
-            <div id="levelSelect" class="show">
-                <div class="overlay-title">🌸 Выбери уровень</div>
-                <div style="margin-top: 16px; font-size: 13px; opacity: 0.9; max-width: 280px; text-align: center; line-height: 1.5;">
-                    Нажми <b>ИГРА А</b> для легкого уровня или <b>ИГРА Б</b> для сложного
-                </div>
-                <div style="margin-top: 16px; font-size: 11px; opacity: 0.7;">
-                    💡 Q/A — лево, W/S — право
-                </div>
-            </div>
-
-            <!-- Пауза / Игра окончена -->
-            <div id="overlay">
-                <div class="overlay-title" id="overlayTitle">⏸ ПАУЗА</div>
-                <div id="overlayMsg" style="font-size: 15px; margin: 8px 0; max-width: 280px; text-align:center;">
-                    Пошагайте на месте, чтобы продолжить
-                </div>
-                <div id="overlayExtra" style="font-size: 32px; color: #FF9F1C; margin: 10px 0;">50 шагов</div>
-                <button class="resume-btn" id="overlayMainBtn" onclick="resumeGame()">ПРОДОЛЖИТЬ 👣</button>
-                <button class="resume-btn" onclick="backToMenu()"
-                    style="background: radial-gradient(circle at 30% 30%, #888, #555); margin-top: 8px;">
-                    В МЕНЮ
-                </button>
-            </div>
-        </div>
-
-        <!-- Правая панель: ИГРА А / ИГРА Б / ПАУЗА + стрелка -->
-        <div class="right-panel">
-            <div class="right-arrow-row">
-                <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-                    <button class="arrow-btn right-up"
-                        onmousedown="setPosition(1)"
-                        ontouchstart="setPosition(1)"
-                        title="Верх-право (W)"></button>
-                    <button class="arrow-btn right-down"
-                        onmousedown="setPosition(3)"
-                        ontouchstart="setPosition(3)"
-                        title="Низ-право (S)"></button>
-                </div>
-                <div style="display:flex; flex-direction:column; gap:6px; margin-left: 6px;">
-                    <button class="game-btn" onclick="startGame('easy')">ИГРА А</button>
-                    <button class="game-btn" onclick="startGame('hard')">ИГРА Б</button>
-                    <button class="game-btn" onclick="pauseGame()">ПАУЗА</button>
-                </div>
-            </div>
-        </div>
-
+```
+<div class="console-middle">
+    <div class="left-panel">
+        <button class="arrow-btn left-up"
+            onmousedown="setPosition(0)"
+            ontouchstart="setPosition(0)"
+            title="Верх-лево (Q)"></button>
+        <button class="arrow-btn left-down"
+            onmousedown="setPosition(2)"
+            ontouchstart="setPosition(2)"
+            title="Низ-лево (A)"></button>
     </div>
 
-    <!-- Нижняя панель: красные кнопки + счёт -->
-    <div class="controls-panel">
-        <div class="control-side">
-            <div class="red-btn"
-                onmousedown="setPosition(0)" ontouchstart="setPosition(0)"></div>
-            <div class="red-btn"
-                onmousedown="setPosition(2)" ontouchstart="setPosition(2)"></div>
-        </div>
+    <div class="screen-wrap" style="position: relative;">
+        <canvas id="game" width="480" height="320"></canvas>
 
-        <div>
-            <div class="stats">
-                <div class="stat-item">🏆 <span id="bestScore">0</span></div>
-                <div class="stat-item">🌸 <span id="currentScore">0</span></div>
+        <div id="levelSelect" class="show">
+            <div class="overlay-title">🌸 Выбери уровень</div>
+            <div style="margin-top: 16px; font-size: 13px; opacity: 0.9; max-width: 280px; text-align: center; line-height: 1.5;">
+                Нажми <b>ИГРА А</b> для легкого уровня или <b>ИГРА Б</b> для сложного
+            </div>
+            <div style="margin-top: 16px; font-size: 11px; opacity: 0.7;">
+                💡 Q/A — лево, W/S — право
             </div>
         </div>
 
-        <div class="control-side">
-            <div class="red-btn"
-                onmousedown="setPosition(1)" ontouchstart="setPosition(1)"></div>
-            <div class="red-btn"
-                onmousedown="setPosition(3)" ontouchstart="setPosition(3)"></div>
+        <div id="overlay">
+            <div class="overlay-title" id="overlayTitle">⏸ ПАУЗА</div>
+            <div id="overlayMsg" style="font-size: 15px; margin: 8px 0; max-width: 280px; text-align:center;">
+                Пошагайте на месте, чтобы продолжить
+            </div>
+            <div id="overlayExtra" style="font-size: 32px; color: #FF9F1C; margin: 10px 0;">50 шагов</div>
+            <button class="resume-btn" id="overlayMainBtn" onclick="resumeGame()">ПРОДОЛЖИТЬ 👣</button>
+            <button class="resume-btn" onclick="backToMenu()"
+                style="background: radial-gradient(circle at 30% 30%, #888, #555); margin-top: 8px;">
+                В МЕНЮ
+            </button>
         </div>
     </div>
 
-    <!-- Нижняя надпись корпуса -->
-    <div class="console-title-bottom">ШАГАЙ &nbsp; ДОМА</div>
+    <div class="right-panel">
+        <div class="right-arrow-row">
+            <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
+                <button class="arrow-btn right-up"
+                    onmousedown="setPosition(1)"
+                    ontouchstart="setPosition(1)"
+                    title="Верх-право (W)"></button>
+                <button class="arrow-btn right-down"
+                    onmousedown="setPosition(3)"
+                    ontouchstart="setPosition(3)"
+                    title="Низ-право (S)"></button>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-left: 6px;">
+                <button class="game-btn" onclick="startGame('easy')">ИГРА А</button>
+                <button class="game-btn" onclick="startGame('hard')">ИГРА Б</button>
+                <button class="game-btn" onclick="pauseGame()">ПАУЗА</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="controls-panel">
+    <div class="control-side">
+        <div class="red-btn"
+            onmousedown="setPosition(0)" ontouchstart="setPosition(0)"></div>
+        <div class="red-btn"
+            onmousedown="setPosition(2)" ontouchstart="setPosition(2)"></div>
+    </div>
+
+    <div>
+        <div class="stats">
+            <div class="stat-item">🏆 <span id="bestScore">0</span></div>
+            <div class="stat-item">🌸 <span id="currentScore">0</span></div>
+        </div>
+    </div>
+
+    <div class="control-side">
+        <div class="red-btn"
+            onmousedown="setPosition(1)" ontouchstart="setPosition(1)"></div>
+        <div class="red-btn"
+            onmousedown="setPosition(3)" ontouchstart="setPosition(3)"></div>
+    </div>
+</div>
+
+<div class="console-title-bottom">ШАГАЙ &nbsp; ДОМА</div>
+```
 
 </div>
 
@@ -647,9 +733,15 @@ canvas {
     🎯 Ловите падающие цветы — не пропускайте ни одного!
 </p>
 
-<script>
+<script type="module">
+import { auth, db, signInAnonymously, onAuthStateChanged, signOut, collection, addDoc, query, orderBy, limit, getDocs, setDoc, doc, getDoc, where } from 'https://irinabulrjaeva.github.io/backend/camp/firebase-config.js';
+
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+
+let currentUser = null;
+let playerName = localStorage.getItem('flowerGamePlayerName') || '';
+let currentLeaderboardMode = 'easy';
 
 // ── Вибрация при потере жизни ──
 function vibrateOnLifeLoss() {
@@ -718,7 +810,164 @@ const flowerEmojis = ['🌸','🌺','🌻','🌼','🌷','🏵️'];
 document.getElementById('bestScore').textContent    = bestScore;
 document.getElementById('currentScore').textContent = score;
 
-// ── Фон по жизням ──
+// Анонимная авторизация при загрузке (не блокирует игру)
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        currentUser = user;
+        if (playerName) {
+            document.getElementById('logoutBtn').style.display = 'block';
+        }
+    } else {
+        // Тихо авторизуемся анонимно
+        try {
+            await signInAnonymously(auth);
+        } catch (error) {
+            console.error('Ошибка анонимной авторизации:', error);
+        }
+    }
+});
+
+// ── Авторизация для лидерборда ──
+window.openLeaderboard = function() {
+    if (!playerName) {
+        document.getElementById('authModal').classList.add('show');
+    } else {
+        showLeaderboard();
+    }
+}
+
+window.closeAuthModal = function() {
+    document.getElementById('authModal').classList.remove('show');
+}
+
+window.loginForLeaderboard = async function() {
+    const email = document.getElementById('authEmail').value.trim();
+    const name = document.getElementById('authName').value.trim();
+    const errorDiv = document.getElementById('authError');
+    
+    if (!email) {
+        errorDiv.textContent = 'Введите email';
+        return;
+    }
+    
+    if (!name || name.length < 2) {
+        errorDiv.textContent = 'Введите имя (минимум 2 символа)';
+        return;
+    }
+    
+    try {
+        playerName = name;
+        localStorage.setItem('flowerGamePlayerName', name);
+        localStorage.setItem('flowerGameEmail', email);
+        
+        // Сохраняем в Firestore
+        if (currentUser) {
+            await setDoc(doc(db, 'players', currentUser.uid), {
+                name: name,
+                email: email,
+                createdAt: new Date()
+            });
+        }
+        
+        closeAuthModal();
+        showLeaderboard();
+        document.getElementById('logoutBtn').style.display = 'block';
+    } catch (error) {
+        console.error('Ошибка сохранения:', error);
+        errorDiv.textContent = 'Ошибка. Попробуйте снова';
+    }
+}
+
+window.logoutUser = async function() {
+    if (confirm('Выйти из аккаунта?')) {
+        playerName = '';
+        localStorage.removeItem('flowerGamePlayerName');
+        localStorage.removeItem('flowerGameEmail');
+        document.getElementById('logoutBtn').style.display = 'none';
+        closeLeaderboard();
+    }
+}
+
+// ── Сохранение результата ──
+async function saveScore(difficulty, score) {
+    if (!currentUser || !playerName) return;
+    
+    try {
+        await addDoc(collection(db, 'scores'), {
+            userId: currentUser.uid,
+            userName: playerName,
+            difficulty: difficulty,
+            score: score,
+            timestamp: new Date()
+        });
+        
+        console.log('Результат сохранен!');
+    } catch (error) {
+        console.error('Ошибка сохранения результата:', error);
+    }
+}
+
+// ── Лидерборд ──
+function showLeaderboard() {
+    document.getElementById('leaderboardScreen').classList.add('show');
+    window.loadLeaderboard(currentLeaderboardMode);
+}
+
+window.closeLeaderboard = function() {
+    document.getElementById('leaderboardScreen').classList.remove('show');
+}
+
+window.loadLeaderboard = async function(difficulty) {
+    currentLeaderboardMode = difficulty;
+    const listDiv = document.getElementById('leaderboardList');
+    listDiv.innerHTML = '<p style="text-align: center; color: #5a4a2a;">Загрузка...</p>';
+    
+    document.getElementById('leaderEasyBtn').style.opacity = difficulty === 'easy' ? '1' : '0.6';
+    document.getElementById('leaderHardBtn').style.opacity = difficulty === 'hard' ? '1' : '0.6';
+    
+    try {
+        const q = query(
+            collection(db, 'scores'),
+            where('difficulty', '==', difficulty),
+            orderBy('score', 'desc'),
+            limit(10)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const scores = [];
+        
+        querySnapshot.forEach((docSnap) => {
+            scores.push(docSnap.data());
+        });
+        
+        if (scores.length === 0) {
+            listDiv.innerHTML = '<p style="text-align: center; color: #5a4a2a;">Пока нет результатов</p>';
+            return;
+        }
+        
+        let html = '';
+        scores.forEach((scoreData, index) => {
+            const isCurrentUser = currentUser && scoreData.userId === currentUser.uid && scoreData.userName === playerName;
+            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+            
+            html += `
+                <div style="padding: 12px; margin-bottom: 8px; background: ${isCurrentUser ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.7)'}; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: ${isCurrentUser ? '2px solid #ffd700' : 'none'};">
+                    <span style="font-weight: bold; color: #5a4a2a; min-width: 30px;">${medal}</span>
+                    <span style="flex: 1; margin-left: 10px; color: #5a4a2a; font-weight: ${isCurrentUser ? 'bold' : 'normal'};">${scoreData.userName}</span>
+                    <span style="font-weight: bold; color: #4CAF50; font-size: 18px;">🌸 ${scoreData.score}</span>
+                </div>
+            `;
+        });
+        
+        listDiv.innerHTML = html;
+    } catch (error) {
+        console.error('Ошибка загрузки лидерборда:', error);
+        listDiv.innerHTML = '<p style="text-align: center; color: #d32f2f;">Ошибка загрузки</p>';
+    }
+}
+
+// ── Игровая логика (без изменений) ──
+
 function getCurrentBackground() {
     if (isGameOver || lives <= 0) return bgGO;
     if (lives === 3) return bg3;
@@ -733,11 +982,9 @@ function drawBackgroundImage() {
     } else {
         ctx.fillStyle = "#f3e7d0";
         ctx.fillRect(0, 0, W, H);
-        bg.onload = () => {};
     }
 }
 
-// ── Игрок (девушка с корзинкой) ── 
 function drawPlayer() {
     const pos   = catchPositions[currentPosition];
     const img   = (lastMoveDir === 'up') ? imgUp : imgDown;
@@ -768,7 +1015,6 @@ function drawPlayer() {
     }
 }
 
-// ── Цветы ──
 function drawFlowers() {
     const flowerSize = H * 0.12;
 
@@ -818,7 +1064,7 @@ function drawFlowers() {
         if (flower.progress >= 100) {
             if (!flower.caught) {
                 lives--;
-                vibrateOnLifeLoss(); // вибрация при потере жизни
+                vibrateOnLifeLoss();
                 if (lives <= 0) { lives = 0; gameOver(); }
             }
             flowers.splice(i, 1);
@@ -826,7 +1072,6 @@ function drawFlowers() {
     }
 }
 
-// ── Спавн ──
 function spawnFlower() {
     if (isPaused || !isGameStarted || isGameOver) return;
     const randomIndex = Math.floor(Math.random() * 6);
@@ -840,17 +1085,16 @@ function spawnFlower() {
     });
 }
 
-// ── Управление ──
 document.addEventListener("keydown", function(e) {
     if (isPaused || !isGameStarted || isGameOver) return;
     const key = e.key.toLowerCase();
-    if (key === 'q') setPosition(0);
-    if (key === 'a') setPosition(2);
-    if (key === 'w') setPosition(1);
-    if (key === 's') setPosition(3);
+    if (key === 'q') window.setPosition(0);
+    if (key === 'a') window.setPosition(2);
+    if (key === 'w') window.setPosition(1);
+    if (key === 's') window.setPosition(3);
 });
 
-function setPosition(pos) {
+window.setPosition = function(pos) {
     if (isPaused || !isGameStarted || isGameOver) return;
     const wasUpper = (currentPosition <= 1);
     const nowUpper = (pos <= 1);
@@ -859,8 +1103,7 @@ function setPosition(pos) {
     currentPosition = pos;
 }
 
-// ── Старт игры ──
-function startGame(difficulty) {
+window.startGame = function(difficulty) {
     currentDifficulty = difficulty;
     baseSpeed = difficulties[difficulty].baseSpeed;
 
@@ -889,29 +1132,30 @@ function resetOverlayToPause() {
     btn.disabled = false;
     btn.style.opacity = '1';
     btn.style.cursor = 'pointer';
-    btn.onclick = resumeGame;
+    btn.onclick = window.resumeGame;
 }
 
-// ── Пауза ──
-function pauseGame() {
+window.pauseGame = function() {
     if (!isGameStarted || isGameOver) return;
     isPaused = true;
     resetOverlayToPause();
     document.getElementById("overlay").classList.add("show");
 }
 
-function resumeGame() {
+window.resumeGame = function() {
     isPaused = false;
     document.getElementById("overlay").classList.remove("show");
 }
 
-
-// ── Игра окончена ──
 function gameOver() {
     isGameOver = true; isPaused = true;
     if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; }
 
-    // ЭТАП 1: Показываем сообщение о необходимости разминки
+    // Сохраняем результат если авторизован
+    if (currentUser && playerName && score > 0) {
+        saveScore(currentDifficulty, score);
+    }
+
     setTimeout(() => {
         document.getElementById('overlayTitle').textContent  = '😟 Все жизни кончились!';
         document.getElementById('overlayMsg').innerHTML      = `Ваш счёт: <b>${score}</b><br><br>Чтобы сыграть заново, пошагайте<br>1 минуту вместе с Настей.`;
@@ -922,46 +1166,32 @@ function gameOver() {
         btn.disabled = false;
         btn.style.opacity = '1';
         btn.style.cursor = 'pointer';
-        btn.onclick = startCardioWorkout; // переходим к видео
+        btn.onclick = startCardioWorkout;
         
         document.getElementById("overlay").classList.add("show");
     }, 400);
 }
 
-// ── Начало кардио-разминки ──
 function startCardioWorkout() {
     document.getElementById('overlayTitle').textContent  = '💪 Кардио-разминка';
     document.getElementById('overlayMsg').innerHTML      = 'Повторяйте движения за Настей!';
     
-    const videoHTML = '<video id="cardioVideo" style="width: 100%; max-width: 260px; border-radius: 8px; margin: 8px 0;" autoplay><source src="cardio.mp4" type="video/mp4">Ваш браузер не поддерживает видео.</video>';
+    const videoHTML = '<video id="cardioVideo" style="width: 100%; max-width: 280px; border-radius: 8px; margin: 10px 0;" autoplay><source src="cardio.mp4" type="video/mp4"></video>';
     document.getElementById('overlayExtra').innerHTML = videoHTML;
     
     const btn = document.getElementById('overlayMainBtn');
     btn.textContent = 'ПРОПУСТИТЬ ⏭️';
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.style.cursor = 'pointer';
-    btn.onclick = () => startGame(currentDifficulty);
+    btn.onclick = () => window.startGame(currentDifficulty);
     
-    // Отслеживаем окончание видео
     const video = document.getElementById('cardioVideo');
     if (video) {
-        video.addEventListener('ended', function() {
-            // Видео закончилось - автоматически начинаем игру
-            startGame(currentDifficulty);
-        });
-        
-        // Если видео не загрузилось, показываем таймер
-        video.addEventListener('error', function() {
-            startCountdownTimer();
-        });
+        video.addEventListener('ended', () => window.startGame(currentDifficulty));
+        video.addEventListener('error', () => startCountdownTimer());
     } else {
-        // Если видео не загрузилось, показываем таймер
         startCountdownTimer();
     }
 }
 
-// ── Таймер обратного отсчета (если видео не загрузилось) ──
 function startCountdownTimer() {
     const btn = document.getElementById('overlayMainBtn');
     btn.disabled = true;
@@ -975,66 +1205,12 @@ function startCountdownTimer() {
             btn.textContent = `ПОДОЖДИТЕ ${countdown} сек ⏱️`;
         } else {
             clearInterval(countdownInterval);
-            startGame(currentDifficulty);
+            window.startGame(currentDifficulty);
         }
     }, 1000);
 }
 
-// ── Начало кардио-разминки ──
-function startCardioWorkout() {
-    document.getElementById('overlayTitle').textContent  = '💪 Кардио-разминка';
-    document.getElementById('overlayMsg').innerHTML      = 'Повторяйте движения за Настей!';
-    
-    const videoHTML = '<video id="cardioVideo" style="width: 100%; max-width: 280px; border-radius: 8px; margin: 10px 0;" autoplay><source src="cardio.mp4" type="video/mp4">Ваш браузер не поддерживает видео.</video>';
-    document.getElementById('overlayExtra').innerHTML = videoHTML;
-    
-    const btn = document.getElementById('overlayMainBtn');
-    btn.textContent = 'ПРОПУСТИТЬ ⏭️';
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.style.cursor = 'pointer';
-    btn.onclick = () => startGame(currentDifficulty);
-    
-    // Отслеживаем окончание видео
-    const video = document.getElementById('cardioVideo');
-    if (video) {
-        video.addEventListener('ended', function() {
-            // Видео закончилось - автоматически начинаем игру
-            startGame(currentDifficulty);
-        });
-        
-        // Если видео не загрузилось, показываем таймер
-        video.addEventListener('error', function() {
-            startCountdownTimer();
-        });
-    } else {
-        // Если видео не загрузилось, показываем таймер
-        startCountdownTimer();
-    }
-}
-
-// ── Таймер обратного отсчета (если видео не загрузилось) ──
-function startCountdownTimer() {
-    const btn = document.getElementById('overlayMainBtn');
-    btn.disabled = true;
-    btn.style.opacity = '0.5';
-    btn.style.cursor = 'not-allowed';
-    
-    let countdown = 60;
-    const countdownInterval = setInterval(() => {
-        countdown--;
-        if (countdown > 0) {
-            btn.textContent = `ПОДОЖДИТЕ ${countdown} сек ⏱️`;
-        } else {
-            clearInterval(countdownInterval);
-            startGame(currentDifficulty);
-        }
-    }, 1000);
-}
-
-
-// ── В меню ──
-function backToMenu() {
+window.backToMenu = function() {
     isGameStarted = false; isPaused = false; isGameOver = false;
     flowers = []; score = 0; lives = 3;
     if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; }
@@ -1046,227 +1222,20 @@ function backToMenu() {
     resetOverlayToPause();
 }
 
-// ── Главный цикл ──
 function update() {
     ctx.clearRect(0, 0, W, H);
-
     if (isGameStarted) {
         drawBackgroundImage();
         if (!isGameOver) {
             drawFlowers();
             drawPlayer();
-        } else {
-            drawBackgroundImage();
         }
     }
-
     requestAnimationFrame(update);
 }
 
 update();
-
-    // Firebase imports и функции
-import { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, collection, addDoc, query, orderBy, limit, getDocs, setDoc, doc, getDoc } from './firebase-config.js';
-
-let currentUser = null;
-let currentLeaderboardMode = 'easy';
-
-// Проверка авторизации
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        currentUser = user;
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('leaderboardBtn').style.display = 'block';
-        console.log('Пользователь авторизован:', user.email);
-    } else {
-        currentUser = null;
-        document.getElementById('authScreen').style.display = 'flex';
-        document.getElementById('leaderboardBtn').style.display = 'none';
-    }
-});
-
-// Вход
-async function login() {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    const errorDiv = document.getElementById('authError');
-    
-    if (!email || !password) {
-        errorDiv.textContent = 'Заполните все поля';
-        return;
-    }
-    
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-        errorDiv.textContent = '';
-    } catch (error) {
-        if (error.code === 'auth/invalid-credential') {
-            errorDiv.textContent = 'Неверный email или пароль';
-        } else if (error.code === 'auth/user-not-found') {
-            errorDiv.textContent = 'Пользователь не найден';
-        } else {
-            errorDiv.textContent = 'Ошибка входа: ' + error.message;
-        }
-    }
-}
-
-// Регистрация
-async function register() {
-    const email = document.getElementById('registerEmail').value;
-    const name = document.getElementById('registerName').value;
-    const password = document.getElementById('registerPassword').value;
-    const errorDiv = document.getElementById('authError');
-    
-    if (!email || !name || !password) {
-        errorDiv.textContent = 'Заполните все поля';
-        return;
-    }
-    
-    if (password.length < 6) {
-        errorDiv.textContent = 'Пароль должен быть минимум 6 символов';
-        return;
-    }
-    
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        
-        // Сохраняем имя пользователя в Firestore
-        await setDoc(doc(db, 'users', userCredential.user.uid), {
-            name: name,
-            email: email,
-            createdAt: new Date()
-        });
-        
-        errorDiv.textContent = '';
-    } catch (error) {
-        if (error.code === 'auth/email-already-in-use') {
-            errorDiv.textContent = 'Email уже используется';
-        } else if (error.code === 'auth/invalid-email') {
-            errorDiv.textContent = 'Неверный формат email';
-        } else {
-            errorDiv.textContent = 'Ошибка регистрации: ' + error.message;
-        }
-    }
-}
-
-// Переключение форм
-function showRegister() {
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'block';
-    document.getElementById('authError').textContent = '';
-}
-
-function showLogin() {
-    document.getElementById('registerForm').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'block';
-    document.getElementById('authError').textContent = '';
-}
-
-// Выход
-async function logoutUser() {
-    if (confirm('Вы уверены, что хотите выйти?')) {
-        await signOut(auth);
-        closeLeaderboard();
-    }
-}
-
-// Сохранение результата в Firebase
-async function saveScore(difficulty, score) {
-    if (!currentUser) return;
-    
-    try {
-        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-        const userName = userDoc.exists() ? userDoc.data().name : 'Игрок';
-        
-        await addDoc(collection(db, 'scores'), {
-            userId: currentUser.uid,
-            userName: userName,
-            difficulty: difficulty,
-            score: score,
-            timestamp: new Date()
-        });
-        
-        console.log('Результат сохранен!');
-    } catch (error) {
-        console.error('Ошибка сохранения результата:', error);
-    }
-}
-
-// Показать лидерборд
-function showLeaderboard() {
-    document.getElementById('leaderboardScreen').style.display = 'block';
-    loadLeaderboard(currentLeaderboardMode);
-}
-
-function closeLeaderboard() {
-    document.getElementById('leaderboardScreen').style.display = 'none';
-}
-
-// Загрузка лидерборда
-async function loadLeaderboard(difficulty) {
-    currentLeaderboardMode = difficulty;
-    const listDiv = document.getElementById('leaderboardList');
-    listDiv.innerHTML = '<p style="text-align: center; color: #5a4a2a;">Загрузка...</p>';
-    
-    // Обновляем стили кнопок
-    document.getElementById('leaderEasyBtn').style.opacity = difficulty === 'easy' ? '1' : '0.6';
-    document.getElementById('leaderHardBtn').style.opacity = difficulty === 'hard' ? '1' : '0.6';
-    
-    try {
-        const q = query(
-            collection(db, 'scores'),
-            orderBy('score', 'desc'),
-            limit(50)
-        );
-        
-        const querySnapshot = await getDocs(q);
-        const scores = [];
-        
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            if (data.difficulty === difficulty) {
-                scores.push(data);
-            }
-        });
-        
-        if (scores.length === 0) {
-            listDiv.innerHTML = '<p style="text-align: center; color: #5a4a2a;">Пока нет результатов</p>';
-            return;
-        }
-        
-        let html = '';
-        scores.slice(0, 10).forEach((scoreData, index) => {
-            const isCurrentUser = currentUser && scoreData.userId === currentUser.uid;
-            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-            
-            html += `
-                <div style="padding: 12px; margin-bottom: 8px; background: ${isCurrentUser ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.7)'}; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: ${isCurrentUser ? '2px solid #ffd700' : 'none'};">
-                    <span style="font-weight: bold; color: #5a4a2a; min-width: 30px;">${medal}</span>
-                    <span style="flex: 1; margin-left: 10px; color: #5a4a2a; font-weight: ${isCurrentUser ? 'bold' : 'normal'};">${scoreData.userName}</span>
-                    <span style="font-weight: bold; color: #4CAF50; font-size: 18px;">🌸 ${scoreData.score}</span>
-                </div>
-            `;
-        });
-        
-        listDiv.innerHTML = html;
-    } catch (error) {
-        console.error('Ошибка загрузки лидерборда:', error);
-        listDiv.innerHTML = '<p style="text-align: center; color: #d32f2f;">Ошибка загрузки</p>';
-    }
-}
-
-// Сделайте функции глобальными
-window.login = login;
-window.register = register;
-window.showRegister = showRegister;
-window.showLogin = showLogin;
-window.logoutUser = logoutUser;
-window.showLeaderboard = showLeaderboard;
-window.closeLeaderboard = closeLeaderboard;
-window.loadLeaderboard = loadLeaderboard;
-
 </script>
+
 </body>
 </html>
-
-
