@@ -10,7 +10,8 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+
 
 <!-- 2. Twemoji — единый рендер эмодзи на всех платформах -->
 
@@ -43,10 +44,17 @@ border: 3px solid #b8a888; position: relative; width: fit-content; max-width: 10
 
 /* Orbitron для заголовков консоли */
 .console-title-top {
-font-family: 'Orbitron', 'Arial Black', Arial, sans-serif;
-font-size: 10px; font-weight: 900;
-letter-spacing: 5px; color: #5a4a2a; margin-bottom: 12px; text-transform: uppercase;
+font-family: 'Press Start 2P', monospace;
+font-size: 8px; font-weight: 400;
+letter-spacing: 4px; color: #5a4a2a; margin-bottom: 12px; text-transform: uppercase;
 }
+
+.console-title-bottom {
+font-family: 'Press Start 2P', monospace;
+font-size: 9px; font-weight: 400;
+letter-spacing: 5px; color: #5a4a2a; margin-top: 16px; text-transform: uppercase;
+}
+
 
 .console-middle { display: flex; align-items: center; gap: 12px; }
 .left-panel { display: flex; flex-direction: column; align-items: center; gap: 6px; }
@@ -270,6 +278,16 @@ canvas { width: 100% !important; height: auto !important; }
 #overlayExtra { font-size: 12px !important; }
 #overlayMsg { font-size: 10px !important; }
 }
+
+    @media (max-width: 680px) {
+.console-title-top { font-size: 6px; letter-spacing: 2px; }
+.console-title-bottom { font-size: 7px; letter-spacing: 3px; }
+}
+@media (max-width: 400px) {
+.console-title-top { font-size: 5px; letter-spacing: 1px; }
+.console-title-bottom { font-size: 6px; letter-spacing: 2px; }
+}
+
 </style>
 
 </head>
@@ -367,7 +385,7 @@ canvas { width: 100% !important; height: auto !important; }
     <div>
         <!-- 3. Счётчики: Orbitron + пульс-анимация через JS -->
         <div class="stats">
-            <div class="stat-item" id="statBest">РЕК <span id="bestScore">0</span></div>
+            <div class="stat-item" id="statBest"> 🏆 <span id="bestScore">0</span></div>
             <div class="stat-item" id="statCurrent">🌸 <span id="currentScore">0</span></div>
         </div>
     </div>
