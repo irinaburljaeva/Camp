@@ -4,21 +4,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>ШАГАЙ ДОМА — собери букет </title>
+<title>ШАГАЙ ДОМА — собери букет</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-background: #ffffff;
-font-family: Arial, sans-serif;
-text-align: center;
-padding: 10px;
-min-height: 100vh;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-overflow-x: hidden;
+background: #ffffff; font-family: Arial, sans-serif; text-align: center;
+padding: 10px; min-height: 100vh; display: flex; flex-direction: column;
+align-items: center; justify-content: center; overflow-x: hidden;
 }
 
 .console-body {
@@ -26,16 +19,12 @@ background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%);
 border-radius: 30px 30px 50% 50% / 30px 30px 60px 60px;
 padding: 20px 24px 28px;
 box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 2px 6px rgba(255,255,255,0.6), inset 0 -4px 12px rgba(0,0,0,0.15);
-border: 3px solid #b8a888;
-position: relative;
-width: fit-content;
-max-width: 100%;
+border: 3px solid #b8a888; position: relative; width: fit-content; max-width: 100%;
 }
 
 .console-title-top {
-font-family: ‘Arial Black’, Arial, sans-serif;
-font-size: 11px; font-weight: 900; letter-spacing: 6px;
-color: #5a4a2a; margin-bottom: 12px; text-transform: uppercase;
+font-family: ‘Arial Black’, Arial, sans-serif; font-size: 11px; font-weight: 900;
+letter-spacing: 6px; color: #5a4a2a; margin-bottom: 12px; text-transform: uppercase;
 }
 
 .console-middle { display: flex; align-items: center; gap: 12px; }
@@ -45,8 +34,7 @@ color: #5a4a2a; margin-bottom: 12px; text-transform: uppercase;
 
 .screen-wrap {
 position: relative; background: #1a1a1a; border-radius: 14px; padding: 10px;
-box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.4);
-max-width: 100%;
+box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.4); max-width: 100%;
 }
 
 canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 100%; height: auto; }
@@ -97,7 +85,7 @@ letter-spacing: 8px; color: #5a4a2a; margin-top: 16px; text-transform: uppercase
 position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
 background: rgba(20,16,10,0.95); color: #f5e6d3;
 display: none; flex-direction: column; align-items: center;
-justify-content: flex-start; padding-top: 14px;
+justify-content: flex-start;
 font-size: 18px; border-radius: 8px; z-index: 10;
 padding: 14px 12px; overflow-y: auto;
 font-family: -apple-system, BlinkMacSystemFont, ‘Segoe UI’, Roboto, ‘Helvetica Neue’, Arial, sans-serif;
@@ -132,34 +120,36 @@ font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.2); flex-shrink: 0;
 }
 
 #overlayExtra video { box-shadow: 0 4px 12px rgba(0,0,0,0.3); max-width: 100%; }
-/* Контейнер для видео разминки */
-.video-wrap {
-    position: relative;
-    width: 100%;
-    flex-shrink: 0;
-}
-.video-wrap video {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-    display: block;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-/* Кнопка «ИГРАТЬ» поверх видео по центру */
+
+.video-wrap { position: relative; width: 100%; flex-shrink: 0; }
+.video-wrap video { width: 100%; height: auto; border-radius: 8px; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 .video-play-overlay {
-    display: none;
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-    color: white; border: none; border-radius: 25px;
-    padding: 12px 28px; font-size: 15px; font-weight: 700;
-    cursor: pointer; white-space: nowrap;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    z-index: 20;
+display: none; position: absolute; top: 50%; left: 50%;
+transform: translate(-50%, -50%);
+background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+color: white; border: none; border-radius: 25px;
+padding: 12px 28px; font-size: 15px; font-weight: 700;
+cursor: pointer; white-space: nowrap;
+box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 20;
 }
 
-    
+/* Полноэкранная модалка для видео разминки */
+.cardio-modal {
+display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+background: #000; z-index: 3000;
+flex-direction: column; align-items: center; justify-content: center;
+}
+.cardio-modal.show { display: flex; }
+.cardio-modal video { width: 100%; height: 100%; object-fit: contain; }
+.cardio-modal-btn {
+position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+color: white; border: none; border-radius: 25px;
+padding: 14px 36px; font-size: 18px; font-weight: 700;
+cursor: pointer; white-space: nowrap;
+box-shadow: 0 4px 20px rgba(0,0,0,0.5); display: none;
+}
+
 .controls-hint {
 margin-top: 14px; color: #5a4a2a; font-size: 11px;
 max-width: 560px; line-height: 1.5; padding: 0 10px;
@@ -233,10 +223,22 @@ canvas { width: 100% !important; height: auto !important; }
 </head>
 <body>
 
+<!-- Полноэкранная модалка для видео разминки -->
+
+<div id="cardioModal" class="cardio-modal">
+    <video id="cardioVideoFull" playsinline webkit-playsinline autoplay
+        style="width:100%;height:100%;object-fit:contain;">
+        <source src="cardio.mp4" type="video/mp4">
+    </video>
+    <button class="cardio-modal-btn" id="cardioPlayBtn">ИГРАТЬ! 🎮</button>
+</div>
+
+<!-- Модалка авторизации -->
+
 <div id="authModal" class="auth-modal">
     <div class="auth-content">
         <h2>Войти для таблицы лидеров</h2>
-        <p>Введите ваш email, чтобы сохранить результаты и участвовать в соревновании </p>
+        <p>Введите ваш email, чтобы сохранить результаты и участвовать в соревновании</p>
         <input type="email" id="authEmail" placeholder="Ваш email" />
         <input type="text" id="authName" placeholder="Ваше имя" />
         <button class="auth-btn-primary" onclick="loginForLeaderboard()">ВОЙТИ</button>
@@ -248,10 +250,12 @@ canvas { width: 100% !important; height: auto !important; }
 <div class="console-body">
     <div class="console-title-top">ИГРА &nbsp; НА &nbsp; ЭКРАНЕ</div>
 
-
+```
 <div class="console-middle">
-    <div class="left-panel"><button class="arrow-btn left-up" onmousedown="window.scrollBy({top:-120,behavior:'smooth'})" ontouchstart="window.scrollBy({top:-120,behavior:'smooth'})" title="Прокрутить вверх"></button>
-<button class="arrow-btn left-down" onmousedown="window.scrollBy({top:120,behavior:'smooth'})" ontouchstart="window.scrollBy({top:120,behavior:'smooth'})" title="Прокрутить вниз"></button>
+    <div class="left-panel">
+        <!-- Стрелки: прокрутка внутри оверлея -->
+        <button class="arrow-btn left-up"   onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)" title="Прокрутить вверх"></button>
+        <button class="arrow-btn left-down" onmousedown="scrollOverlay(80)"  ontouchstart="scrollOverlay(80)"  title="Прокрутить вниз"></button>
     </div>
 
     <div class="screen-wrap" style="position: relative;">
@@ -263,7 +267,7 @@ canvas { width: 100% !important; height: auto !important; }
                 Нажми <b>ИГРА А</b> для легкого уровня или <b>ИГРА Б</b> для сложного
             </div>
             <div style="margin-top: 16px; font-size: 11px; opacity: 0.7;">
-                💡 С компьютера: Q/A — лево, W/S — право, с телефона: нажимай на рычажки
+                💡 С компьютера: Q/A — лево, W/S — право | Стрелки — прокрутка оверлея
             </div>
         </div>
 
@@ -283,8 +287,9 @@ canvas { width: 100% !important; height: auto !important; }
     <div class="right-panel">
         <div class="right-arrow-row">
             <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-<button class="arrow-btn right-up" onmousedown="window.scrollBy({top:-120,behavior:'smooth'})" ontouchstart="window.scrollBy({top:-120,behavior:'smooth'})" title="Прокрутить вверх"></button>
-<button class="arrow-btn right-down" onmousedown="window.scrollBy({top:120,behavior:'smooth'})" ontouchstart="window.scrollBy({top:120,behavior:'smooth'})" title="Прокрутить вниз"></button>
+                <!-- Стрелки: прокрутка внутри оверлея -->
+                <button class="arrow-btn right-up"   onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)" title="Прокрутить вверх"></button>
+                <button class="arrow-btn right-down" onmousedown="scrollOverlay(80)"  ontouchstart="scrollOverlay(80)"  title="Прокрутить вниз"></button>
             </div>
             <div style="display:flex; flex-direction:column; gap:6px; margin-left: 6px;">
                 <button class="game-btn" onclick="startGame('easy')">ИГРА А</button>
@@ -318,22 +323,20 @@ canvas { width: 100% !important; height: auto !important; }
 
 </div>
 
-<p class="controls-hint">
-    🎯 Ловите падающие цветы — не пропускайте ни одного!
-</p>
+<p class="controls-hint">🎯 Ловите падающие цветы — не пропускайте ни одного!</p>
 
 <div id="leaderboardScreen" class="leaderboard-screen" style="display: none;">
     <div class="leaderboard-content">
         <h2 style="color: #5a4a2a; margin-bottom: 20px; text-align: center; font-family: 'Arial Black', Arial, sans-serif;">🏆 ЛИДЕРБОРД</h2>
         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <button onclick="loadLeaderboard('easy')" id="leaderEasyBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #4CAF50, #388E3C); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">ИГРА А</button>
-            <button onclick="loadLeaderboard('hard')" id="leaderHardBtn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #ff6b6b, #ee5a6f); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">ИГРА Б</button>
+            <button onclick="loadLeaderboard('easy')" id="leaderEasyBtn" style="flex:1;padding:12px;background:linear-gradient(135deg,#4CAF50,#388E3C);color:white;border:none;border-radius:10px;font-weight:bold;cursor:pointer;">ИГРА А</button>
+            <button onclick="loadLeaderboard('hard')" id="leaderHardBtn" style="flex:1;padding:12px;background:linear-gradient(135deg,#ff6b6b,#ee5a6f);color:white;border:none;border-radius:10px;font-weight:bold;cursor:pointer;">ИГРА Б</button>
         </div>
-        <div id="leaderboardList" style="background: rgba(255,255,255,0.5); border-radius: 10px; padding: 15px; margin-bottom: 20px; max-height: 400px; overflow-y: auto;">
-            <p style="text-align: center; color: #5a4a2a;">Загрузка...</p>
+        <div id="leaderboardList" style="background:rgba(255,255,255,0.5);border-radius:10px;padding:15px;margin-bottom:20px;max-height:400px;overflow-y:auto;">
+            <p style="text-align:center;color:#5a4a2a;">Загрузка...</p>
         </div>
-        <button onclick="closeLeaderboard()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #888, #555); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;">ЗАКРЫТЬ</button>
-        <button id="logoutBtn" onclick="logoutUser()" style="width: 100%; padding: 10px; background: transparent; color: #d32f2f; border: 2px solid #d32f2f; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; display: none;">ВЫЙТИ</button>
+        <button onclick="closeLeaderboard()" style="width:100%;padding:14px;background:linear-gradient(135deg,#888,#555);color:white;border:none;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;">ЗАКРЫТЬ</button>
+        <button id="logoutBtn" onclick="logoutUser()" style="width:100%;padding:10px;background:transparent;color:#d32f2f;border:2px solid #d32f2f;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;margin-top:10px;display:none;">ВЫЙТИ</button>
     </div>
 </div>
 
@@ -367,25 +370,28 @@ function vibrateOnLifeLoss() {
     if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
 }
 
+// ── Прокрутка активного оверлея ──
+window.scrollOverlay = function(amount) {
+    const overlay = document.getElementById('overlay');
+    const levelSelect = document.getElementById('levelSelect');
+    if (overlay.classList.contains('show')) {
+        overlay.scrollBy({ top: amount, behavior: 'smooth' });
+    } else if (levelSelect.classList.contains('show')) {
+        levelSelect.scrollBy({ top: amount, behavior: 'smooth' });
+    }
+}
+
 // ── Состояние игры ──
-let score = 0;
-let lives = 3;
+let score = 0, lives = 3;
 let bestScore     = parseInt(localStorage.getItem('flowerGameBest'))     || 0;
 let bestScoreEasy = parseInt(localStorage.getItem('flowerGameBestEasy')) || 0;
 let bestScoreHard = parseInt(localStorage.getItem('flowerGameBestHard')) || 0;
-let isPaused       = false;
-let isGameStarted  = false;
-let isGameOver     = false;
-let currentDifficulty = null;
-let baseSpeed      = 1;
-let spawnInterval  = null;
-let currentPosition = 2;
-let lastMoveDir    = 'down';
+let isPaused = false, isGameStarted = false, isGameOver = false;
+let currentDifficulty = null, baseSpeed = 1, spawnInterval = null;
+let currentPosition = 2, lastMoveDir = 'down';
 
 // ── Ветер ──
-let windActive = false;
-let windTimeout = null;
-let windScheduleTimeout = null;
+let windActive = false, windTimeout = null, windScheduleTimeout = null;
 const WIND_BOOST = 1.15;
 
 function startWindCycle() {
@@ -393,10 +399,7 @@ function startWindCycle() {
     windScheduleTimeout = setTimeout(() => {
         if (!isGameStarted || isPaused || isGameOver) { startWindCycle(); return; }
         windActive = true;
-        windTimeout = setTimeout(() => {
-            windActive = false;
-            startWindCycle();
-        }, 3000);
+        windTimeout = setTimeout(() => { windActive = false; startWindCycle(); }, 3000);
     }, delay);
 }
 
@@ -417,423 +420,335 @@ function drawWindIndicator() {
 }
 
 // ── Загрузка изображений ──
-const bg3  = new Image(); bg3.src  = "1.jpg";
-const bg2  = new Image(); bg2.src  = "2.jpg";
-const bg1  = new Image(); bg1.src  = "3.jpg";
-const bgGO = new Image(); bgGO.src = "4.jpg";
+const bg3=new Image(); bg3.src="1.jpg";
+const bg2=new Image(); bg2.src="2.jpg";
+const bg1=new Image(); bg1.src="3.jpg";
+const bgGO=new Image(); bgGO.src="4.jpg";
+const imgUp=new Image(); imgUp.src="up.png";
+const imgDown=new Image(); imgDown.src="down.png";
+const flowerImages=[];
+for(let i=1;i<=6;i++){const img=new Image();img.src=`flower${i}.png`;flowerImages.push(img);}
 
-const imgUp   = new Image(); imgUp.src   = "up.png";
-const imgDown = new Image(); imgDown.src = "down.png";
-
-const flowerImages = [];
-for (let i = 1; i <= 6; i++) {
-    const img = new Image();
-    img.src = `flower${i}.png`;
-    flowerImages.push(img);
-}
-
-// ── Сложности ──
 const difficulties = {
-    easy: { name:'ИГРА А 🌼', baseSpeed:0.5, spawnDelay:2000, speedIncrease:0.08 },
-    hard: { name:'ИГРА Б 🔥', baseSpeed:0.8, spawnDelay:1400, speedIncrease:0.15 }
+    easy:{name:'ИГРА А 🌼',baseSpeed:0.5,spawnDelay:2000,speedIncrease:0.08},
+    hard:{name:'ИГРА Б 🔥',baseSpeed:0.8,spawnDelay:1400,speedIncrease:0.15}
 };
 
-// ── Жёлоба ──
-const W = canvas.width, H = canvas.height;
-const lanes = [
-    { startX: W*0.10, startY: H*0.20, endX: W*0.31, endY: H*0.58 },
-    { startX: W*0.90, startY: H*0.20, endX: W*0.69, endY: H*0.58 },
-    { startX: W*0.10, startY: H*0.45, endX: W*0.31, endY: H*0.78 },
-    { startX: W*0.90, startY: H*0.45, endX: W*0.69, endY: H*0.78 }
+const W=canvas.width, H=canvas.height;
+const lanes=[
+    {startX:W*0.10,startY:H*0.20,endX:W*0.31,endY:H*0.58},
+    {startX:W*0.90,startY:H*0.20,endX:W*0.69,endY:H*0.58},
+    {startX:W*0.10,startY:H*0.45,endX:W*0.31,endY:H*0.78},
+    {startX:W*0.90,startY:H*0.45,endX:W*0.69,endY:H*0.78}
 ];
-const catchPositions = [
-    { x: W*0.31, y: H*0.58 },
-    { x: W*0.69, y: H*0.58 },
-    { x: W*0.31, y: H*0.78 },
-    { x: W*0.69, y: H*0.78 }
+const catchPositions=[
+    {x:W*0.31,y:H*0.58},{x:W*0.69,y:H*0.58},
+    {x:W*0.31,y:H*0.78},{x:W*0.69,y:H*0.78}
 ];
+let flowers=[];
+const flowerEmojis=['🌸','🌺','🌻','🌼','🌷','🏵️'];
 
-let flowers = [];
-const flowerEmojis = ['🌸','🌺','🌻','🌼','🌷','🏵️'];
+document.getElementById('bestScore').textContent=bestScore;
+document.getElementById('currentScore').textContent=score;
 
-document.getElementById('bestScore').textContent    = bestScore;
-document.getElementById('currentScore').textContent = score;
-
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        currentUser = user;
-        if (playerName) document.getElementById('logoutBtn').style.display = 'block';
-    } else {
-        try { await signInAnonymously(auth); }
-        catch (error) { console.error('Ошибка анонимной авторизации:', error); }
-    }
+onAuthStateChanged(auth,async(user)=>{
+    if(user){currentUser=user;if(playerName)document.getElementById('logoutBtn').style.display='block';}
+    else{try{await signInAnonymously(auth);}catch(e){console.error(e);}}
 });
 
-window.openLeaderboard = function() {
-    if (!playerName) document.getElementById('authModal').classList.add('show');
+window.openLeaderboard=function(){
+    if(!playerName)document.getElementById('authModal').classList.add('show');
     else showLeaderboard();
 }
+window.closeAuthModal=function(){document.getElementById('authModal').classList.remove('show');}
 
-window.closeAuthModal = function() {
-    document.getElementById('authModal').classList.remove('show');
+window.loginForLeaderboard=async function(){
+    const email=document.getElementById('authEmail').value.trim();
+    const name=document.getElementById('authName').value.trim();
+    const err=document.getElementById('authError');
+    if(!email){err.textContent='Введите email';return;}
+    if(!name||name.length<2){err.textContent='Введите имя (минимум 2 символа)';return;}
+    try{
+        playerName=name;
+        localStorage.setItem('flowerGamePlayerName',name);
+        localStorage.setItem('flowerGameEmail',email);
+        if(currentUser)await setDoc(doc(db,'players',currentUser.uid),{name,email,createdAt:new Date()});
+        window.closeAuthModal();showLeaderboard();
+        document.getElementById('logoutBtn').style.display='block';
+    }catch(e){console.error(e);err.textContent='Ошибка. Попробуйте снова';}
 }
 
-window.loginForLeaderboard = async function() {
-    const email = document.getElementById('authEmail').value.trim();
-    const name  = document.getElementById('authName').value.trim();
-    const errorDiv = document.getElementById('authError');
-    if (!email) { errorDiv.textContent = 'Введите email'; return; }
-    if (!name || name.length < 2) { errorDiv.textContent = 'Введите имя (минимум 2 символа)'; return; }
-    try {
-        playerName = name;
-        localStorage.setItem('flowerGamePlayerName', name);
-        localStorage.setItem('flowerGameEmail', email);
-        if (currentUser) {
-            await setDoc(doc(db, 'players', currentUser.uid), { name, email, createdAt: new Date() });
+window.logoutUser=function(){
+    if(confirm('Выйти из аккаунта?')){
+        playerName='';
+        localStorage.removeItem('flowerGamePlayerName');localStorage.removeItem('flowerGameEmail');
+        document.getElementById('logoutBtn').style.display='none';closeLeaderboard();
+    }
+}
+
+async function saveScore(difficulty,scoreVal){
+    if(!currentUser||!playerName)return;
+    try{
+        const id=`${currentUser.uid}_${difficulty}`;
+        const ref=doc(db,'scores',id);
+        const cur=await getDoc(ref);
+        if(!cur.exists()||cur.data().score<scoreVal){
+            await setDoc(ref,{userId:currentUser.uid,userName:playerName,difficulty,score:scoreVal,timestamp:new Date()});
         }
-        window.closeAuthModal();
-        showLeaderboard();
-        document.getElementById('logoutBtn').style.display = 'block';
-    } catch (error) {
-        console.error('Ошибка сохранения:', error);
-        errorDiv.textContent = 'Ошибка. Попробуйте снова';
-    }
+    }catch(e){console.error(e);}
 }
 
-window.logoutUser = async function() {
-    if (confirm('Выйти из аккаунта?')) {
-        playerName = '';
-        localStorage.removeItem('flowerGamePlayerName');
-        localStorage.removeItem('flowerGameEmail');
-        document.getElementById('logoutBtn').style.display = 'none';
-        closeLeaderboard();
-    }
-}
-
-async function saveScore(difficulty, scoreVal) {
-    if (!currentUser || !playerName) return;
-    try {
-        const scoreDocId = `${currentUser.uid}_${difficulty}`;
-        const scoreRef = doc(db, 'scores', scoreDocId);
-        const currentDoc = await getDoc(scoreRef);
-        if (!currentDoc.exists() || currentDoc.data().score < scoreVal) {
-            await setDoc(scoreRef, {
-                userId: currentUser.uid,
-                userName: playerName,
-                difficulty,
-                score: scoreVal,
-                timestamp: new Date()
-            });
-        }
-    } catch (error) {
-        console.error('Ошибка сохранения результата:', error);
-    }
-}
-
-function showLeaderboard() {
-    document.getElementById('leaderboardScreen').style.display = 'block';
+function showLeaderboard(){
+    document.getElementById('leaderboardScreen').style.display='block';
     window.loadLeaderboard(currentLeaderboardMode);
 }
+window.closeLeaderboard=function(){document.getElementById('leaderboardScreen').style.display='none';}
 
-window.closeLeaderboard = function() {
-    document.getElementById('leaderboardScreen').style.display = 'none';
-}
-
-window.loadLeaderboard = async function(difficulty) {
-    currentLeaderboardMode = difficulty;
-    const listDiv = document.getElementById('leaderboardList');
-    listDiv.innerHTML = '<p style="text-align: center; color: #5a4a2a;">Загрузка...</p>';
-    document.getElementById('leaderEasyBtn').style.opacity = difficulty === 'easy' ? '1' : '0.6';
-    document.getElementById('leaderHardBtn').style.opacity = difficulty === 'hard' ? '1' : '0.6';
-    try {
-        const q = query(
-            collection(db, 'scores'),
-            where('difficulty', '==', difficulty),
-            orderBy('score', 'desc'),
-            limit(10)
-        );
-        const querySnapshot = await getDocs(q);
-        const scores = [];
-        querySnapshot.forEach((docSnap) => { scores.push(docSnap.data()); });
-        if (scores.length === 0) {
-            listDiv.innerHTML = '<p style="text-align: center; color: #5a4a2a;">Пока нет результатов</p>';
-            return;
-        }
-        let html = '';
-        scores.forEach((scoreData, index) => {
-            const isCurrentUser = currentUser && scoreData.userId === currentUser.uid && scoreData.userName === playerName;
-            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
-            html += `
-                <div style="padding: 12px; margin-bottom: 8px; background: ${isCurrentUser ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.7)'}; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: ${isCurrentUser ? '2px solid #ffd700' : 'none'};">
-                    <span style="font-weight: bold; color: #5a4a2a; min-width: 30px;">${medal}</span>
-                    <span style="flex: 1; margin-left: 10px; color: #5a4a2a; font-weight: ${isCurrentUser ? 'bold' : 'normal'};">${scoreData.userName}</span>
-                    <span style="font-weight: bold; color: #4CAF50; font-size: 18px;">🌸 ${scoreData.score}</span>
-                </div>
-            `;
+window.loadLeaderboard=async function(difficulty){
+    currentLeaderboardMode=difficulty;
+    const listDiv=document.getElementById('leaderboardList');
+    listDiv.innerHTML='<p style="text-align:center;color:#5a4a2a;">Загрузка...</p>';
+    document.getElementById('leaderEasyBtn').style.opacity=difficulty==='easy'?'1':'0.6';
+    document.getElementById('leaderHardBtn').style.opacity=difficulty==='hard'?'1':'0.6';
+    try{
+        const q=query(collection(db,'scores'),where('difficulty','==',difficulty),orderBy('score','desc'),limit(10));
+        const snap=await getDocs(q);
+        const scores=[];snap.forEach(d=>scores.push(d.data()));
+        if(scores.length===0){listDiv.innerHTML='<p style="text-align:center;color:#5a4a2a;">Пока нет результатов</p>';return;}
+        let html='';
+        scores.forEach((sd,i)=>{
+            const isCur=currentUser&&sd.userId===currentUser.uid&&sd.userName===playerName;
+            const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}.`;
+            html+=`<div style="padding:12px;margin-bottom:8px;background:${isCur?'rgba(255,215,0,0.3)':'rgba(255,255,255,0.7)'};border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:${isCur?'2px solid #ffd700':'none'};">
+                <span style="font-weight:bold;color:#5a4a2a;min-width:30px;">${medal}</span>
+                <span style="flex:1;margin-left:10px;color:#5a4a2a;font-weight:${isCur?'bold':'normal'};">${sd.userName}</span>
+                <span style="font-weight:bold;color:#4CAF50;font-size:18px;">🌸 ${sd.score}</span>
+            </div>`;
         });
-        listDiv.innerHTML = html;
-    } catch (error) {
-        console.error('Ошибка загрузки лидерборда:', error);
-        listDiv.innerHTML = '<p style="text-align: center; color: #d32f2f;">Ошибка загрузки</p>';
+        listDiv.innerHTML=html;
+    }catch(e){
+        console.error(e);
+        listDiv.innerHTML=`<p style="text-align:center;color:#d32f2f;">Ошибка загрузки<br><small>${e.message}</small></p>`;
     }
 }
 
 // ── Игровая логика ──
 
-function getCurrentBackground() {
-    if (isGameOver || lives <= 0) return bgGO;
-    if (lives === 3) return bg3;
-    if (lives === 2) return bg2;
-    return bg1;
+function getCurrentBackground(){
+    if(isGameOver||lives<=0)return bgGO;
+    if(lives===3)return bg3;if(lives===2)return bg2;return bg1;
 }
-
-function drawBackgroundImage() {
-    const bg = getCurrentBackground();
-    if (bg.complete && bg.naturalWidth > 0) ctx.drawImage(bg, 0, 0, W, H);
-    else { ctx.fillStyle = "#f3e7d0"; ctx.fillRect(0, 0, W, H); }
+function drawBackgroundImage(){
+    const bg=getCurrentBackground();
+    if(bg.complete&&bg.naturalWidth>0)ctx.drawImage(bg,0,0,W,H);
+    else{ctx.fillStyle="#f3e7d0";ctx.fillRect(0,0,W,H);}
 }
-
-function drawPlayer() {
-    const pos = catchPositions[currentPosition];
-    const img = (lastMoveDir === 'up') ? imgUp : imgDown;
-    const ph = H * 0.45;
-    const pw = ph * 0.55;
-    const bottomY = H * 0.90;
-    if (img.complete && img.naturalWidth > 0) {
+function drawPlayer(){
+    const pos=catchPositions[currentPosition];
+    const img=(lastMoveDir==='up')?imgUp:imgDown;
+    const ph=H*0.45,pw=ph*0.55,bottomY=H*0.90;
+    if(img.complete&&img.naturalWidth>0){
         ctx.save();
-        if (currentPosition === 0 || currentPosition === 2) {
-            ctx.translate(pos.x + pw/2, bottomY - ph);
-            ctx.scale(-1, 1);
-            ctx.drawImage(img, 0, 0, pw, ph);
-        } else {
-            ctx.drawImage(img, pos.x - pw/2, bottomY - ph, pw, ph);
-        }
+        if(currentPosition===0||currentPosition===2){ctx.translate(pos.x+pw/2,bottomY-ph);ctx.scale(-1,1);ctx.drawImage(img,0,0,pw,ph);}
+        else ctx.drawImage(img,pos.x-pw/2,bottomY-ph,pw,ph);
         ctx.restore();
-    } else {
-        ctx.font = `${Math.round(H*0.10)}px Arial`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("🧺", pos.x, pos.y);
-    }
+    }else{ctx.font=`${Math.round(H*0.10)}px Arial`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("🧺",pos.x,pos.y);}
 }
-
-function drawFlowers() {
-    const flowerSize = H * 0.12;
-    for (let i = flowers.length - 1; i >= 0; i--) {
-        const flower = flowers[i];
-        if (flower.caught) { flowers.splice(i,1); continue; }
-        const lane = lanes[flower.laneIndex];
-        flower.progress += flower.speed;
-        const t = flower.progress / 100;
-        const x = lane.startX + (lane.endX - lane.startX) * t;
-        const y = lane.startY + (lane.endY - lane.startY) * t;
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate((flower.progress * 3) * Math.PI / 180);
-        if (flower.image && flower.image.complete && flower.image.naturalWidth > 0) {
-            ctx.drawImage(flower.image, -flowerSize/2, -flowerSize/2, flowerSize, flowerSize);
-        } else {
-            ctx.font = `${Math.round(flowerSize)}px Arial`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(flower.emoji, 0, 0);
-        }
+function drawFlowers(){
+    const fs=H*0.12;
+    for(let i=flowers.length-1;i>=0;i--){
+        const f=flowers[i];
+        if(f.caught){flowers.splice(i,1);continue;}
+        const lane=lanes[f.laneIndex];
+        f.progress+=f.speed;
+        const t=f.progress/100;
+        const x=lane.startX+(lane.endX-lane.startX)*t;
+        const y=lane.startY+(lane.endY-lane.startY)*t;
+        ctx.save();ctx.translate(x,y);ctx.rotate((f.progress*3)*Math.PI/180);
+        if(f.image&&f.image.complete&&f.image.naturalWidth>0)ctx.drawImage(f.image,-fs/2,-fs/2,fs,fs);
+        else{ctx.font=`${Math.round(fs)}px Arial`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(f.emoji,0,0);}
         ctx.restore();
-        if (flower.progress >= 95 && currentPosition === flower.laneIndex) {
-            score++;
-            flower.caught = true;
-            document.getElementById('currentScore').textContent = score;
-            const curBest = currentDifficulty === 'easy' ? bestScoreEasy : bestScoreHard;
-            if (score > curBest) {
-                if (currentDifficulty === 'easy') { bestScoreEasy = score; localStorage.setItem('flowerGameBestEasy', score); }
-                else { bestScoreHard = score; localStorage.setItem('flowerGameBestHard', score); }
-                if (score > bestScore) { bestScore = score; localStorage.setItem('flowerGameBest', score); }
-                document.getElementById('bestScore').textContent = score;
+        if(f.progress>=95&&currentPosition===f.laneIndex){
+            score++;f.caught=true;
+            document.getElementById('currentScore').textContent=score;
+            const cb=currentDifficulty==='easy'?bestScoreEasy:bestScoreHard;
+            if(score>cb){
+                if(currentDifficulty==='easy'){bestScoreEasy=score;localStorage.setItem('flowerGameBestEasy',score);}
+                else{bestScoreHard=score;localStorage.setItem('flowerGameBestHard',score);}
+                if(score>bestScore){bestScore=score;localStorage.setItem('flowerGameBest',score);}
+                document.getElementById('bestScore').textContent=score;
             }
-            if (score % 10 === 0) baseSpeed += difficulties[currentDifficulty].speedIncrease;
+            if(score%10===0)baseSpeed+=difficulties[currentDifficulty].speedIncrease;
         }
-        if (flower.progress >= 100) {
-            if (!flower.caught) {
-                lives--;
-                vibrateOnLifeLoss();
-                if (lives <= 0) { lives = 0; gameOver(); }
-            }
-            flowers.splice(i, 1);
+        if(f.progress>=100){
+            if(!f.caught){lives--;vibrateOnLifeLoss();if(lives<=0){lives=0;gameOver();}}
+            flowers.splice(i,1);
         }
     }
 }
-
-function spawnFlower() {
-    if (isPaused || !isGameStarted || isGameOver) return;
-    const randomIndex = Math.floor(Math.random() * 6);
+function spawnFlower(){
+    if(isPaused||!isGameStarted||isGameOver)return;
+    const ri=Math.floor(Math.random()*6);
     flowers.push({
-        laneIndex: Math.floor(Math.random() * 4),
-        progress:  0,
-        // +15% скорости во время ветра
-        speed:     (0.8 + Math.random() * 0.4) * baseSpeed * (windActive ? WIND_BOOST : 1),
-        emoji:     flowerEmojis[randomIndex],
-        image:     flowerImages[randomIndex],
-        caught:    false
+        laneIndex:Math.floor(Math.random()*4),progress:0,
+        speed:(0.8+Math.random()*0.4)*baseSpeed*(windActive?WIND_BOOST:1),
+        emoji:flowerEmojis[ri],image:flowerImages[ri],caught:false
     });
 }
 
-document.addEventListener("keydown", function(e) {
-    if (isPaused || !isGameStarted || isGameOver) return;
-    const key = e.key.toLowerCase();
-    if (key === 'q') window.setPosition(0);
-    if (key === 'a') window.setPosition(2);
-    if (key === 'w') window.setPosition(1);
-    if (key === 's') window.setPosition(3);
+document.addEventListener("keydown",function(e){
+    if(isPaused||!isGameStarted||isGameOver)return;
+    const k=e.key.toLowerCase();
+    if(k==='q')window.setPosition(0);if(k==='a')window.setPosition(2);
+    if(k==='w')window.setPosition(1);if(k==='s')window.setPosition(3);
 });
 
-window.setPosition = function(pos) {
-    if (isPaused || !isGameStarted || isGameOver) return;
-    const wasUpper = (currentPosition <= 1);
-    const nowUpper = (pos <= 1);
-    if (nowUpper && !wasUpper) lastMoveDir = 'up';
-    else if (!nowUpper && wasUpper) lastMoveDir = 'down';
-    currentPosition = pos;
+window.setPosition=function(pos){
+    if(isPaused||!isGameStarted||isGameOver)return;
+    const wu=(currentPosition<=1),nu=(pos<=1);
+    if(nu&&!wu)lastMoveDir='up';else if(!nu&&wu)lastMoveDir='down';
+    currentPosition=pos;
 }
 
-window.startGame = function(difficulty) {
-    currentDifficulty = difficulty;
-    baseSpeed = difficulties[difficulty].baseSpeed;
-    score = 0; lives = 3; flowers = [];
-    isPaused = false; isGameStarted = true; isGameOver = false;
-    currentPosition = 2; lastMoveDir = 'down';
-    document.getElementById('currentScore').textContent = 0;
-    document.getElementById('bestScore').textContent =
-        difficulty === 'easy' ? bestScoreEasy : bestScoreHard;
+window.startGame=function(difficulty){
+    currentDifficulty=difficulty;baseSpeed=difficulties[difficulty].baseSpeed;
+    score=0;lives=3;flowers=[];isPaused=false;isGameStarted=true;isGameOver=false;
+    currentPosition=2;lastMoveDir='down';
+    document.getElementById('currentScore').textContent=0;
+    document.getElementById('bestScore').textContent=difficulty==='easy'?bestScoreEasy:bestScoreHard;
     document.getElementById('levelSelect').classList.remove('show');
     document.getElementById('overlay').classList.remove('show');
     resetOverlayToPause();
-    if (spawnInterval) clearInterval(spawnInterval);
-    spawnInterval = setInterval(spawnFlower, difficulties[difficulty].spawnDelay);
-    // Запускаем ветер — первый порыв не раньше 10 секунд
+    if(spawnInterval)clearInterval(spawnInterval);
+    spawnInterval=setInterval(spawnFlower,difficulties[difficulty].spawnDelay);
     stopWind();
-    setTimeout(startWindCycle, 10000);
+    setTimeout(startWindCycle,10000);
 }
 
-function resetOverlayToPause() {
-    document.getElementById('overlayTitle').textContent  = '⏸ ПАУЗА';
-    document.getElementById('overlayMsg').textContent    = 'Пошагайте на месте, чтобы продолжить';
-    document.getElementById('overlayExtra').textContent  = '50 шагов';
-    const btn = document.getElementById('overlayMainBtn');
-    btn.textContent = 'ПРОДОЛЖИТЬ 👣';
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.style.cursor = 'pointer';
-    btn.onclick = window.resumeGame;
+function resetOverlayToPause(){
+    document.getElementById('overlayTitle').textContent='⏸ ПАУЗА';
+    document.getElementById('overlayMsg').textContent='Пошагайте на месте, чтобы продолжить';
+    document.getElementById('overlayExtra').textContent='50 шагов';
+    const btn=document.getElementById('overlayMainBtn');
+    btn.textContent='ПРОДОЛЖИТЬ 👣';btn.disabled=false;
+    btn.style.opacity='1';btn.style.cursor='pointer';btn.style.display='';
+    btn.onclick=window.resumeGame;
+    // Кнопка «В МЕНЮ» видна в обычной паузе
+    const menuBtn=document.querySelector('#overlay .resume-btn:last-of-type');
+    if(menuBtn)menuBtn.style.display='';
 }
 
-window.pauseGame = function() {
-    if (!isGameStarted || isGameOver) return;
-    isPaused = true;
-    resetOverlayToPause();
+window.pauseGame=function(){
+    if(!isGameStarted||isGameOver)return;
+    isPaused=true;resetOverlayToPause();
     document.getElementById("overlay").classList.add("show");
 }
-
-window.resumeGame = function() {
-    isPaused = false;
-    document.getElementById("overlay").classList.remove("show");
+window.resumeGame=function(){
+    isPaused=false;document.getElementById("overlay").classList.remove("show");
 }
 
-function gameOver() {
-    isGameOver = true; isPaused = true;
-    if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; }
-    stopWind(); // останавливаем ветер при game over
-    if (currentUser && playerName && score > 0) {
-        saveScore(currentDifficulty, score);
-    }
-    setTimeout(() => {
-        document.getElementById('overlayTitle').textContent  = '😟 Все жизни кончились!';
-        document.getElementById('overlayMsg').innerHTML      = `Ваш счёт: <b>${score}</b><br><br>Чтобы сыграть заново, пошагайте<br>1 минуту вместе с Настей.`;
-        document.getElementById('overlayExtra').innerHTML    = '<div style="font-size: 18px; color: #FF9F1C; margin: 12px 0;">Готовы?</div>';
-        const btn = document.getElementById('overlayMainBtn');
-        btn.textContent = 'НАЧАТЬ РАЗМИНКУ 💪';
-        btn.disabled = false;
-        btn.style.opacity = '1';
-        btn.style.cursor = 'pointer';
-        btn.onclick = startCardioWorkout;
-        const menuBtn = document.querySelector('#overlay .resume-btn:last-of-type');
-        if (menuBtn) menuBtn.style.display = 'none';
+function gameOver(){
+    isGameOver=true;isPaused=true;
+    if(spawnInterval){clearInterval(spawnInterval);spawnInterval=null;}
+    stopWind();
+    if(currentUser&&playerName&&score>0)saveScore(currentDifficulty,score);
+    setTimeout(()=>{
+        document.getElementById('overlayTitle').textContent='😟 Все жизни кончились!';
+        document.getElementById('overlayMsg').innerHTML=`Ваш счёт: <b>${score}</b><br><br>Чтобы сыграть заново, пошагайте<br>1 минуту вместе с Настей.`;
+        document.getElementById('overlayExtra').innerHTML='<div style="font-size:18px;color:#FF9F1C;margin:12px 0;">Готовы?</div>';
+        const btn=document.getElementById('overlayMainBtn');
+        btn.textContent='НАЧАТЬ РАЗМИНКУ 💪';btn.disabled=false;
+        btn.style.opacity='1';btn.style.cursor='pointer';btn.style.display='';
+        btn.onclick=startCardioWorkout;
+        // Прячем «В МЕНЮ» — нельзя обойти разминку
+        const menuBtn=document.querySelector('#overlay .resume-btn:last-of-type');
+        if(menuBtn)menuBtn.style.display='none';
         document.getElementById("overlay").classList.add("show");
-    }, 400);
+    },400);
 }
 
-function startCardioWorkout() {
-    document.getElementById('overlayTitle').textContent = '💪 Кардио-разминка';
-    document.getElementById('overlayMsg').innerHTML     = 'Повторяйте движения за Настей!';
+function startCardioWorkout(){
+    // Скрываем маленький оверлей и открываем полноэкранную модалку
+    document.getElementById('overlay').classList.remove('show');
 
-    // Видео в обёртке — без кнопки «Пропустить», без автофуллскрина на iOS
-    document.getElementById('overlayExtra').innerHTML = `
-        <div class="video-wrap">
-            <video id="cardioVideo"
-                playsinline
-                webkit-playsinline
-                autoplay
-                style="width:100%;height:auto;border-radius:8px;display:block;">
-                <source src="cardio.mp4" type="video/mp4">
-            </video>
-            <button class="video-play-overlay" id="videoPlayBtn"
-                onclick="window.startGame(currentDifficulty)">
-                ИГРАТЬ! 🎮
-            </button>
-        </div>
-    `;
+    const modal=document.getElementById('cardioModal');
+    const video=document.getElementById('cardioVideoFull');
+    const playBtn=document.getElementById('cardioPlayBtn');
 
-    // Прячем кнопку overlayMainBtn во время видео
-    const btn = document.getElementById('overlayMainBtn');
-    btn.style.display = 'none';
+    modal.classList.add('show');
+    video.currentTime=0;
+    video.play().catch(()=>{});
+    playBtn.style.display='none';
 
-    const video = document.getElementById('cardioVideo');
-    if (video) {
-        video.addEventListener('ended', () => {
-            showMenuBtn();
-            // Показываем кнопку поверх видео
-            document.getElementById('videoPlayBtn').style.display = 'block';
-        });
-        video.addEventListener('error', () => {
-            btn.style.display = '';
-            startCountdownTimer();
-        });
-    } else {
-        btn.style.display = '';
+    // Когда видео закончилось — показываем кнопку ИГРАТЬ
+    video.onended=()=>{
+        playBtn.style.display='block';
+    };
+
+    // Ошибка видео — закрываем модалку и запускаем таймер
+    video.onerror=()=>{
+        modal.classList.remove('show');
+        document.getElementById('overlay').classList.add('show');
+        const btn=document.getElementById('overlayMainBtn');
+        btn.style.display='';
         startCountdownTimer();
-    }
+    };
+
+    // Кнопка ИГРАТЬ — закрываем модалку, показываем оверлей с финальным экраном
+    playBtn.onclick=()=>{
+        modal.classList.remove('show');
+        showMenuBtn();
+        document.getElementById('overlayTitle').textContent='🌸 Отличная работа!';
+        document.getElementById('overlayMsg').innerHTML='Разминка завершена. Готовы играть?';
+        document.getElementById('overlayExtra').innerHTML='';
+        const btn=document.getElementById('overlayMainBtn');
+        btn.style.display='';btn.textContent='ИГРАТЬ! 🎮';
+        btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';
+        btn.onclick=()=>window.startGame(currentDifficulty);
+        document.getElementById('overlay').classList.add('show');
+    };
 }
 
-
-function showMenuBtn() {
-    const menuBtn = document.querySelector('#overlay .resume-btn:last-of-type');
-    if (menuBtn) menuBtn.style.display = '';
+function startCountdownTimer(){
+    const btn=document.getElementById('overlayMainBtn');
+    btn.disabled=true;btn.style.opacity='0.5';btn.style.cursor='not-allowed';
+    let countdown=60;
+    const iv=setInterval(()=>{
+        countdown--;
+        if(countdown>0){btn.textContent=`ПОДОЖДИТЕ ${countdown} сек ⏱️`;}
+        else{
+            clearInterval(iv);
+            showMenuBtn();
+            window.startGame(currentDifficulty);
+        }
+    },1000);
 }
 
-window.backToMenu = function() {
-    isGameStarted = false; isPaused = false; isGameOver = false;
-    flowers = []; score = 0; lives = 3;
-    if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; }
-    stopWind(); // останавливаем ветер при возврате в меню
-    document.getElementById('currentScore').textContent = 0;
-    document.getElementById('bestScore').textContent    = bestScore;
+function showMenuBtn(){
+    const menuBtn=document.querySelector('#overlay .resume-btn:last-of-type');
+    if(menuBtn)menuBtn.style.display='';
+}
+
+window.backToMenu=function(){
+    isGameStarted=false;isPaused=false;isGameOver=false;
+    flowers=[];score=0;lives=3;
+    if(spawnInterval){clearInterval(spawnInterval);spawnInterval=null;}
+    stopWind();
+    document.getElementById('currentScore').textContent=0;
+    document.getElementById('bestScore').textContent=bestScore;
     document.getElementById('overlay').classList.remove('show');
     document.getElementById('levelSelect').classList.add('show');
     resetOverlayToPause();
 }
 
-function update() {
-    ctx.clearRect(0, 0, W, H);
-    if (isGameStarted) {
+function update(){
+    ctx.clearRect(0,0,W,H);
+    if(isGameStarted){
         drawBackgroundImage();
-        if (!isGameOver) {
-            drawFlowers();
-            drawPlayer();
-            drawWindIndicator(); // индикатор ветра поверх всего
-        }
+        if(!isGameOver){drawFlowers();drawPlayer();drawWindIndicator();}
     }
     requestAnimationFrame(update);
 }
-
 update();
 </script>
 
