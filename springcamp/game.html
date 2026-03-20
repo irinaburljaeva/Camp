@@ -250,9 +250,9 @@ canvas { width: 100% !important; height: auto !important; }
 <div class="console-body">
     <div class="console-title-top">ИГРА &nbsp; НА &nbsp; ЭКРАНЕ</div>
 
+```
 <div class="console-middle">
     <div class="left-panel">
-        <!-- Стрелки: прокрутка внутри оверлея -->
         <button class="arrow-btn left-up"   onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)" title="Прокрутить вверх"></button>
         <button class="arrow-btn left-down" onmousedown="scrollOverlay(80)"  ontouchstart="scrollOverlay(80)"  title="Прокрутить вниз"></button>
     </div>
@@ -286,7 +286,6 @@ canvas { width: 100% !important; height: auto !important; }
     <div class="right-panel">
         <div class="right-arrow-row">
             <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-                <!-- Стрелки: прокрутка внутри оверлея -->
                 <button class="arrow-btn right-up"   onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)" title="Прокрутить вверх"></button>
                 <button class="arrow-btn right-down" onmousedown="scrollOverlay(80)"  ontouchstart="scrollOverlay(80)"  title="Прокрутить вниз"></button>
             </div>
@@ -318,7 +317,7 @@ canvas { width: 100% !important; height: auto !important; }
 </div>
 
 <div class="console-title-bottom">ШАГАЙ &nbsp; ДОМА</div>
-
+```
 
 </div>
 
@@ -391,14 +390,16 @@ let currentPosition = 2, lastMoveDir = 'down';
 
 // ── Ветер ──
 let windActive = false, windTimeout = null, windScheduleTimeout = null;
-const WIND_BOOST = 1.30;
+let windWasActive = false; // запоминаем, был ли ветер за эту игру
+const WIND_BOOST = 1.30; // +30% скорости
 
 function startWindCycle() {
     const delay = (15 + Math.random() * 25) * 1000;
     windScheduleTimeout = setTimeout(() => {
         if (!isGameStarted || isPaused || isGameOver) { startWindCycle(); return; }
         windActive = true;
-        windTimeout = setTimeout(() => { windActive = false; startWindCycle(); }, 5500);
+        windWasActive = true; // фиксируем что ветер был
+        windTimeout = setTimeout(() => { windActive = false; startWindCycle(); }, 5500); // 5.5 сек
     }, delay);
 }
 
@@ -412,11 +413,11 @@ function drawWindIndicator() {
     if (!windActive) return;
     ctx.save();
 
-    // Полупрозрачный синеватый оверлей — «туман ветра»
+    // Полупрозрачный синеватый оверлей
     ctx.fillStyle = 'rgba(180, 210, 255, 0.10)';
     ctx.fillRect(0, 0, W, H);
 
-    // Несколько анимированных линий-порывов
+    // Анимированные линии-порывы
     const t = Date.now() / 80;
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
     ctx.lineWidth = 1.5;
@@ -430,19 +431,34 @@ function drawWindIndicator() {
         ctx.stroke();
     }
 
-    // Надпись с иконкой
+    // Надпись
     ctx.font = 'bold 13px Arial';
     ctx.textAlign = 'center';
-    // Тень
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.fillText('💨 ВЕТЕР!', W / 2 + 1, 23);
-    // Текст
     ctx.fillStyle = 'rgba(255, 230, 80, 0.95)';
     ctx.fillText('💨 ВЕТЕР!', W / 2, 22);
 
     ctx.restore();
 }
 
+// ── Поделиться результатом ──
+function shareResult() {
+    const windLine = windWasActive ? '\nДаже ветер не помешал 😄' : '';
+    const text = `🌸 Я собрала букет из ${score} цветов в игре от «ШАГАЙ ДОМА⚡️»${windLine}\n\nПопробуй побить мой рекорд 👇🏻\nhttps://walk-walk.ru/spring_camp?utm_source=getcourse&utm_medium=game&utm_campaign=springgame`;
+
+    if (navigator.share) {
+        navigator.share({ text }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('shareBtn');
+            if (btn) {
+                btn.textContent = '✅ Скопировано!';
+                setTimeout(() => { btn.textContent = '📤 Поделиться результатом'; }, 2500);
+            }
+        }).catch(() => {});
+    }
+}
 
 // ── Загрузка изображений ──
 const bg3=new Image(); bg3.src="1.jpg";
@@ -647,6 +663,7 @@ window.startGame=function(difficulty){
     if(spawnInterval)clearInterval(spawnInterval);
     spawnInterval=setInterval(spawnFlower,difficulties[difficulty].spawnDelay);
     stopWind();
+    windWasActive=false; // сбрасываем флаг ветра при старте
     setTimeout(startWindCycle,10000);
 }
 
@@ -658,9 +675,11 @@ function resetOverlayToPause(){
     btn.textContent='ПРОДОЛЖИТЬ 👣';btn.disabled=false;
     btn.style.opacity='1';btn.style.cursor='pointer';btn.style.display='';
     btn.onclick=window.resumeGame;
-    // Кнопка «В МЕНЮ» видна в обычной паузе
     const menuBtn=document.querySelector('#overlay .resume-btn:last-of-type');
     if(menuBtn)menuBtn.style.display='';
+    // Убираем кнопку шаринга если есть
+    const shareBtn=document.getElementById('shareBtn');
+    if(shareBtn)shareBtn.remove();
 }
 
 window.pauseGame=function(){
@@ -685,15 +704,28 @@ function gameOver(){
         btn.textContent='НАЧАТЬ РАЗМИНКУ 💪';btn.disabled=false;
         btn.style.opacity='1';btn.style.cursor='pointer';btn.style.display='';
         btn.onclick=startCardioWorkout;
+
+        // Кнопка «Поделиться» — появляется сразу на game over
+        const existingShare=document.getElementById('shareBtn');
+        if(!existingShare){
+            const shareBtn=document.createElement('button');
+            shareBtn.id='shareBtn';
+            shareBtn.className='resume-btn';
+            shareBtn.style.cssText='background:linear-gradient(135deg,#4CAF50,#388E3C);margin-top:8px;';
+            shareBtn.textContent='📤 Поделиться результатом';
+            shareBtn.onclick=shareResult;
+            btn.parentNode.insertBefore(shareBtn,btn.nextSibling);
+        }
+
         // Прячем «В МЕНЮ» — нельзя обойти разминку
         const menuBtn=document.querySelector('#overlay .resume-btn:last-of-type');
-        if(menuBtn)menuBtn.style.display='none';
+        if(menuBtn&&menuBtn.id!=='shareBtn')menuBtn.style.display='none';
+
         document.getElementById("overlay").classList.add("show");
     },400);
 }
 
 function startCardioWorkout(){
-    // Скрываем маленький оверлей и открываем полноэкранную модалку
     document.getElementById('overlay').classList.remove('show');
 
     const modal=document.getElementById('cardioModal');
@@ -705,12 +737,10 @@ function startCardioWorkout(){
     video.play().catch(()=>{});
     playBtn.style.display='none';
 
-    // Когда видео закончилось — показываем кнопку ИГРАТЬ
     video.onended=()=>{
         playBtn.style.display='block';
     };
 
-    // Ошибка видео — закрываем модалку и запускаем таймер
     video.onerror=()=>{
         modal.classList.remove('show');
         document.getElementById('overlay').classList.add('show');
@@ -719,7 +749,6 @@ function startCardioWorkout(){
         startCountdownTimer();
     };
 
-    // Кнопка ИГРАТЬ — закрываем модалку, показываем оверлей с финальным экраном
     playBtn.onclick=()=>{
         modal.classList.remove('show');
         showMenuBtn();
