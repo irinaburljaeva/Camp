@@ -832,10 +832,11 @@ function startCardioWorkout() {
 
     const video = document.getElementById('cardioVideo');
     if (video) {
-        video.addEventListener('ended', () => {
-            showMenuBtn();
-            window.startGame(currentDifficulty);
-        });
+      video.addEventListener('ended', () => {
+    showMenuBtn();
+    btn.textContent = 'ИГРАТЬ! 🎮';
+    btn.onclick = () => window.startGame(currentDifficulty);
+});
         video.addEventListener('error', () => startCountdownTimer());
     } else {
         startCountdownTimer();
