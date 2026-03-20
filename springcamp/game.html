@@ -250,9 +250,8 @@ canvas { width: 100% !important; height: auto !important; }
 
 
 <div class="console-middle">
-    <div class="left-panel">
-        <button class="arrow-btn left-up" onmousedown="setPosition(0)" ontouchstart="setPosition(0)" title="Верх-лево (Q)"></button>
-        <button class="arrow-btn left-down" onmousedown="setPosition(2)" ontouchstart="setPosition(2)" title="Низ-лево (A)"></button>
+    <div class="left-panel"><button class="arrow-btn left-up" onmousedown="window.scrollBy({top:-120,behavior:'smooth'})" ontouchstart="window.scrollBy({top:-120,behavior:'smooth'})" title="Прокрутить вверх"></button>
+<button class="arrow-btn left-down" onmousedown="window.scrollBy({top:120,behavior:'smooth'})" ontouchstart="window.scrollBy({top:120,behavior:'smooth'})" title="Прокрутить вниз"></button>
     </div>
 
     <div class="screen-wrap" style="position: relative;">
@@ -284,8 +283,8 @@ canvas { width: 100% !important; height: auto !important; }
     <div class="right-panel">
         <div class="right-arrow-row">
             <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-                <button class="arrow-btn right-up" onmousedown="setPosition(1)" ontouchstart="setPosition(1)" title="Верх-право (W)"></button>
-                <button class="arrow-btn right-down" onmousedown="setPosition(3)" ontouchstart="setPosition(3)" title="Низ-право (S)"></button>
+<button class="arrow-btn right-up" onmousedown="window.scrollBy({top:-120,behavior:'smooth'})" ontouchstart="window.scrollBy({top:-120,behavior:'smooth'})" title="Прокрутить вверх"></button>
+<button class="arrow-btn right-down" onmousedown="window.scrollBy({top:120,behavior:'smooth'})" ontouchstart="window.scrollBy({top:120,behavior:'smooth'})" title="Прокрутить вниз"></button>
             </div>
             <div style="display:flex; flex-direction:column; gap:6px; margin-left: 6px;">
                 <button class="game-btn" onclick="startGame('easy')">ИГРА А</button>
