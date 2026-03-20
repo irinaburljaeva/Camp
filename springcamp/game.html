@@ -808,6 +808,10 @@ function gameOver() {
         btn.style.cursor = 'pointer';
         btn.onclick = startCardioWorkout;
 
+        // Прячем «В МЕНЮ» — нельзя обойти разминку
+        const menuBtn = document.querySelector('#overlay .resume-btn:last-of-type');
+        if (menuBtn) menuBtn.style.display = 'none';
+
         document.getElementById("overlay").classList.add("show");
     }, 400);
 }
@@ -821,11 +825,17 @@ function startCardioWorkout() {
 
     const btn = document.getElementById('overlayMainBtn');
     btn.textContent = 'ПРОПУСТИТЬ ⏭️';
-    btn.onclick = () => window.startGame(currentDifficulty);
+    btn.onclick = () => {
+        showMenuBtn(); // возвращаем кнопку меню перед стартом
+        window.startGame(currentDifficulty);
+    };
 
     const video = document.getElementById('cardioVideo');
     if (video) {
-        video.addEventListener('ended', () => window.startGame(currentDifficulty));
+        video.addEventListener('ended', () => {
+            showMenuBtn();
+            window.startGame(currentDifficulty);
+        });
         video.addEventListener('error', () => startCountdownTimer());
     } else {
         startCountdownTimer();
@@ -845,22 +855,18 @@ function startCountdownTimer() {
             btn.textContent = `ПОДОЖДИТЕ ${countdown} сек ⏱️`;
         } else {
             clearInterval(countdownInterval);
+            showMenuBtn();
             window.startGame(currentDifficulty);
         }
     }, 1000);
 }
 
-window.backToMenu = function() {
-    isGameStarted = false; isPaused = false; isGameOver = false;
-    flowers = []; score = 0; lives = 3;
-    if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; }
-
-    document.getElementById('currentScore').textContent = 0;
-    document.getElementById('bestScore').textContent    = bestScore;
-    document.getElementById('overlay').classList.remove('show');
-    document.getElementById('levelSelect').classList.add('show');
-    resetOverlayToPause();
+// Вспомогательная — возвращает кнопку «В МЕНЮ» после разминки
+function showMenuBtn() {
+    const menuBtn = document.querySelector('#overlay .resume-btn:last-of-type');
+    if (menuBtn) menuBtn.style.display = '';
 }
+
 
 function update() {
     ctx.clearRect(0, 0, W, H);
