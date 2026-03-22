@@ -68,41 +68,27 @@ canvas{display:block;border-radius:8px;border:2px solid #111;max-width:100%;heig
 .auth-btn-secondary{background:linear-gradient(135deg,#888,#555);color:#fff}
 .auth-error{color:#d32f2f;text-align:center;margin-top:10px;font-family:'Exo 2',Arial,sans-serif;font-size:13px}
 @media(max-width:680px){
-body{padding:5px}
-.console-body{padding:12px 16px 20px;border-radius:20px 20px 40% 40%/20px 20px 50px 50px}
-.console-title-top{font-size:6px;letter-spacing:2px;margin-bottom:8px}
-.console-title-bottom{font-size:6px;letter-spacing:2px}
-.console-middle{gap:6px}
-.screen-wrap{padding:6px}
-canvas{width:100%!important;height:auto!important}
+body{padding:5px}.console-body{padding:12px 16px 20px;border-radius:20px 20px 40% 40%/20px 20px 50px 50px}
+.console-title-top{font-size:6px;letter-spacing:2px;margin-bottom:8px}.console-title-bottom{font-size:6px;letter-spacing:2px}
+.console-middle{gap:6px}.screen-wrap{padding:6px}canvas{width:100%!important;height:auto!important}
 .arrow-btn.left-up,.arrow-btn.right-up{border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:20px solid #4a3a1a}
 .arrow-btn.left-down,.arrow-btn.right-down{border-left:12px solid transparent;border-right:12px solid transparent;border-top:20px solid #4a3a1a}
 .red-btn{width:44px;height:44px;min-width:44px;min-height:44px;border:3px solid #6a0a0a}
-.game-btn{padding:4px 8px;font-size:6px}
-.control-side{gap:6px}
-.controls-panel{margin-top:12px}
-.stats{gap:6px}
-.stat-item{padding:4px 8px;font-size:11px}
-.overlay-title{font-size:10px;margin-bottom:6px}
+.game-btn{padding:4px 8px;font-size:6px}.control-side{gap:6px}.controls-panel{margin-top:12px}
+.stats{gap:6px}.stat-item{padding:4px 8px;font-size:11px}.overlay-title{font-size:10px;margin-bottom:6px}
 #overlay,#levelSelect,#leaderboardOverlay{font-size:11px;padding:10px}
 .resume-btn{padding:8px 14px;font-size:8px;margin-top:6px}
 #overlayMsg{font-size:11px!important;margin:4px 0!important;line-height:1.5!important}
 #overlayExtra{font-size:11px!important;margin:4px 0!important}
-.lb-tab{font-size:6px;padding:7px}
-.controls-hint{font-size:11px}
+.lb-tab{font-size:6px;padding:7px}.controls-hint{font-size:11px}
 }
 @media(max-width:400px){
-.console-title-top{font-size:5px;letter-spacing:1px}
-.console-title-bottom{font-size:5px;letter-spacing:1px}
+.console-title-top{font-size:5px;letter-spacing:1px}.console-title-bottom{font-size:5px;letter-spacing:1px}
 .arrow-btn.left-up,.arrow-btn.right-up{border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:16px solid #4a3a1a}
 .arrow-btn.left-down,.arrow-btn.right-down{border-left:10px solid transparent;border-right:10px solid transparent;border-top:16px solid #4a3a1a}
-.red-btn{width:32px;height:32px}
-.game-btn{font-size:5px;padding:3px 7px}
-.overlay-title{font-size:9px}
-.resume-btn{padding:7px 12px;font-size:7px}
-#overlayExtra{font-size:10px!important}
-#overlayMsg{font-size:10px!important}
-.controls-hint{font-size:10px}
+.red-btn{width:32px;height:32px}.game-btn{font-size:5px;padding:3px 7px}
+.overlay-title{font-size:9px}.resume-btn{padding:7px 12px;font-size:7px}
+#overlayExtra{font-size:10px!important}#overlayMsg{font-size:10px!important}.controls-hint{font-size:10px}
 }
 </style>
 </head>
@@ -136,7 +122,6 @@ canvas{width:100%!important;height:auto!important}
     </div>
     <div class="screen-wrap" style="position:relative">
       <canvas id="game" width="480" height="320"></canvas>
-
 
   <div id="levelSelect" class="show">
     <div class="overlay-title">Выбери уровень</div>
@@ -185,7 +170,6 @@ canvas{width:100%!important;height:auto!important}
   </div>
 </div>
 
-
   </div>
 
   <div class="controls-panel">
@@ -233,14 +217,14 @@ let currentUser = null;
 let playerName = localStorage.getItem('flowerGamePlayerName') || '';
 let currentLeaderboardMode = 'easy';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
   twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
 });
 
 function pulseStatBest() {
-  const el = document.getElementById('statBest');
+  var el = document.getElementById('statBest');
   el.classList.add('pulse');
-  setTimeout(() => el.classList.remove('pulse'), 400);
+  setTimeout(function() { el.classList.remove('pulse'); }, 400);
 }
 
 function vibrateOnLifeLoss() {
@@ -248,32 +232,31 @@ function vibrateOnLifeLoss() {
 }
 
 window.scrollOverlay = function(amount) {
-  const ov = document.getElementById('overlay');
-  const ls = document.getElementById('levelSelect');
-  const lb = document.getElementById('leaderboardOverlay');
+  var ov = document.getElementById('overlay');
+  var ls = document.getElementById('levelSelect');
+  var lb = document.getElementById('leaderboardOverlay');
   if (ov.classList.contains('show')) ov.scrollBy({ top: amount, behavior: 'smooth' });
   else if (lb.classList.contains('show')) lb.scrollBy({ top: amount, behavior: 'smooth' });
   else if (ls.classList.contains('show')) ls.scrollBy({ top: amount, behavior: 'smooth' });
 };
 
-let score = 0, lives = 3;
-let bestScore = parseInt(localStorage.getItem('flowerGameBest')) || 0;
-let bestScoreEasy = parseInt(localStorage.getItem('flowerGameBestEasy')) || 0;
-let bestScoreHard = parseInt(localStorage.getItem('flowerGameBestHard')) || 0;
-let isPaused = false, isGameStarted = false, isGameOver = false;
-let currentDifficulty = null, baseSpeed = 1, spawnInterval = null;
-let currentPosition = 2, lastMoveDir = 'down';
-let windActive = false, windTimeout = null, windScheduleTimeout = null;
-let windWasActive = false;
-const WIND_BOOST = 1.30;
+var score = 0, lives = 3;
+var bestScore = parseInt(localStorage.getItem('flowerGameBest')) || 0;
+var bestScoreEasy = parseInt(localStorage.getItem('flowerGameBestEasy')) || 0;
+var bestScoreHard = parseInt(localStorage.getItem('flowerGameBestHard')) || 0;
+var isPaused = false, isGameStarted = false, isGameOver = false;
+var currentDifficulty = null, baseSpeed = 1, spawnInterval = null;
+var currentPosition = 2, lastMoveDir = 'down';
+var windActive = false, windTimeout = null, windScheduleTimeout = null;
+var windWasActive = false;
+var WIND_BOOST = 1.30;
 
 function startWindCycle() {
-  const delay = (15 + Math.random() * 25) * 1000;
-  windScheduleTimeout = setTimeout(() => {
+  var delay = (15 + Math.random() * 25) * 1000;
+  windScheduleTimeout = setTimeout(function() {
     if (!isGameStarted || isPaused || isGameOver) { startWindCycle(); return; }
-    windActive = true;
-    windWasActive = true;
-    windTimeout = setTimeout(() => { windActive = false; startWindCycle(); }, 5500);
+    windActive = true; windWasActive = true;
+    windTimeout = setTimeout(function() { windActive = false; startWindCycle(); }, 5500);
   }, delay);
 }
 
@@ -288,13 +271,13 @@ function drawWindIndicator() {
   ctx.save();
   ctx.fillStyle = 'rgba(180,210,255,0.10)';
   ctx.fillRect(0, 0, W, H);
-  const t = Date.now() / 80;
+  var t = Date.now() / 80;
   ctx.strokeStyle = 'rgba(255,255,255,0.25)';
   ctx.lineWidth = 1.5;
-  for (let i = 0; i < 6; i++) {
-    const y = ((t * (0.6 + i * 0.15) + i * 55) % H);
-    const len = 30 + i * 18;
-    const x = (t * (1.2 + i * 0.2) + i * 80) % W;
+  for (var i = 0; i < 6; i++) {
+    var y = ((t * (0.6 + i * 0.15) + i * 55) % H);
+    var len = 30 + i * 18;
+    var x = (t * (1.2 + i * 0.2) + i * 80) % W;
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + len, y + 4); ctx.stroke();
   }
   ctx.font = "bold 11px 'Press Start 2P',monospace";
@@ -304,54 +287,64 @@ function drawWindIndicator() {
   ctx.restore();
 }
 
-Я собрала букет из 2 цветов в игре от «ШАГАЙ ДОМА»
+// Кнопка «Поделиться результатом» — открывает ВКонтакте
+function shareResult() {
+  var windLine = windWasActive ? '\nДаже ветер не помешал!' : '';
+  var text = 'Я собрала букет из ' + score + ' цветов в игре от «ШАГАЙ ДОМА»' + windLine + '\n\nПопробуй побить мой рекорд:\nhttps://walk-walk.ru/spring_camp?utm_source=getcourse&utm_medium=game&utm_campaign=springgame';
+  var encoded = encodeURIComponent(text);
 
-Попробуй побить мой рекорд:
-https://walk-walk.ru/spring_camp?utm_source=getcourse&utm_medium=game&utm_campaign=springgame
+  var old = document.getElementById('shareBtns');
+  if (old) old.remove();
 
-function fallbackCopy(text) {
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px';
-  document.body.appendChild(ta);
-  ta.focus();
-  ta.select();
-  try { document.execCommand('copy'); } catch(e) {}
-  document.body.removeChild(ta);
+  var wrap = document.createElement('div');
+  wrap.id = 'shareBtns';
+  wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;width:100%;align-items:center;margin-top:8px;flex-shrink:0;';
+
+  var btn = document.createElement('button');
+  btn.className = 'resume-btn';
+  btn.style.cssText = 'background:linear-gradient(135deg,#0077ff,#0055cc);margin-top:0;width:100%;font-family:"Exo 2",Arial,sans-serif;font-size:14px;font-weight:700;letter-spacing:0;white-space:normal;';
+  btn.textContent = 'Поделиться результатом';
+  btn.onclick = function() {
+    window.open('https://vk.com/share.php?comment=' + encoded, '_blank');
+  };
+  wrap.appendChild(btn);
+
+  var menuBtn = document.getElementById('menuBtn');
+  menuBtn.parentNode.insertBefore(wrap, menuBtn);
 }
 
-const bg3 = new Image(); bg3.src = "1.jpg";
-const bg2 = new Image(); bg2.src = "2.jpg";
-const bg1 = new Image(); bg1.src = "3.jpg";
-const bgGO = new Image(); bgGO.src = "4.jpg";
-const imgUp = new Image(); imgUp.src = "up.png";
-const imgDown = new Image(); imgDown.src = "down.png";
-const flowerImages = [];
-for (let i = 1; i <= 6; i++) { const img = new Image(); img.src = 'flower' + i + '.png'; flowerImages.push(img); }
+var bg3 = new Image(); bg3.src = "1.jpg";
+var bg2 = new Image(); bg2.src = "2.jpg";
+var bg1 = new Image(); bg1.src = "3.jpg";
+var bgGO = new Image(); bgGO.src = "4.jpg";
+var imgUp = new Image(); imgUp.src = "up.png";
+var imgDown = new Image(); imgDown.src = "down.png";
+var flowerImages = [];
+for (var fi = 1; fi <= 6; fi++) { var fimg = new Image(); fimg.src = 'flower' + fi + '.png'; flowerImages.push(fimg); }
 
-const difficulties = {
+var difficulties = {
   easy: { baseSpeed: 0.5, spawnDelay: 2000, speedIncrease: 0.08 },
   hard: { baseSpeed: 0.8, spawnDelay: 1400, speedIncrease: 0.15 }
 };
 
-const W = canvas.width, H = canvas.height;
-const lanes = [
+var W = canvas.width, H = canvas.height;
+var lanes = [
   { startX: W*0.10, startY: H*0.20, endX: W*0.31, endY: H*0.58 },
   { startX: W*0.90, startY: H*0.20, endX: W*0.69, endY: H*0.58 },
   { startX: W*0.10, startY: H*0.45, endX: W*0.31, endY: H*0.78 },
   { startX: W*0.90, startY: H*0.45, endX: W*0.69, endY: H*0.78 }
 ];
-const catchPositions = [
+var catchPositions = [
   { x: W*0.31, y: H*0.58 }, { x: W*0.69, y: H*0.58 },
   { x: W*0.31, y: H*0.78 }, { x: W*0.69, y: H*0.78 }
 ];
-let flowers = [];
-const flowerEmojis = ['🌸','🌺','🌻','🌼','🌷','🏵️'];
+var flowers = [];
+var flowerEmojis = ['🌸','🌺','🌻','🌼','🌷','🏵️'];
 
 document.getElementById('bestScore').textContent = bestScore;
 document.getElementById('currentScore').textContent = score;
 
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, async function(user) {
   if (user) {
     currentUser = user;
     if (playerName) document.getElementById('logoutBtn').style.display = 'block';
@@ -370,16 +363,16 @@ window.closeAuthModal = function() {
 };
 
 window.loginForLeaderboard = async function() {
-  const email = document.getElementById('authEmail').value.trim();
-  const name = document.getElementById('authName').value.trim();
-  const err = document.getElementById('authError');
+  var email = document.getElementById('authEmail').value.trim();
+  var name = document.getElementById('authName').value.trim();
+  var err = document.getElementById('authError');
   if (!email) { err.textContent = 'Введите email'; return; }
   if (!name || name.length < 2) { err.textContent = 'Введите имя (минимум 2 символа)'; return; }
   try {
     playerName = name;
     localStorage.setItem('flowerGamePlayerName', name);
     localStorage.setItem('flowerGameEmail', email);
-    if (currentUser) await setDoc(doc(db, 'players', currentUser.uid), { name, email, createdAt: new Date() });
+    if (currentUser) await setDoc(doc(db, 'players', currentUser.uid), { name: name, email: email, createdAt: new Date() });
     window.closeAuthModal();
     showLeaderboard();
     document.getElementById('logoutBtn').style.display = 'block';
@@ -399,11 +392,11 @@ window.logoutUser = function() {
 async function saveScore(difficulty, scoreVal) {
   if (!currentUser || !playerName) return;
   try {
-    const id = currentUser.uid + '_' + difficulty;
-    const ref = doc(db, 'scores', id);
-    const cur = await getDoc(ref);
+    var id = currentUser.uid + '_' + difficulty;
+    var ref = doc(db, 'scores', id);
+    var cur = await getDoc(ref);
     if (!cur.exists() || cur.data().score < scoreVal) {
-      await setDoc(ref, { userId: currentUser.uid, userName: playerName, difficulty, score: scoreVal, timestamp: new Date() });
+      await setDoc(ref, { userId: currentUser.uid, userName: playerName, difficulty: difficulty, score: scoreVal, timestamp: new Date() });
     }
   } catch(e) { console.error(e); }
 }
@@ -419,22 +412,22 @@ window.closeLeaderboard = function() {
 
 window.loadLeaderboard = async function(difficulty) {
   currentLeaderboardMode = difficulty;
-  const listDiv = document.getElementById('leaderboardList');
+  var listDiv = document.getElementById('leaderboardList');
   listDiv.innerHTML = '<p style="text-align:center;color:#e8d4b8;font-size:13px">Загрузка...</p>';
   document.getElementById('lbTabEasy').className = 'lb-tab easy' + (difficulty === 'easy' ? '' : ' inactive');
   document.getElementById('lbTabHard').className = 'lb-tab hard' + (difficulty === 'hard' ? '' : ' inactive');
   try {
-    const q = query(collection(db, 'scores'), where('difficulty', '==', difficulty), orderBy('score', 'desc'), limit(10));
-    const snap = await getDocs(q);
-    const scores = []; snap.forEach(d => scores.push(d.data()));
+    var q = query(collection(db, 'scores'), where('difficulty', '==', difficulty), orderBy('score', 'desc'), limit(10));
+    var snap = await getDocs(q);
+    var scores = []; snap.forEach(function(d) { scores.push(d.data()); });
     if (scores.length === 0) {
       listDiv.innerHTML = '<p style="text-align:center;color:#e8d4b8;font-size:13px">Пока нет результатов</p>';
       return;
     }
-    let html = '';
-    scores.forEach((sd, i) => {
-      const isCur = currentUser && sd.userId === currentUser.uid && sd.userName === playerName;
-      const medal = i === 0 ? '1' : i === 1 ? '2' : i === 2 ? '3' : (i + 1).toString();
+    var html = '';
+    scores.forEach(function(sd, i) {
+      var isCur = currentUser && sd.userId === currentUser.uid && sd.userName === playerName;
+      var medal = i === 0 ? '1' : i === 1 ? '2' : i === 2 ? '3' : String(i + 1);
       html += '<div class="lb-row' + (isCur ? ' lb-mine' : '') + '">'
         + '<span style="font-weight:bold;color:#e84040;min-width:26px;font-size:14px">' + medal + '</span>'
         + '<span style="flex:1;margin-left:8px;color:#f5e6d3;font-size:13px;font-weight:' + (isCur ? '700' : '400') + ';text-align:left">' + sd.userName + '</span>'
@@ -456,15 +449,15 @@ function getCurrentBackground() {
 }
 
 function drawBackgroundImage() {
-  const bg = getCurrentBackground();
+  var bg = getCurrentBackground();
   if (bg.complete && bg.naturalWidth > 0) ctx.drawImage(bg, 0, 0, W, H);
   else { ctx.fillStyle = "#f3e7d0"; ctx.fillRect(0, 0, W, H); }
 }
 
 function drawPlayer() {
-  const pos = catchPositions[currentPosition];
-  const img = (lastMoveDir === 'up') ? imgUp : imgDown;
-  const ph = H * 0.45, pw = ph * 0.55, bottomY = H * 0.90;
+  var pos = catchPositions[currentPosition];
+  var img = (lastMoveDir === 'up') ? imgUp : imgDown;
+  var ph = H * 0.45, pw = ph * 0.55, bottomY = H * 0.90;
   if (img.complete && img.naturalWidth > 0) {
     ctx.save();
     if (currentPosition === 0 || currentPosition === 2) {
@@ -481,15 +474,15 @@ function drawPlayer() {
 }
 
 function drawFlowers() {
-  const fs = H * 0.12;
-  for (let i = flowers.length - 1; i >= 0; i--) {
-    const f = flowers[i];
+  var fs = H * 0.12;
+  for (var i = flowers.length - 1; i >= 0; i--) {
+    var f = flowers[i];
     if (f.caught) { flowers.splice(i, 1); continue; }
-    const lane = lanes[f.laneIndex];
+    var lane = lanes[f.laneIndex];
     f.progress += f.speed;
-    const t = f.progress / 100;
-    const x = lane.startX + (lane.endX - lane.startX) * t;
-    const y = lane.startY + (lane.endY - lane.startY) * t;
+    var t = f.progress / 100;
+    var x = lane.startX + (lane.endX - lane.startX) * t;
+    var y = lane.startY + (lane.endY - lane.startY) * t;
     ctx.save(); ctx.translate(x, y); ctx.rotate((f.progress * 3) * Math.PI / 180);
     if (f.image && f.image.complete && f.image.naturalWidth > 0) {
       ctx.drawImage(f.image, -fs/2, -fs/2, fs, fs);
@@ -502,7 +495,7 @@ function drawFlowers() {
     if (f.progress >= 95 && currentPosition === f.laneIndex) {
       score++; f.caught = true;
       document.getElementById('currentScore').textContent = score;
-      const cb = currentDifficulty === 'easy' ? bestScoreEasy : bestScoreHard;
+      var cb = currentDifficulty === 'easy' ? bestScoreEasy : bestScoreHard;
       if (score > cb) {
         if (currentDifficulty === 'easy') { bestScoreEasy = score; localStorage.setItem('flowerGameBestEasy', score); }
         else { bestScoreHard = score; localStorage.setItem('flowerGameBestHard', score); }
@@ -513,11 +506,7 @@ function drawFlowers() {
       if (score % 10 === 0) baseSpeed += difficulties[currentDifficulty].speedIncrease;
     }
     if (f.progress >= 100) {
-      if (!f.caught) {
-        lives--;
-        vibrateOnLifeLoss();
-        if (lives <= 0) { lives = 0; gameOver(); }
-      }
+      if (!f.caught) { lives--; vibrateOnLifeLoss(); if (lives <= 0) { lives = 0; gameOver(); } }
       flowers.splice(i, 1);
     }
   }
@@ -525,7 +514,7 @@ function drawFlowers() {
 
 function spawnFlower() {
   if (isPaused || !isGameStarted || isGameOver) return;
-  const ri = Math.floor(Math.random() * 6);
+  var ri = Math.floor(Math.random() * 6);
   flowers.push({
     laneIndex: Math.floor(Math.random() * 4), progress: 0,
     speed: (0.8 + Math.random() * 0.4) * baseSpeed * (windActive ? WIND_BOOST : 1),
@@ -535,7 +524,7 @@ function spawnFlower() {
 
 document.addEventListener("keydown", function(e) {
   if (isPaused || !isGameStarted || isGameOver) return;
-  const k = e.key.toLowerCase();
+  var k = e.key.toLowerCase();
   if (k === 'q') window.setPosition(0);
   if (k === 'a') window.setPosition(2);
   if (k === 'w') window.setPosition(1);
@@ -544,7 +533,7 @@ document.addEventListener("keydown", function(e) {
 
 window.setPosition = function(pos) {
   if (isPaused || !isGameStarted || isGameOver) return;
-  const wu = (currentPosition <= 1), nu = (pos <= 1);
+  var wu = (currentPosition <= 1), nu = (pos <= 1);
   if (nu && !wu) lastMoveDir = 'up';
   else if (!nu && wu) lastMoveDir = 'down';
   currentPosition = pos;
@@ -568,19 +557,16 @@ window.startGame = function(difficulty) {
   setTimeout(startWindCycle, 10000);
 };
 
-// Сброс оверлея в состояние обычной паузы
 function resetOverlayToPause() {
   document.getElementById('overlayTitle').textContent = 'ПАУЗА';
   document.getElementById('overlayMsg').textContent = 'Пошагайте на месте, чтобы продолжить';
   document.getElementById('overlayExtra').textContent = '50 шагов';
-  const btn = document.getElementById('overlayMainBtn');
+  var btn = document.getElementById('overlayMainBtn');
   btn.textContent = 'ПРОДОЛЖИТЬ'; btn.disabled = false;
   btn.style.opacity = '1'; btn.style.cursor = 'pointer'; btn.style.display = '';
   btn.onclick = window.resumeGame;
-  // При паузе кнопка «В МЕНЮ» видна
   document.getElementById('menuBtn').style.display = '';
-  // Убираем кнопку шаринга если есть
-  const sb = document.getElementById('shareBtns');
+  var sb = document.getElementById('shareBtns');
   if (sb) sb.remove();
 }
 
@@ -607,15 +593,15 @@ function gameOver() {
     document.getElementById('overlayMsg').innerHTML = 'Ваш счёт: <b>' + score + '</b><br><br>Чтобы сыграть заново, пошагайте<br>1 минуту вместе с Настей.';
     document.getElementById('overlayExtra').innerHTML = '<div style="color:#FF9F1C;margin:12px 0">Готовы?</div>';
 
-    const btn = document.getElementById('overlayMainBtn');
+    var btn = document.getElementById('overlayMainBtn');
     btn.textContent = 'Начать разминку';
     btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; btn.style.display = '';
     btn.onclick = startCardioWorkout;
 
-    // Скрываем «В МЕНЮ» — нельзя обойти разминку
+    // «В МЕНЮ» скрыта — нельзя обойти разминку
     document.getElementById('menuBtn').style.display = 'none';
 
-    // Показываем кнопку «Поделиться результатом»
+    // Кнопка «Поделиться результатом»
     shareResult();
 
     document.getElementById("overlay").classList.add("show");
@@ -624,34 +610,31 @@ function gameOver() {
 
 function startCardioWorkout() {
   document.getElementById('overlay').classList.remove('show');
-  const modal = document.getElementById('cardioModal');
-  const video = document.getElementById('cardioVideoFull');
-  const playBtn = document.getElementById('cardioPlayBtn');
+  var modal = document.getElementById('cardioModal');
+  var video = document.getElementById('cardioVideoFull');
+  var playBtn = document.getElementById('cardioPlayBtn');
   modal.classList.add('show');
   video.currentTime = 0;
   video.play().catch(function() {});
   playBtn.style.display = 'none';
 
-  // Видео закончилось — показываем кнопку ИГРАТЬ
   video.onended = function() {
     playBtn.style.display = 'block';
   };
 
-  // Ошибка загрузки видео — запускаем таймер
   video.onerror = function() {
     modal.classList.remove('show');
     document.getElementById('overlay').classList.add('show');
     startCountdownTimer();
   };
 
-  // Нажали ИГРАТЬ после просмотра видео — разблокируем «В МЕНЮ»
   playBtn.onclick = function() {
     modal.classList.remove('show');
     document.getElementById('menuBtn').style.display = '';
     document.getElementById('overlayTitle').textContent = 'Отличная работа!';
     document.getElementById('overlayMsg').innerHTML = 'Разминка завершена. Готовы играть?';
     document.getElementById('overlayExtra').innerHTML = '';
-    const btn = document.getElementById('overlayMainBtn');
+    var btn = document.getElementById('overlayMainBtn');
     btn.style.display = ''; btn.textContent = 'ИГРАТЬ!';
     btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
     btn.onclick = function() { window.startGame(currentDifficulty); };
@@ -660,11 +643,11 @@ function startCardioWorkout() {
 }
 
 function startCountdownTimer() {
-  const btn = document.getElementById('overlayMainBtn');
+  var btn = document.getElementById('overlayMainBtn');
   btn.style.display = '';
   btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed';
-  let countdown = 60;
-  const iv = setInterval(function() {
+  var countdown = 60;
+  var iv = setInterval(function() {
     countdown--;
     if (countdown > 0) {
       btn.textContent = 'Подождите ' + countdown + ' сек';
