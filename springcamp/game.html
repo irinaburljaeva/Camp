@@ -547,7 +547,6 @@ wrap.appendChild(copyBtn);
 // Вставляем перед кнопкой «В МЕНЮ» — она скрыта, но место сохраняем правильно
 const menuBtn = document.getElementById('menuBtn');
 menuBtn.parentNode.insertBefore(wrap, menuBtn);
-```
 
 }
 
@@ -796,7 +795,6 @@ document.getElementById(‘overlayTitle’).textContent=‘Жизни кончи
 document.getElementById(‘overlayMsg’).innerHTML=`Ваш счёт: <b>${score}</b><br><br>Чтобы сыграть заново, пошагайте<br>1 минуту вместе с Настей.`;
 document.getElementById(‘overlayExtra’).innerHTML=’<div style="color:#FF9F1C;margin:12px 0;">Готовы?</div>’;
 
-```
     const btn=document.getElementById('overlayMainBtn');
     btn.textContent='Начать разминку';btn.disabled=false;
     btn.style.opacity='1';btn.style.cursor='pointer';btn.style.display='';
@@ -811,7 +809,6 @@ document.getElementById(‘overlayExtra’).innerHTML=’<div style="color:#FF9F
 
     document.getElementById("overlay").classList.add("show");
 },400);
-```
 
 }
 
@@ -824,7 +821,7 @@ modal.classList.add(‘show’);
 video.currentTime=0;video.play().catch(()=>{});
 playBtn.style.display=‘none’;
 
-```
+
 // Видео закончилось — показываем кнопку ИГРАТЬ и разблокируем «В МЕНЮ»
 video.onended=()=>{
     playBtn.style.display='block';
@@ -853,7 +850,7 @@ playBtn.onclick=()=>{
     btn.onclick=()=>window.startGame(currentDifficulty);
     document.getElementById('overlay').classList.add('show');
 };
-```
+
 
 }
 
