@@ -506,15 +506,35 @@ function drawWindIndicator() {
 function shareResult() {
     const windLine = windWasActive ? '\nДаже ветер не помешал!' : '';
     const text = `Я собрала букет из ${score} цветов в игре от «ШАГАЙ ДОМА»${windLine}\n\nПопробуй побить мой рекорд:\nhttps://walk-walk.ru/spring_camp?utm_source=getcourse&utm_medium=game&utm_campaign=springgame`;
-    if (navigator.share) {
-        navigator.share({ text }).catch(() => {});
-    } else {
-        navigator.clipboard.writeText(text).then(() => {
-            const btn = document.getElementById('shareBtn');
-            if (btn) { btn.textContent = 'Скопировано!'; setTimeout(() => { btn.textContent = 'Поделиться результатом'; }, 2500); }
-        }).catch(() => {});
-    }
+    const encoded = encodeURIComponent(text);
+
+    // Убираем старые кнопки шаринга если есть
+    const old = document.getElementById('shareBtns');
+    if (old) old.remove();
+
+    const wrap = document.createElement('div');
+    wrap.id = 'shareBtns';
+    wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;width:100%;align-items:center;margin-top:8px;flex-shrink:0;';
+
+    const btns = [
+        { label: 'Telegram', color: '#2aabee', url: `https://t.me/share/url?url=&text=${encoded}` },
+        { label: 'ВКонтакте', color: '#0077ff', url: `https://vk.com/share.php?comment=${encoded}` },
+        { label: 'WhatsApp', color: '#25d366', url: `https://wa.me/?text=${encoded}` },
+    ];
+
+    btns.forEach(b => {
+        const btn = document.createElement('button');
+        btn.className = 'resume-btn';
+        btn.style.cssText = `background:${b.color};margin-top:0;width:100%;`;
+        btn.textContent = b.label;
+        btn.onclick = () => window.open(b.url, '_blank');
+        wrap.appendChild(btn);
+    });
+
+    const mainBtn = document.getElementById('overlayMainBtn');
+    mainBtn.parentNode.insertBefore(wrap, mainBtn.nextSibling);
 }
+
 
 const bg3=new Image(); bg3.src="1.jpg";
 const bg2=new Image(); bg2.src="2.jpg";
@@ -736,8 +756,8 @@ function resetOverlayToPause(){
     btn.onclick=window.resumeGame;
     const menuBtn=document.querySelector('#overlay .resume-btn:last-of-type');
     if(menuBtn)menuBtn.style.display='';
-    const shareBtn=document.getElementById('shareBtn');
-    if(shareBtn)shareBtn.remove();
+    const shareBtns=document.getElementById('shareBtns');
+if(shareBtns)shareBtns.remove();
 }
 
 window.pauseGame=function(){
@@ -762,15 +782,7 @@ function gameOver(){
         btn.textContent='Начать разминку';btn.disabled=false;
         btn.style.opacity='1';btn.style.cursor='pointer';btn.style.display='';
         btn.onclick=startCardioWorkout;
-        const existingShare=document.getElementById('shareBtn');
-        if(!existingShare){
-            const shareBtn=document.createElement('button');
-            shareBtn.id='shareBtn';shareBtn.className='resume-btn';
-            shareBtn.style.cssText='background:linear-gradient(135deg,#4CAF50,#388E3C);margin-top:8px;';
-            shareBtn.textContent='Поделиться результатом';
-            shareBtn.onclick=shareResult;
-            btn.parentNode.insertBefore(shareBtn,btn.nextSibling);
-        }
+        shareResult();
         const menuBtn=document.querySelector('#overlay .resume-btn:last-of-type');
         if(menuBtn&&menuBtn.id!=='shareBtn')menuBtn.style.display='none';
         document.getElementById("overlay").classList.add("show");
