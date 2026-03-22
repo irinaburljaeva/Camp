@@ -302,7 +302,7 @@ function shareResult() {
 
   var btn = document.createElement('button');
   btn.className = 'resume-btn';
-  btn.style.cssText = 'background:linear-gradient(135deg,#0077ff,#0055cc);margin-top:0;width:100%;font-family:"Exo 2",Arial,sans-serif;font-size:14px;font-weight:700;letter-spacing:0;white-space:normal;';
+  btn.style.cssText = 'background:linear-gradient(135deg,#0077ff,#0055cc);margin-top:0;width:100%;white-space:normal;';
   btn.textContent = 'Поделиться результатом';
   btn.onclick = function() {
     window.open('https://vk.com/share.php?comment=' + encoded, '_blank');
