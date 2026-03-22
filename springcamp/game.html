@@ -5,891 +5,730 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>ШАГАЙ ДОМА — собери букет</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
-
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
-
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-img.emoji {
-    height: 1em; width: 1em;
-    margin: 0 .05em 0 .1em;
-    vertical-align: -0.1em;
-    display: inline;
+*{margin:0;padding:0;box-sizing:border-box}
+img.emoji{height:1em;width:1em;margin:0 .05em 0 .1em;vertical-align:-0.1em;display:inline}
+body{background:#fff;font-family:'Exo 2',Arial,sans-serif;text-align:center;padding:10px;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-x:hidden}
+.console-body{background:linear-gradient(160deg,#e8dcc8 0%,#d4c8a8 40%,#c8bc9c 100%);border-radius:30px 30px 50% 50%/30px 30px 60px 60px;padding:20px 24px 28px;box-shadow:0 20px 60px rgba(0,0,0,.5),inset 0 2px 6px rgba(255,255,255,.6),inset 0 -4px 12px rgba(0,0,0,.15);border:3px solid #b8a888;position:relative;width:fit-content;max-width:100%}
+.console-title-top{font-family:'Press Start 2P',monospace;font-size:8px;font-weight:400;letter-spacing:4px;color:#5a4a2a;margin-bottom:12px;text-transform:uppercase}
+.console-title-bottom{font-family:'Press Start 2P',monospace;font-size:8px;font-weight:400;letter-spacing:4px;color:#5a4a2a;margin-top:16px;text-transform:uppercase}
+.console-middle{display:flex;align-items:center;gap:12px}
+.left-panel{display:flex;flex-direction:column;align-items:center;gap:6px}
+.right-panel{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.right-arrow-row{display:flex;align-items:center;gap:6px}
+.screen-wrap{position:relative;background:#1a1a1a;border-radius:14px;padding:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.9),0 4px 12px rgba(0,0,0,.4);max-width:100%}
+canvas{display:block;border-radius:8px;border:2px solid #111;max-width:100%;height:auto}
+.controls-panel{display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding:0 5px;width:100%}
+.control-side{display:flex;flex-direction:column;gap:10px;align-items:center}
+.arrow-btn{width:0;height:0;background:none;border:none;cursor:pointer;padding:0;touch-action:manipulation;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4));transition:filter .1s,transform .1s}
+.arrow-btn:active{transform:scale(.9);filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+.arrow-btn.left-up,.arrow-btn.right-up{border-left:16px solid transparent;border-right:16px solid transparent;border-bottom:28px solid #4a3a1a}
+.arrow-btn.left-down,.arrow-btn.right-down{border-left:16px solid transparent;border-right:16px solid transparent;border-top:28px solid #4a3a1a}
+.red-btn{width:52px;height:52px;min-width:52px;min-height:52px;background:radial-gradient(circle at 35% 30%,#e84040,#9a1a1a);border:4px solid #6a0a0a;border-radius:50%;cursor:pointer;box-shadow:0 6px 12px rgba(0,0,0,.45),inset 0 3px 6px rgba(255,255,255,.2),inset 0 -3px 6px rgba(0,0,0,.3);transition:all .1s ease;touch-action:manipulation;position:relative}
+.red-btn::before{content:'';position:absolute;top:16%;left:16%;width:28%;height:28%;background:radial-gradient(circle,rgba(255,255,255,.45),transparent);border-radius:50%}
+.red-btn:active{transform:translateY(3px);box-shadow:0 3px 6px rgba(0,0,0,.45),inset 0 3px 8px rgba(0,0,0,.4)}
+.game-btn{background:linear-gradient(180deg,#d8cdb0 0%,#c0b490 100%);border:2px solid #9a8a6a;border-radius:20px;padding:6px 12px;font-family:'Press Start 2P',monospace;font-size:7px;font-weight:400;letter-spacing:1px;color:#3a2a0a;cursor:pointer;box-shadow:0 4px 8px rgba(0,0,0,.3),inset 0 1px 3px rgba(255,255,255,.5);transition:all .1s ease;touch-action:manipulation;white-space:nowrap}
+.game-btn:active{transform:translateY(2px);box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.stats{display:flex;gap:10px;justify-content:center}
+.stat-item{background:rgba(20,10,5,.15);padding:5px 12px;border-radius:8px;border:2px solid #8b6f47;font-family:'Exo 2',Arial,sans-serif;font-size:13px;font-weight:700;color:#3a2a0a;box-shadow:inset 0 1px 3px rgba(0,0,0,.15),0 1px 2px rgba(255,255,255,.4);transition:box-shadow .2s,transform .15s}
+.stat-item.pulse{box-shadow:0 0 10px rgba(232,64,64,.6),inset 0 1px 3px rgba(0,0,0,.15);transform:scale(1.08)}
+#overlay,#levelSelect,#leaderboardOverlay{position:absolute;top:10px;left:10px;right:10px;bottom:10px;background:rgba(20,16,10,.95);color:#f5e6d3;display:none;flex-direction:column;align-items:center;justify-content:flex-start;border-radius:8px;z-index:10;padding:14px 12px;overflow-y:auto;font-family:'Exo 2',Arial,sans-serif;font-size:13px}
+#overlay.show,#levelSelect.show,#leaderboardOverlay.show{display:flex}
+.overlay-title{font-family:'Press Start 2P',monospace;font-size:13px;font-weight:400;margin-bottom:8px;color:#e84040;text-align:center;line-height:1.6;max-width:100%;text-shadow:0 2px 4px rgba(0,0,0,.3);flex-shrink:0}
+.resume-btn{padding:10px 20px;margin-top:8px;background:linear-gradient(135deg,#ff6b6b 0%,#ee5a6f 100%);border:none;border-radius:25px;color:#fff;font-family:'Press Start 2P',monospace;font-size:9px;font-weight:400;letter-spacing:.3px;cursor:pointer;box-shadow:0 4px 12px rgba(255,107,107,.4);transition:all .2s ease;white-space:nowrap;flex-shrink:0;line-height:1.6}
+.resume-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(255,107,107,.5)}
+.resume-btn:active{transform:translateY(1px);box-shadow:0 2px 8px rgba(255,107,107,.3)}
+.resume-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+#overlayMsg{font-size:13px;margin:6px 0;max-width:90%;text-align:center;color:#e8d4b8;line-height:1.6;font-weight:400;flex-shrink:0;font-family:'Exo 2',Arial,sans-serif}
+#overlayExtra{font-size:13px;color:#ff9f1c;margin:8px 0;font-family:'Press Start 2P',monospace;line-height:1.8;flex-shrink:0}
+.lb-row{padding:8px 10px;margin-bottom:6px;background:rgba(255,255,255,.12);border-radius:8px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;width:100%}
+.lb-row.lb-mine{background:rgba(255,215,0,.2);border:1px solid rgba(255,215,0,.5)}
+.lb-tabs{display:flex;gap:8px;margin-bottom:10px;width:100%;flex-shrink:0}
+.lb-tab{flex:1;padding:8px;border:none;border-radius:16px;font-family:'Press Start 2P',monospace;font-size:7px;font-weight:400;cursor:pointer;transition:opacity .15s;line-height:1.6}
+.lb-tab.easy{background:linear-gradient(135deg,#4caf50,#388e3c);color:#fff}
+.lb-tab.hard{background:linear-gradient(135deg,#ff6b6b,#ee5a6f);color:#fff}
+.lb-tab.inactive{opacity:.5}
+.cardio-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#000;z-index:3000;flex-direction:column;align-items:center;justify-content:center}
+.cardio-modal.show{display:flex}
+.cardio-modal video{width:100%;height:100%;object-fit:contain}
+.cardio-modal-btn{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#ff6b6b 0%,#ee5a6f 100%);color:#fff;border:none;border-radius:25px;padding:14px 36px;font-size:14px;font-weight:700;font-family:'Press Start 2P',monospace;cursor:pointer;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5);display:none;line-height:1.6}
+.controls-hint{margin-top:14px;color:#5a4a2a;font-family:'Exo 2',Arial,sans-serif;font-size:12px;font-weight:400;max-width:560px;line-height:1.8;padding:0 10px}
+.auth-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:2000;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.auth-modal.show{display:flex}
+.auth-content{background:linear-gradient(160deg,#e8dcc8 0%,#d4c8a8 40%,#c8bc9c 100%);padding:30px;border-radius:20px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.auth-content h2{color:#5a4a2a;margin-bottom:15px;text-align:center;font-family:'Exo 2',Arial,sans-serif;font-size:16px;font-weight:700}
+.auth-content p{color:#5a4a2a;margin-bottom:20px;text-align:center;font-family:'Exo 2',Arial,sans-serif;font-size:13px;line-height:1.6}
+.auth-content input{width:100%;padding:12px;margin-bottom:15px;border:2px solid #9a8a6a;border-radius:8px;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.auth-content button{width:100%;padding:14px;border:none;border-radius:10px;font-family:'Exo 2',Arial,sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px}
+.auth-btn-primary{background:linear-gradient(135deg,#4caf50,#388e3c);color:#fff}
+.auth-btn-secondary{background:linear-gradient(135deg,#888,#555);color:#fff}
+.auth-error{color:#d32f2f;text-align:center;margin-top:10px;font-family:'Exo 2',Arial,sans-serif;font-size:13px}
+@media(max-width:680px){
+body{padding:5px}
+.console-body{padding:12px 16px 20px;border-radius:20px 20px 40% 40%/20px 20px 50px 50px}
+.console-title-top{font-size:6px;letter-spacing:2px;margin-bottom:8px}
+.console-title-bottom{font-size:6px;letter-spacing:2px}
+.console-middle{gap:6px}
+.screen-wrap{padding:6px}
+canvas{width:100%!important;height:auto!important}
+.arrow-btn.left-up,.arrow-btn.right-up{border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:20px solid #4a3a1a}
+.arrow-btn.left-down,.arrow-btn.right-down{border-left:12px solid transparent;border-right:12px solid transparent;border-top:20px solid #4a3a1a}
+.red-btn{width:44px;height:44px;min-width:44px;min-height:44px;border:3px solid #6a0a0a}
+.game-btn{padding:4px 8px;font-size:6px}
+.control-side{gap:6px}
+.controls-panel{margin-top:12px}
+.stats{gap:6px}
+.stat-item{padding:4px 8px;font-size:11px}
+.overlay-title{font-size:10px;margin-bottom:6px}
+#overlay,#levelSelect,#leaderboardOverlay{font-size:11px;padding:10px}
+.resume-btn{padding:8px 14px;font-size:8px;margin-top:6px}
+#overlayMsg{font-size:11px!important;margin:4px 0!important;line-height:1.5!important}
+#overlayExtra{font-size:11px!important;margin:4px 0!important}
+.lb-tab{font-size:6px;padding:7px}
+.controls-hint{font-size:11px}
 }
-
-body {
-    background: #ffffff;
-    font-family: 'Exo 2', Arial, sans-serif;
-    text-align: center;
-    padding: 10px; min-height: 100vh; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; overflow-x: hidden;
-}
-
-.console-body {
-    background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%);
-    border-radius: 30px 30px 50% 50% / 30px 30px 60px 60px;
-    padding: 20px 24px 28px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 2px 6px rgba(255,255,255,0.6), inset 0 -4px 12px rgba(0,0,0,0.15);
-    border: 3px solid #b8a888; position: relative; width: fit-content; max-width: 100%;
-}
-
-.console-title-top {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px; font-weight: 400;
-    letter-spacing: 4px; color: #5a4a2a; margin-bottom: 12px; text-transform: uppercase;
-}
-.console-title-bottom {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px; font-weight: 400;
-    letter-spacing: 4px; color: #5a4a2a; margin-top: 16px; text-transform: uppercase;
-}
-
-.console-middle { display: flex; align-items: center; gap: 12px; }
-.left-panel { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.right-panel { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
-.right-arrow-row { display: flex; align-items: center; gap: 6px; }
-
-.screen-wrap {
-    position: relative; background: #1a1a1a; border-radius: 14px; padding: 10px;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.4); max-width: 100%;
-}
-
-canvas { display: block; border-radius: 8px; border: 2px solid #111; max-width: 100%; height: auto; }
-
-.controls-panel { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding: 0 5px; width: 100%; }
-.control-side { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-
-.arrow-btn {
-    width: 0; height: 0; background: none; border: none; cursor: pointer; padding: 0;
-    touch-action: manipulation; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4));
-    transition: filter 0.1s, transform 0.1s;
-}
-.arrow-btn:active { transform: scale(0.9); filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
-.arrow-btn.left-up, .arrow-btn.right-up { border-left: 16px solid transparent; border-right: 16px solid transparent; border-bottom: 28px solid #4a3a1a; }
-.arrow-btn.left-down, .arrow-btn.right-down { border-left: 16px solid transparent; border-right: 16px solid transparent; border-top: 28px solid #4a3a1a; }
-
-.red-btn {
-    width: 52px; height: 52px;
-    min-width: 52px; min-height: 52px; /* добавить */
-    background: radial-gradient(circle at 35% 30%, #e84040, #9a1a1a);
-    border: 4px solid #6a0a0a; border-radius: 50%; cursor: pointer;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.45), inset 0 3px 6px rgba(255,255,255,0.2), inset 0 -3px 6px rgba(0,0,0,0.3);
-    transition: all 0.1s ease; touch-action: manipulation; position: relative;
-}
-
-.red-btn::before {
-    content: ''; position: absolute; top: 16%; left: 16%; width: 28%; height: 28%;
-    background: radial-gradient(circle, rgba(255,255,255,0.45), transparent); border-radius: 50%;
-}
-.red-btn:active { transform: translateY(3px); box-shadow: 0 3px 6px rgba(0,0,0,0.45), inset 0 3px 8px rgba(0,0,0,0.4); }
-
-/* Press Start 2P — кнопки панели справа */
-.game-btn {
-    background: linear-gradient(180deg, #d8cdb0 0%, #c0b490 100%);
-    border: 2px solid #9a8a6a; border-radius: 20px; padding: 6px 12px;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 7px; font-weight: 400; letter-spacing: 1px; color: #3a2a0a;
-    cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 1px 3px rgba(255,255,255,0.5);
-    transition: all 0.1s ease; touch-action: manipulation; white-space: nowrap;
-}
-.game-btn:active { transform: translateY(2px); box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-
-/* Счётчики — Exo 2 */
-.stats { display: flex; gap: 10px; justify-content: center; }
-.stat-item {
-    background: rgba(20,10,5,0.15);
-    padding: 5px 12px; border-radius: 8px;
-    border: 2px solid #8B6F47;
-    font-family: 'Exo 2', Arial, sans-serif;
-    font-size: 13px; font-weight: 700; color: #3a2a0a;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.15), 0 1px 2px rgba(255,255,255,0.4);
-    transition: box-shadow 0.2s, transform 0.15s;
-}
-.stat-item.pulse {
-    box-shadow: 0 0 10px rgba(232,64,64,0.6), inset 0 1px 3px rgba(0,0,0,0.15);
-    transform: scale(1.08);
-}
-
-/* Оверлеи */
-#overlay, #levelSelect, #leaderboardOverlay {
-    position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
-    background: rgba(20,16,10,0.95); color: #f5e6d3;
-    display: none; flex-direction: column; align-items: center;
-    justify-content: flex-start;
-    border-radius: 8px; z-index: 10;
-    padding: 14px 12px; overflow-y: auto;
-    font-family: 'Exo 2', Arial, sans-serif;
-    font-size: 13px;
-}
-#overlay.show, #levelSelect.show, #leaderboardOverlay.show { display: flex; }
-
-/* Press Start 2P — заголовки оверлеев */
-.overlay-title {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 13px; font-weight: 400; margin-bottom: 8px; color: #e84040;
-    text-align: center; line-height: 1.6; max-width: 100%;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;
-}
-
-/* Press Start 2P — кнопки внутри оверлеев */
-.resume-btn {
-    padding: 10px 20px; margin-top: 8px;
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-    border: none; border-radius: 25px; color: #ffffff;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 9px; font-weight: 400; letter-spacing: 0.3px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(255,107,107,0.4); transition: all 0.2s ease;
-    white-space: nowrap; flex-shrink: 0; line-height: 1.6;
-}
-.resume-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(255,107,107,0.5); }
-.resume-btn:active { transform: translateY(1px); box-shadow: 0 2px 8px rgba(255,107,107,0.3); }
-.resume-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-/* Exo 2 — описательные тексты */
-#overlayMsg {
-    font-size: 13px; margin: 6px 0; max-width: 90%; text-align: center;
-    color: #e8d4b8; line-height: 1.6; font-weight: 400; flex-shrink: 0;
-    font-family: 'Exo 2', Arial, sans-serif;
-}
-
-/* Press Start 2P — overlayExtra (50 шагов, Готовы? и т.д.) */
-#overlayExtra {
-    font-size: 13px; color: #FF9F1C; margin: 8px 0;
-    font-family: 'Press Start 2P', monospace;
-    line-height: 1.8; flex-shrink: 0;
-}
-#overlayExtra video { box-shadow: 0 4px 12px rgba(0,0,0,0.3); max-width: 100%; }
-
-/* Лидерборд */
-.lb-row {
-    padding: 8px 10px; margin-bottom: 6px;
-    background: rgba(255,255,255,0.12);
-    border-radius: 8px; display: flex; justify-content: space-between; align-items: center;
-    flex-shrink: 0; width: 100%;
-}
-.lb-row.lb-mine { background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.5); }
-
-/* Press Start 2P — табы лидерборда */
-.lb-tabs { display: flex; gap: 8px; margin-bottom: 10px; width: 100%; flex-shrink: 0; }
-.lb-tab {
-    flex: 1; padding: 8px; border: none; border-radius: 16px;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 7px; font-weight: 400; cursor: pointer; transition: opacity 0.15s;
-    line-height: 1.6;
-}
-.lb-tab.easy { background: linear-gradient(135deg,#4CAF50,#388E3C); color: white; }
-.lb-tab.hard { background: linear-gradient(135deg,#ff6b6b,#ee5a6f); color: white; }
-.lb-tab.inactive { opacity: 0.5; }
-
-.video-wrap { position: relative; width: 100%; flex-shrink: 0; }
-.video-wrap video { width: 100%; height: auto; border-radius: 8px; display: block; }
-
-.cardio-modal {
-    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: #000; z-index: 3000;
-    flex-direction: column; align-items: center; justify-content: center;
-}
-.cardio-modal.show { display: flex; }
-.cardio-modal video { width: 100%; height: 100%; object-fit: contain; }
-.cardio-modal-btn {
-    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-    color: white; border: none; border-radius: 25px;
-    padding: 14px 36px; font-size: 16px; font-weight: 700;
-    font-family: 'Press Start 2P', monospace;
-    cursor: pointer; white-space: nowrap;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5); display: none;
-}
-
-.controls-hint {
-    margin-top: 14px; color: #5a4a2a;
-    font-family: 'Exo 2', Arial, sans-serif;
-    font-size: 12px; font-weight: 400;
-    max-width: 560px; line-height: 1.8; padding: 0 10px;
-}
-
-.auth-modal {
-    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.95); z-index: 2000;
-    align-items: center; justify-content: center; padding: 20px; overflow-y: auto;
-}
-.auth-modal.show { display: flex; }
-
-.auth-content {
-    background: linear-gradient(160deg, #e8dcc8 0%, #d4c8a8 40%, #c8bc9c 100%);
-    padding: 30px; border-radius: 20px; max-width: 400px; width: 100%;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-}
-.auth-content h2 {
-    color: #5a4a2a; margin-bottom: 15px; text-align: center;
-    font-family: 'Exo 2', Arial, sans-serif; font-size: 16px; font-weight: 700;
-}
-.auth-content p {
-    color: #5a4a2a; margin-bottom: 20px; text-align: center;
-    font-family: 'Exo 2', Arial, sans-serif; font-size: 13px; line-height: 1.6;
-}
-.auth-content input {
-    width: 100%; padding: 12px; margin-bottom: 15px;
-    border: 2px solid #9a8a6a; border-radius: 8px; font-size: 14px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-}
-.auth-content button {
-    width: 100%; padding: 14px; border: none; border-radius: 10px;
-    font-family: 'Exo 2', Arial, sans-serif;
-    font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 10px;
-}
-.auth-btn-primary { background: linear-gradient(135deg, #4CAF50, #388E3C); color: white; }
-.auth-btn-secondary { background: linear-gradient(135deg, #888, #555); color: white; }
-.auth-error {
-    color: #d32f2f; text-align: center; margin-top: 10px;
-    font-family: 'Exo 2', Arial, sans-serif; font-size: 13px;
-}
-
-@media (max-width: 680px) {
-    body { padding: 5px; }
-    .console-body { padding: 12px 16px 20px; border-radius: 20px 20px 40% 40% / 20px 20px 50px 50px; }
-    .console-title-top { font-size: 6px; letter-spacing: 2px; margin-bottom: 8px; }
-    .console-title-bottom { font-size: 6px; letter-spacing: 2px; }
-    .console-middle { gap: 6px; }
-    .screen-wrap { padding: 6px; }
-    canvas { width: 100% !important; height: auto !important; }
-    .arrow-btn.left-up, .arrow-btn.right-up { border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 20px solid #4a3a1a; }
-    .arrow-btn.left-down, .arrow-btn.right-down { border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 20px solid #4a3a1a; }
-.red-btn { width: 44px; height: 44px; min-width: 44px; min-height: 44px; border: 3px solid #6a0a0a; }
-    .game-btn { padding: 4px 8px; font-size: 6px; }
-    .control-side { gap: 6px; }
-    .controls-panel { margin-top: 12px; }
-    .stats { gap: 6px; }
-    .stat-item { padding: 4px 8px; font-size: 11px; }
-    .overlay-title { font-size: 10px; margin-bottom: 6px; }
-    #overlay, #levelSelect, #leaderboardOverlay { font-size: 11px; padding: 10px; }
-    .resume-btn { padding: 8px 14px; font-size: 8px; margin-top: 6px; }
-    #overlayMsg { font-size: 11px !important; margin: 4px 0 !important; line-height: 1.5 !important; }
-    #overlayExtra { font-size: 11px !important; margin: 4px 0 !important; }
-    .lb-tab { font-size: 6px; padding: 7px; }
-    .controls-hint { font-size: 11px; }
-}
-
-@media (max-width: 400px) {
-    .console-title-top { font-size: 5px; letter-spacing: 1px; }
-    .console-title-bottom { font-size: 5px; letter-spacing: 1px; }
-    .arrow-btn.left-up, .arrow-btn.right-up { border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 16px solid #4a3a1a; }
-    .arrow-btn.left-down, .arrow-btn.right-down { border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 16px solid #4a3a1a; }
-    .red-btn { width: 32px; height: 32px; }
-    .game-btn { font-size: 5px; padding: 3px 7px; }
-    .overlay-title { font-size: 9px; }
-    .resume-btn { padding: 7px 12px; font-size: 7px; }
-    #overlayExtra { font-size: 10px !important; }
-    #overlayMsg { font-size: 10px !important; }
-    .controls-hint { font-size: 10px; }
+@media(max-width:400px){
+.console-title-top{font-size:5px;letter-spacing:1px}
+.console-title-bottom{font-size:5px;letter-spacing:1px}
+.arrow-btn.left-up,.arrow-btn.right-up{border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:16px solid #4a3a1a}
+.arrow-btn.left-down,.arrow-btn.right-down{border-left:10px solid transparent;border-right:10px solid transparent;border-top:16px solid #4a3a1a}
+.red-btn{width:32px;height:32px}
+.game-btn{font-size:5px;padding:3px 7px}
+.overlay-title{font-size:9px}
+.resume-btn{padding:7px 12px;font-size:7px}
+#overlayExtra{font-size:10px!important}
+#overlayMsg{font-size:10px!important}
+.controls-hint{font-size:10px}
 }
 </style>
-
 </head>
 <body>
 
 <div id="cardioModal" class="cardio-modal">
-    <video id="cardioVideoFull" playsinline webkit-playsinline autoplay
-        style="width:100%;height:100%;object-fit:contain;">
-        <source src="cardio.mp4" type="video/mp4">
-    </video>
-    <button class="cardio-modal-btn" id="cardioPlayBtn">ИГРАТЬ!</button>
+  <video id="cardioVideoFull" playsinline webkit-playsinline autoplay style="width:100%;height:100%;object-fit:contain">
+    <source src="cardio.mp4" type="video/mp4">
+  </video>
+  <button class="cardio-modal-btn" id="cardioPlayBtn">ИГРАТЬ!</button>
 </div>
 
 <div id="authModal" class="auth-modal">
-    <div class="auth-content">
-        <h2>Войти для таблицы лидеров</h2>
-        <p>Введите ваш email, чтобы сохранить результаты и участвовать в соревновании</p>
-        <input type="email" id="authEmail" placeholder="Ваш email" />
-        <input type="text" id="authName" placeholder="Ваше имя" />
-        <button class="auth-btn-primary" onclick="loginForLeaderboard()">ВОЙТИ</button>
-        <button class="auth-btn-secondary" onclick="closeAuthModal()">ЗАКРЫТЬ</button>
-        <div id="authError" class="auth-error"></div>
-    </div>
+  <div class="auth-content">
+    <h2>Войти для таблицы лидеров</h2>
+    <p>Введите ваш email, чтобы сохранить результаты и участвовать в соревновании</p>
+    <input type="email" id="authEmail" placeholder="Ваш email">
+    <input type="text" id="authName" placeholder="Ваше имя">
+    <button class="auth-btn-primary" onclick="loginForLeaderboard()">ВОЙТИ</button>
+    <button class="auth-btn-secondary" onclick="closeAuthModal()">ЗАКРЫТЬ</button>
+    <div id="authError" class="auth-error"></div>
+  </div>
 </div>
 
 <div class="console-body">
-    <div class="console-title-top">ИГРА &nbsp; НА &nbsp; ЭКРАНЕ</div>
-
-<div class="console-middle">
+  <div class="console-title-top">ИГРА &nbsp; НА &nbsp; ЭКРАНЕ</div>
+  <div class="console-middle">
     <div class="left-panel">
-        <button class="arrow-btn left-up"   onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)"></button>
-        <button class="arrow-btn left-down" onmousedown="scrollOverlay(80)"  ontouchstart="scrollOverlay(80)"></button>
+      <button class="arrow-btn left-up" onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)"></button>
+      <button class="arrow-btn left-down" onmousedown="scrollOverlay(80)" ontouchstart="scrollOverlay(80)"></button>
     </div>
+    <div class="screen-wrap" style="position:relative">
+      <canvas id="game" width="480" height="320"></canvas>
 
-    <div class="screen-wrap" style="position: relative;">
-        <canvas id="game" width="480" height="320"></canvas>
-
-        <div id="levelSelect" class="show">
-            <div class="overlay-title">Выбери уровень</div>
-            <div style="margin-top: 16px; font-size: 13px; opacity: 0.9; max-width: 280px; text-align: center; line-height: 1.5;">
-                Нажми <b>ИГРА А</b> для легкого уровня или <b>ИГРА Б</b> для сложного
-            </div>
-            <div style="margin-top: 16px; font-size: 11px; opacity: 0.7;">
-                С компьютера: Q/A — лево, W/S — право, с телефона: жми на красные рычажки
-            </div>
-        </div>
-
-        <div id="overlay">
-            <div class="overlay-title" id="overlayTitle">ПАУЗА</div>
-            <div id="overlayMsg" style="font-size: 13px; margin: 8px 0; max-width: 280px; text-align:center;">
-                Пошагайте на месте, чтобы продолжить
-            </div>
-            <div id="overlayExtra" style="color: #FF9F1C; margin: 10px 0;">50 шагов</div>
-            <button class="resume-btn" id="overlayMainBtn" onclick="resumeGame()">ПРОДОЛЖИТЬ</button>
-            <button id="menuBtn" class="resume-btn" onclick="backToMenu()" style="background: radial-gradient(circle at 30% 30%, #888, #555); margin-top: 8px;">
-    В МЕНЮ
-</button>
-
-        </div>
-
-        <div id="leaderboardOverlay">
-            <div class="overlay-title">ЧЕМПИОНЫ</div>
-            <div class="lb-tabs">
-                <button class="lb-tab easy" id="lbTabEasy" onclick="loadLeaderboard('easy')">ИГРА А</button>
-                <button class="lb-tab hard inactive" id="lbTabHard" onclick="loadLeaderboard('hard')">ИГРА Б</button>
-            </div>
-            <div id="leaderboardList" style="width:100%;flex-shrink:0;">
-                <p style="text-align:center;color:#e8d4b8;font-size:13px;">Загрузка...</p>
-            </div>
-            <button class="resume-btn" onclick="closeLeaderboard()" style="background:linear-gradient(135deg,#888,#555);margin-top:10px;">ЗАКРЫТЬ</button>
-            <button id="logoutBtn" onclick="logoutUser()" style="background:transparent;color:#ff6b6b;border:2px solid #ff6b6b;border-radius:25px;padding:8px 18px;font-size:9px;cursor:pointer;margin-top:8px;display:none;flex-shrink:0;font-family:'Press Start 2P',monospace;line-height:1.6;">ВЫЙТИ</button>
-        </div>
+```
+  <div id="levelSelect" class="show">
+    <div class="overlay-title">Выбери уровень</div>
+    <div style="margin-top:16px;font-size:13px;opacity:.9;max-width:280px;text-align:center;line-height:1.5">
+      Нажми <b>ИГРА А</b> для легкого уровня или <b>ИГРА Б</b> для сложного
     </div>
-
-    <div class="right-panel">
-        <div class="right-arrow-row">
-            <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-                <button class="arrow-btn right-up"   onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)"></button>
-                <button class="arrow-btn right-down" onmousedown="scrollOverlay(80)"  ontouchstart="scrollOverlay(80)"></button>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:6px; margin-left: 6px;">
-                <button class="game-btn" onclick="startGame('easy')">ИГРА А</button>
-                <button class="game-btn" onclick="startGame('hard')">ИГРА Б</button>
-                <button class="game-btn" onclick="pauseGame()">ПАУЗА</button>
-                <button class="game-btn" onclick="openLeaderboard()">ТОП</button>
-            </div>
-        </div>
+    <div style="margin-top:16px;font-size:11px;opacity:.7">
+      С компьютера: Q/A — лево, W/S — право, с телефона: жми на красные рычажки
     </div>
+  </div>
+
+  <div id="overlay">
+    <div class="overlay-title" id="overlayTitle">ПАУЗА</div>
+    <div id="overlayMsg" style="font-size:13px;margin:8px 0;max-width:280px;text-align:center">Пошагайте на месте, чтобы продолжить</div>
+    <div id="overlayExtra" style="color:#FF9F1C;margin:10px 0">50 шагов</div>
+    <button class="resume-btn" id="overlayMainBtn" onclick="resumeGame()">ПРОДОЛЖИТЬ</button>
+    <button id="menuBtn" class="resume-btn" onclick="backToMenu()" style="background:radial-gradient(circle at 30% 30%,#888,#555);margin-top:8px">В МЕНЮ</button>
+  </div>
+
+  <div id="leaderboardOverlay">
+    <div class="overlay-title">ЧЕМПИОНЫ</div>
+    <div class="lb-tabs">
+      <button class="lb-tab easy" id="lbTabEasy" onclick="loadLeaderboard('easy')">ИГРА А</button>
+      <button class="lb-tab hard inactive" id="lbTabHard" onclick="loadLeaderboard('hard')">ИГРА Б</button>
+    </div>
+    <div id="leaderboardList" style="width:100%;flex-shrink:0">
+      <p style="text-align:center;color:#e8d4b8;font-size:13px">Загрузка...</p>
+    </div>
+    <button class="resume-btn" onclick="closeLeaderboard()" style="background:linear-gradient(135deg,#888,#555);margin-top:10px">ЗАКРЫТЬ</button>
+    <button id="logoutBtn" onclick="logoutUser()" style="background:transparent;color:#ff6b6b;border:2px solid #ff6b6b;border-radius:25px;padding:8px 18px;font-size:9px;cursor:pointer;margin-top:8px;display:none;flex-shrink:0;font-family:'Press Start 2P',monospace;line-height:1.6">ВЫЙТИ</button>
+  </div>
 </div>
 
-<div class="controls-panel">
+<div class="right-panel">
+  <div class="right-arrow-row">
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:center">
+      <button class="arrow-btn right-up" onmousedown="scrollOverlay(-80)" ontouchstart="scrollOverlay(-80)"></button>
+      <button class="arrow-btn right-down" onmousedown="scrollOverlay(80)" ontouchstart="scrollOverlay(80)"></button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-left:6px">
+      <button class="game-btn" onclick="startGame('easy')">ИГРА А</button>
+      <button class="game-btn" onclick="startGame('hard')">ИГРА Б</button>
+      <button class="game-btn" onclick="pauseGame()">ПАУЗА</button>
+      <button class="game-btn" onclick="openLeaderboard()">ТОП</button>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <div class="controls-panel">
     <div class="control-side">
-        <div class="red-btn" onmousedown="setPosition(0)" ontouchstart="setPosition(0)"></div>
-        <div class="red-btn" onmousedown="setPosition(2)" ontouchstart="setPosition(2)"></div>
+      <div class="red-btn" onmousedown="setPosition(0)" ontouchstart="setPosition(0)"></div>
+      <div class="red-btn" onmousedown="setPosition(2)" ontouchstart="setPosition(2)"></div>
     </div>
     <div>
-        <div class="stats">
-            <div class="stat-item" id="statBest">🏆 <span id="bestScore">0</span></div>
-            <div class="stat-item" id="statCurrent">🌸 <span id="currentScore">0</span></div>
-        </div>
+      <div class="stats">
+        <div class="stat-item" id="statBest">🏆 <span id="bestScore">0</span></div>
+        <div class="stat-item" id="statCurrent">🌸 <span id="currentScore">0</span></div>
+      </div>
     </div>
     <div class="control-side">
-        <div class="red-btn" onmousedown="setPosition(1)" ontouchstart="setPosition(1)"></div>
-        <div class="red-btn" onmousedown="setPosition(3)" ontouchstart="setPosition(3)"></div>
+      <div class="red-btn" onmousedown="setPosition(1)" ontouchstart="setPosition(1)"></div>
+      <div class="red-btn" onmousedown="setPosition(3)" ontouchstart="setPosition(3)"></div>
     </div>
-</div>
-
-<div class="console-title-bottom">ШАГАЙ &nbsp; ДОМА</div>
-
-
+  </div>
+  <div class="console-title-bottom">ШАГАЙ &nbsp; ДОМА</div>
 </div>
 
 <p class="controls-hint">Соберите самый большой букет! Ловите падающие цветки 🌸</p>
 
 <script type="module">
-import { initializeApp } from ‘https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js’;
-import { getAuth, signInAnonymously, onAuthStateChanged } from ‘https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js’;
-import { getFirestore, collection, query, orderBy, limit, getDocs, setDoc, doc, getDoc, where } from ‘https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js’;
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, query, orderBy, limit, getDocs, setDoc, doc, getDoc, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const firebaseConfig = {
-apiKey: “AIzaSyCJmAfXjVGiuPEGSMGcQfvxvE5VY8hR2-M”,
-authDomain: “walk-walk-d8a14.firebaseapp.com”,
-projectId: “walk-walk-d8a14”,
-storageBucket: “walk-walk-d8a14.firebasestorage.app”,
-messagingSenderId: “1022340791272”,
-appId: “1:1022340791272:web:17156f5b1c161183dac25d”
+  apiKey: "AIzaSyCJmAfXjVGiuPEGSMGcQfvxvE5VY8hR2-M",
+  authDomain: "walk-walk-d8a14.firebaseapp.com",
+  projectId: "walk-walk-d8a14",
+  storageBucket: "walk-walk-d8a14.firebasestorage.app",
+  messagingSenderId: "1022340791272",
+  appId: "1:1022340791272:web:17156f5b1c161183dac25d"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-const canvas = document.getElementById(“game”);
-const ctx = canvas.getContext(“2d”);
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
 let currentUser = null;
-let playerName = localStorage.getItem(‘flowerGamePlayerName’) || ‘’;
-let currentLeaderboardMode = ‘easy’;
+let playerName = localStorage.getItem('flowerGamePlayerName') || '';
+let currentLeaderboardMode = 'easy';
 
-document.addEventListener(‘DOMContentLoaded’, () => {
-twemoji.parse(document.body, { folder: ‘svg’, ext: ‘.svg’ });
+document.addEventListener('DOMContentLoaded', () => {
+  twemoji.parse(document.body, { folder: 'svg', ext: '.svg' });
 });
 
 function pulseStatBest() {
-const el = document.getElementById(‘statBest’);
-el.classList.add(‘pulse’);
-setTimeout(() => el.classList.remove(‘pulse’), 400);
+  const el = document.getElementById('statBest');
+  el.classList.add('pulse');
+  setTimeout(() => el.classList.remove('pulse'), 400);
 }
 
 function vibrateOnLifeLoss() {
-if (‘vibrate’ in navigator) navigator.vibrate([100, 50, 100]);
+  if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
 }
 
 window.scrollOverlay = function(amount) {
-const overlay = document.getElementById(‘overlay’);
-const levelSelect = document.getElementById(‘levelSelect’);
-const lb = document.getElementById(‘leaderboardOverlay’);
-if (overlay.classList.contains(‘show’)) {
-overlay.scrollBy({ top: amount, behavior: ‘smooth’ });
-} else if (lb.classList.contains(‘show’)) {
-lb.scrollBy({ top: amount, behavior: ‘smooth’ });
-} else if (levelSelect.classList.contains(‘show’)) {
-levelSelect.scrollBy({ top: amount, behavior: ‘smooth’ });
-}
-}
+  const ov = document.getElementById('overlay');
+  const ls = document.getElementById('levelSelect');
+  const lb = document.getElementById('leaderboardOverlay');
+  if (ov.classList.contains('show')) ov.scrollBy({ top: amount, behavior: 'smooth' });
+  else if (lb.classList.contains('show')) lb.scrollBy({ top: amount, behavior: 'smooth' });
+  else if (ls.classList.contains('show')) ls.scrollBy({ top: amount, behavior: 'smooth' });
+};
 
 let score = 0, lives = 3;
-let bestScore     = parseInt(localStorage.getItem(‘flowerGameBest’))     || 0;
-let bestScoreEasy = parseInt(localStorage.getItem(‘flowerGameBestEasy’)) || 0;
-let bestScoreHard = parseInt(localStorage.getItem(‘flowerGameBestHard’)) || 0;
+let bestScore = parseInt(localStorage.getItem('flowerGameBest')) || 0;
+let bestScoreEasy = parseInt(localStorage.getItem('flowerGameBestEasy')) || 0;
+let bestScoreHard = parseInt(localStorage.getItem('flowerGameBestHard')) || 0;
 let isPaused = false, isGameStarted = false, isGameOver = false;
 let currentDifficulty = null, baseSpeed = 1, spawnInterval = null;
-let currentPosition = 2, lastMoveDir = ‘down’;
-
+let currentPosition = 2, lastMoveDir = 'down';
 let windActive = false, windTimeout = null, windScheduleTimeout = null;
 let windWasActive = false;
 const WIND_BOOST = 1.30;
 
 function startWindCycle() {
-const delay = (15 + Math.random() * 25) * 1000;
-windScheduleTimeout = setTimeout(() => {
-if (!isGameStarted || isPaused || isGameOver) { startWindCycle(); return; }
-windActive = true;
-windWasActive = true;
-windTimeout = setTimeout(() => { windActive = false; startWindCycle(); }, 5500);
-}, delay);
+  const delay = (15 + Math.random() * 25) * 1000;
+  windScheduleTimeout = setTimeout(() => {
+    if (!isGameStarted || isPaused || isGameOver) { startWindCycle(); return; }
+    windActive = true;
+    windWasActive = true;
+    windTimeout = setTimeout(() => { windActive = false; startWindCycle(); }, 5500);
+  }, delay);
 }
 
 function stopWind() {
-windActive = false;
-clearTimeout(windTimeout);
-clearTimeout(windScheduleTimeout);
+  windActive = false;
+  clearTimeout(windTimeout);
+  clearTimeout(windScheduleTimeout);
 }
 
 function drawWindIndicator() {
-if (!windActive) return;
-ctx.save();
-ctx.fillStyle = ‘rgba(180, 210, 255, 0.10)’;
-ctx.fillRect(0, 0, W, H);
-const t = Date.now() / 80;
-ctx.strokeStyle = ‘rgba(255, 255, 255, 0.25)’;
-ctx.lineWidth = 1.5;
-for (let i = 0; i < 6; i++) {
-const y = ((t * (0.6 + i * 0.15) + i * 55) % H);
-const len = 30 + i * 18;
-const x = (t * (1.2 + i * 0.2) + i * 80) % W;
-ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + len, y + 4); ctx.stroke();
-}
-ctx.font = “bold 11px ‘Press Start 2P’, monospace”;
-ctx.textAlign = ‘center’;
-ctx.fillStyle = ‘rgba(0,0,0,0.5)’; ctx.fillText(‘ВЕТЕР!’, W / 2 + 1, 23);
-ctx.fillStyle = ‘rgba(232, 64, 64, 0.95)’; ctx.fillText(‘ВЕТЕР!’, W / 2, 22);
-ctx.restore();
+  if (!windActive) return;
+  ctx.save();
+  ctx.fillStyle = 'rgba(180,210,255,0.10)';
+  ctx.fillRect(0, 0, W, H);
+  const t = Date.now() / 80;
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 1.5;
+  for (let i = 0; i < 6; i++) {
+    const y = ((t * (0.6 + i * 0.15) + i * 55) % H);
+    const len = 30 + i * 18;
+    const x = (t * (1.2 + i * 0.2) + i * 80) % W;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + len, y + 4); ctx.stroke();
+  }
+  ctx.font = "bold 11px 'Press Start 2P',monospace";
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillText('ВЕТЕР!', W / 2 + 1, 23);
+  ctx.fillStyle = 'rgba(232,64,64,0.95)'; ctx.fillText('ВЕТЕР!', W / 2, 22);
+  ctx.restore();
 }
 
-// ── Шаринг — только копирование, работает в iframe ──
+// Шаринг — копирование в буфер, работает в iframe
 function shareResult() {
-const windLine = windWasActive ? ‘\nДаже ветер не помешал!’ : ‘’;
-const text = `Я собрала букет из ${score} цветов в игре от «ШАГАЙ ДОМА»${windLine}\n\nПопробуй побить мой рекорд:\nhttps://walk-walk.ru/spring_camp?utm_source=getcourse&utm_medium=game&utm_campaign=springgame`;
+  const windLine = windWasActive ? '\nДаже ветер не помешал!' : '';
+  const text = 'Я собрала букет из ' + score + ' цветов в игре от «ШАГАЙ ДОМА»' + windLine + '\n\nПопробуй побить мой рекорд:\nhttps://walk-walk.ru/spring_camp?utm_source=getcourse&utm_medium=game&utm_campaign=springgame';
 
-const old = document.getElementById('shareBtns');
-if (old) old.remove();
+  const old = document.getElementById('shareBtns');
+  if (old) old.remove();
 
-const wrap = document.createElement('div');
-wrap.id = 'shareBtns';
-wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;width:100%;align-items:center;margin-top:8px;flex-shrink:0;';
+  const wrap = document.createElement('div');
+  wrap.id = 'shareBtns';
+  wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;width:100%;align-items:center;margin-top:8px;flex-shrink:0';
 
-const hint = document.createElement('div');
-hint.style.cssText = 'font-size:11px;color:#e8d4b8;text-align:center;line-height:1.5;font-family:"Exo 2",sans-serif;';
-hint.textContent = 'Скопируй и отправь подругам в Telegram или ВКонтакте 👇';
-wrap.appendChild(hint);
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'resume-btn';
+  copyBtn.style.cssText = 'background:linear-gradient(135deg,#4CAF50,#388E3C);margin-top:0;width:100%';
+  copyBtn.textContent = 'Поделиться результатом';
 
-const copyBtn = document.createElement('button');
-copyBtn.className = 'resume-btn';
-copyBtn.style.cssText = 'background:linear-gradient(135deg,#4CAF50,#388E3C);margin-top:0;width:100%;';
-copyBtn.textContent = 'Скопировать результат';
-copyBtn.onclick = () => {
-    navigator.clipboard.writeText(text).then(() => {
-        copyBtn.textContent = 'Скопировано!';
-        setTimeout(() => { copyBtn.textContent = 'Скопировать результат'; }, 2500);
-    }).catch(() => {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.cssText = 'position:fixed;top:-9999px;';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        copyBtn.textContent = 'Скопировано!';
-        setTimeout(() => { copyBtn.textContent = 'Скопировать результат'; }, 2500);
-    });
-};
-wrap.appendChild(copyBtn);
+  copyBtn.onclick = function() {
+    const done = function() {
+      copyBtn.textContent = 'Скопировано! Отправь подругам';
+      setTimeout(function() { copyBtn.textContent = 'Поделиться результатом'; }, 3000);
+    };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(done).catch(function() {
+        fallbackCopy(text); done();
+      });
+    } else {
+      fallbackCopy(text); done();
+    }
+  };
 
-// Вставляем перед кнопкой «В МЕНЮ» — она скрыта, но место сохраняем правильно
-const menuBtn = document.getElementById('menuBtn');
-menuBtn.parentNode.insertBefore(wrap, menuBtn);
+  wrap.appendChild(copyBtn);
 
+  // Вставляем ПЕРЕД кнопкой «В МЕНЮ» (она скрыта, но DOM-место есть)
+  const menuBtn = document.getElementById('menuBtn');
+  menuBtn.parentNode.insertBefore(wrap, menuBtn);
 }
 
-// ── Изображения ──
-const bg3=new Image(); bg3.src=“1.jpg”;
-const bg2=new Image(); bg2.src=“2.jpg”;
-const bg1=new Image(); bg1.src=“3.jpg”;
-const bgGO=new Image(); bgGO.src=“4.jpg”;
-const imgUp=new Image(); imgUp.src=“up.png”;
-const imgDown=new Image(); imgDown.src=“down.png”;
-const flowerImages=[];
-for(let i=1;i<=6;i++){const img=new Image();img.src=`flower${i}.png`;flowerImages.push(img);}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
+}
+
+const bg3 = new Image(); bg3.src = "1.jpg";
+const bg2 = new Image(); bg2.src = "2.jpg";
+const bg1 = new Image(); bg1.src = "3.jpg";
+const bgGO = new Image(); bgGO.src = "4.jpg";
+const imgUp = new Image(); imgUp.src = "up.png";
+const imgDown = new Image(); imgDown.src = "down.png";
+const flowerImages = [];
+for (let i = 1; i <= 6; i++) { const img = new Image(); img.src = 'flower' + i + '.png'; flowerImages.push(img); }
 
 const difficulties = {
-easy:{baseSpeed:0.5,spawnDelay:2000,speedIncrease:0.08},
-hard:{baseSpeed:0.8,spawnDelay:1400,speedIncrease:0.15}
+  easy: { baseSpeed: 0.5, spawnDelay: 2000, speedIncrease: 0.08 },
+  hard: { baseSpeed: 0.8, spawnDelay: 1400, speedIncrease: 0.15 }
 };
 
-const W=canvas.width, H=canvas.height;
-const lanes=[
-{startX:W*0.10,startY:H*0.20,endX:W*0.31,endY:H*0.58},
-{startX:W*0.90,startY:H*0.20,endX:W*0.69,endY:H*0.58},
-{startX:W*0.10,startY:H*0.45,endX:W*0.31,endY:H*0.78},
-{startX:W*0.90,startY:H*0.45,endX:W*0.69,endY:H*0.78}
+const W = canvas.width, H = canvas.height;
+const lanes = [
+  { startX: W*0.10, startY: H*0.20, endX: W*0.31, endY: H*0.58 },
+  { startX: W*0.90, startY: H*0.20, endX: W*0.69, endY: H*0.58 },
+  { startX: W*0.10, startY: H*0.45, endX: W*0.31, endY: H*0.78 },
+  { startX: W*0.90, startY: H*0.45, endX: W*0.69, endY: H*0.78 }
 ];
-const catchPositions=[
-{x:W*0.31,y:H*0.58},{x:W*0.69,y:H*0.58},
-{x:W*0.31,y:H*0.78},{x:W*0.69,y:H*0.78}
+const catchPositions = [
+  { x: W*0.31, y: H*0.58 }, { x: W*0.69, y: H*0.58 },
+  { x: W*0.31, y: H*0.78 }, { x: W*0.69, y: H*0.78 }
 ];
-let flowers=[];
-const flowerEmojis=[‘🌸’,‘🌺’,‘🌻’,‘🌼’,‘🌷’,‘🏵️’];
+let flowers = [];
+const flowerEmojis = ['🌸','🌺','🌻','🌼','🌷','🏵️'];
 
-document.getElementById(‘bestScore’).textContent=bestScore;
-document.getElementById(‘currentScore’).textContent=score;
+document.getElementById('bestScore').textContent = bestScore;
+document.getElementById('currentScore').textContent = score;
 
-onAuthStateChanged(auth,async(user)=>{
-if(user){currentUser=user;if(playerName)document.getElementById(‘logoutBtn’).style.display=‘block’;}
-else{try{await signInAnonymously(auth);}catch(e){console.error(e);}}
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    if (playerName) document.getElementById('logoutBtn').style.display = 'block';
+  } else {
+    try { await signInAnonymously(auth); } catch(e) { console.error(e); }
+  }
 });
 
-// ── Авторизация ──
-window.openLeaderboard=function(){
-if(!playerName)document.getElementById(‘authModal’).classList.add(‘show’);
-else showLeaderboard();
-}
-window.closeAuthModal=function(){document.getElementById(‘authModal’).classList.remove(‘show’);}
+window.openLeaderboard = function() {
+  if (!playerName) document.getElementById('authModal').classList.add('show');
+  else showLeaderboard();
+};
 
-window.loginForLeaderboard=async function(){
-const email=document.getElementById(‘authEmail’).value.trim();
-const name=document.getElementById(‘authName’).value.trim();
-const err=document.getElementById(‘authError’);
-if(!email){err.textContent=‘Введите email’;return;}
-if(!name||name.length<2){err.textContent=‘Введите имя (минимум 2 символа)’;return;}
-try{
-playerName=name;
-localStorage.setItem(‘flowerGamePlayerName’,name);
-localStorage.setItem(‘flowerGameEmail’,email);
-if(currentUser)await setDoc(doc(db,‘players’,currentUser.uid),{name,email,createdAt:new Date()});
-window.closeAuthModal();showLeaderboard();
-document.getElementById(‘logoutBtn’).style.display=‘block’;
-}catch(e){console.error(e);err.textContent=‘Ошибка. Попробуйте снова’;}
-}
+window.closeAuthModal = function() {
+  document.getElementById('authModal').classList.remove('show');
+};
 
-window.logoutUser=function(){
-if(confirm(‘Выйти из аккаунта?’)){
-playerName=’’;
-localStorage.removeItem(‘flowerGamePlayerName’);localStorage.removeItem(‘flowerGameEmail’);
-document.getElementById(‘logoutBtn’).style.display=‘none’;closeLeaderboard();
-}
-}
+window.loginForLeaderboard = async function() {
+  const email = document.getElementById('authEmail').value.trim();
+  const name = document.getElementById('authName').value.trim();
+  const err = document.getElementById('authError');
+  if (!email) { err.textContent = 'Введите email'; return; }
+  if (!name || name.length < 2) { err.textContent = 'Введите имя (минимум 2 символа)'; return; }
+  try {
+    playerName = name;
+    localStorage.setItem('flowerGamePlayerName', name);
+    localStorage.setItem('flowerGameEmail', email);
+    if (currentUser) await setDoc(doc(db, 'players', currentUser.uid), { name, email, createdAt: new Date() });
+    window.closeAuthModal();
+    showLeaderboard();
+    document.getElementById('logoutBtn').style.display = 'block';
+  } catch(e) { console.error(e); err.textContent = 'Ошибка. Попробуйте снова'; }
+};
 
-async function saveScore(difficulty,scoreVal){
-if(!currentUser||!playerName)return;
-try{
-const id=`${currentUser.uid}_${difficulty}`;
-const ref=doc(db,‘scores’,id);
-const cur=await getDoc(ref);
-if(!cur.exists()||cur.data().score<scoreVal){
-await setDoc(ref,{userId:currentUser.uid,userName:playerName,difficulty,score:scoreVal,timestamp:new Date()});
-}
-}catch(e){console.error(e);}
-}
+window.logoutUser = function() {
+  if (confirm('Выйти из аккаунта?')) {
+    playerName = '';
+    localStorage.removeItem('flowerGamePlayerName');
+    localStorage.removeItem('flowerGameEmail');
+    document.getElementById('logoutBtn').style.display = 'none';
+    closeLeaderboard();
+  }
+};
 
-// ── Лидерборд ──
-function showLeaderboard(){
-document.getElementById(‘leaderboardOverlay’).classList.add(‘show’);
-loadLeaderboard(currentLeaderboardMode);
-}
-window.closeLeaderboard=function(){
-document.getElementById(‘leaderboardOverlay’).classList.remove(‘show’);
+async function saveScore(difficulty, scoreVal) {
+  if (!currentUser || !playerName) return;
+  try {
+    const id = currentUser.uid + '_' + difficulty;
+    const ref = doc(db, 'scores', id);
+    const cur = await getDoc(ref);
+    if (!cur.exists() || cur.data().score < scoreVal) {
+      await setDoc(ref, { userId: currentUser.uid, userName: playerName, difficulty, score: scoreVal, timestamp: new Date() });
+    }
+  } catch(e) { console.error(e); }
 }
 
-window.loadLeaderboard=async function(difficulty){
-currentLeaderboardMode=difficulty;
-const listDiv=document.getElementById(‘leaderboardList’);
-listDiv.innerHTML=’<p style="text-align:center;color:#e8d4b8;font-size:13px;">Загрузка…</p>’;
-document.getElementById(‘lbTabEasy’).className=‘lb-tab easy’+(difficulty===‘easy’?’’:’ inactive’);
-document.getElementById(‘lbTabHard’).className=‘lb-tab hard’+(difficulty===‘hard’?’’:’ inactive’);
-try{
-const q=query(collection(db,‘scores’),where(‘difficulty’,’==’,difficulty),orderBy(‘score’,‘desc’),limit(10));
-const snap=await getDocs(q);
-const scores=[];snap.forEach(d=>scores.push(d.data()));
-if(scores.length===0){
-listDiv.innerHTML=’<p style="text-align:center;color:#e8d4b8;font-size:13px;">Пока нет результатов</p>’;
-return;
+function showLeaderboard() {
+  document.getElementById('leaderboardOverlay').classList.add('show');
+  loadLeaderboard(currentLeaderboardMode);
 }
-let html=’’;
-scores.forEach((sd,i)=>{
-const isCur=currentUser&&sd.userId===currentUser.uid&&sd.userName===playerName;
-const medal=i===0?‘1’:i===1?‘2’:i===2?‘3’:`${i+1}`;
-html+=`<div class="lb-row${isCur?' lb-mine':''}"> <span style="font-weight:bold;color:#e84040;min-width:26px;font-size:14px;">${medal}</span> <span style="flex:1;margin-left:8px;color:#f5e6d3;font-size:13px;font-weight:${isCur?'700':'400'};text-align:left;">${sd.userName}</span> <span style="font-weight:bold;color:#4CAF50;font-size:14px;">${sd.score}</span> </div>`;
+
+window.closeLeaderboard = function() {
+  document.getElementById('leaderboardOverlay').classList.remove('show');
+};
+
+window.loadLeaderboard = async function(difficulty) {
+  currentLeaderboardMode = difficulty;
+  const listDiv = document.getElementById('leaderboardList');
+  listDiv.innerHTML = '<p style="text-align:center;color:#e8d4b8;font-size:13px">Загрузка...</p>';
+  document.getElementById('lbTabEasy').className = 'lb-tab easy' + (difficulty === 'easy' ? '' : ' inactive');
+  document.getElementById('lbTabHard').className = 'lb-tab hard' + (difficulty === 'hard' ? '' : ' inactive');
+  try {
+    const q = query(collection(db, 'scores'), where('difficulty', '==', difficulty), orderBy('score', 'desc'), limit(10));
+    const snap = await getDocs(q);
+    const scores = []; snap.forEach(d => scores.push(d.data()));
+    if (scores.length === 0) {
+      listDiv.innerHTML = '<p style="text-align:center;color:#e8d4b8;font-size:13px">Пока нет результатов</p>';
+      return;
+    }
+    let html = '';
+    scores.forEach((sd, i) => {
+      const isCur = currentUser && sd.userId === currentUser.uid && sd.userName === playerName;
+      const medal = i === 0 ? '1' : i === 1 ? '2' : i === 2 ? '3' : (i + 1).toString();
+      html += '<div class="lb-row' + (isCur ? ' lb-mine' : '') + '">'
+        + '<span style="font-weight:bold;color:#e84040;min-width:26px;font-size:14px">' + medal + '</span>'
+        + '<span style="flex:1;margin-left:8px;color:#f5e6d3;font-size:13px;font-weight:' + (isCur ? '700' : '400') + ';text-align:left">' + sd.userName + '</span>'
+        + '<span style="font-weight:bold;color:#4CAF50;font-size:14px">' + sd.score + '</span>'
+        + '</div>';
+    });
+    listDiv.innerHTML = html;
+  } catch(e) {
+    console.error(e);
+    listDiv.innerHTML = '<p style="text-align:center;color:#ff6b6b;font-size:12px">Ошибка загрузки</p>';
+  }
+};
+
+function getCurrentBackground() {
+  if (isGameOver || lives <= 0) return bgGO;
+  if (lives === 3) return bg3;
+  if (lives === 2) return bg2;
+  return bg1;
+}
+
+function drawBackgroundImage() {
+  const bg = getCurrentBackground();
+  if (bg.complete && bg.naturalWidth > 0) ctx.drawImage(bg, 0, 0, W, H);
+  else { ctx.fillStyle = "#f3e7d0"; ctx.fillRect(0, 0, W, H); }
+}
+
+function drawPlayer() {
+  const pos = catchPositions[currentPosition];
+  const img = (lastMoveDir === 'up') ? imgUp : imgDown;
+  const ph = H * 0.45, pw = ph * 0.55, bottomY = H * 0.90;
+  if (img.complete && img.naturalWidth > 0) {
+    ctx.save();
+    if (currentPosition === 0 || currentPosition === 2) {
+      ctx.translate(pos.x + pw / 2, bottomY - ph); ctx.scale(-1, 1); ctx.drawImage(img, 0, 0, pw, ph);
+    } else {
+      ctx.drawImage(img, pos.x - pw / 2, bottomY - ph, pw, ph);
+    }
+    ctx.restore();
+  } else {
+    ctx.font = Math.round(H * 0.10) + 'px Arial';
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("🧺", pos.x, pos.y);
+  }
+}
+
+function drawFlowers() {
+  const fs = H * 0.12;
+  for (let i = flowers.length - 1; i >= 0; i--) {
+    const f = flowers[i];
+    if (f.caught) { flowers.splice(i, 1); continue; }
+    const lane = lanes[f.laneIndex];
+    f.progress += f.speed;
+    const t = f.progress / 100;
+    const x = lane.startX + (lane.endX - lane.startX) * t;
+    const y = lane.startY + (lane.endY - lane.startY) * t;
+    ctx.save(); ctx.translate(x, y); ctx.rotate((f.progress * 3) * Math.PI / 180);
+    if (f.image && f.image.complete && f.image.naturalWidth > 0) {
+      ctx.drawImage(f.image, -fs/2, -fs/2, fs, fs);
+    } else {
+      ctx.font = Math.round(fs) + 'px Arial';
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(f.emoji, 0, 0);
+    }
+    ctx.restore();
+    if (f.progress >= 95 && currentPosition === f.laneIndex) {
+      score++; f.caught = true;
+      document.getElementById('currentScore').textContent = score;
+      const cb = currentDifficulty === 'easy' ? bestScoreEasy : bestScoreHard;
+      if (score > cb) {
+        if (currentDifficulty === 'easy') { bestScoreEasy = score; localStorage.setItem('flowerGameBestEasy', score); }
+        else { bestScoreHard = score; localStorage.setItem('flowerGameBestHard', score); }
+        if (score > bestScore) { bestScore = score; localStorage.setItem('flowerGameBest', score); }
+        document.getElementById('bestScore').textContent = score;
+        pulseStatBest();
+      }
+      if (score % 10 === 0) baseSpeed += difficulties[currentDifficulty].speedIncrease;
+    }
+    if (f.progress >= 100) {
+      if (!f.caught) {
+        lives--;
+        vibrateOnLifeLoss();
+        if (lives <= 0) { lives = 0; gameOver(); }
+      }
+      flowers.splice(i, 1);
+    }
+  }
+}
+
+function spawnFlower() {
+  if (isPaused || !isGameStarted || isGameOver) return;
+  const ri = Math.floor(Math.random() * 6);
+  flowers.push({
+    laneIndex: Math.floor(Math.random() * 4), progress: 0,
+    speed: (0.8 + Math.random() * 0.4) * baseSpeed * (windActive ? WIND_BOOST : 1),
+    emoji: flowerEmojis[ri], image: flowerImages[ri], caught: false
+  });
+}
+
+document.addEventListener("keydown", function(e) {
+  if (isPaused || !isGameStarted || isGameOver) return;
+  const k = e.key.toLowerCase();
+  if (k === 'q') window.setPosition(0);
+  if (k === 'a') window.setPosition(2);
+  if (k === 'w') window.setPosition(1);
+  if (k === 's') window.setPosition(3);
 });
-listDiv.innerHTML=html;
-}catch(e){
-console.error(e);
-listDiv.innerHTML=`<p style="text-align:center;color:#ff6b6b;font-size:12px;">Ошибка загрузки</p>`;
-}
+
+window.setPosition = function(pos) {
+  if (isPaused || !isGameStarted || isGameOver) return;
+  const wu = (currentPosition <= 1), nu = (pos <= 1);
+  if (nu && !wu) lastMoveDir = 'up';
+  else if (!nu && wu) lastMoveDir = 'down';
+  currentPosition = pos;
+};
+
+window.startGame = function(difficulty) {
+  currentDifficulty = difficulty;
+  baseSpeed = difficulties[difficulty].baseSpeed;
+  score = 0; lives = 3; flowers = [];
+  isPaused = false; isGameStarted = true; isGameOver = false;
+  currentPosition = 2; lastMoveDir = 'down';
+  document.getElementById('currentScore').textContent = 0;
+  document.getElementById('bestScore').textContent = difficulty === 'easy' ? bestScoreEasy : bestScoreHard;
+  document.getElementById('levelSelect').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('leaderboardOverlay').classList.remove('show');
+  resetOverlayToPause();
+  if (spawnInterval) clearInterval(spawnInterval);
+  spawnInterval = setInterval(spawnFlower, difficulties[difficulty].spawnDelay);
+  stopWind(); windWasActive = false;
+  setTimeout(startWindCycle, 10000);
+};
+
+// Сброс оверлея в состояние обычной паузы
+function resetOverlayToPause() {
+  document.getElementById('overlayTitle').textContent = 'ПАУЗА';
+  document.getElementById('overlayMsg').textContent = 'Пошагайте на месте, чтобы продолжить';
+  document.getElementById('overlayExtra').textContent = '50 шагов';
+  const btn = document.getElementById('overlayMainBtn');
+  btn.textContent = 'ПРОДОЛЖИТЬ'; btn.disabled = false;
+  btn.style.opacity = '1'; btn.style.cursor = 'pointer'; btn.style.display = '';
+  btn.onclick = window.resumeGame;
+  // При паузе кнопка «В МЕНЮ» видна
+  document.getElementById('menuBtn').style.display = '';
+  // Убираем кнопку шаринга если есть
+  const sb = document.getElementById('shareBtns');
+  if (sb) sb.remove();
 }
 
-// ── Игровая логика ──
-function getCurrentBackground(){
-if(isGameOver||lives<=0)return bgGO;
-if(lives===3)return bg3;if(lives===2)return bg2;return bg1;
-}
-function drawBackgroundImage(){
-const bg=getCurrentBackground();
-if(bg.complete&&bg.naturalWidth>0)ctx.drawImage(bg,0,0,W,H);
-else{ctx.fillStyle=”#f3e7d0”;ctx.fillRect(0,0,W,H);}
-}
-function drawPlayer(){
-const pos=catchPositions[currentPosition];
-const img=(lastMoveDir===‘up’)?imgUp:imgDown;
-const ph=H*0.45,pw=ph*0.55,bottomY=H*0.90;
-if(img.complete&&img.naturalWidth>0){
-ctx.save();
-if(currentPosition===0||currentPosition===2){ctx.translate(pos.x+pw/2,bottomY-ph);ctx.scale(-1,1);ctx.drawImage(img,0,0,pw,ph);}
-else ctx.drawImage(img,pos.x-pw/2,bottomY-ph,pw,ph);
-ctx.restore();
-}else{ctx.font=`${Math.round(H*0.10)}px Arial`;ctx.textAlign=“center”;ctx.textBaseline=“middle”;ctx.fillText(“🧺”,pos.x,pos.y);}
-}
-function drawFlowers(){
-const fs=H*0.12;
-for(let i=flowers.length-1;i>=0;i–){
-const f=flowers[i];
-if(f.caught){flowers.splice(i,1);continue;}
-const lane=lanes[f.laneIndex];
-f.progress+=f.speed;
-const t=f.progress/100;
-const x=lane.startX+(lane.endX-lane.startX)*t;
-const y=lane.startY+(lane.endY-lane.startY)*t;
-ctx.save();ctx.translate(x,y);ctx.rotate((f.progress*3)*Math.PI/180);
-if(f.image&&f.image.complete&&f.image.naturalWidth>0)ctx.drawImage(f.image,-fs/2,-fs/2,fs,fs);
-else{ctx.font=`${Math.round(fs)}px Arial`;ctx.textAlign=“center”;ctx.textBaseline=“middle”;ctx.fillText(f.emoji,0,0);}
-ctx.restore();
-if(f.progress>=95&&currentPosition===f.laneIndex){
-score++;f.caught=true;
-document.getElementById(‘currentScore’).textContent=score;
-const cb=currentDifficulty===‘easy’?bestScoreEasy:bestScoreHard;
-if(score>cb){
-if(currentDifficulty===‘easy’){bestScoreEasy=score;localStorage.setItem(‘flowerGameBestEasy’,score);}
-else{bestScoreHard=score;localStorage.setItem(‘flowerGameBestHard’,score);}
-if(score>bestScore){bestScore=score;localStorage.setItem(‘flowerGameBest’,score);}
-document.getElementById(‘bestScore’).textContent=score;
-pulseStatBest();
-}
-if(score%10===0)baseSpeed+=difficulties[currentDifficulty].speedIncrease;
-}
-if(f.progress>=100){
-if(!f.caught){lives–;vibrateOnLifeLoss();if(lives<=0){lives=0;gameOver();}}
-flowers.splice(i,1);
-}
-}
-}
-function spawnFlower(){
-if(isPaused||!isGameStarted||isGameOver)return;
-const ri=Math.floor(Math.random()*6);
-flowers.push({
-laneIndex:Math.floor(Math.random()*4),progress:0,
-speed:(0.8+Math.random()*0.4)*baseSpeed*(windActive?WIND_BOOST:1),
-emoji:flowerEmojis[ri],image:flowerImages[ri],caught:false
-});
-}
+window.pauseGame = function() {
+  if (!isGameStarted || isGameOver) return;
+  isPaused = true;
+  resetOverlayToPause();
+  document.getElementById("overlay").classList.add("show");
+};
 
-document.addEventListener(“keydown”,function(e){
-if(isPaused||!isGameStarted||isGameOver)return;
-const k=e.key.toLowerCase();
-if(k===‘q’)window.setPosition(0);if(k===‘a’)window.setPosition(2);
-if(k===‘w’)window.setPosition(1);if(k===‘s’)window.setPosition(3);
-});
+window.resumeGame = function() {
+  isPaused = false;
+  document.getElementById("overlay").classList.remove("show");
+};
 
-window.setPosition=function(pos){
-if(isPaused||!isGameStarted||isGameOver)return;
-const wu=(currentPosition<=1),nu=(pos<=1);
-if(nu&&!wu)lastMoveDir=‘up’;else if(!nu&&wu)lastMoveDir=‘down’;
-currentPosition=pos;
-}
+function gameOver() {
+  isGameOver = true; isPaused = true;
+  if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; }
+  stopWind();
+  if (currentUser && playerName && score > 0) saveScore(currentDifficulty, score);
 
-window.startGame=function(difficulty){
-currentDifficulty=difficulty;baseSpeed=difficulties[difficulty].baseSpeed;
-score=0;lives=3;flowers=[];isPaused=false;isGameStarted=true;isGameOver=false;
-currentPosition=2;lastMoveDir=‘down’;
-document.getElementById(‘currentScore’).textContent=0;
-document.getElementById(‘bestScore’).textContent=difficulty===‘easy’?bestScoreEasy:bestScoreHard;
-document.getElementById(‘levelSelect’).classList.remove(‘show’);
-document.getElementById(‘overlay’).classList.remove(‘show’);
-document.getElementById(‘leaderboardOverlay’).classList.remove(‘show’);
-resetOverlayToPause();
-if(spawnInterval)clearInterval(spawnInterval);
-spawnInterval=setInterval(spawnFlower,difficulties[difficulty].spawnDelay);
-stopWind();windWasActive=false;
-setTimeout(startWindCycle,10000);
-}
+  setTimeout(function() {
+    document.getElementById('overlayTitle').textContent = 'Жизни кончились!';
+    document.getElementById('overlayMsg').innerHTML = 'Ваш счёт: <b>' + score + '</b><br><br>Чтобы сыграть заново, пошагайте<br>1 минуту вместе с Настей.';
+    document.getElementById('overlayExtra').innerHTML = '<div style="color:#FF9F1C;margin:12px 0">Готовы?</div>';
 
-function resetOverlayToPause(){
-document.getElementById(‘overlayTitle’).textContent=‘ПАУЗА’;
-document.getElementById(‘overlayMsg’).textContent=‘Пошагайте на месте, чтобы продолжить’;
-document.getElementById(‘overlayExtra’).textContent=‘50 шагов’;
-const btn=document.getElementById(‘overlayMainBtn’);
-btn.textContent=‘ПРОДОЛЖИТЬ’;btn.disabled=false;
-btn.style.opacity=‘1’;btn.style.cursor=‘pointer’;btn.style.display=’’;
-btn.onclick=window.resumeGame;
-// Показываем «В МЕНЮ» при обычной паузе
-const menuBtn=document.getElementById(‘menuBtn’);
-if(menuBtn)menuBtn.style.display=’’;
-// Убираем шаринг
-const shareBtns=document.getElementById(‘shareBtns’);
-if(shareBtns)shareBtns.remove();
-}
-
-window.pauseGame=function(){
-if(!isGameStarted||isGameOver)return;
-isPaused=true;resetOverlayToPause();
-document.getElementById(“overlay”).classList.add(“show”);
-}
-window.resumeGame=function(){
-isPaused=false;document.getElementById(“overlay”).classList.remove(“show”);
-}
-
-function gameOver(){
-isGameOver=true;isPaused=true;
-if(spawnInterval){clearInterval(spawnInterval);spawnInterval=null;}
-stopWind();
-if(currentUser&&playerName&&score>0)saveScore(currentDifficulty,score);
-setTimeout(()=>{
-document.getElementById(‘overlayTitle’).textContent=‘Жизни кончились!’;
-document.getElementById(‘overlayMsg’).innerHTML=`Ваш счёт: <b>${score}</b><br><br>Чтобы сыграть заново, пошагайте<br>1 минуту вместе с Настей.`;
-document.getElementById(‘overlayExtra’).innerHTML=’<div style="color:#FF9F1C;margin:12px 0;">Готовы?</div>’;
-
-    const btn=document.getElementById('overlayMainBtn');
-    btn.textContent='Начать разминку';btn.disabled=false;
-    btn.style.opacity='1';btn.style.cursor='pointer';btn.style.display='';
-    btn.onclick=startCardioWorkout;
+    const btn = document.getElementById('overlayMainBtn');
+    btn.textContent = 'Начать разминку';
+    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; btn.style.display = '';
+    btn.onclick = startCardioWorkout;
 
     // Скрываем «В МЕНЮ» — нельзя обойти разминку
-    const menuBtn=document.getElementById('menuBtn');
-    if(menuBtn)menuBtn.style.display='none';
+    document.getElementById('menuBtn').style.display = 'none';
 
-    // Показываем кнопку шаринга
+    // Показываем кнопку «Поделиться результатом»
     shareResult();
 
     document.getElementById("overlay").classList.add("show");
-},400);
-
+  }, 400);
 }
 
-function startCardioWorkout(){
-document.getElementById(‘overlay’).classList.remove(‘show’);
-const modal=document.getElementById(‘cardioModal’);
-const video=document.getElementById(‘cardioVideoFull’);
-const playBtn=document.getElementById(‘cardioPlayBtn’);
-modal.classList.add(‘show’);
-video.currentTime=0;video.play().catch(()=>{});
-playBtn.style.display=‘none’;
+function startCardioWorkout() {
+  document.getElementById('overlay').classList.remove('show');
+  const modal = document.getElementById('cardioModal');
+  const video = document.getElementById('cardioVideoFull');
+  const playBtn = document.getElementById('cardioPlayBtn');
+  modal.classList.add('show');
+  video.currentTime = 0;
+  video.play().catch(function() {});
+  playBtn.style.display = 'none';
 
+  // Видео закончилось — показываем кнопку ИГРАТЬ
+  video.onended = function() {
+    playBtn.style.display = 'block';
+  };
 
-// Видео закончилось — показываем кнопку ИГРАТЬ и разблокируем «В МЕНЮ»
-video.onended=()=>{
-    playBtn.style.display='block';
-};
-
-// Ошибка видео — таймер и разблокировка
-video.onerror=()=>{
+  // Ошибка загрузки видео — запускаем таймер
+  video.onerror = function() {
     modal.classList.remove('show');
     document.getElementById('overlay').classList.add('show');
-    document.getElementById('overlayMainBtn').style.display='';
     startCountdownTimer();
-};
+  };
 
-// Нажали ИГРАТЬ после видео
-playBtn.onclick=()=>{
+  // Нажали ИГРАТЬ после просмотра видео — разблокируем «В МЕНЮ»
+  playBtn.onclick = function() {
     modal.classList.remove('show');
-    // Теперь показываем «В МЕНЮ»
-    const menuBtn=document.getElementById('menuBtn');
-    if(menuBtn)menuBtn.style.display='';
-    document.getElementById('overlayTitle').textContent='Отличная работа!';
-    document.getElementById('overlayMsg').innerHTML='Разминка завершена. Готовы играть?';
-    document.getElementById('overlayExtra').innerHTML='';
-    const btn=document.getElementById('overlayMainBtn');
-    btn.style.display='';btn.textContent='ИГРАТЬ!';
-    btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';
-    btn.onclick=()=>window.startGame(currentDifficulty);
+    document.getElementById('menuBtn').style.display = '';
+    document.getElementById('overlayTitle').textContent = 'Отличная работа!';
+    document.getElementById('overlayMsg').innerHTML = 'Разминка завершена. Готовы играть?';
+    document.getElementById('overlayExtra').innerHTML = '';
+    const btn = document.getElementById('overlayMainBtn');
+    btn.style.display = ''; btn.textContent = 'ИГРАТЬ!';
+    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
+    btn.onclick = function() { window.startGame(currentDifficulty); };
     document.getElementById('overlay').classList.add('show');
+  };
+}
+
+function startCountdownTimer() {
+  const btn = document.getElementById('overlayMainBtn');
+  btn.style.display = '';
+  btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed';
+  let countdown = 60;
+  const iv = setInterval(function() {
+    countdown--;
+    if (countdown > 0) {
+      btn.textContent = 'Подождите ' + countdown + ' сек';
+    } else {
+      clearInterval(iv);
+      document.getElementById('menuBtn').style.display = '';
+      window.startGame(currentDifficulty);
+    }
+  }, 1000);
+}
+
+window.backToMenu = function() {
+  isGameStarted = false; isPaused = false; isGameOver = false;
+  flowers = []; score = 0; lives = 3;
+  if (spawnInterval) { clearInterval(spawnInterval); spawnInterval = null; }
+  stopWind();
+  document.getElementById('currentScore').textContent = 0;
+  document.getElementById('bestScore').textContent = bestScore;
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('leaderboardOverlay').classList.remove('show');
+  document.getElementById('levelSelect').classList.add('show');
+  resetOverlayToPause();
 };
 
-
-}
-
-function startCountdownTimer(){
-const btn=document.getElementById(‘overlayMainBtn’);
-btn.disabled=true;btn.style.opacity=‘0.5’;btn.style.cursor=‘not-allowed’;
-let countdown=60;
-const iv=setInterval(()=>{
-countdown–;
-if(countdown>0){btn.textContent=`Подождите ${countdown} сек`;}
-else{
-clearInterval(iv);
-// Таймер истёк — разблокируем «В МЕНЮ» и запускаем игру
-const menuBtn=document.getElementById(‘menuBtn’);
-if(menuBtn)menuBtn.style.display=’’;
-window.startGame(currentDifficulty);
-}
-},1000);
-}
-
-window.backToMenu=function(){
-isGameStarted=false;isPaused=false;isGameOver=false;
-flowers=[];score=0;lives=3;
-if(spawnInterval){clearInterval(spawnInterval);spawnInterval=null;}
-stopWind();
-document.getElementById(‘currentScore’).textContent=0;
-document.getElementById(‘bestScore’).textContent=bestScore;
-document.getElementById(‘overlay’).classList.remove(‘show’);
-document.getElementById(‘leaderboardOverlay’).classList.remove(‘show’);
-document.getElementById(‘levelSelect’).classList.add(‘show’);
-resetOverlayToPause();
-}
-
-function update(){
-ctx.clearRect(0,0,W,H);
-if(isGameStarted){
-drawBackgroundImage();
-if(!isGameOver){drawFlowers();drawPlayer();drawWindIndicator();}
-}
-requestAnimationFrame(update);
+function update() {
+  ctx.clearRect(0, 0, W, H);
+  if (isGameStarted) {
+    drawBackgroundImage();
+    if (!isGameOver) { drawFlowers(); drawPlayer(); drawWindIndicator(); }
+  }
+  requestAnimationFrame(update);
 }
 update();
 </script>
