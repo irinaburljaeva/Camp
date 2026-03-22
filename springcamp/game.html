@@ -304,43 +304,10 @@ function drawWindIndicator() {
   ctx.restore();
 }
 
-// Шаринг — копирование в буфер, работает в iframe
-function shareResult() {
-  const windLine = windWasActive ? '\nДаже ветер не помешал!' : '';
-  const text = 'Я собрала букет из ' + score + ' цветов в игре от «ШАГАЙ ДОМА»' + windLine + '\n\nПопробуй побить мой рекорд:\nhttps://walk-walk.ru/spring_camp?utm_source=getcourse&utm_medium=game&utm_campaign=springgame';
+Я собрала букет из 2 цветов в игре от «ШАГАЙ ДОМА»
 
-  const old = document.getElementById('shareBtns');
-  if (old) old.remove();
-
-  const wrap = document.createElement('div');
-  wrap.id = 'shareBtns';
-  wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;width:100%;align-items:center;margin-top:8px;flex-shrink:0';
-
-  const copyBtn = document.createElement('button');
-  copyBtn.className = 'resume-btn';
-  copyBtn.style.cssText = 'background:linear-gradient(135deg,#4CAF50,#388E3C);margin-top:0;width:100%';
-  copyBtn.textContent = 'Поделиться результатом';
-
-  copyBtn.onclick = function() {
-    const done = function() {
-      copyBtn.textContent = 'Скопировано! Отправь подругам';
-      setTimeout(function() { copyBtn.textContent = 'Поделиться результатом'; }, 3000);
-    };
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(done).catch(function() {
-        fallbackCopy(text); done();
-      });
-    } else {
-      fallbackCopy(text); done();
-    }
-  };
-
-  wrap.appendChild(copyBtn);
-
-  // Вставляем ПЕРЕД кнопкой «В МЕНЮ» (она скрыта, но DOM-место есть)
-  const menuBtn = document.getElementById('menuBtn');
-  menuBtn.parentNode.insertBefore(wrap, menuBtn);
-}
+Попробуй побить мой рекорд:
+https://walk-walk.ru/spring_camp?utm_source=getcourse&utm_medium=game&utm_campaign=springgame
 
 function fallbackCopy(text) {
   const ta = document.createElement('textarea');
