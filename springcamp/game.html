@@ -506,9 +506,7 @@ function drawWindIndicator() {
 function shareResult() {
     const windLine = windWasActive ? '\nДаже ветер не помешал!' : '';
     const text = `Я собрала букет из ${score} цветов в игре от «ШАГАЙ ДОМА»${windLine}\n\nПопробуй побить мой рекорд:\nhttps://walk-walk.ru/spring_camp?utm_source=getcourse&utm_medium=game&utm_campaign=springgame`;
-    const encoded = encodeURIComponent(text);
 
-    // Убираем старые кнопки шаринга если есть
     const old = document.getElementById('shareBtns');
     if (old) old.remove();
 
@@ -516,24 +514,40 @@ function shareResult() {
     wrap.id = 'shareBtns';
     wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;width:100%;align-items:center;margin-top:8px;flex-shrink:0;';
 
-    const btns = [
-        { label: 'Telegram', color: '#2aabee', url: `https://t.me/share/url?url=&text=${encoded}` },
-        { label: 'ВКонтакте', color: '#0077ff', url: `https://vk.com/share.php?comment=${encoded}` },
-        { label: 'WhatsApp', color: '#25d366', url: `https://wa.me/?text=${encoded}` },
-    ];
+    // Подсказка
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-size:11px;color:#e8d4b8;text-align:center;line-height:1.5;font-family:"Exo 2",sans-serif;';
+    hint.textContent = 'Скопируй и отправь подругам в Telegram или ВКонтакте 👇';
+    wrap.appendChild(hint);
 
-    btns.forEach(b => {
-        const btn = document.createElement('button');
-        btn.className = 'resume-btn';
-        btn.style.cssText = `background:${b.color};margin-top:0;width:100%;`;
-        btn.textContent = b.label;
-        btn.onclick = () => window.open(b.url, '_blank');
-        wrap.appendChild(btn);
-    });
+    // Кнопка копирования
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'resume-btn';
+    copyBtn.style.cssText = 'background:linear-gradient(135deg,#4CAF50,#388E3C);margin-top:0;width:100%;';
+    copyBtn.textContent = 'Скопировать результат';
+    copyBtn.onclick = () => {
+        navigator.clipboard.writeText(text).then(() => {
+            copyBtn.textContent = 'Скопировано!';
+            setTimeout(() => { copyBtn.textContent = 'Скопировать результат'; }, 2500);
+        }).catch(() => {
+            // Фоллбэк если clipboard не работает
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;top:-9999px;';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            copyBtn.textContent = 'Скопировано!';
+            setTimeout(() => { copyBtn.textContent = 'Скопировать результат'; }, 2500);
+        });
+    };
+    wrap.appendChild(copyBtn);
 
     const mainBtn = document.getElementById('overlayMainBtn');
     mainBtn.parentNode.insertBefore(wrap, mainBtn.nextSibling);
 }
+
 
 
 const bg3=new Image(); bg3.src="1.jpg";
