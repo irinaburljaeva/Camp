@@ -363,6 +363,46 @@ tr:hover td{background:var(--cream);}
       <div class="progress-wrap">
         <span class="progress-label">Процедуры</span>
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="star">★</span> Процедуры санатория</div>
+        <div class="shelf-wrap">
+          <div class="shelf-label">Твои бутылочки Шагайтуки</div>
+          <div class="shelf-bottles" id="shelfBottles"><div class="shelf-empty">Пока пусто — отмечай задания!</div></div>
+        </div>
+        <div class="autosave-indicator">
+          <div class="autosave-dot" id="autosaveDot"></div>
+          <span id="autosaveText">Изменения сохраняются автоматически</span>
+        </div>
+        <div class="tasks-list" id="tasksList"></div>
+      </div>
+
+      <div class="card" style="text-align:center;padding:16px 20px;">
+        <div class="hint-text" style="margin-bottom:10px;">Подошла к концу марафона? Дополни замеры и оставь обратную связь.</div>
+        <button class="btn-secondary" onclick="goToPhase(3)">Перейти к финалу →</button>
+      </div>
+
+    </div><!-- /phase2 -->
+
+    <!-- ── PHASE 3: Финал ── -->
+    <div class="phase" id="phase3">
+
+      <div class="card">
+        <div class="card-title"><span class="star">★</span> День выезда — замеры после</div>
+        <div class="hint-text" style="margin-bottom:14px;">Заполни после окончания марафона.</div>
+        <label>Дата окончания</label>
+        <input type="date" id="d_end">
+        <div class="row2" style="margin-top:2px;">
+          <div><label>Вес (кг)</label><input type="number" id="w_end" placeholder="62.0" step="0.1"></div>
+          <div></div>
+        </div>
+        <div class="row2">
+          <div><label>Талия (см)</label><input type="number" id="waist_end" placeholder="77"></div>
+          <div><label>Бёдра (см)</label><input type="number" id="hips_end" placeholder="97"></div>
+        </div>
+        <div class="delta-box" id="deltaBox">
+          Изменение веса: <span class="delta-num" id="deltaNum">—</span>
         </div>
       </div>
 
@@ -694,7 +734,6 @@ function setWhere(e,i,val){
 }
 function updateProgress(){
   var done=Object.values(taskState).filter(function(t){return t.done;}).length;
-  document.getElementById("doneCount").textContent=done;
   document.getElementById("progressFill").style.width=(done/TASK_COUNT*100)+"%";
 }
 
