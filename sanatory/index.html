@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Онлайн Санаторий для похудения — Шагай Дома</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<style>
+:root {
+  --cream: #F5EDD8;
+  --cream2: #EDE0C4;
+  --red: #D63025;
+  --red2: #B82218;
+  --navy: #1B2A6B;
+  --gold: #C8973A;
+  --green: #3A7A3A;
+  --dark: #1A1A1A;
+  --mid: #6B5A3A;
+  --border: #C8B48A;
+  --white: #FFFDF5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--dark); min-height: 100vh; }
+
+.header {
+  background: var(--cream);
+  border-bottom: 3px solid var(--red);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-logo { display: flex; align-items: center; gap: 10px; }
+.logo-star { color: var(--red); font-size: 28px; line-height: 1; }
+.logo-text-top { font-family: 'Oswald', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: var(--red); text-transform: uppercase; }
+.logo-text-main { font-family: 'PT Serif', serif; font-style: italic; font-size: 22px; color: var(--navy); line-height: 1.1; }
+.logo-text-sub { font-family: 'Oswald', sans-serif; font-size: 11px; letter-spacing: 0.12em; color: var(--mid); }
+.btn-admin-toggle { background: transparent; border: 1.5px solid var(--border); color: var(--mid); padding: 6px 14px; border-radius: 2px; font-size: 12px; cursor: pointer; font-family: 'Oswald', sans-serif; letter-spacing: 0.08em; transition: all 0.2s; }
+.btn-admin-toggle:hover { border-color: var(--red); color: var(--red); }
+
+.page { display: none; }
+.page.active { display: block; }
+.name-screen, .form-screen { display: none; }
+.name-screen.active, .form-screen.active { display: block; }
+
+.user-wrap { max-width: 620px; margin: 0 auto; padding: 0 16px 60px; }
+
+.hero {
+  text-align: center;
+  padding: 36px 20px 28px;
+  border-bottom: 2px dashed var(--border);
+  margin-bottom: 28px;
+}
+.hero-eyebrow { font-family: 'Oswald', sans-serif; font-size: 12px; letter-spacing: 0.22em; color: var(--red); text-transform: uppercase; margin-bottom: 8px; }
+.hero-title { font-family: 'PT Serif', serif; font-style: italic; font-size: 48px; color: var(--navy); line-height: 0.95; margin-bottom: 6px; }
+.hero-title-sub { font-family: 'Oswald', sans-serif; font-size: 16px; letter-spacing: 0.18em; color: var(--navy); text-transform: uppercase; }
+.hero-badge { display: inline-block; background: var(--red); color: white; font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 22px; border-radius: 2px; margin: 16px 0 8px; }
+.hero-sub { font-size: 13px; color: var(--mid); line-height: 1.6; }
+
+.card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 2px;
+  padding: 24px 22px;
+  margin-bottom: 16px;
+  position: relative;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 5px; left: 5px; right: -5px; bottom: -5px;
+  background: var(--cream2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  z-index: -1;
+}
+.card-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--navy);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--cream2);
+  padding-bottom: 10px;
+}
+.card-title .star { color: var(--red); }
+
+label { display: block; font-family: 'Oswald', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; margin-top: 14px; }
+label:first-of-type { margin-top: 0; }
+input[type="text"], input[type="number"], input[type="date"], input[type="email"], textarea, select {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 2px;
+  font-size: 15px; font-family: 'Inter', sans-serif; background: var(--cream); color: var(--dark);
+  transition: border-color 0.2s; outline: none;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--navy); background: var(--white); }
+textarea { min-height: 90px; resize: vertical; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.hint-text { font-size: 12px; color: var(--mid); margin-top: 6px; line-height: 1.5; }
+
+.progress-wrap {
+  background: var(--navy);
+  color: white;
+  padding: 11px 18px;
+  position: sticky;
+  top: 67px;
+  z-index: 50;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.progress-label { font-family: 'Oswald', sans-serif; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; opacity: 0.7; }
+.progress-bar { flex: 1; height: 5px; background: rgba(255,255,255,0.2); overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #E8C060); transition: width 0.4s ease; width: 0%; }
+.progress-count { font-family: 'Oswald', sans-serif; font-size: 15px; font-weight: 700; color: var(--gold); white-space: nowrap; }
+
+.tasks-list { display: flex; flex-direction: column; }
+
+.task-row-wrap { display: flex; flex-direction: column; }
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  border: 1.5px solid var(--border);
+  border-bottom: none;
+  background: var(--cream);
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.task-row-wrap:last-child .task-item { border-bottom: 1.5px solid var(--border); }
+.task-row-wrap:last-child .task-item.done { border-bottom: none; }
+.task-item:hover { border-color: var(--navy); }
+.task-item.done { border-color: var(--green); background: #F0F7F0; }
+.task-num { font-family: 'Oswald', sans-serif; font-size: 22px; font-weight: 700; color: var(--border); min-width: 36px; line-height: 1; transition: color 0.15s; }
+.task-item.done .task-num { color: var(--green); }
+.task-text { font-size: 14px; color: var(--dark); flex: 1; line-height: 1.4; }
+.task-check-box { width: 24px; height: 24px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; background: white; transition: all 0.15s; }
+.task-item.done .task-check-box { background: var(--green); border-color: var(--green); color: white; }
+.bottle-earned { font-size: 20px; display: none; animation: popB 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
+.task-item.done .bottle-earned { display: block; }
+@keyframes popB { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+.task-where-wrap {
+  display: none;
+  padding: 10px 15px 12px 63px;
+  background: #F0F7F0;
+  border: 1.5px solid var(--green);
+  border-top: none;
+}
+.task-row-wrap:last-child .task-where-wrap { border-bottom: 1.5px solid var(--green); }
+.where-label { font-family: 'Oswald', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); margin-bottom: 8px; }
+.where-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.where-btn { padding: 5px 13px; border: 1.5px solid var(--green); background: white; color: var(--green); font-family: 'Oswald', sans-serif; font-size: 12px; letter-spacing: 0.06em; cursor: pointer; border-radius: 2px; transition: all 0.12s; }
+.where-btn.active, .where-btn:hover { background: var(--green); color: white; }
+
+.measure-block { background: var(--cream); border: 1px solid var(--border); padding: 14px 16px; margin-bottom: 14px; border-radius: 2px; }
+.measure-block-title { font-family: 'Oswald', sans-serif; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--navy); margin-bottom: 12px; }
+
+.delta-box { display: none; background: var(--navy); color: white; padding: 12px 16px; margin-top: 12px; border-radius: 2px; font-family: 'Oswald', sans-serif; font-size: 13px; letter-spacing: 0.06em; }
+.delta-num { font-size: 22px; font-weight: 700; color: var(--gold); }
+
+.star-rating { display: flex; gap: 8px; margin-top: 8px; }
+.star-btn { font-size: 26px; cursor: pointer; opacity: 0.3; transition: all 0.1s; background: none; border: none; padding: 0; line-height: 1; }
+.star-btn.active { opacity: 1; }
+.star-btn:hover { opacity: 0.8; transform: scale(1.1); }
+
+.permission-btns { display: flex; gap: 10px; margin-top: 8px; }
+.perm-btn { flex: 1; padding: 10px; border: 1.5px solid var(--border); background: var(--cream); color: var(--mid); font-family: 'Oswald', sans-serif; font-size: 13px; letter-spacing: 0.05em; cursor: pointer; border-radius: 2px; text-align: center; transition: all 0.15s; }
+.perm-btn.active-yes { background: var(--green); border-color: var(--green); color: white; }
+.perm-btn.active-no  { background: var(--mid); border-color: var(--mid); color: white; }
+
+.btn-submit { width: 100%; padding: 17px; background: var(--red); color: white; border: none; font-family: 'Oswald', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; margin-top: 6px; border-radius: 2px; box-shadow: 4px 4px 0 var(--red2); }
+.btn-submit:hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--red2); }
+.btn-submit:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--red2); }
+.btn-submit:disabled { background: #bbb; box-shadow: 4px 4px 0 #999; transform: none; cursor: not-allowed; }
+
+.divider { text-align: center; font-family: 'Oswald', sans-serif; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--border); margin: 24px 0 16px; display: flex; align-items: center; gap: 12px; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.success-screen { display: none; text-align: center; padding: 40px 20px; }
+.success-screen.show { display: block; }
+.success-title { font-family: 'PT Serif', serif; font-style: italic; font-size: 36px; color: var(--navy); margin: 16px 0 8px; }
+.success-sub { font-size: 15px; color: var(--mid); line-height: 1.6; }
+.bottles-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 20px 0; }
+.bottle-badge { background: var(--navy); color: var(--gold); font-family: 'Oswald', sans-serif; font-size: 13px; padding: 5px 12px; border-radius: 2px; animation: popB 0.4s cubic-bezier(0.175,0.885,0.32,1.275) both; }
+
+.admin-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 16px 60px; }
+.admin-top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 24px; border-bottom: 2px solid var(--navy); padding-bottom: 16px; }
+.admin-top h2 { font-family: 'Oswald', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--navy); flex: 1; }
+.btn-export { padding: 9px 18px; background: var(--navy); color: white; border: none; font-family: 'Oswald', sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 2px; }
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-box { background: var(--white); border: 1.5px solid var(--border); padding: 16px; text-align: center; border-radius: 2px; }
+.stat-num { font-family: 'Oswald', sans-serif; font-size: 30px; font-weight: 700; color: var(--red); }
+.stat-lbl { font-family: 'Oswald', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); margin-top: 4px; }
+.filter-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.filter-row input, .filter-row select { flex: 1; min-width: 150px; background: var(--white); }
+.table-wrap { overflow-x: auto; background: var(--white); border: 1.5px solid var(--border); border-radius: 2px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--navy); color: white; padding: 11px 14px; text-align: left; font-family: 'Oswald', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; cursor: pointer; }
+th:hover { background: #2A3A8B; }
+td { padding: 12px 14px; border-top: 1px solid var(--border); vertical-align: middle; }
+tr:hover td { background: var(--cream); }
+.count-badge { background: var(--gold); color: var(--dark); font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 13px; padding: 2px 9px; border-radius: 2px; }
+.btn-view { padding: 5px 12px; background: transparent; border: 1.5px solid var(--navy); color: var(--navy); font-family: 'Oswald', sans-serif; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.12s; }
+.btn-view:hover { background: var(--navy); color: white; }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--white); border: 2px solid var(--border); padding: 28px; max-width: 580px; width: 100%; max-height: 85vh; overflow-y: auto; border-radius: 2px; position: relative; }
+.modal::before { content: ''; position: absolute; top: 6px; left: 6px; right: -6px; bottom: -6px; background: var(--cream2); border: 1px solid var(--border); z-index: -1; }
+.modal-title { font-family: 'Oswald', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--navy); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--cream2); padding-bottom: 12px; }
+.modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--mid); }
+.dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-size: 13px; margin-bottom: 16px; }
+.dl dt { font-family: 'Oswald', sans-serif; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); padding-top: 2px; }
+.dl dd { color: var(--dark); line-height: 1.5; }
+.task-mini-list { list-style: none; }
+.task-mini-list li { padding: 5px 0; border-bottom: 1px solid var(--cream2); font-size: 13px; display: flex; gap: 8px; }
+.section-lbl { font-family: 'Oswald', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; margin-top: 14px; }
+
+.loading { text-align: center; padding: 40px; color: var(--mid); font-family: 'Oswald', sans-serif; letter-spacing: 0.1em; text-transform: uppercase; }
+.empty-state { text-align: center; padding: 40px; color: var(--mid); }
+
+#confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
+
+@media (max-width: 480px) {
+  .row2 { grid-template-columns: 1fr; }
+  .hero-title { font-size: 36px; }
+  .filter-row input, .filter-row select { max-width: 100%; }
+  .permission-btns { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<div class="header">
+  <div class="header-logo">
+    <div class="logo-star">★</div>
+    <div>
+      <div class="logo-text-top">Шагай Дома</div>
+      <div class="logo-text-main">Санаторий</div>
+      <div class="logo-text-sub">Для похудения</div>
+    </div>
+  </div>
+  <button class="btn-admin-toggle" onclick="showAdminLogin()">⚙ Организатор</button>
+</div>
+
+<!-- Detail modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modalName">—</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- Admin login modal -->
+<div class="modal-overlay" id="adminLoginModal">
+  <div class="modal" style="max-width:340px;">
+    <div class="modal-title">
+      <span>Вход</span>
+      <button class="modal-close" onclick="document.getElementById('adminLoginModal').classList.remove('open')">✕</button>
+    </div>
+    <label>Пароль организатора</label>
+    <input type="password" id="adminPwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkAdmin()">
+    <button class="btn-submit" style="margin-top:14px;" onclick="checkAdmin()">Войти</button>
+    <div id="adminPwError" style="color:var(--red);font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:0.08em;margin-top:10px;display:none;">НЕВЕРНЫЙ ПАРОЛЬ</div>
+  </div>
+</div>
+
+<!-- USER PAGE -->
+<div class="page active" id="userPage">
+  <div class="user-wrap">
+
+    <div class="name-screen active" id="nameScreen">
+      <div class="hero">
+        <div class="hero-eyebrow">Онлайн</div>
+        <div class="hero-title">Санаторий</div>
+        <div class="hero-title-sub">для похудения</div>
+        <div class="hero-badge">Старт 13 июля</div>
+        <div class="hero-sub">Отмечай выполненные процедуры и получай<br>бутылочки Шагайтуки за каждое задание 🍶</div>
+      </div>
+
+      <div class="card" style="margin-top:24px;">
+        <div class="card-title"><span class="star">★</span> Регистрация участницы</div>
+        <label>Имя и фамилия</label>
+        <input type="text" id="nameInput" placeholder="Мария Иванова">
+        <label>Email</label>
+        <input type="email" id="emailInput" placeholder="maria@mail.ru">
+        <div class="hint-text">Для важных новостей марафона</div>
+        <button class="btn-submit" style="margin-top:20px;" onclick="startForm()">Начать заполнять &rarr;</button>
+      </div>
+    </div>
+
+    <div class="form-screen" id="formScreen">
+
+      <div class="progress-wrap">
+        <span class="progress-label">Процедуры</span>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <span class="progress-count"><span id="doneCount">0</span>/13 &nbsp;🍶</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="star">★</span> Процедуры санатория</div>
+        <div class="tasks-list" id="tasksList"></div>
+      </div>
+
+      <div class="divider">Замеры</div>
+
+      <div class="card">
+        <div class="card-title"><span class="star">★</span> Замеры до и после</div>
+        <div class="measure-block">
+          <div class="measure-block-title">День заезда — начало марафона</div>
+          <div class="row2">
+            <div><label>Вес (кг)</label><input type="number" id="w_start" placeholder="65.5" step="0.1"></div>
+            <div><label>Дата</label><input type="date" id="d_start"></div>
+          </div>
+          <div class="row2">
+            <div><label>Талия (см)</label><input type="number" id="waist_start" placeholder="80"></div>
+            <div><label>Бёдра (см)</label><input type="number" id="hips_start" placeholder="100"></div>
+          </div>
+        </div>
+        <div class="measure-block">
+          <div class="measure-block-title">День выезда — конец марафона</div>
+          <div class="row2">
+            <div><label>Вес (кг)</label><input type="number" id="w_end" placeholder="62.0" step="0.1"></div>
+            <div><label>Дата</label><input type="date" id="d_end"></div>
+          </div>
+          <div class="row2">
+            <div><label>Талия (см)</label><input type="number" id="waist_end" placeholder="77"></div>
+            <div><label>Бёдра (см)</label><input type="number" id="hips_end" placeholder="97"></div>
+          </div>
+        </div>
+        <div class="delta-box" id="deltaBox">
+          Изменение веса: <span class="delta-num" id="deltaNum">—</span>
+        </div>
+      </div>
+
+      <div class="divider">Книга отзывов</div>
+
+      <div class="card">
+        <div class="card-title"><span class="star">★</span> Книга отзывов санатория</div>
+        <label>Отзыв о марафоне</label>
+        <textarea id="reviewText" placeholder="Что понравилось, что изменилось, что удивило..."></textarea>
+        <label>Пожелания и предложения</label>
+        <textarea id="feedbackText" placeholder="Что стоит добавить или улучшить?" style="min-height:70px;"></textarea>
+        <label>Оценка санатория</label>
+        <div class="star-rating" id="starRating">
+          <button class="star-btn" onclick="setRating(1)">⭐</button>
+          <button class="star-btn" onclick="setRating(2)">⭐</button>
+          <button class="star-btn" onclick="setRating(3)">⭐</button>
+          <button class="star-btn" onclick="setRating(4)">⭐</button>
+          <button class="star-btn" onclick="setRating(5)">⭐</button>
+        </div>
+        <label>Разрешаю использовать отзыв в материалах клуба</label>
+        <div class="permission-btns">
+          <button class="perm-btn" id="permYes" onclick="setPermission(true)">&#10003; Да, конечно!</button>
+          <button class="perm-btn" id="permNo"  onclick="setPermission(false)">Лучше нет</button>
+        </div>
+      </div>
+
+      <button class="btn-submit" onclick="submitForm()" id="submitBtn">Сдать путёвку в санаторий &rarr;</button>
+
+      <div class="success-screen" id="successScreen">
+        <div style="font-size:64px;">🍶</div>
+        <div class="success-title">Выздоровление подтверждено!</div>
+        <div class="success-sub">Твои результаты сохранены. Организаторы всё получили.</div>
+        <div class="bottles-row" id="finalBottles"></div>
+        <div class="success-sub" style="margin-top:12px;">Ты настоящая звезда санатория! &#11088;</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PAGE -->
+<div class="page" id="adminPage">
+  <div class="admin-wrap">
+    <div class="admin-top">
+      <h2>&#9733; Панель организатора</h2>
+      <button class="btn-export" onclick="exportCSV()">&#8595; Экспорт CSV</button>
+      <button class="btn-admin-toggle" onclick="switchToUser()">&larr; Выйти</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num" id="sTotalPart">—</div><div class="stat-lbl">Участниц</div></div>
+      <div class="stat-box"><div class="stat-num" id="sTotalBottles">—</div><div class="stat-lbl">Бутылочек</div></div>
+      <div class="stat-box"><div class="stat-num" id="sAvgRating">—</div><div class="stat-lbl">Ср. оценка</div></div>
+      <div class="stat-box"><div class="stat-num" id="sPermCount">—</div><div class="stat-lbl">Разрешили отзыв</div></div>
+    </div>
+    <div class="filter-row">
+      <input type="text" id="filterName" placeholder="Поиск по имени..." oninput="renderTable()">
+      <input type="text" id="filterEmail" placeholder="Поиск по email..." oninput="renderTable()">
+      <select id="filterTasks" onchange="renderTable()">
+        <option value="">Все задания</option>
+        <option value="13">Все 13</option>
+        <option value="10">10+</option>
+        <option value="5">5+</option>
+      </select>
+      <select id="filterRating" onchange="renderTable()">
+        <option value="">Любая оценка</option>
+        <option value="5">Только 5 звёзд</option>
+        <option value="4">От 4 звёзд</option>
+      </select>
+      <select id="filterPerm" onchange="renderTable()">
+        <option value="">Все</option>
+        <option value="true">Разрешили отзыв</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('name')">Имя ↕</th>
+            <th>Email</th>
+            <th onclick="sortBy('tasks')">Задания ↕</th>
+            <th onclick="sortBy('rating')">Оценка ↕</th>
+            <th>Вес до → после</th>
+            <th onclick="sortBy('ts')">Дата ↕</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="adminTableBody">
+          <tr><td colspan="7" class="loading">Загрузка...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyApSUQxealmL13siDzauRWO_J6-fSHkN-4",
+  authDomain: "walk-walk-d8a14.firebaseapp.com",
+  projectId: "walk-walk-d8a14",
+  storageBucket: "walk-walk-d8a14.firebasestorage.app",
+  messagingSenderId: "1022340791272",
+  appId: "1:1022340791272:web:08750762c63e8cbbdac25d"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const ADMIN_PASSWORD = "admin2025";
+const COLLECTION = "sanatorium_marathon";
+const TASK_COUNT = 13;
+
+let userName = "", userEmail = "";
+let taskState = {};
+let rating = 0;
+let permission = null;
+let allData = [];
+let sortField = "ts", sortDir = -1;
+
+function startForm() {
+  const name = document.getElementById("nameInput").value.trim();
+  const email = document.getElementById("emailInput").value.trim();
+  if (!name) { document.getElementById("nameInput").focus(); return; }
+  userName = name; userEmail = email;
+  document.getElementById("nameScreen").classList.remove("active");
+  document.getElementById("formScreen").classList.add("active");
+  renderTasks();
+}
+
+function renderTasks() {
+  const list = document.getElementById("tasksList");
+  list.innerHTML = "";
+  for (let i = 0; i < TASK_COUNT; i++) {
+    const done = !!taskState[i]?.done;
+    const where = taskState[i]?.where || "";
+    const wrap = document.createElement("div");
+    wrap.className = "task-row-wrap";
+
+    const item = document.createElement("div");
+    item.className = "task-item" + (done ? " done" : "");
+    item.id = "task_" + i;
+    item.innerHTML =
+      '<div class="task-num">' + String(i+1).padStart(2,"0") + '</div>' +
+      '<div class="task-text">Задание #' + (i+1) + '</div>' +
+      '<div class="task-check-box">' + (done ? "&#10003;" : "") + '</div>' +
+      '<div class="bottle-earned">&#127862;</div>';
+    item.onclick = function() { toggleTask(i); };
+    wrap.appendChild(item);
+
+    const whereWrap = document.createElement("div");
+    whereWrap.className = "task-where-wrap";
+    whereWrap.id = "where_" + i;
+    if (done) whereWrap.style.display = "block";
+    whereWrap.innerHTML =
+      '<div class="where-label">Куда отчиталась?</div>' +
+      '<div class="where-btns">' +
+        '<button class="where-btn' + (where==="tg"?" active":"") + '" onclick="setWhere(event,' + i + ',\'tg\')">Телеграм</button>' +
+        '<button class="where-btn' + (where==="vk"?" active":"") + '" onclick="setWhere(event,' + i + ',\'vk\')">ВКонтакте</button>' +
+        '<button class="where-btn' + (where==="both"?" active":"") + '" onclick="setWhere(event,' + i + ',\'both\')">Везде</button>' +
+      '</div>';
+    wrap.appendChild(whereWrap);
+    list.appendChild(wrap);
+  }
+  updateProgress();
+}
+
+function toggleTask(i) {
+  if (!taskState[i]) taskState[i] = {};
+  taskState[i].done = !taskState[i].done;
+  if (!taskState[i].done) taskState[i].where = "";
+  renderTasks();
+}
+
+function setWhere(e, i, val) {
+  e.stopPropagation();
+  if (!taskState[i]) taskState[i] = {};
+  taskState[i].where = val;
+  document.querySelectorAll("#where_" + i + " .where-btn").forEach(function(b) { b.classList.remove("active"); });
+  e.target.classList.add("active");
+}
+
+function updateProgress() {
+  var done = Object.values(taskState).filter(function(t) { return t.done; }).length;
+  document.getElementById("doneCount").textContent = done;
+  document.getElementById("progressFill").style.width = (done/TASK_COUNT*100) + "%";
+}
+
+function updateDelta() {
+  var ws = parseFloat(document.getElementById("w_start").value);
+  var we = parseFloat(document.getElementById("w_end").value);
+  var box = document.getElementById("deltaBox");
+  if (ws && we) {
+    var diff = (we - ws).toFixed(1);
+    document.getElementById("deltaNum").textContent = (diff < 0 ? "−" : "+") + Math.abs(diff) + " кг";
+    document.getElementById("deltaNum").style.color = diff < 0 ? "#4CAF7D" : "var(--gold)";
+    box.style.display = "block";
+  } else { box.style.display = "none"; }
+}
+document.addEventListener("input", function(e) {
+  if (e.target.id === "w_start" || e.target.id === "w_end") updateDelta();
+});
+
+function setRating(val) {
+  rating = val;
+  document.querySelectorAll(".star-btn").forEach(function(b, i) {
+    b.classList.toggle("active", i < val);
+  });
+}
+
+function setPermission(val) {
+  permission = val;
+  document.getElementById("permYes").classList.toggle("active-yes", val === true);
+  document.getElementById("permNo").classList.toggle("active-no", val === false);
+}
+
+async function submitForm() {
+  var btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "Сохраняем...";
+  var tasks = [];
+  for (var i = 0; i < TASK_COUNT; i++) {
+    tasks.push({ num: i+1, done: !!(taskState[i] && taskState[i].done), where: (taskState[i] && taskState[i].where) || "" });
+  }
+  var data = {
+    name: userName, email: userEmail,
+    tasks: tasks,
+    totalBottles: tasks.filter(function(t) { return t.done; }).length,
+    measurements: {
+      weightStart: document.getElementById("w_start").value || null,
+      weightEnd:   document.getElementById("w_end").value   || null,
+      dateStart:   document.getElementById("d_start").value || null,
+      dateEnd:     document.getElementById("d_end").value   || null,
+      waistStart:  document.getElementById("waist_start").value || null,
+      waistEnd:    document.getElementById("waist_end").value   || null,
+      hipsStart:   document.getElementById("hips_start").value  || null,
+      hipsEnd:     document.getElementById("hips_end").value    || null,
+    },
+    review: document.getElementById("reviewText").value,
+    feedback: document.getElementById("feedbackText").value,
+    rating: rating, permission: permission,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  try {
+    await db.collection(COLLECTION).add(data);
+    btn.style.display = "none";
+    var ss = document.getElementById("successScreen");
+    ss.classList.add("show");
+    var fb = document.getElementById("finalBottles");
+    fb.innerHTML = "";
+    for (var j = 0; j < data.totalBottles; j++) {
+      var b = document.createElement("div");
+      b.className = "bottle-badge";
+      b.style.animationDelay = (j * 0.05) + "s";
+      b.textContent = "🍶 Шагайтуки";
+      fb.appendChild(b);
+    }
+    launchConfetti();
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = "Ошибка — попробуй ещё раз";
+    console.error(err);
+  }
+}
+
+function showAdminLogin() {
+  document.getElementById("adminLoginModal").classList.add("open");
+  setTimeout(function() { document.getElementById("adminPwInput").focus(); }, 100);
+}
+function checkAdmin() {
+  if (document.getElementById("adminPwInput").value === ADMIN_PASSWORD) {
+    document.getElementById("adminLoginModal").classList.remove("open");
+    document.getElementById("adminPwInput").value = "";
+    switchToAdmin();
+  } else {
+    document.getElementById("adminPwError").style.display = "block";
+  }
+}
+function switchToAdmin() {
+  document.getElementById("userPage").classList.remove("active");
+  document.getElementById("adminPage").classList.add("active");
+  loadAdminData();
+}
+function switchToUser() {
+  document.getElementById("adminPage").classList.remove("active");
+  document.getElementById("userPage").classList.add("active");
+}
+
+async function loadAdminData() {
+  document.getElementById("adminTableBody").innerHTML = '<tr><td colspan="7" class="loading">Загружаем данные...</td></tr>';
+  try {
+    var snap = await db.collection(COLLECTION).orderBy("timestamp","desc").get();
+    allData = snap.docs.map(function(d) { return Object.assign({id: d.id}, d.data()); });
+    updateStats(); renderTable();
+  } catch(e) {
+    document.getElementById("adminTableBody").innerHTML = '<tr><td colspan="7" class="empty-state">Ошибка. Проверь правила Firestore.</td></tr>';
+  }
+}
+
+function updateStats() {
+  document.getElementById("sTotalPart").textContent = allData.length;
+  document.getElementById("sTotalBottles").textContent = allData.reduce(function(s,r) { return s + (r.totalBottles||0); }, 0);
+  var rated = allData.filter(function(r) { return r.rating; });
+  document.getElementById("sAvgRating").textContent = rated.length ? (rated.reduce(function(s,r) { return s + r.rating; }, 0) / rated.length).toFixed(1) : "—";
+  document.getElementById("sPermCount").textContent = allData.filter(function(r) { return r.permission === true; }).length;
+}
+
+function renderTable() {
+  var nameQ  = document.getElementById("filterName").value.toLowerCase();
+  var emailQ = document.getElementById("filterEmail").value.toLowerCase();
+  var tQ = document.getElementById("filterTasks").value;
+  var rQ = document.getElementById("filterRating").value;
+  var pQ = document.getElementById("filterPerm").value;
+  var rows = allData.filter(function(r) {
+    if (nameQ  && !(r.name||"").toLowerCase().includes(nameQ))  return false;
+    if (emailQ && !(r.email||"").toLowerCase().includes(emailQ)) return false;
+    if (tQ === "13" && r.totalBottles < 13) return false;
+    if (tQ === "10" && r.totalBottles < 10) return false;
+    if (tQ === "5"  && r.totalBottles < 5)  return false;
+    if (rQ === "5" && r.rating !== 5) return false;
+    if (rQ === "4" && r.rating < 4)   return false;
+    if (pQ === "true" && r.permission !== true) return false;
+    return true;
+  });
+  rows.sort(function(a, b) {
+    var av = a[sortField], bv = b[sortField];
+    if (sortField === "tasks") { av = a.totalBottles; bv = b.totalBottles; }
+    if (sortField === "ts") { av = (a.timestamp && a.timestamp.seconds) || 0; bv = (b.timestamp && b.timestamp.seconds) || 0; }
+    if (av < bv) return -sortDir;
+    if (av > bv) return sortDir;
+    return 0;
+  });
+  var tbody = document.getElementById("adminTableBody");
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Нет участниц по фильтрам</td></tr>'; return; }
+  tbody.innerHTML = rows.map(function(r) {
+    var ts = r.timestamp ? new Date(r.timestamp.seconds*1000).toLocaleDateString("ru") : "—";
+    var m = r.measurements || {};
+    var wdelta = m.weightStart && m.weightEnd
+      ? "<br><small style='color:" + ((+m.weightEnd - +m.weightStart) < 0 ? "#3A7A3A" : "#D63025") + "'>" + (+m.weightEnd - +m.weightStart).toFixed(1) + " кг</small>"
+      : "";
+    var stars = r.rating ? "★".repeat(r.rating) + "☆".repeat(5-r.rating) : "—";
+    return "<tr>" +
+      "<td><strong>" + (r.name||"—") + "</strong></td>" +
+      "<td style='color:var(--mid);font-size:12px;'>" + (r.email||"—") + "</td>" +
+      "<td><span class='count-badge'>🍶 " + (r.totalBottles||0) + "</span></td>" +
+      "<td style='color:var(--gold);'>" + stars + "</td>" +
+      "<td style='font-size:12px;'>" + (m.weightStart||"—") + " → " + (m.weightEnd||"—") + wdelta + "</td>" +
+      "<td style='font-size:12px;color:var(--mid);'>" + ts + "</td>" +
+      "<td><button class='btn-view' onclick=\"openDetail('" + r.id + "')\">Открыть</button></td>" +
+      "</tr>";
+  }).join("");
+}
+
+function sortBy(f) {
+  if (sortField === f) sortDir *= -1; else { sortField = f; sortDir = -1; }
+  renderTable();
+}
+
+function openDetail(id) {
+  var r = allData.find(function(x) { return x.id === id; });
+  if (!r) return;
+  document.getElementById("modalName").textContent = r.name || "—";
+  var m = r.measurements || {};
+  var tasks = (r.tasks || []).map(function(t) {
+    return "<li><span>" + (t.done ? "✅" : "⬜") + "</span> Задание #" + t.num + (t.where ? " <span style='color:var(--mid);font-size:11px;'>(" + t.where + ")</span>" : "") + "</li>";
+  }).join("");
+  document.getElementById("modalContent").innerHTML =
+    "<dl class='dl'>" +
+    "<dt>Email</dt><dd>" + (r.email||"—") + "</dd>" +
+    "<dt>Бутылочки</dt><dd>🍶 " + (r.totalBottles||0) + " из 13</dd>" +
+    "<dt>Оценка</dt><dd>" + (r.rating ? "★".repeat(r.rating) : "—") + "</dd>" +
+    "<dt>Разрешила отзыв</dt><dd>" + (r.permission===true ? "✅ Да" : r.permission===false ? "❌ Нет" : "—") + "</dd>" +
+    "<dt>Вес</dt><dd>" + (m.weightStart||"—") + " → " + (m.weightEnd||"—") + " кг</dd>" +
+    "<dt>Талия</dt><dd>" + (m.waistStart||"—") + " → " + (m.waistEnd||"—") + " см</dd>" +
+    "<dt>Бёдра</dt><dd>" + (m.hipsStart||"—") + " → " + (m.hipsEnd||"—") + " см</dd>" +
+    "</dl>" +
+    "<div class='section-lbl'>Задания</div>" +
+    "<ul class='task-mini-list'>" + tasks + "</ul>" +
+    (r.review ? "<div class='section-lbl' style='margin-top:14px;'>Отзыв</div><div style='font-size:13px;line-height:1.6;'>" + r.review + "</div>" : "") +
+    (r.feedback ? "<div class='section-lbl' style='margin-top:12px;'>Пожелания</div><div style='font-size:13px;line-height:1.6;'>" + r.feedback + "</div>" : "");
+  document.getElementById("detailModal").classList.add("open");
+}
+
+function closeModal() { document.getElementById("detailModal").classList.remove("open"); }
+
+document.querySelectorAll(".modal-overlay").forEach(function(el) {
+  el.addEventListener("click", function(e) { if (e.target === el) el.classList.remove("open"); });
+});
+
+function exportCSV() {
+  var h = ["Имя","Email","Бутылочек","Оценка","Вес нач","Вес кон","Талия нач","Талия кон","Бёдра нач","Бёдра кон","Отзыв","Пожелания","Разрешила отзыв","Дата"];
+  var rows = allData.map(function(r) {
+    var m = r.measurements || {};
+    var ts = r.timestamp ? new Date(r.timestamp.seconds*1000).toLocaleDateString("ru") : "";
+    return [r.name, r.email, r.totalBottles, r.rating,
+      m.weightStart, m.weightEnd, m.waistStart, m.waistEnd, m.hipsStart, m.hipsEnd,
+      '"' + (r.review||"").replace(/"/g,"'") + '"',
+      '"' + (r.feedback||"").replace(/"/g,"'") + '"',
+      r.permission===true ? "Да" : r.permission===false ? "Нет" : "", ts].join(",");
+  });
+  var csv = [h.join(",")].concat(rows).join("\n");
+  var a = document.createElement("a");
+  a.href = "data:text/csv;charset=utf-8,\uFEFF" + encodeURIComponent(csv);
+  a.download = "sanatorium.csv";
+  a.click();
+}
+
+function launchConfetti() {
+  var canvas = document.getElementById("confetti-canvas");
+  var ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  var ps = [];
+  var colors = ["#D63025","#C8973A","#1B2A6B","#3A7A3A","#F5EDD8"];
+  for (var i = 0; i < 100; i++) {
+    ps.push({ x: Math.random()*canvas.width, y: Math.random()*-canvas.height, r: Math.random()*5+3, d: Math.random()*2+1, color: colors[Math.floor(Math.random()*5)], tilt: Math.random()*10-5 });
+  }
+  var f = 0;
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ps.forEach(function(p) {
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=p.color; ctx.fill();
+      p.y += p.d + Math.sin(f/20)*0.5; p.x += Math.sin(f/30+p.tilt)*1.5;
+      if (p.y > canvas.height) { p.y = -10; p.x = Math.random()*canvas.width; }
+    });
+    f++;
+    if (f < 200) requestAnimationFrame(draw); else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+}
+</script>
+</body>
+</html>
