@@ -303,6 +303,7 @@ tr:hover td { background: var(--cream); }
         <label>Email</label>
         <input type="email" id="emailInput" placeholder="maria@mail.ru">
         <div class="hint-text">Для важных новостей марафона</div>
+        <div id="lookupStatus" style="display:none;margin-top:10px;padding:10px 14px;border-radius:2px;font-size:13px;font-family:'Oswald',sans-serif;letter-spacing:0.06em;"></div>
         <button class="btn-submit" style="margin-top:20px;" onclick="startForm()">Начать заполнять &rarr;</button>
       </div>
     </div>
@@ -465,14 +466,110 @@ let permission = null;
 let allData = [];
 let sortField = "ts", sortDir = -1;
 
-function startForm() {
+// ── LocalStorage helpers ──
+var LS_KEY = "sanatorium_user";
+function saveLocal() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ name: userName, email: userEmail })); } catch(e) {}
+}
+function loadLocal() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch(e) { return null; }
+}
+
+// ── Load existing record from Firestore by email ──
+var existingDocId = null;
+
+async function lookupByEmail(email) {
+  if (!email || email.indexOf("@") < 0) return null;
+  try {
+    var snap = await db.collection(COLLECTION).where("email","==",email).orderBy("timestamp","desc").limit(1).get();
+    if (snap.empty) return null;
+    var doc = snap.docs[0];
+    return { id: doc.id, ...doc.data() };
+  } catch(e) { return null; }
+}
+
+function applyRecord(rec) {
+  existingDocId = rec.id;
+  // tasks
+  taskState = {};
+  if (rec.tasks) {
+    rec.tasks.forEach(function(t) {
+      taskState[t.num - 1] = { done: t.done, where: t.where || "" };
+    });
+  }
+  // measurements
+  var m = rec.measurements || {};
+  var fields = { w_start: m.weightStart, w_end: m.weightEnd, d_start: m.dateStart, d_end: m.dateEnd,
+    waist_start: m.waistStart, waist_end: m.waistEnd, hips_start: m.hipsStart, hips_end: m.hipsEnd };
+  Object.keys(fields).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && fields[id]) el.value = fields[id];
+  });
+  // review/feedback
+  if (rec.review) document.getElementById("reviewText").value = rec.review;
+  if (rec.feedback) document.getElementById("feedbackText").value = rec.feedback;
+  if (rec.rating) setRating(rec.rating);
+  if (rec.permission !== undefined && rec.permission !== null) setPermission(rec.permission);
+}
+
+// ── Email field: lookup on blur ──
+document.addEventListener("DOMContentLoaded", function() {
+  var emailEl = document.getElementById("emailInput");
+  if (emailEl) {
+    emailEl.addEventListener("blur", async function() {
+      var email = emailEl.value.trim();
+      if (!email || email.indexOf("@") < 0) return;
+      var status = document.getElementById("lookupStatus");
+      status.style.display = "block";
+      status.style.background = "var(--cream2)";
+      status.style.color = "var(--mid)";
+      status.textContent = "Ищем твои данные...";
+      var rec = await lookupByEmail(email);
+      if (rec) {
+        status.style.background = "#F0F7F0";
+        status.style.color = "var(--green)";
+        status.style.border = "1px solid var(--green)";
+        status.textContent = "Нашли твои данные! Они загрузятся автоматически.";
+        // prefill name if empty
+        var nameEl = document.getElementById("nameInput");
+        if (!nameEl.value.trim() && rec.name) nameEl.value = rec.name;
+      } else {
+        status.style.background = "var(--cream)";
+        status.style.color = "var(--mid)";
+        status.style.border = "1px solid var(--border)";
+        status.textContent = "Новый участник — данные ещё не заполнены.";
+      }
+    });
+  }
+
+  // ── Auto-login from localStorage ──
+  var saved = loadLocal();
+  if (saved && saved.name && saved.email) {
+    document.getElementById("nameInput").value = saved.name;
+    document.getElementById("emailInput").value = saved.email;
+  }
+});
+
+async function startForm() {
   const name = document.getElementById("nameInput").value.trim();
   const email = document.getElementById("emailInput").value.trim();
   if (!name) { document.getElementById("nameInput").focus(); return; }
   userName = name; userEmail = email;
+  saveLocal();
+
+  // Try to load existing record
+  var btn = document.getElementById("submitBtn");
+  // show loading briefly
   document.getElementById("nameScreen").classList.remove("active");
   document.getElementById("formScreen").classList.add("active");
+
+  if (email && email.indexOf("@") >= 0) {
+    var rec = await lookupByEmail(email);
+    if (rec) { applyRecord(rec); }
+  }
+
   renderTasks();
+  updateDelta();
 }
 
 function renderTasks() {
@@ -588,7 +685,12 @@ async function submitForm() {
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   };
   try {
-    await db.collection(COLLECTION).add(data);
+    if (existingDocId) {
+      await db.collection(COLLECTION).doc(existingDocId).set(data);
+    } else {
+      var newDoc = await db.collection(COLLECTION).add(data);
+      existingDocId = newDoc.id;
+    }
     btn.style.display = "none";
     var ss = document.getElementById("successScreen");
     ss.classList.add("show");
