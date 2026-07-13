@@ -193,6 +193,7 @@ tr:hover td{background:var(--cream);}
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
+<canvas class="bubble-bg" id="bubbleBg"></canvas>
 
 <!-- HEADER -->
 <div class="header">
@@ -280,6 +281,44 @@ tr:hover td{background:var(--cream);}
 
     <!-- ── PHASE 2: Задания ── -->
     <div class="phase" id="phase2">
+      <div class="greeting-banner" id="greetingBanner" style="display:none;">
+        <div class="greeting-avatar" id="greetingAvatar">?</div>
+        <div class="greeting-text">
+          <div class="greeting-hi" id="greetingHi">Привет!</div>
+          <div class="greeting-sub" id="greetingSub">Марафон Санаторий для похудения</div>
+        </div>
+      </div>
+
+      <div class="level-badge-wrap" id="levelBadgeWrap">
+        <div class="level-badge-icon" id="levelIcon">🌱</div>
+        <div class="level-badge-info">
+          <div class="level-badge-name" id="levelName">Новичок санатория</div>
+          <div class="level-badge-next" id="levelNext">Отметь первое задание</div>
+          <div class="level-track-mini"><div class="level-track-fill" id="levelFill" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="motiv-phrase-wrap">
+        <div class="motiv-phrase" id="motivPhrase">"Каждый шаг — это уже победа над вчерашней собой"</div>
+        <div class="motiv-author">— Санаторий Шагайтуки</div>
+      </div>
+
+      <div class="streak-wrap" id="streakWrap" style="display:none;">
+        <div class="streak-fire">🔥</div>
+        <div>
+          <div class="streak-num" id="streakNum">0</div>
+          <div class="streak-lbl">дней заходишь подряд</div>
+        </div>
+      </div>
+
+      <div class="days-wrap">
+        <div class="days-header">
+          <span class="days-title">14 дней марафона</span>
+          <span class="days-left" id="daysLeft"></span>
+        </div>
+        <div class="days-dots" id="daysDots"></div>
+      </div>
+
       <div class="progress-wrap">
         <span class="progress-label">Процедуры</span>
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
@@ -448,6 +487,12 @@ async function lookupByEmail(email){
 }
 
 async function saveToFirestore(extraData){
+  // Safety: if no docId yet, try lookup by email one more time to avoid duplicates
+  if(!docId&&userEmail&&userEmail.indexOf("@")>=0){
+    var existing=await lookupByEmail(userEmail);
+    if(existing){docId=existing.id;saveLocal();}
+  }
+
   var tasks=[];
   for(var i=0;i<TASK_COUNT;i++){
     tasks.push({num:i+1,done:!!(taskState[i]&&taskState[i].done),where:(taskState[i]&&taskState[i].where)||""});
@@ -460,7 +505,7 @@ async function saveToFirestore(extraData){
   },extraData||{});
 
   if(docId){
-    await db.collection(COLLECTION).doc(docId).update(data);
+    await db.collection(COLLECTION).doc(docId).set(data,{merge:true});
   }else{
     data.timestamp=firebase.firestore.FieldValue.serverTimestamp();
     data.stage="start";
@@ -515,7 +560,7 @@ function showPhase(n){
   window.scrollTo(0,0);
 }
 function goToPhase(n){
-  if(n===2)renderTasks();
+  if(n===2){renderTasks();setTimeout(initUX,50);}
   if(n===3)updateDelta();
   showPhase(n);
 }
@@ -546,6 +591,7 @@ document.addEventListener("DOMContentLoaded",function(){
   if(saved&&saved.name&&saved.email){
     document.getElementById("nameInput").value=saved.name;
     document.getElementById("emailInput").value=saved.email;
+    if(saved.docId)docId=saved.docId;
   }
 });
 
@@ -569,8 +615,8 @@ async function doLogin(){
     else startPhase=1;
   }
   showPhase(startPhase);
-  if(startPhase===2){renderTasks();renderShelf();}
-  if(startPhase===3){renderTasks();renderShelf();updateDelta();}
+  if(startPhase===2){renderTasks();renderShelf();initUX();updateMotivPhrase(Object.values(taskState).filter(function(t){return t.done;}).length);updateLevel(Object.values(taskState).filter(function(t){return t.done;}).length);}
+  if(startPhase===3){renderTasks();renderShelf();updateDelta();initUX();}
 }
 
 // ── PHASE 1 SAVE ──
@@ -626,12 +672,14 @@ function toggleTask(i){
   taskState[i].done=!taskState[i].done;
   if(!taskState[i].done)taskState[i].where="";
   renderTasks();
-  // Check for golden bottle effect
   var doneNow=Object.keys(taskState).filter(function(k){return taskState[k]&&taskState[k].done;}).length;
   var taskEl=document.getElementById("task_"+i);
   if(taskState[i]&&taskState[i].done){
+    playPop();
     if(doneNow%5===0&&taskEl){fireSparkles(taskEl);fireMiniConfetti();}
   }
+  updateMotivPhrase(doneNow);
+  updateLevel(doneNow);
   renderShelf();
   scheduleAutoSave();
 }
@@ -713,6 +761,224 @@ function fireMiniConfetti(){
   draw();
 }
 
+// ── CONSTANTS ──
+var MARATHON_START = new Date("2025-07-13");
+var MARATHON_END = new Date("2025-07-27");
+
+var PHRASES = [
+  '"Каждый шаг — это уже победа над вчерашней собой"',
+  '"1 процедура выполнена. Начало положено — это главное!"',
+  '"Вода, движение, забота о себе — три кита здоровья"',
+  '"Уже 3 процедуры позади. Тело тебя благодарит 🙏"',
+  '"Четыре шага к лучшей себе. Ты неостановима!"',
+  '"5 из 13 — ты на полпути! Золотая бутылочка заслужена ✨"',
+  '"Больше половины пути пройдено. Гордись собой!"',
+  '"7 процедур — ты настоящий ветеран санатория!"',
+  '"Восемь — уже больше половины! Финиш близко 💪"',
+  '"9 процедур. Ты — пример для всего санатория!"',
+  '"10 из 13. Золотая бутылочка — заслуженная награда ✨"',
+  '"Почти финиш! Осталось совсем чуть-чуть!"',
+  '"12 процедур! Ты легенда санатория. Ещё один шаг!"',
+  '"Все 13! Ты — ЛЕГЕНДА санатория Шагайтуки! 👑🎊"',
+];
+
+var LEVELS = [
+  {min:0, max:3,  name:"Новичок санатория", icon:"🌱", next:"до Постояльца"},
+  {min:3, max:7,  name:"Постоялец",          icon:"🛁", next:"до Ветерана"},
+  {min:7, max:11, name:"Ветеран курорта",     icon:"💪", next:"до Легенды"},
+  {min:11,max:13, name:"Легенда санатория",   icon:"👑", next:null},
+];
+
+// ── GREETING ──
+function showGreeting(){
+  if(!userName)return;
+  var el=document.getElementById("greetingBanner");
+  if(!el)return;
+  el.style.display="flex";
+  var av=document.getElementById("greetingAvatar");
+  av.textContent=userName.charAt(0).toUpperCase();
+  var now=new Date();
+  var h=now.getHours();
+  var greet=h<12?"Доброе утро":h<17?"Добрый день":"Добрый вечер";
+  document.getElementById("greetingHi").textContent=greet+", "+userName.split(" ")[0]+"! 👋";
+  // day of marathon
+  var dayNum=Math.floor((now-MARATHON_START)/(1000*60*60*24))+1;
+  dayNum=Math.max(1,Math.min(14,dayNum));
+  document.getElementById("greetingSub").textContent=dayNum+"-й день марафона · Санаторий для похудения";
+}
+
+// ── MOTIV PHRASE ──
+function updateMotivPhrase(cnt){
+  var el=document.getElementById("motivPhrase");
+  if(!el)return;
+  el.style.opacity="0";
+  setTimeout(function(){
+    el.textContent=PHRASES[Math.min(cnt,PHRASES.length-1)];
+    el.style.opacity="1";
+  },300);
+}
+
+// ── LEVEL ──
+var prevLevel=-1;
+function updateLevel(cnt){
+  var lv=0;
+  LEVELS.forEach(function(l,i){if(cnt>=l.min)lv=i;});
+  var L=LEVELS[lv];
+  document.getElementById("levelIcon").textContent=L.icon;
+  document.getElementById("levelName").textContent=L.name;
+  var range=L.max-L.min;
+  var prog=Math.min(cnt-L.min,range);
+  document.getElementById("levelFill").style.width=(prog/range*100)+"%";
+  if(L.next){
+    document.getElementById("levelNext").textContent=L.next+": ещё "+(L.max-cnt)+" зад.";
+  }else{
+    document.getElementById("levelNext").textContent="Максимальный уровень! 👑";
+  }
+  if(prevLevel>=0&&lv>prevLevel){
+    // level up!
+    var wrap=document.getElementById("levelBadgeWrap");
+    wrap.classList.add("upgraded");
+    setTimeout(function(){wrap.classList.remove("upgraded");},2000);
+    fireConfettiSmall();
+    playChime();
+  }
+  prevLevel=lv;
+}
+
+// ── STREAK ──
+function updateStreak(){
+  var LS_STREAK="san_streak_v1";
+  try{
+    var today=new Date().toDateString();
+    var data=JSON.parse(localStorage.getItem(LS_STREAK)||"{}");
+    if(data.lastDate===today){
+      // already logged today
+    } else {
+      var yesterday=new Date(Date.now()-86400000).toDateString();
+      if(data.lastDate===yesterday){data.count=(data.count||0)+1;}
+      else{data.count=1;}
+      data.lastDate=today;
+      localStorage.setItem(LS_STREAK,JSON.stringify(data));
+    }
+    var cnt=data.count||1;
+    if(cnt>1){
+      document.getElementById("streakWrap").style.display="flex";
+      document.getElementById("streakNum").textContent=cnt+" "+(cnt===1?"день":cnt<5?"дня":"дней");
+    }
+  }catch(e){}
+}
+
+// ── DAYS TRACK ──
+function initDaysTrack(){
+  var wrap=document.getElementById("daysDots");
+  if(!wrap||wrap.children.length>0)return;
+  var now=new Date();
+  var today=Math.floor((now-MARATHON_START)/(1000*60*60*24));
+  var left=Math.ceil((MARATHON_END-now)/(1000*60*60*24));
+  document.getElementById("daysLeft").textContent=left>0?left+" дн. до финиша":"Финиш!";
+  for(var i=0;i<14;i++){
+    var d=document.createElement("div");d.className="day-dot";
+    if(i<today)d.classList.add("done-day"),d.textContent="✓";
+    else if(i===today)d.classList.add("today-day");
+    wrap.appendChild(d);
+  }
+}
+
+// ── BUBBLE BG ──
+function initBubbleBg(){
+  var canvas=document.getElementById("bubbleBg");
+  if(!canvas||canvas._running)return;
+  canvas._running=true;
+  var ctx=canvas.getContext("2d");
+  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+  resize();window.addEventListener("resize",resize);
+  var bs=[];
+  for(var i=0;i<28;i++){
+    bs.push({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,
+      r:Math.random()*5+2,speed:Math.random()*.35+.15,op:Math.random()*.25+.06});
+  }
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    bs.forEach(function(b){
+      ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+      ctx.strokeStyle="rgba(27,42,107,"+b.op+")";ctx.lineWidth=1;ctx.stroke();
+      b.y-=b.speed;b.x+=Math.sin(b.y/40)*.4;
+      if(b.y<-b.r){b.y=canvas.height+b.r;b.x=Math.random()*canvas.width;}
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ── SOUND ──
+var audioCtx=null;
+function getAudio(){
+  if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  return audioCtx;
+}
+function playPop(){
+  var ctx=getAudio();if(!ctx)return;
+  var o=ctx.createOscillator();var g=ctx.createGain();
+  o.connect(g);g.connect(ctx.destination);
+  o.frequency.setValueAtTime(380,ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(180,ctx.currentTime+.09);
+  g.gain.setValueAtTime(.25,ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.13);
+  o.start(ctx.currentTime);o.stop(ctx.currentTime+.14);
+}
+function playChime(){
+  var ctx=getAudio();if(!ctx)return;
+  [523,659,784,1047].forEach(function(freq,i){
+    var o=ctx.createOscillator();var g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type="sine";o.frequency.value=freq;
+    var t=ctx.currentTime+i*.11;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.18,t+.02);
+    g.gain.exponentialRampToValueAtTime(.001,t+.35);
+    o.start(t);o.stop(t+.38);
+  });
+}
+function playSuccess(){
+  var ctx=getAudio();if(!ctx)return;
+  [392,440,523,659,784].forEach(function(freq,i){
+    var o=ctx.createOscillator();var g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type="sine";o.frequency.value=freq;
+    var t=ctx.currentTime+i*.09;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.13,t+.02);
+    g.gain.exponentialRampToValueAtTime(.001,t+.32);
+    o.start(t);o.stop(t+.35);
+  });
+}
+
+// ── SMALL CONFETTI ──
+function fireConfettiSmall(){
+  var canvas=document.getElementById("confetti-canvas");
+  var ctx=canvas.getContext("2d");
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  var colors=["#D63025","#C8973A","#1B2A6B","#3A7A3A","#FFD700"];
+  var ps=[];
+  for(var i=0;i<60;i++)ps.push({x:Math.random()*canvas.width,y:Math.random()*-canvas.height*.5,r:Math.random()*4+2,d:Math.random()*2+.8,color:colors[Math.floor(Math.random()*5)],tilt:Math.random()*10-5});
+  var f=0;
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ps.forEach(function(p){ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color;ctx.fill();p.y+=p.d+Math.sin(f/20)*.5;p.x+=Math.sin(f/30+p.tilt)*1.5;if(p.y>canvas.height){p.y=-10;p.x=Math.random()*canvas.width;}});
+    f++;if(f<120)requestAnimationFrame(draw);else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+}
+
+// ── CALL UX ON PHASE 2 SHOW ──
+var uxInitDone=false;
+function initUX(){
+  if(uxInitDone)return;
+  uxInitDone=true;
+  showGreeting();
+  updateStreak();
+  initDaysTrack();
+  initBubbleBg();
+}
+
 function scheduleAutoSave(){
   var dot=document.getElementById("autosaveDot");
   var txt=document.getElementById("autosaveText");
@@ -778,7 +1044,7 @@ async function submitFinal(){
       completedAt:firebase.firestore.FieldValue.serverTimestamp()
     });
     btn.style.display="none";
-    var ss=document.getElementById("successScreen");ss.classList.add("show");
+    var ss=document.getElementById("successScreen");ss.classList.add("show");playSuccess();
     var fb=document.getElementById("finalBottles");fb.innerHTML="";
     var cnt=Object.values(taskState).filter(function(t){return t.done;}).length;
     for(var j=0;j<cnt;j++){
