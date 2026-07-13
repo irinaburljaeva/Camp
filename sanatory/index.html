@@ -507,10 +507,14 @@ function loadLocal(){try{return JSON.parse(localStorage.getItem(LS_KEY)||"null")
 async function lookupByEmail(email){
   if(!email||email.indexOf("@")<0)return null;
   try{
-    var snap=await db.collection(COLLECTION).where("email","==",email).orderBy("timestamp","desc").limit(1).get();
+    // No orderBy — avoids needing composite Firestore index
+    var snap=await db.collection(COLLECTION).where("email","==",email).limit(1).get();
     if(snap.empty)return null;
     return{id:snap.docs[0].id,...snap.docs[0].data()};
-  }catch(e){return null;}
+  }catch(e){
+    console.error("lookupByEmail error:",e);
+    return null;
+  }
 }
 
 async function saveToFirestore(extraData){
@@ -533,12 +537,14 @@ async function saveToFirestore(extraData){
 
   if(docId){
     await db.collection(COLLECTION).doc(docId).set(data,{merge:true});
+    console.log("Updated doc:",docId);
   }else{
     data.timestamp=firebase.firestore.FieldValue.serverTimestamp();
     data.stage="start";
     var ref=await db.collection(COLLECTION).add(data);
     docId=ref.id;
     saveLocal();
+    console.log("Created new doc:",docId);
   }
   return docId;
 }
@@ -1009,15 +1015,36 @@ function initUX(){
 function scheduleAutoSave(){
   var dot=document.getElementById("autosaveDot");
   var txt=document.getElementById("autosaveText");
-  dot.className="autosave-dot saving";txt.textContent="Сохраняем...";
+  if(dot)dot.className="autosave-dot saving";
+  if(txt)txt.textContent="Сохраняем...";
   if(autoSaveTimer)clearTimeout(autoSaveTimer);
   autoSaveTimer=setTimeout(async function(){
     try{
       await saveToFirestore({stage:"tasks"});
-      dot.className="autosave-dot saved";txt.textContent="Сохранено ✓";
-      setTimeout(function(){dot.className="autosave-dot";txt.textContent="Изменения сохраняются автоматически";},3000);
+      if(dot)dot.className="autosave-dot saved";
+      if(txt)txt.textContent="Сохранено ✓";
+      setTimeout(function(){
+        if(dot)dot.className="autosave-dot";
+        if(txt)txt.textContent="Изменения сохраняются автоматически";
+      },3000);
     }catch(e){
-      dot.className="autosave-dot";txt.textContent="Ошибка сохранения";
+      console.error("autosave error:",e);
+      if(dot)dot.className="autosave-dot";
+      if(txt){
+        txt.textContent="⚠️ Не удалось сохранить — повтор...";
+        txt.style.color="var(--red)";
+      }
+      // retry once after 5s
+      setTimeout(async function(){
+        try{
+          await saveToFirestore({stage:"tasks"});
+          if(dot)dot.className="autosave-dot saved";
+          if(txt){txt.textContent="Сохранено ✓";txt.style.color="";}
+          setTimeout(function(){if(dot)dot.className="autosave-dot";if(txt){txt.textContent="Изменения сохраняются автоматически";txt.style.color="";}},3000);
+        }catch(e2){
+          if(txt){txt.textContent="⚠️ Ошибка сохранения. Проверь интернет.";txt.style.color="var(--red)";}
+        }
+      },5000);
     }
   },1500);
 }
