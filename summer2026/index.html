@@ -44,29 +44,39 @@
   .login-note.error{ color:var(--bloom); font-weight:700; }
 
   .card{ background:var(--card); border-radius:18px; padding:14px 16px; margin-bottom:12px; box-shadow:0 8px 20px -12px rgba(74,51,36,0.28); }
-  .day-card{ background:linear-gradient(135deg,#FBF3E4,#F3E4C4); }
-  .day-title{ font-size:14.5px; font-weight:800; color:var(--soil-dark); }
-  .day-mode{ display:inline-block; margin-top:4px; font-size:10.5px; font-weight:800; color:#fff; background:var(--plum); border-radius:8px; padding:2px 7px; }
-  .day-desc{ font-size:11.5px; color:var(--ink-soft); margin-top:6px; line-height:1.4; }
-  .day-pill{ display:inline-block; margin-top:8px; font-size:11px; font-weight:800; color:var(--plum); background:#fff; border-radius:10px; padding:3px 8px; }
 
   .toast{ text-align:center; font-size:12.5px; font-weight:700; color:var(--soil-dark); min-height:18px; margin:2px 0 10px; }
   .weeds-note{ text-align:center; font-size:12px; color:#8B9574; font-weight:700; margin-top:2px; min-height:16px; }
 
-  .plots{ display:flex; flex-direction:column; gap:14px; margin-bottom:12px; }
-  .plot-scene{ border-radius:20px; overflow:hidden; box-shadow:0 8px 22px -12px rgba(74,51,36,0.3); border:2px solid transparent; position:relative; }
+  .day-chip{
+    display:block; width:fit-content; margin:4px auto 12px; background:#fff; border:1px solid #EAD9B8;
+    border-radius:14px; padding:5px 12px; font-size:11.5px; font-weight:800; color:var(--plum); cursor:pointer;
+  }
+
+  .garden-scene{ border-radius:22px; overflow:hidden; box-shadow:0 10px 30px -12px rgba(74,51,36,0.25); margin-bottom:12px; }
+  .sky{ position:relative; height:60px; background:linear-gradient(180deg,#BFE3ED,#EAF6EA); overflow:hidden; }
+  .sun{ position:absolute; top:11px; right:22px; width:30px; height:30px; border-radius:50%;
+        background:radial-gradient(circle at 35% 35%,#FFEBB0,var(--sun)); box-shadow:0 0 18px 6px rgba(232,184,75,0.45);
+        animation:sunPulse 4s ease-in-out infinite; }
+  @keyframes sunPulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+  .cloud{ position:absolute; top:14px; left:-18%; width:50px; height:15px; border-radius:20px; background:#fff; opacity:.85; animation:drift 26s linear infinite; }
+  .cloud::before,.cloud::after{ content:""; position:absolute; background:#fff; border-radius:50%; }
+  .cloud::before{ width:20px; height:20px; top:-9px; left:5px; }
+  .cloud::after{ width:15px; height:15px; top:-6px; left:24px; }
+  .cloud2{ top:30px; transform:scale(.65); opacity:.6; animation-duration:34s; animation-delay:-12s; }
+  @keyframes drift{ from{left:-18%;} to{left:112%;} }
+  .decor{ position:absolute; top:8px; font-size:18px; opacity:0; transition:opacity .6s ease; pointer-events:none; }
+  .decor.unlocked{ opacity:1; animation:flutter 5s ease-in-out infinite; }
+  @keyframes flutter{ 0%,100%{transform:translate(0,0) rotate(0deg);} 25%{transform:translate(6px,-6px) rotate(6deg);} 50%{transform:translate(-4px,2px) rotate(-4deg);} 75%{transform:translate(4px,6px) rotate(3deg);} }
+  .ground{ background:linear-gradient(180deg,#EFE1C5,#E5D0A8); padding:14px 12px 16px; }
+
+  .plots{ display:flex; flex-direction:column; gap:12px; }
+  .plot-scene{ background:#fff; border-radius:16px; box-shadow:0 6px 16px -10px rgba(74,51,36,0.3); border:2px solid transparent; position:relative; }
   .plot-scene.bonus-ready{ border-color:var(--sun); animation:pulseGlow 1.3s ease-in-out infinite; }
-  @keyframes pulseGlow{ 0%,100%{box-shadow:0 8px 22px -12px rgba(232,184,75,0.2);} 50%{box-shadow:0 8px 26px -4px rgba(232,184,75,0.75);} }
-  .plot-sky{ height:30px; }
-  .plot-sky.steps{ background:linear-gradient(180deg,#CDE8EF,#E9F5F0); }
-  .plot-sky.training{ background:linear-gradient(180deg,#F7E6BE,#F3EFDA); }
-  .plot-sky.meal{ background:linear-gradient(180deg,#F0D9DE,#F5EDE2); }
-  .plot-main{ display:flex; align-items:flex-start; gap:10px; padding:0 12px 10px; }
-  .plot-main.steps{ background:linear-gradient(180deg,#E9F5F0,#DCE9DE); }
-  .plot-main.training{ background:linear-gradient(180deg,#F3EFDA,#EFE1C0); }
-  .plot-main.meal{ background:linear-gradient(180deg,#F5EDE2,#EAD8CE); }
-  .plant-svg{ width:70px; height:96px; flex-shrink:0; overflow:visible; position:relative; margin-top:4px; }
-  .plot-info{ flex:1; min-width:0; padding-top:8px; }
+  @keyframes pulseGlow{ 0%,100%{box-shadow:0 0 0 rgba(232,184,75,0);} 50%{box-shadow:0 0 16px rgba(232,184,75,0.65);} }
+  .plot-main{ display:flex; align-items:flex-start; gap:10px; padding:10px 12px; }
+  .plant-svg{ width:64px; height:88px; flex-shrink:0; overflow:visible; position:relative; margin-top:2px; }
+  .plot-info{ flex:1; min-width:0; }
   .plot-title{ font-size:12.5px; font-weight:800; color:var(--soil-dark); }
   .plot-status{ font-size:11px; color:var(--ink-soft); margin-top:2px; line-height:1.3; }
   .progress-track{ height:6px; background:rgba(0,0,0,0.08); border-radius:6px; margin-top:7px; overflow:hidden; }
@@ -165,16 +175,22 @@
       <button class="switch-account" id="switchAccountBtn">Это не я — войти под другим именем</button>
     </header>
 
-    <div class="card day-card">
-      <div class="day-title" id="dayTitle">День 1</div>
-      <div class="day-mode" id="dayMode">Обычная кнопка</div>
-      <div class="day-desc" id="dayDesc">...</div>
-      <div class="day-pill" id="dayPill">1 / 7</div>
-    </div>
+    <div class="day-chip" id="dayChip">День 1 / 7</div>
 
     <div class="toast" id="toast"></div>
 
-    <div class="plots" id="plots"></div>
+    <div class="garden-scene" id="gardenScene">
+      <div class="sky">
+        <div class="sun"></div>
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        <div class="decor" id="decorButterfly" style="left:18%;">🦋</div>
+        <div class="decor" id="decorLadybug" style="left:68%;">🐞</div>
+      </div>
+      <div class="ground">
+        <div class="plots" id="plots"></div>
+      </div>
+    </div>
     <div id="extraZone"></div>
 
     <div class="weeds-note" id="weedsNote"></div>
@@ -656,14 +672,17 @@ const DAY_CONFIG = [
     greetingLine.textContent = `Привет, ${state.name}! 👋`;
     bonusBadge.textContent = '🌟 ' + state.bonusSeeds;
     streakBadge.textContent = '🔥 Серия: ' + computeStreak();
+    const butterfly = document.getElementById('decorButterfly');
+    const ladybug = document.getElementById('decorLadybug');
+    if(butterfly) butterfly.classList.toggle('unlocked', state.bonusSeeds >= 1);
+    if(ladybug) ladybug.classList.toggle('unlocked', state.bonusSeeds >= 3);
   }
   function renderDayCard(){
     const n = Math.min(Math.max(getDayNumber(),1),7);
     const cfg = DAY_CONFIG[n-1];
-    document.getElementById('dayTitle').textContent = `День ${n} — ${cfg.title}`;
-    document.getElementById('dayMode').textContent = cfg.modeLabel;
-    document.getElementById('dayDesc').textContent = cfg.desc;
-    document.getElementById('dayPill').textContent = `${n} / 7`;
+    const chip = document.getElementById('dayChip');
+    chip.textContent = `День ${n} / 7 · ${cfg.modeLabel}`;
+    chip.onclick = ()=> showToast(`${cfg.title}: ${cfg.desc}`);
   }
 
   /* ---------- построение / рендер грядок ---------- */
@@ -673,7 +692,6 @@ const DAY_CONFIG = [
       const m = PLOT_META[key];
       return `
       <div class="plot-scene" id="plot-${key}">
-        <div class="plot-sky ${key}"></div>
         <div class="plot-main ${key}">
           ${plantSVG(key)}
           <div class="plot-info">
