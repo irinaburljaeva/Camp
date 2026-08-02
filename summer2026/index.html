@@ -58,6 +58,38 @@
   .cloud::after{ width:13px; height:13px; top:-5px; left:22px; }
   .cloud2{ top:28px; transform:scale(.65); opacity:.6; animation-duration:34s; animation-delay:-12s; }
   @keyframes drift{ from{left:-18%;} to{left:112%;} }
+  /* время суток */
+  .sky.t-morning{ background:linear-gradient(180deg,#F7DFC4,#EAF2E4); }
+  .sky.t-day{ background:linear-gradient(180deg,#BFE3ED,#EAF6EA); }
+  .sky.t-evening{ background:linear-gradient(180deg,#E8B3A0,#F2E0CC); }
+  .sky.t-night{ background:linear-gradient(180deg,#3E4463,#6B6486); }
+  .moon{ position:absolute; top:10px; right:22px; font-size:22px; display:none; }
+  .sky.t-night .moon{ display:block; }
+  .sky.t-night .sun{ display:none; }
+  .sky.t-evening .sun{ opacity:.75; }
+  .star{ position:absolute; width:3px; height:3px; border-radius:50%; background:#FFF6D8; opacity:0; }
+  .sky.t-night .star{ opacity:1; animation:twinkle 2.6s ease-in-out infinite; }
+  @keyframes twinkle{ 0%,100%{opacity:.9;} 50%{opacity:.25;} }
+  .firefly{ position:absolute; width:4px; height:4px; border-radius:50%; background:#F5E27A; box-shadow:0 0 6px 2px rgba(245,226,122,0.8); opacity:0; }
+  .sky.t-evening .firefly, .sky.t-night .firefly{ opacity:1; animation:flyabout 6s ease-in-out infinite; }
+  @keyframes flyabout{ 0%,100%{transform:translate(0,0);} 25%{transform:translate(10px,-8px);} 50%{transform:translate(-8px,4px);} 75%{transform:translate(6px,8px);} }
+  .sky.t-night ~ .ground, .garden-scene.night .ground{ filter:brightness(0.92); }
+  /* погода */
+  .garden-scene{ position:relative; }
+  .rain-layer{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:8; display:none; }
+  .rain-layer.on{ display:block; }
+  .rain-drop{ position:absolute; top:-14px; width:2px; height:11px; border-radius:2px; background:rgba(120,170,200,0.55); animation:rainfall linear infinite; }
+  @keyframes rainfall{ from{ transform:translateY(-14px); } to{ transform:translateY(320px); } }
+  .windy .plant-svg{ animation:windSway 1.4s ease-in-out infinite; transform-origin:50% 95%; }
+  @keyframes windSway{ 0%,100%{ transform:rotate(-2.5deg); } 50%{ transform:rotate(2.5deg); } }
+  /* гербарий */
+  .collection-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .coll-slot{ aspect-ratio:1; border-radius:12px; background:#fff; border:2px dashed #E4D9C4; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:22px; position:relative; }
+  .coll-slot.filled{ border-style:solid; border-color:var(--leaf); background:#F1F6EA; }
+  .coll-slot.rare{ border-color:var(--sun); background:#FBF3E4; }
+  .coll-slot .coll-name{ font-size:8px; font-weight:800; color:var(--ink-soft); margin-top:2px; }
+  .coll-empty-note{ font-size:11px; color:var(--ink-soft); text-align:center; }
+  .postcard-canvas{ display:none; }
   .decor-fly{ position:absolute; top:8px; font-size:16px; opacity:0; transition:opacity .6s ease; pointer-events:none; }
   .decor-fly.unlocked{ opacity:1; animation:flutter 5s ease-in-out infinite; }
   @keyframes flutter{ 0%,100%{transform:translate(0,0) rotate(0deg);} 25%{transform:translate(6px,-6px) rotate(6deg);} 50%{transform:translate(-4px,2px) rotate(-4deg);} 75%{transform:translate(4px,6px) rotate(3deg);} }
@@ -192,13 +224,21 @@
     <div class="toast" id="toast"></div>
 
     <div class="garden-scene" id="gardenScene">
-      <div class="sky">
+      <div class="sky" id="skyEl">
         <div class="sun"></div>
+        <div class="moon">🌙</div>
+        <div class="star" style="top:12px; left:14%;"></div>
+        <div class="star" style="top:26px; left:32%; animation-delay:-.8s;"></div>
+        <div class="star" style="top:9px; left:55%; animation-delay:-1.6s;"></div>
+        <div class="star" style="top:30px; left:78%; animation-delay:-.4s;"></div>
+        <div class="firefly" style="top:30px; left:24%;"></div>
+        <div class="firefly" style="top:20px; left:62%; animation-delay:-2.5s;"></div>
         <div class="cloud"></div>
         <div class="cloud cloud2"></div>
         <div class="decor-fly" id="decorButterfly" style="left:16%;">🦋</div>
         <div class="decor-fly" id="decorLadybug" style="left:70%;">🐞</div>
       </div>
+      <div class="rain-layer" id="rainLayer"></div>
       <div class="level-bar-wrap">
         <div class="level-line"><span id="levelLabel">Уровень сада: 1</span><span id="levelXp">0 / 50 XP</span></div>
         <div class="level-track"><div class="level-fill" id="levelFill" style="width:0%"></div></div>
@@ -251,11 +291,18 @@
       <div class="lb-hint">Нажми на участницу, чтобы заглянуть в её сад</div>
     </div>
 
+    <div class="card">
+      <div class="lb-title">📖 Мой гербарий</div>
+      <div id="collectionZone"><div class="coll-empty-note">Вырасти цветок до полного расцвета — и он попадёт сюда. Редкие расцветы дают особые цветы!</div></div>
+    </div>
+
     <div class="card finale-panel" id="finalePanel">
       <h2>🌻 Грядка расцвела</h2>
       <p>Семь дней — и сад полон. Каждый цветок здесь — это твой выбор идти, тренироваться и есть с заботой о себе.</p>
       <div class="stat-row" id="statRow"></div>
-      <button class="primary-btn" id="shareBtn">Поделиться результатом</button>
+      <button class="primary-btn" id="postcardBtn">🖼️ Скачать открытку сада</button>
+      <button class="primary-btn" id="shareBtn" style="margin-top:8px;">Поделиться результатом</button>
+      <canvas id="postcardCanvas" class="postcard-canvas" width="1080" height="1350"></canvas>
     </div>
 
   </div>
@@ -317,13 +364,25 @@ const TASK_REWARDS = {
 };
 // темы дней — модификаторы той же механики
 const DAY_CONFIG = [
-  { title:'Знакомство',        desc:'Обычный день — знакомимся с садом.', growMul:1,   bonusMinMs:45*60000, bonusMaxMs:150*60000, sparkleChance:0.3, special:null },
-  { title:'Тёплый дождь',      desc:'Полив сегодня действует сильнее.',    growMul:1.3, bonusMinMs:30*60000, bonusMaxMs:90*60000,  sparkleChance:0.3, special:null },
-  { title:'Щедрое утро',       desc:'Подарок за вход сегодня больше обычного.', growMul:1, bonusMinMs:45*60000, bonusMaxMs:150*60000, sparkleChance:0.35, special:'gift2x' },
-  { title:'Ветреный день',     desc:'Время до бонусного расцвета особенно непредсказуемое.', growMul:1, bonusMinMs:20*60000, bonusMaxMs:180*60000, sparkleChance:0.3, special:null },
-  { title:'Секретное задание', desc:'Есть дополнительное необязательное задание с наградой.', growMul:1, bonusMinMs:45*60000, bonusMaxMs:150*60000, sparkleChance:0.4, special:'secret' },
-  { title:'День соседок',      desc:'Загляни в чужие сады — сегодня это особенно приятно.', growMul:1, bonusMinMs:45*60000, bonusMaxMs:150*60000, sparkleChance:0.3, special:'social' },
-  { title:'Большой расцвет',   desc:'Финальный день — рост почти вдвое сильнее.', growMul:1.9, bonusMinMs:15*60000, bonusMaxMs:40*60000, sparkleChance:0.6, special:null },
+  { title:'Знакомство',        desc:'Обычный день — знакомимся с садом.', growMul:1,   bonusMinMs:45*60000, bonusMaxMs:150*60000, sparkleChance:0.3, special:null, weather:null },
+  { title:'Тёплый дождь',      desc:'Полив сегодня действует сильнее.',    growMul:1.3, bonusMinMs:30*60000, bonusMaxMs:90*60000,  sparkleChance:0.3, special:null, weather:'rain' },
+  { title:'Щедрое утро',       desc:'Подарок за вход сегодня больше обычного.', growMul:1, bonusMinMs:45*60000, bonusMaxMs:150*60000, sparkleChance:0.35, special:'gift2x', weather:null },
+  { title:'Ветреный день',     desc:'Время до бонусного расцвета особенно непредсказуемое.', growMul:1, bonusMinMs:20*60000, bonusMaxMs:180*60000, sparkleChance:0.3, special:null, weather:'wind' },
+  { title:'Секретное задание', desc:'Есть дополнительное необязательное задание с наградой.', growMul:1, bonusMinMs:45*60000, bonusMaxMs:150*60000, sparkleChance:0.4, special:'secret', weather:null },
+  { title:'День соседок',      desc:'Загляни в чужие сады — сегодня это особенно приятно.', growMul:1, bonusMinMs:45*60000, bonusMaxMs:150*60000, sparkleChance:0.3, special:'social', weather:null },
+  { title:'Большой расцвет',   desc:'Финальный день — рост почти вдвое сильнее.', growMul:1.9, bonusMinMs:15*60000, bonusMaxMs:40*60000, sparkleChance:0.6, special:null, weather:null },
+];
+
+// Гербарий: базовые цветы за полный расцвет грядки + редкие за бурные расцветы
+const BASE_FLOWERS = {
+  steps:    { emoji:'🌼', name:'Ромашка шагов' },
+  training: { emoji:'🌻', name:'Подсолнух силы' },
+  meal:     { emoji:'🌺', name:'Гибискус вкуса' }
+};
+const RARE_FLOWERS = [
+  { emoji:'🌷', name:'Тюльпан' }, { emoji:'🌹', name:'Роза' },
+  { emoji:'💮', name:'Белый цвет' }, { emoji:'🪻', name:'Лаванда' },
+  { emoji:'🏵️', name:'Розетка' }
 ];
 
 (async function(){
@@ -331,7 +390,9 @@ const DAY_CONFIG = [
     docId:null, name:'', email:'', campStartDate:null,
     log:{},              // {'YYYY-MM-DD': {steps:0..4, training:0..2, meal:0..3, secret:false, gift:false}}
     plots:{ steps:{level:0,bonusReadyAt:null,sparkle:false}, training:{level:0,bonusReadyAt:null,sparkle:false}, meal:{level:0,bonusReadyAt:null,sparkle:false} },
-    water:0, fert:0, bonusSeeds:0
+    water:0, fert:0, bonusSeeds:0,
+    collection:[],       // [{emoji,name,rare,date}]
+    lastSeenCheersAt:0
   };
   let structureBuilt = false;
 
@@ -368,6 +429,8 @@ const DAY_CONFIG = [
     state.log=data.log||{};
     state.plots=data.plots||state.plots;
     state.water=data.water??0; state.fert=data.fert??0; state.bonusSeeds=data.bonusSeeds??0;
+    state.collection=data.collection||[];
+    state.lastSeenCheersAt=data.lastSeenCheersAt||0;
   }
   async function loadOrCreateParticipant(rawName, rawEmail, uid){
     const email=normalizeEmail(rawEmail), name=rawName.trim();
@@ -406,7 +469,8 @@ const DAY_CONFIG = [
       await setDoc(doc(db,PROGRESS_COLLECTION,state.docId),{
         name:state.name, email:state.email, campStartDate:state.campStartDate,
         log:state.log, plots:state.plots, water:state.water, fert:state.fert,
-        bonusSeeds:state.bonusSeeds, score, updatedAt:serverTimestamp()
+        bonusSeeds:state.bonusSeeds, collection:state.collection,
+        lastSeenCheersAt:state.lastSeenCheersAt, score, updatedAt:serverTimestamp()
       },{merge:true});
       await setDoc(doc(db,LEADERBOARD_COLLECTION,state.docId),{
         name:state.name, score, plotLevels, updatedAt:serverTimestamp()
@@ -522,7 +586,9 @@ const DAY_CONFIG = [
   function growPlot(key, mult){
     const p=state.plots[key], cfg=dayCfg();
     const inc=(0.35+Math.random()*0.25)*cfg.growMul*mult;
+    const wasBelow7 = p.level < 7;
     p.level=Math.min(7,p.level+inc);
+    if(wasBelow7 && p.level>=7) awardBaseFlower(key);
     bumpPlant(key); spawnParticles(key,Math.round(4+inc*4)); chime(430+Math.random()*80);
     if(navigator.vibrate) navigator.vibrate(25);
     if(!p.bonusReadyAt && p.level<7){
@@ -536,14 +602,57 @@ const DAY_CONFIG = [
     const p=state.plots[key];
     if(!p.bonusReadyAt || Date.now()<p.bonusReadyAt) return;
     const gain=p.sparkle?1.4:0.8;
+    const wasSparkle=p.sparkle;
+    const wasBelow7 = p.level < 7;
     p.level=Math.min(7,p.level+gain);
-    if(p.sparkle) state.bonusSeeds++;
+    if(wasBelow7 && p.level>=7) awardBaseFlower(key);
+    if(wasSparkle){ state.bonusSeeds++; awardRareFlower(); }
     p.bonusReadyAt=null; p.sparkle=false;
     bumpPlant(key,true); spawnParticles(key,9); chime(700);
     if(navigator.vibrate) navigator.vibrate([20,30,20]);
     saveProgress();
     renderAll();
     showToast(gain>1?'✨ Редкий бурный расцвет! Бонусное семечко.':'Цветок раскрылся сильнее!');
+  }
+  function awardBaseFlower(key){
+    const f=BASE_FLOWERS[key];
+    if(state.collection.some(c=>c.name===f.name)) return;
+    state.collection.push({ emoji:f.emoji, name:f.name, rare:false, date:todayStr() });
+    setTimeout(()=>showToast(`📖 В гербарий добавлен цветок: ${f.emoji} ${f.name}!`), 700);
+  }
+  function awardRareFlower(){
+    const owned = new Set(state.collection.filter(c=>c.rare).map(c=>c.name));
+    const available = RARE_FLOWERS.filter(f=>!owned.has(f.name));
+    const pick = available.length ? available[Math.floor(Math.random()*available.length)]
+                                  : RARE_FLOWERS[Math.floor(Math.random()*RARE_FLOWERS.length)];
+    if(available.length){
+      state.collection.push({ emoji:pick.emoji, name:pick.name, rare:true, date:todayStr() });
+      setTimeout(()=>showToast(`📖 Редкий цветок в гербарий: ${pick.emoji} ${pick.name}!`), 900);
+    }
+  }
+
+  /* ---------- реакции: кто помахал моему саду ---------- */
+  async function checkCheers(){
+    try{
+      const q=query(collection(db,'garden_cheers'), where('to','==',state.docId), limit(30));
+      const snap=await getDocs(q);
+      const fresh=[];
+      snap.forEach(d=>{
+        const c=d.data();
+        if((c.ts||0) > state.lastSeenCheersAt) fresh.push(c);
+      });
+      if(fresh.length){
+        const names=[...new Set(fresh.map(c=>c.fromName).filter(Boolean))];
+        const shown=names.slice(0,3).join(', ');
+        const more=names.length>3 ? ` и ещё ${names.length-3}` : '';
+        setTimeout(()=>{
+          showToast(`👋 Твоему саду помахали: ${shown}${more}!`);
+          chime(680);
+        }, 1400);
+        state.lastSeenCheersAt=Date.now();
+        saveProgress();
+      }
+    }catch(e){ console.error('Не удалось проверить приветы:', e); }
   }
 
   /* ---------- подарок за вход ---------- */
@@ -744,9 +853,14 @@ const DAY_CONFIG = [
       const lvl = entry.plotLevels ? (entry.plotLevels[key]||0) : 0;
       updatePlantVisual(key, lvl, 'v-');
     });
-    $('visitCheerBtn').onclick=()=>{
+    $('visitCheerBtn').onclick=async()=>{
       chime(600); showToast(`Помахала ${entry.name} 👋 — пусть день будет добрым!`);
       closeVisit();
+      try{
+        await setDoc(doc(collection(db,'garden_cheers')),{
+          to: entry.id, fromName: state.name, ts: Date.now(), createdAt: serverTimestamp()
+        });
+      }catch(e){ console.error('Не удалось отправить привет:', e); }
     };
     $('visitOverlay').classList.add('open');
   }
@@ -771,16 +885,65 @@ const DAY_CONFIG = [
     return finished;
   }
 
+  function renderSkyTime(){
+    const h = new Date().getHours();
+    const cls = h>=5&&h<10 ? 't-morning' : h>=10&&h<17 ? 't-day' : h>=17&&h<22 ? 't-evening' : 't-night';
+    const sky=$('skyEl');
+    ['t-morning','t-day','t-evening','t-night'].forEach(c=>sky.classList.toggle(c, c===cls));
+    $('gardenScene').classList.toggle('night', cls==='t-night');
+  }
+  let rainBuilt=false;
+  function renderWeather(){
+    const w = dayCfg().weather;
+    const rain=$('rainLayer');
+    rain.classList.toggle('on', w==='rain');
+    if(w==='rain' && !rainBuilt){
+      rainBuilt=true;
+      for(let i=0;i<26;i++){
+        const d=document.createElement('div');
+        d.className='rain-drop';
+        d.style.left=(Math.random()*100)+'%';
+        d.style.animationDuration=(0.7+Math.random()*0.6)+'s';
+        d.style.animationDelay=(Math.random()*1.2)+'s';
+        rain.appendChild(d);
+      }
+    }
+    $('gardenScene').classList.toggle('windy', w==='wind');
+  }
+  function renderCollection(){
+    const zone=$('collectionZone');
+    if(!state.collection.length){
+      zone.innerHTML='<div class="coll-empty-note">Вырасти цветок до полного расцвета — и он попадёт сюда. Редкие расцветы дают особые цветы!</div>';
+      return;
+    }
+    const totalSlots = 3 + RARE_FLOWERS.length;
+    const slots=[];
+    Object.values(BASE_FLOWERS).forEach(f=>{
+      const owned=state.collection.find(c=>c.name===f.name);
+      slots.push(owned ? {emoji:f.emoji,name:f.name,cls:'filled'} : {emoji:'❔',name:f.name,cls:''});
+    });
+    RARE_FLOWERS.forEach(f=>{
+      const owned=state.collection.find(c=>c.name===f.name);
+      slots.push(owned ? {emoji:f.emoji,name:f.name,cls:'filled rare'} : {emoji:'❔',name:'???',cls:''});
+    });
+    zone.innerHTML='<div class="collection-grid">'+slots.map(s=>
+      `<div class="coll-slot ${s.cls}">${s.emoji}<span class="coll-name">${s.name}</span></div>`
+    ).join('')+'</div>';
+  }
+
   function renderAll(){
     renderHeader();
+    renderSkyTime();
     const finished=checkFinale();
     if(!finished){
       if(!structureBuilt) renderFarmStructure();
       renderLevelAndDecor();
+      renderWeather();
       renderFarmState();
       renderTasks();
       renderExtraZone();
     }
+    renderCollection();
   }
 
   /* ---------- задания: обработчики ---------- */
@@ -802,7 +965,7 @@ const DAY_CONFIG = [
       const cred=await signInAnonymously(auth);
       await loadOrCreateParticipant(rawName,rawEmail,cred.user.uid);
       loginScreen.style.display='none'; gameContent.style.display='block';
-      renderAll(); maybeDailyGift(); loadLeaderboard();
+      renderAll(); maybeDailyGift(); loadLeaderboard(); checkCheers();
     }catch(err){
       console.error(err);
       loginNote.textContent = err.code==='name-mismatch'
@@ -822,6 +985,75 @@ const DAY_CONFIG = [
     await signInAnonymously(auth);
   });
 
+  /* ---------- финальная открытка ---------- */
+  function drawPostcard(){
+    const cv=$('postcardCanvas'), ctx=cv.getContext('2d');
+    const W=cv.width, H=cv.height;
+    // фон: небо → земля
+    const skyGrad=ctx.createLinearGradient(0,0,0,H*0.55);
+    skyGrad.addColorStop(0,'#BFE3ED'); skyGrad.addColorStop(1,'#EAF6EA');
+    ctx.fillStyle=skyGrad; ctx.fillRect(0,0,W,H*0.55);
+    const groundGrad=ctx.createLinearGradient(0,H*0.55,0,H);
+    groundGrad.addColorStop(0,'#EFE1C5'); groundGrad.addColorStop(1,'#E5D0A8');
+    ctx.fillStyle=groundGrad; ctx.fillRect(0,H*0.55,W,H*0.45);
+    // солнце
+    ctx.fillStyle='#E8B84B'; ctx.beginPath(); ctx.arc(W-140,130,64,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(232,184,75,0.3)'; ctx.beginPath(); ctx.arc(W-140,130,96,0,Math.PI*2); ctx.fill();
+    // заголовок
+    ctx.fillStyle='#7C5568';
+    ctx.font='800 34px "Nunito Sans", sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText('ЛЕТНИЙ ЛАГЕРЬ · ШАГАЙ ДОМА', W/2, 110);
+    ctx.fillStyle='#4A3324';
+    ctx.font='700 84px "Fraunces", serif';
+    ctx.fillText('Сад: ' + state.name, W/2, 220);
+    ctx.fillStyle='#6B5D4E';
+    ctx.font='600 40px "Nunito Sans", sans-serif';
+    ctx.fillText('7 дней заботы о себе — и сад расцвёл', W/2, 290);
+    // цветы сада (крупные эмодзи трёх грядок + гербарий)
+    ctx.font='220px serif';
+    const flowers = PLOT_KEYS.map(k=>{
+      const lvl=state.plots[k].level;
+      return lvl>=7 ? BASE_FLOWERS[k].emoji : (lvl>=4.6?'🌸':lvl>=2.5?'🌿':'🌱');
+    });
+    flowers.forEach((f,i)=>{ ctx.fillText(f, W*(0.25+0.25*i), H*0.62); });
+    // редкие цветы из гербария внизу
+    const rares=state.collection.filter(c=>c.rare).map(c=>c.emoji).slice(0,5);
+    if(rares.length){
+      ctx.font='96px serif';
+      const startX = W/2 - (rares.length-1)*70;
+      rares.forEach((e,i)=>ctx.fillText(e, startX+i*140, H*0.76));
+    }
+    // статистика
+    const total=PLOT_KEYS.reduce((s,k)=>s+state.plots[k].level,0);
+    ctx.fillStyle='#4A3324';
+    ctx.font='800 44px "Nunito Sans", sans-serif';
+    ctx.fillText(`🌟 ${state.bonusSeeds} семян  ·  📖 ${state.collection.length} цветов  ·  Ур. сада ${farmLevel(farmXP())}`, W/2, H*0.86);
+    ctx.fillStyle='#6B5D4E';
+    ctx.font='600 34px "Nunito Sans", sans-serif';
+    ctx.fillText('Каждый цветок — мой выбор двигаться и заботиться о себе', W/2, H*0.92);
+  }
+  async function downloadPostcard(){
+    drawPostcard();
+    const cv=$('postcardCanvas');
+    cv.toBlob(async(blob)=>{
+      if(!blob) return;
+      const file=new File([blob], 'moy-sad-shagai-doma.png', {type:'image/png'});
+      try{
+        if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+          await navigator.share({ files:[file], text:'Мой сад за 7 дней летнего лагеря Шагай Дома 🌻' });
+          return;
+        }
+      }catch(e){ /* пользователь отменил — падаем на скачивание */ }
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download='moy-sad-shagai-doma.png';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }, 'image/png');
+  }
+  $('postcardBtn').addEventListener('click', downloadPostcard);
+
   /* ---------- share ---------- */
   $('shareBtn').addEventListener('click',async()=>{
     const text='Я вырастила свою грядку стройности за 7 дней летнего лагеря Шагай Дома 🌻';
@@ -839,7 +1071,7 @@ const DAY_CONFIG = [
         loadingScreen.style.display='none';
         if(resumed){
           gameContent.style.display='block';
-          renderAll(); maybeDailyGift(); loadLeaderboard();
+          renderAll(); maybeDailyGift(); loadLeaderboard(); checkCheers();
         }
         else loginScreen.style.display='block';
       }catch(e){
