@@ -34,8 +34,43 @@
   .switch-account{ display:inline-block; margin-top:8px; border:none; background:none; padding:0; font-family:'Nunito Sans',sans-serif; font-size:10.5px; color:var(--plum); text-decoration:underline; cursor:pointer; font-weight:700; }
 
   .login-screen{ text-align:center; background:var(--card); border-radius:22px; padding:26px 22px 24px; box-shadow:0 10px 30px -12px rgba(74,51,36,0.25); margin-top:40px; }
-  .loading-screen{ text-align:center; margin-top:60px; }
-  .loading-screen .subtitle{ margin-top:14px; }
+  .loading-screen{
+    position:fixed; inset:0; z-index:100; overflow:hidden;
+    display:flex; align-items:flex-end; justify-content:center;
+  }
+  .loading-bg{
+    position:absolute; inset:0;
+    background:url('garden-loading.png') center 30% / cover no-repeat, linear-gradient(180deg,#BFE3ED,#EFE6D2);
+    animation:slowZoom 14s ease-in-out infinite alternate;
+  }
+  @keyframes slowZoom{ from{ transform:scale(1); } to{ transform:scale(1.08); } }
+  .loading-veil{
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(59,46,34,0.05) 30%, rgba(59,46,34,0.55) 78%, rgba(59,46,34,0.78) 100%);
+  }
+  .loading-content{
+    position:relative; z-index:2; text-align:center; padding:0 24px 64px; width:100%;
+    animation:loadRise 1s ease both;
+  }
+  @keyframes loadRise{ from{ opacity:0; transform:translateY(18px); } to{ opacity:1; transform:translateY(0); } }
+  .loading-eyebrow{
+    font-size:12px; letter-spacing:.16em; text-transform:uppercase; font-weight:800;
+    color:rgba(255,251,240,0.85); text-shadow:0 1px 8px rgba(0,0,0,0.4);
+  }
+  .loading-title{
+    font-family:'Fraunces', serif; font-size:44px; line-height:1.05; font-weight:700;
+    color:#FFFBF0; margin-top:8px; text-shadow:0 2px 16px rgba(0,0,0,0.45);
+  }
+  .loading-sprout{ font-size:26px; margin-top:16px; display:inline-block; animation:sproutBob 1.6s ease-in-out infinite; }
+  @keyframes sproutBob{ 0%,100%{ transform:translateY(0) rotate(-4deg); } 50%{ transform:translateY(-6px) rotate(4deg); } }
+  .loading-sub{
+    margin-top:8px; font-size:14px; font-weight:700; color:rgba(255,251,240,0.9);
+    text-shadow:0 1px 8px rgba(0,0,0,0.4);
+  }
+  .loading-dots span{ animation:dotBlink 1.4s infinite; }
+  .loading-dots span:nth-child(2){ animation-delay:.2s; }
+  .loading-dots span:nth-child(3){ animation-delay:.4s; }
+  @keyframes dotBlink{ 0%,60%,100%{ opacity:.25; } 30%{ opacity:1; } }
   .subtitle{ margin-top:6px; font-size:12.5px; color:var(--ink-soft); line-height:1.4; }
   .name-input{ width:100%; margin-top:12px; padding:14px 16px; border-radius:12px; border:2px solid #E4D9C4; background:#fff; font-family:'Nunito Sans', sans-serif; font-size:15px; color:var(--ink); outline:none; }
   .name-input:first-of-type{ margin-top:18px; }
@@ -190,9 +225,14 @@
 <div class="app">
 
   <div class="loading-screen" id="loadingScreen">
-    <div class="eyebrow">Летний лагерь · Шагай Дома</div>
-    <h1>Грядка стройности</h1>
-    <p class="subtitle">Открываем твой сад…</p>
+    <div class="loading-bg"></div>
+    <div class="loading-veil"></div>
+    <div class="loading-content">
+      <div class="loading-eyebrow">Летний лагерь · Шагай Дома</div>
+      <div class="loading-title">Грядка<br>стройности</div>
+      <div class="loading-sprout">🌱</div>
+      <div class="loading-sub">Открываем твой сад<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></div>
+    </div>
   </div>
 
   <div class="login-screen" id="loginScreen" style="display:none;">
