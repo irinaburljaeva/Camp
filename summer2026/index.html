@@ -65,6 +65,36 @@
     line-height:1.4;
   }
 
+  .login-screen{
+    text-align:center;
+    background:var(--card);
+    border-radius:22px;
+    padding:26px 22px 24px;
+    box-shadow:0 10px 30px -12px rgba(74,51,36,0.25);
+    margin-top:40px;
+  }
+  .name-input{
+    width:100%;
+    margin-top:12px;
+    padding:14px 16px;
+    border-radius:12px;
+    border:2px solid #E4D9C4;
+    background:#fff;
+    font-family:'Nunito Sans', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    outline:none;
+  }
+  .name-input:first-of-type{ margin-top:18px; }
+  .name-input:focus{ border-color:var(--bloom); }
+  .login-note{
+    margin-top:12px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    min-height:16px;
+  }
+  .login-note.error{ color:var(--bloom); font-weight:700; }
+
   .day-track{
     display:flex;
     justify-content:center;
@@ -219,9 +249,21 @@
 <body>
 <div class="app">
 
-  <header>
+  <div class="login-screen" id="loginScreen">
     <div class="eyebrow">Летний лагерь · Шагай Дома</div>
     <h1>Грядка стройности</h1>
+    <p class="subtitle">Введи имя, чтобы посадить свою грядку. Прогресс сохранится — можно возвращаться каждый день.</p>
+    <input type="text" id="nameInput" class="name-input" placeholder="Твоё имя" autocomplete="off">
+    <input type="email" id="emailInput" class="name-input" placeholder="Электронная почта" autocomplete="off">
+    <button class="primary-btn" id="enterBtn">Войти в сад →</button>
+    <div class="login-note" id="loginNote"></div>
+  </div>
+
+  <div class="game-content" id="gameContent" style="display:none;">
+
+  <header>
+    <div class="eyebrow">Летний лагерь · Шагай Дома</div>
+    <h1 id="participantHeading">Грядка стройности</h1>
     <p class="subtitle">Каждый шаг, тренировка и полезный приём пищи — это капля воды и горсть удобрения для твоего сада. Через 7 дней здесь будет цвести результат.</p>
   </header>
 
@@ -324,18 +366,180 @@
     <button class="primary-btn" id="shareBtn">Поделиться результатом</button>
   </div>
 
+  </div><!-- /game-content -->
+
 </div>
 
-<script>
-(function(){
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, setDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getAuth, signInAnonymously
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// Твоя конфигурация Firebase (проект walk-walk-d8a14, как в остальных играх лагеря)
+const firebaseConfig = {
+  apiKey: "AIzaSyApSUQxealmL13siDzauRWO_J6-fSHkN-4",
+  authDomain: "walk-walk-d8a14.firebaseapp.com",
+  projectId: "walk-walk-d8a14",
+  storageBucket: "walk-walk-d8a14.firebasestorage.app",
+  messagingSenderId: "1022340791272",
+  appId: "1:1022340791272:web:228f98bc590a4f77dac25d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Коллекция с прогрессом участниц: garden_progress/{идентификатор}
+const COLLECTION_NAME = 'garden_progress';
+
+(async function(){
   const TOTAL_DAYS = 7;
   const state = {
+    docId: null,
+    name: '',
+    email: '',
     currentDay: 1,
     today: { steps:false, training:false, meal:false },
     totalGrowth: 0,
     weeds: 0,
     history: [] // per day: count of tasks completed
   };
+
+  const loginScreen = document.getElementById('loginScreen');
+  const gameContent = document.getElementById('gameContent');
+  const nameInput = document.getElementById('nameInput');
+  const emailInput = document.getElementById('emailInput');
+  const enterBtn = document.getElementById('enterBtn');
+  const loginNote = document.getElementById('loginNote');
+  const participantHeading = document.getElementById('participantHeading');
+
+  function normalizeEmail(email){
+    return email.trim().toLowerCase();
+  }
+
+  function isValidEmail(email){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  async function loadOrCreateParticipant(rawName, rawEmail){
+    const email = normalizeEmail(rawEmail);
+    const name = rawName.trim();
+    // doc ID = почта: она уникальна для каждой участницы.
+    // Имя используется как проверочный слой, чтобы почту нельзя было
+    // случайно перепутать между двумя разными участницами.
+    const ref = doc(db, COLLECTION_NAME, email);
+    const snap = await getDoc(ref);
+    if(snap.exists()){
+      const data = snap.data();
+      const storedName = (data.name || '').trim().toLowerCase();
+      if(storedName !== name.toLowerCase()){
+        const err = new Error('name-mismatch');
+        err.code = 'name-mismatch';
+        err.storedName = data.name;
+        throw err;
+      }
+      state.docId = email;
+      state.name = data.name || name;
+      state.email = email;
+      state.currentDay = data.currentDay ?? 1;
+      state.today = data.today ?? { steps:false, training:false, meal:false };
+      state.totalGrowth = data.totalGrowth ?? 0;
+      state.weeds = data.weeds ?? 0;
+      state.history = data.history ?? [];
+    } else {
+      state.docId = email;
+      state.name = name;
+      state.email = email;
+      await setDoc(ref, {
+        name: state.name,
+        email: state.email,
+        currentDay: 1,
+        today: { steps:false, training:false, meal:false },
+        totalGrowth: 0,
+        weeds: 0,
+        history: [],
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+    }
+  }
+
+  async function saveProgress(){
+    if(!state.docId) return;
+    const ref = doc(db, COLLECTION_NAME, state.docId);
+    try{
+      await setDoc(ref, {
+        name: state.name,
+        email: state.email,
+        currentDay: state.currentDay,
+        today: state.today,
+        totalGrowth: state.totalGrowth,
+        weeds: state.weeds,
+        history: state.history,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }catch(e){
+      console.error('Не удалось сохранить прогресс:', e);
+    }
+  }
+
+  enterBtn.addEventListener('click', handleEnter);
+  nameInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') handleEnter(); });
+  emailInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') handleEnter(); });
+
+  async function handleEnter(){
+    const rawName = nameInput.value;
+    const rawEmail = emailInput.value;
+    if(!rawName.trim() || !rawEmail.trim()){
+      loginNote.textContent = 'Укажи имя и почту, чтобы посадить грядку.';
+      loginNote.classList.add('error');
+      return;
+    }
+    if(!isValidEmail(rawEmail)){
+      loginNote.textContent = 'Проверь адрес почты — что-то не так с форматом.';
+      loginNote.classList.add('error');
+      return;
+    }
+    enterBtn.disabled = true;
+    enterBtn.textContent = 'Заходим в сад…';
+    loginNote.classList.remove('error');
+    loginNote.textContent = '';
+    try{
+      await signInAnonymously(auth);
+      await loadOrCreateParticipant(rawName, rawEmail);
+      loginScreen.style.display = 'none';
+      gameContent.style.display = 'block';
+      participantHeading.textContent = `Грядка ${state.name}`;
+      finishBtn.textContent = `Завершить день ${Math.min(state.currentDay, TOTAL_DAYS)} →`;
+      renderTodayCards();
+      updateDayDots();
+      renderPlant();
+      if(state.currentDay > TOTAL_DAYS){
+        showFinale();
+      }
+    }catch(err){
+      console.error(err);
+      if(err.code === 'name-mismatch'){
+        loginNote.textContent = `Эта почта уже зарегистрирована на другое имя. Если это твой сад — введи имя так же, как в первый раз.`;
+      } else {
+        loginNote.textContent = 'Не получилось подключиться. Проверь интернет и попробуй ещё раз.';
+      }
+      loginNote.classList.add('error');
+    }finally{
+      enterBtn.disabled = false;
+      enterBtn.textContent = 'Войти в сад →';
+    }
+  }
+
+  function renderTodayCards(){
+    document.getElementById('card-steps').classList.toggle('done', !!state.today.steps);
+    document.getElementById('card-training').classList.toggle('done', !!state.today.training);
+    document.getElementById('card-meal').classList.toggle('done', !!state.today.meal);
+  }
 
   const dayTrack = document.getElementById('dayTrack');
   const stageLabel = document.getElementById('stageLabel');
@@ -429,9 +633,10 @@
     const task = card.dataset.task;
     state.today[task] = !state.today[task];
     card.classList.toggle('done', state.today[task]);
+    saveProgress();
   });
 
-  finishBtn.addEventListener('click', ()=>{
+  finishBtn.addEventListener('click', async ()=>{
     const doneCount = Object.values(state.today).filter(Boolean).length;
     state.history.push(doneCount);
     state.totalGrowth += doneCount;
@@ -449,27 +654,30 @@
     resetTodayCards();
     updateDayDots();
     renderPlant();
+    await saveProgress();
 
     if(state.currentDay > TOTAL_DAYS){
-      setTimeout(()=>{
-        finale.style.display = 'block';
-        const fullDays = state.history.filter(c=>c===3).length;
-        const totalTasks = state.history.reduce((a,b)=>a+b,0);
-        document.getElementById('statRow').innerHTML = `
-          <div class="stat"><b>${fullDays}</b><span>идеальных дней</span></div>
-          <div class="stat"><b>${totalTasks}</b><span>задач выполнено</span></div>
-          <div class="stat"><b>${state.weeds}</b><span>сорняков</span></div>
-        `;
-        finishBtn.style.display = 'none';
-        weedsNote.textContent = '';
-      }, 500);
+      setTimeout(showFinale, 500);
     } else {
       finishBtn.textContent = `Завершить день ${state.currentDay} →`;
     }
   });
 
+  function showFinale(){
+    finale.style.display = 'block';
+    const fullDays = state.history.filter(c=>c===3).length;
+    const totalTasks = state.history.reduce((a,b)=>a+b,0);
+    document.getElementById('statRow').innerHTML = `
+      <div class="stat"><b>${fullDays}</b><span>идеальных дней</span></div>
+      <div class="stat"><b>${totalTasks}</b><span>задач выполнено</span></div>
+      <div class="stat"><b>${state.weeds}</b><span>сорняков</span></div>
+    `;
+    finishBtn.style.display = 'none';
+    weedsNote.textContent = '';
+  }
+
   document.getElementById('shareBtn').addEventListener('click', async ()=>{
-    const text = 'Я вырастила свою грядку стройности за 7 дней летнего лагеря Шагай Дома 🌻';
+    const text = `Я вырастила свою грядку стройности за 7 дней летнего лагеря Шагай Дома 🌻`;
     try{
       if(navigator.share){
         await navigator.share({ text });
@@ -480,8 +688,6 @@
     }catch(e){ /* пользователь отменил шеринг — ничего не делаем */ }
   });
 
-  updateDayDots();
-  renderPlant();
 })();
 </script>
 </body>
