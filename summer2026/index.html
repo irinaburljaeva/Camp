@@ -27,232 +27,136 @@
   body{
     margin:0;
     min-height:100vh;
-    background:
-      radial-gradient(ellipse at top, var(--cream-deep), var(--cream) 60%);
+    background:radial-gradient(ellipse at top, var(--cream-deep), var(--cream) 60%);
     font-family:'Nunito Sans', sans-serif;
     color:var(--ink);
     display:flex;
     justify-content:center;
     padding:28px 14px 60px;
   }
-  .app{
-    width:100%;
-    max-width:430px;
-  }
-  h1,h2,h3{
-    font-family:'Fraunces', serif;
-    margin:0;
-  }
-  header{ text-align:center; margin-bottom:18px; }
+  .app{ width:100%; max-width:430px; }
+  h1,h2,h3{ font-family:'Fraunces', serif; margin:0; }
+  header{ text-align:center; margin-bottom:14px; }
   .eyebrow{
-    font-size:12.5px;
-    letter-spacing:.12em;
-    text-transform:uppercase;
-    color:var(--plum);
-    font-weight:800;
-    margin-bottom:6px;
+    font-size:12.5px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--plum); font-weight:800; margin-bottom:6px;
   }
-  h1{
-    font-size:26px;
-    font-weight:700;
-    color:var(--soil-dark);
-    line-height:1.15;
-  }
-  .subtitle{
-    margin-top:6px;
-    font-size:14.5px;
-    color:var(--ink-soft);
-    line-height:1.4;
+  h1{ font-size:24px; font-weight:700; color:var(--soil-dark); line-height:1.15; }
+  .subtitle{ margin-top:6px; font-size:13.5px; color:var(--ink-soft); line-height:1.4; }
+  .switch-account{
+    display:inline-block; margin-top:10px; border:none; background:none; padding:0;
+    font-family:'Nunito Sans', sans-serif; font-size:11.5px; color:var(--plum);
+    text-decoration:underline; cursor:pointer; font-weight:700;
   }
 
   .login-screen{
-    text-align:center;
-    background:var(--card);
-    border-radius:22px;
-    padding:26px 22px 24px;
-    box-shadow:0 10px 30px -12px rgba(74,51,36,0.25);
-    margin-top:40px;
+    text-align:center; background:var(--card); border-radius:22px;
+    padding:26px 22px 24px; box-shadow:0 10px 30px -12px rgba(74,51,36,0.25); margin-top:40px;
   }
+  .loading-screen{ text-align:center; margin-top:60px; }
+  .loading-screen .subtitle{ margin-top:14px; }
   .name-input{
-    width:100%;
-    margin-top:12px;
-    padding:14px 16px;
-    border-radius:12px;
-    border:2px solid #E4D9C4;
-    background:#fff;
-    font-family:'Nunito Sans', sans-serif;
-    font-size:15px;
-    color:var(--ink);
-    outline:none;
+    width:100%; margin-top:12px; padding:14px 16px; border-radius:12px;
+    border:2px solid #E4D9C4; background:#fff; font-family:'Nunito Sans', sans-serif;
+    font-size:15px; color:var(--ink); outline:none;
   }
   .name-input:first-of-type{ margin-top:18px; }
   .name-input:focus{ border-color:var(--bloom); }
-  .login-note{
-    margin-top:12px;
-    font-size:12.5px;
-    color:var(--ink-soft);
-    min-height:16px;
-  }
+  .login-note{ margin-top:12px; font-size:12.5px; color:var(--ink-soft); min-height:16px; }
   .login-note.error{ color:var(--bloom); font-weight:700; }
 
-  .day-track{
-    display:flex;
-    justify-content:center;
-    gap:8px;
-    margin:20px 0 6px;
-  }
+  .day-track{ display:flex; justify-content:center; gap:7px; margin:16px 0 4px; }
   .day-dot{
-    width:30px; height:30px;
-    border-radius:50%;
-    border:2px solid #D8CBB2;
-    background:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:12px;
-    font-weight:800;
-    color:#B7A98C;
-    position:relative;
-    transition:all .3s ease;
+    width:28px; height:28px; border-radius:50%; border:2px solid #D8CBB2; background:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:800;
+    color:#B7A98C; transition:all .3s ease;
   }
-  .day-dot.today{
-    border-color:var(--bloom);
-    color:var(--bloom);
-    box-shadow:0 0 0 4px rgba(193,80,46,0.12);
-  }
+  .day-dot.today{ border-color:var(--bloom); color:var(--bloom); box-shadow:0 0 0 4px rgba(193,80,46,0.12); }
   .day-dot.full{ background:var(--leaf); border-color:var(--leaf-dark); color:#fff; }
   .day-dot.partial{ background:var(--sun); border-color:#C99A2E; color:#5C4715; }
   .day-dot.empty{ background:#E4D9C4; border-color:var(--weed); color:var(--ink-soft); }
 
-  .garden-panel{
-    background:var(--card);
-    border-radius:22px;
-    padding:18px 18px 6px;
-    box-shadow:0 10px 30px -12px rgba(74,51,36,0.25);
-    margin-top:16px;
-    position:relative;
-    overflow:hidden;
-  }
-  .garden-panel::before{
-    content:"";
-    position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(232,184,75,0.08), transparent 40%);
-    pointer-events:none;
-  }
-  .plant-stage-label{
-    text-align:center;
-    font-size:13px;
-    color:var(--ink-soft);
-    font-weight:700;
-    margin-bottom:2px;
-  }
-  svg#plant{ width:100%; height:auto; display:block; }
-  .grown{ transition: opacity .6s ease, transform .6s cubic-bezier(.34,1.56,.64,1); }
-
-  .feedback{
-    text-align:center;
-    font-size:14px;
-    color:var(--soil-dark);
-    font-weight:600;
-    padding:10px 6px 16px;
-    min-height:20px;
+  .toast{
+    text-align:center; font-size:13.5px; font-weight:700; color:var(--soil-dark);
+    min-height:20px; padding:10px 6px; margin-top:6px;
   }
 
-  .resources{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
-    margin-top:16px;
+  .plots{ display:flex; flex-direction:column; gap:12px; margin-top:10px; }
+  .plot-card{
+    background:var(--card); border-radius:18px; padding:14px 16px;
+    box-shadow:0 8px 20px -12px rgba(74,51,36,0.28);
+    display:flex; align-items:center; gap:14px;
+    border:2px solid transparent; transition:border-color .3s ease, transform .2s ease;
   }
-  .res-card{
-    background:var(--card);
-    border-radius:16px;
-    padding:14px 8px;
-    text-align:center;
-    box-shadow:0 6px 16px -10px rgba(74,51,36,0.3);
-    border:2px solid transparent;
-    cursor:pointer;
-    transition:all .2s ease;
-    user-select:none;
+  .plot-card.ready{ border-color:var(--sun); animation:pulseGlow 1.6s ease-in-out infinite; }
+  @keyframes pulseGlow{
+    0%,100%{ box-shadow:0 8px 20px -12px rgba(232,184,75,0.3); }
+    50%{ box-shadow:0 8px 26px -8px rgba(232,184,75,0.7); }
   }
-  .res-card:active{ transform:scale(0.96); }
-  .res-card.done{
-    border-color:var(--leaf);
-    background:#F1F6EA;
+  .plot-emoji{ font-size:34px; width:46px; text-align:center; flex-shrink:0; transition:transform .4s cubic-bezier(.34,1.56,.64,1); }
+  .plot-card.ready .plot-emoji{ transform:scale(1.15); }
+  .plot-body{ flex:1; min-width:0; }
+  .plot-title{ font-size:13.5px; font-weight:800; color:var(--soil-dark); }
+  .plot-status{ font-size:12px; color:var(--ink-soft); margin-top:2px; line-height:1.35; }
+  .plot-btn{
+    border:none; border-radius:10px; padding:9px 12px; font-family:'Nunito Sans', sans-serif;
+    font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap; flex-shrink:0;
+    transition:transform .15s ease;
   }
-  .res-card .icon{ font-size:26px; display:block; margin-bottom:6px; }
-  .res-card .label{ font-size:12px; font-weight:800; color:var(--ink-soft); line-height:1.25; }
-  .res-card.done .label{ color:var(--leaf-dark); }
-  .res-card .check{
-    margin-top:5px;
-    font-size:11px;
-    font-weight:800;
-    color:var(--leaf-dark);
-    visibility:hidden;
+  .plot-btn:active{ transform:scale(0.95); }
+  .plot-btn.water{ background:var(--leaf); color:#fff; }
+  .plot-btn.collect{ background:var(--sun); color:#5C4715; }
+  .plot-btn:disabled{ background:#E4D9C4; color:#A99A80; cursor:default; }
+
+  .weeds-note{ text-align:center; font-size:12px; color:var(--weed); font-weight:700; margin-top:12px; min-height:16px; }
+
+  .lb-toggle{
+    width:100%; margin-top:16px; padding:12px; border-radius:12px; border:2px solid #E4D9C4;
+    background:#fff; color:var(--plum); font-weight:800; font-size:13.5px; cursor:pointer;
   }
-  .res-card.done .check{ visibility:visible; }
+  .leaderboard{ display:none; background:var(--card); border-radius:18px; padding:14px 16px; margin-top:10px; box-shadow:0 8px 20px -12px rgba(74,51,36,0.28); }
+  .leaderboard h3{ font-size:14.5px; color:var(--soil-dark); margin-bottom:8px; }
+  .lb-row{ display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid #EFE6D2; font-size:13px; }
+  .lb-row:last-child{ border-bottom:none; }
+  .lb-rank{ width:20px; font-weight:800; color:var(--plum); }
+  .lb-name{ flex:1; color:var(--ink); font-weight:700; }
+  .lb-score{ font-weight:800; color:var(--bloom); }
+  .lb-row.me{ background:#FBF3E4; border-radius:8px; padding-left:6px; }
 
   .primary-btn{
-    width:100%;
-    margin-top:18px;
-    padding:15px;
-    border:none;
-    border-radius:14px;
-    background:var(--bloom);
-    color:#fff;
-    font-family:'Nunito Sans', sans-serif;
-    font-size:15.5px;
-    font-weight:800;
-    letter-spacing:.01em;
-    cursor:pointer;
-    box-shadow:0 8px 18px -8px rgba(193,80,46,0.55);
-    transition:transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+    width:100%; margin-top:14px; padding:15px; border:none; border-radius:14px;
+    background:var(--bloom); color:#fff; font-family:'Nunito Sans', sans-serif; font-size:15.5px;
+    font-weight:800; cursor:pointer; box-shadow:0 8px 18px -8px rgba(193,80,46,0.55);
+    transition:transform .15s ease;
   }
   .primary-btn:active{ transform:translateY(1px) scale(0.99); }
-  .primary-btn:disabled{
-    background:#D8CBB2;
-    box-shadow:none;
-    cursor:not-allowed;
-    color:#A99A80;
-  }
+  .primary-btn:disabled{ background:#D8CBB2; box-shadow:none; cursor:not-allowed; color:#A99A80; }
 
-  .weeds-note{
-    text-align:center;
-    font-size:12.5px;
-    color:var(--weed);
-    font-weight:700;
-    margin-top:10px;
-    min-height:16px;
-  }
-
-  .finale{
-    display:none;
-    text-align:center;
-    animation:fadeUp .6s ease;
-  }
+  .finale{ display:none; text-align:center; animation:fadeUp .6s ease; }
   @keyframes fadeUp{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
   .finale h2{ font-size:22px; color:var(--soil-dark); margin-bottom:6px; }
   .finale p{ font-size:14px; color:var(--ink-soft); line-height:1.5; margin:0 0 14px; }
-  .stat-row{
-    display:flex; justify-content:center; gap:18px;
-    margin:14px 0 6px;
-  }
+  .stat-row{ display:flex; justify-content:center; gap:14px; margin:14px 0 6px; flex-wrap:wrap; }
   .stat{ text-align:center; }
-  .stat b{ display:block; font-family:'Fraunces',serif; font-size:22px; color:var(--bloom); }
-  .stat span{ font-size:11px; color:var(--ink-soft); font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+  .stat b{ display:block; font-family:'Fraunces',serif; font-size:20px; color:var(--bloom); }
+  .stat span{ font-size:10.5px; color:var(--ink-soft); font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
 
-  @media (prefers-reduced-motion: reduce){
-    .grown, .primary-btn, .finale{ transition:none; animation:none; }
-  }
+  @media (prefers-reduced-motion: reduce){ *{ transition:none!important; animation:none!important; } }
 </style>
 </head>
 <body>
 <div class="app">
 
-  <div class="login-screen" id="loginScreen">
+  <div class="loading-screen" id="loadingScreen">
     <div class="eyebrow">Летний лагерь · Шагай Дома</div>
     <h1>Грядка стройности</h1>
-    <p class="subtitle">Введи имя, чтобы посадить свою грядку. Прогресс сохранится — можно возвращаться каждый день.</p>
+    <p class="subtitle">Открываем твой сад…</p>
+  </div>
+
+  <div class="login-screen" id="loginScreen" style="display:none;">
+    <div class="eyebrow">Летний лагерь · Шагай Дома</div>
+    <h1>Грядка стройности</h1>
+    <p class="subtitle">Введи имя и почту, чтобы посадить свою грядку. Прогресс сохранится — можно возвращаться в любое время.</p>
     <input type="text" id="nameInput" class="name-input" placeholder="Твоё имя" autocomplete="off">
     <input type="email" id="emailInput" class="name-input" placeholder="Электронная почта" autocomplete="off">
     <button class="primary-btn" id="enterBtn">Войти в сад →</button>
@@ -261,110 +165,57 @@
 
   <div class="game-content" id="gameContent" style="display:none;">
 
-  <header>
-    <div class="eyebrow">Летний лагерь · Шагай Дома</div>
-    <h1 id="participantHeading">Грядка стройности</h1>
-    <p class="subtitle">Каждый шаг, тренировка и полезный приём пищи — это капля воды и горсть удобрения для твоего сада. Через 7 дней здесь будет цвести результат.</p>
-  </header>
+    <header>
+      <div class="eyebrow">Летний лагерь · Шагай Дома</div>
+      <h1 id="participantHeading">Грядка стройности</h1>
+      <p class="subtitle">Отмечай активность — грядка расцветёт не сразу: загляни ещё раз позже и собери урожай.</p>
+      <button class="switch-account" id="switchAccountBtn">Это не я — войти под другим именем</button>
+    </header>
 
-  <div class="day-track" id="dayTrack"></div>
+    <div class="day-track" id="dayTrack"></div>
+    <div class="toast" id="toast"></div>
 
-  <div class="garden-panel" id="gardenPanel">
-    <div class="plant-stage-label" id="stageLabel">День 1 · семя посажено</div>
-
-    <svg id="plant" viewBox="0 0 220 250" fill="none">
-      <!-- ground / bed -->
-      <rect x="14" y="205" width="192" height="30" rx="10" fill="#8A6748"/>
-      <rect x="14" y="205" width="192" height="10" rx="5" fill="#A9805A"/>
-      <ellipse cx="110" cy="207" rx="90" ry="14" fill="#573A26"/>
-
-      <!-- weeds (up to 3) -->
-      <g id="weed1" data-weed style="opacity:0">
-        <path d="M40 207 q-6 -14 2 -22 M40 207 q4 -12 -4 -20" stroke="#8B9574" stroke-width="3" stroke-linecap="round"/>
-      </g>
-      <g id="weed2" data-weed style="opacity:0">
-        <path d="M180 207 q-6 -14 2 -22 M180 207 q4 -12 -4 -20" stroke="#8B9574" stroke-width="3" stroke-linecap="round"/>
-      </g>
-      <g id="weed3" data-weed style="opacity:0">
-        <path d="M65 207 q5 -12 -3 -19" stroke="#8B9574" stroke-width="3" stroke-linecap="round"/>
-      </g>
-
-      <!-- seed -->
-      <g id="seed" style="transform-origin:110px 205px; transition:opacity .5s ease, transform .5s ease;">
-        <ellipse cx="110" cy="200" rx="5" ry="4" fill="var(--soil-dark)"/>
-      </g>
-
-      <!-- stem -->
-      <g id="stemGroup" style="transform-origin:110px 205px; transition:transform .8s cubic-bezier(.34,1.2,.64,1); transform:scaleY(0);">
-        <path d="M110 205 L110 90" stroke="var(--leaf-dark)" stroke-width="6" stroke-linecap="round"/>
-      </g>
-
-      <!-- leaves pair 1 -->
-      <g id="leaves1" style="transform-origin:110px 175px; opacity:0; transition:opacity .5s ease, transform .5s ease;">
-        <path d="M110 175 Q80 165 78 145 Q104 150 110 175Z" fill="var(--leaf)"/>
-        <path d="M110 175 Q140 165 142 145 Q116 150 110 175Z" fill="var(--leaf)"/>
-      </g>
-
-      <!-- leaves pair 2 -->
-      <g id="leaves2" style="transform-origin:110px 135px; opacity:0; transition:opacity .5s ease, transform .5s ease;">
-        <path d="M110 135 Q75 128 70 105 Q102 108 110 135Z" fill="var(--leaf-dark)"/>
-        <path d="M110 135 Q145 128 150 105 Q118 108 110 135Z" fill="var(--leaf-dark)"/>
-      </g>
-
-      <!-- bud -->
-      <g id="bud" style="transform-origin:110px 90px; opacity:0; transform:scale(.4); transition:opacity .5s ease, transform .5s cubic-bezier(.34,1.56,.64,1);">
-        <ellipse cx="110" cy="88" rx="12" ry="16" fill="var(--leaf-dark)"/>
-      </g>
-
-      <!-- bloom (petals) -->
-      <g id="bloom" style="transform-origin:110px 85px; opacity:0; transform:scale(.5); transition:opacity .6s ease, transform .6s cubic-bezier(.34,1.56,.64,1);">
-        <circle cx="110" cy="85" r="10" fill="var(--sun)"/>
-        <path d="M110 85 Q95 65 78 72 Q88 92 110 85Z" fill="var(--bloom-light)"/>
-        <path d="M110 85 Q125 65 142 72 Q132 92 110 85Z" fill="var(--bloom-light)"/>
-        <path d="M110 85 Q95 105 78 98 Q88 78 110 85Z" fill="var(--bloom)"/>
-        <path d="M110 85 Q125 105 142 98 Q132 78 110 85Z" fill="var(--bloom)"/>
-      </g>
-
-      <!-- harvest basket (final day) -->
-      <g id="harvest" style="transform-origin:110px 205px; opacity:0; transform:scale(.6) translateY(10px); transition:opacity .7s ease, transform .7s cubic-bezier(.34,1.56,.64,1);">
-        <path d="M60 200 L160 200 L150 225 L70 225 Z" fill="var(--soil)"/>
-        <path d="M60 200 L160 200 L157 208 L63 208 Z" fill="#8A6748"/>
-        <circle cx="90" cy="192" r="10" fill="var(--bloom)"/>
-        <circle cx="112" cy="188" r="11" fill="var(--sun)"/>
-        <circle cx="133" cy="194" r="9" fill="var(--bloom-light)"/>
-      </g>
-    </svg>
-
-    <div class="feedback" id="feedback">Посади первое зёрнышко: отметь сегодняшние шаги, тренировку и питание.</div>
-  </div>
-
-  <div class="resources" id="resources">
-    <div class="res-card" data-task="steps" id="card-steps">
-      <span class="icon">💧</span>
-      <span class="label">10 000 шагов</span>
-      <span class="check">полито</span>
+    <div class="plots" id="plots">
+      <div class="plot-card" data-plot="steps">
+        <div class="plot-emoji" id="emoji-steps">🌰</div>
+        <div class="plot-body">
+          <div class="plot-title">Грядка шагов 💧</div>
+          <div class="plot-status" id="status-steps">10 000 шагов сегодня</div>
+        </div>
+        <button class="plot-btn water" id="btn-steps">Полить</button>
+      </div>
+      <div class="plot-card" data-plot="training">
+        <div class="plot-emoji" id="emoji-training">🌰</div>
+        <div class="plot-body">
+          <div class="plot-title">Грядка силы ☀️</div>
+          <div class="plot-status" id="status-training">Тренировка сегодня</div>
+        </div>
+        <button class="plot-btn water" id="btn-training">Полить</button>
+      </div>
+      <div class="plot-card" data-plot="meal">
+        <div class="plot-emoji" id="emoji-meal">🌰</div>
+        <div class="plot-body">
+          <div class="plot-title">Грядка вкуса 🍽️</div>
+          <div class="plot-status" id="status-meal">Питание по плану</div>
+        </div>
+        <button class="plot-btn water" id="btn-meal">Полить</button>
+      </div>
     </div>
-    <div class="res-card" data-task="training" id="card-training">
-      <span class="icon">☀️</span>
-      <span class="label">Тренировка</span>
-      <span class="check">удобрено</span>
-    </div>
-    <div class="res-card" data-task="meal" id="card-meal">
-      <span class="icon">🌰</span>
-      <span class="label">Питание по плану</span>
-      <span class="check">посеяно</span>
-    </div>
-  </div>
 
-  <button class="primary-btn" id="finishDayBtn">Завершить день 1 →</button>
-  <div class="weeds-note" id="weedsNote"></div>
+    <div class="weeds-note" id="weedsNote"></div>
 
-  <div class="finale" id="finale">
-    <h2>🌻 Грядка расцвела</h2>
-    <p>Семь дней — и сад полон. Каждый цветок здесь — это твой выбор идти, тренироваться и есть с заботой о себе.</p>
-    <div class="stat-row" id="statRow"></div>
-    <button class="primary-btn" id="shareBtn">Поделиться результатом</button>
-  </div>
+    <button class="lb-toggle" id="lbToggle">🏆 Сад лагеря — рейтинг участниц</button>
+    <div class="leaderboard" id="leaderboard">
+      <h3>Топ участниц</h3>
+      <div id="leaderboardList">Загружаю…</div>
+    </div>
+
+    <div class="finale" id="finale">
+      <h2>🌻 Грядка расцвела</h2>
+      <p>Семь дней — и сад полон. Каждый цветок здесь — это твой выбор идти, тренироваться и есть с заботой о себе.</p>
+      <div class="stat-row" id="statRow"></div>
+      <button class="primary-btn" id="shareBtn">Поделиться результатом</button>
+    </div>
 
   </div><!-- /game-content -->
 
@@ -373,13 +224,14 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore, doc, getDoc, setDoc, serverTimestamp
+  getFirestore, doc, getDoc, setDoc, serverTimestamp,
+  collection, query, orderBy, limit, where, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
-  getAuth, signInAnonymously
+  getAuth, signInAnonymously, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// Твоя конфигурация Firebase (проект walk-walk-d8a14, как в остальных играх лагеря)
+// Конфигурация Firebase (проект walk-walk-d8a14, как в остальных играх лагеря)
 const firebaseConfig = {
   apiKey: "AIzaSyApSUQxealmL13siDzauRWO_J6-fSHkN-4",
   authDomain: "walk-walk-d8a14.firebaseapp.com",
@@ -393,22 +245,36 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Коллекция с прогрессом участниц: garden_progress/{идентификатор}
-const COLLECTION_NAME = 'garden_progress';
+const PROGRESS_COLLECTION = 'garden_progress';   // приватный прогресс участницы, doc id = почта
+const LEADERBOARD_COLLECTION = 'garden_leaderboard'; // публичные имя+счёт для общего рейтинга
+
+// Через сколько миллисекунд политая грядка готова к сбору.
+// Для теста можно временно поставить 60 * 1000 (1 минута), для лагеря — 2-3 часа.
+const GROWTH_DURATION_MS = 2 * 60 * 60 * 1000;
+
+const PLOT_KEYS = ['steps','training','meal'];
+const PLOT_META = {
+  steps:    { statusLabel:'10 000 шагов сегодня',   collectMsg:'Грядка шагов расцвела!' },
+  training: { statusLabel:'Тренировка сегодня',      collectMsg:'Грядка силы расцвела!' },
+  meal:     { statusLabel:'Питание по плану',        collectMsg:'Грядка вкуса расцвела!' }
+};
+const STAGE_EMOJI = ['🌰','🌱','🌿','🍀','🌷','🌸','🌻','🧺'];
 
 (async function(){
-  const TOTAL_DAYS = 7;
   const state = {
-    docId: null,
-    name: '',
-    email: '',
-    currentDay: 1,
-    today: { steps:false, training:false, meal:false },
-    totalGrowth: 0,
-    weeds: 0,
-    history: [] // per day: count of tasks completed
+    docId: null, name: '', email: '',
+    campStartDate: null,
+    log: {},               // { 'YYYY-MM-DD': {steps,training,meal} }
+    plots: {                // per task-type growth
+      steps:    { collectedLevel:0, pendingSince:null, sparkle:false },
+      training: { collectedLevel:0, pendingSince:null, sparkle:false },
+      meal:     { collectedLevel:0, pendingSince:null, sparkle:false }
+    },
+    bonusSeeds: 0
   };
 
+  // ---------- DOM refs ----------
+  const loadingScreen = document.getElementById('loadingScreen');
   const loginScreen = document.getElementById('loginScreen');
   const gameContent = document.getElementById('gameContent');
   const nameInput = document.getElementById('nameInput');
@@ -416,22 +282,55 @@ const COLLECTION_NAME = 'garden_progress';
   const enterBtn = document.getElementById('enterBtn');
   const loginNote = document.getElementById('loginNote');
   const participantHeading = document.getElementById('participantHeading');
+  const switchAccountBtn = document.getElementById('switchAccountBtn');
+  const dayTrack = document.getElementById('dayTrack');
+  const toast = document.getElementById('toast');
+  const weedsNote = document.getElementById('weedsNote');
+  const finale = document.getElementById('finale');
+  const lbToggle = document.getElementById('lbToggle');
+  const leaderboard = document.getElementById('leaderboard');
+  const leaderboardList = document.getElementById('leaderboardList');
 
-  function normalizeEmail(email){
-    return email.trim().toLowerCase();
+  // ---------- date helpers ----------
+  function todayStr(){ return dateStr(new Date()); }
+  function dateStr(d){
+    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+  function addDays(dStr, n){
+    const [y,m,d] = dStr.split('-').map(Number);
+    const dt = new Date(y, m-1, d+n);
+    return dateStr(dt);
+  }
+  function diffDays(fromStr, toStr){
+    const [y1,m1,d1]=fromStr.split('-').map(Number);
+    const [y2,m2,d2]=toStr.split('-').map(Number);
+    const a = new Date(y1,m1-1,d1), b = new Date(y2,m2-1,d2);
+    return Math.round((b-a)/86400000);
+  }
+  function getDayNumber(){ return diffDays(state.campStartDate, todayStr()) + 1; }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function normalizeEmail(email){ return email.trim().toLowerCase(); }
+  function isValidEmail(email){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+
+  // ---------- Firestore ----------
+  function loadStateFromDoc(id, data){
+    state.docId = id;
+    state.name = data.name || '';
+    state.email = data.email || id;
+    state.campStartDate = data.campStartDate || todayStr();
+    state.log = data.log || {};
+    state.plots = data.plots || state.plots;
+    state.bonusSeeds = data.bonusSeeds ?? 0;
   }
 
-  function isValidEmail(email){
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  async function loadOrCreateParticipant(rawName, rawEmail){
+  async function loadOrCreateParticipant(rawName, rawEmail, uid){
     const email = normalizeEmail(rawEmail);
     const name = rawName.trim();
-    // doc ID = почта: она уникальна для каждой участницы.
-    // Имя используется как проверочный слой, чтобы почту нельзя было
-    // случайно перепутать между двумя разными участницами.
-    const ref = doc(db, COLLECTION_NAME, email);
+    const ref = doc(db, PROGRESS_COLLECTION, email);
     const snap = await getDoc(ref);
     if(snap.exists()){
       const data = snap.data();
@@ -439,57 +338,247 @@ const COLLECTION_NAME = 'garden_progress';
       if(storedName !== name.toLowerCase()){
         const err = new Error('name-mismatch');
         err.code = 'name-mismatch';
-        err.storedName = data.name;
         throw err;
       }
-      state.docId = email;
-      state.name = data.name || name;
-      state.email = email;
-      state.currentDay = data.currentDay ?? 1;
-      state.today = data.today ?? { steps:false, training:false, meal:false };
-      state.totalGrowth = data.totalGrowth ?? 0;
-      state.weeds = data.weeds ?? 0;
-      state.history = data.history ?? [];
+      loadStateFromDoc(email, data);
+      // "запоминаем" это устройство за этой участницей, чтобы в следующий раз
+      // не спрашивать имя и почту заново
+      await setDoc(ref, { ownerUid: uid, updatedAt: serverTimestamp() }, { merge:true });
     } else {
       state.docId = email;
       state.name = name;
       state.email = email;
+      state.campStartDate = todayStr();
       await setDoc(ref, {
-        name: state.name,
-        email: state.email,
-        currentDay: 1,
-        today: { steps:false, training:false, meal:false },
-        totalGrowth: 0,
-        weeds: 0,
-        history: [],
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        name: state.name, email: state.email, campStartDate: state.campStartDate,
+        log: {}, plots: state.plots, bonusSeeds: 0, ownerUid: uid,
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp()
       });
     }
   }
 
+  // Пытаемся найти сад, уже привязанный к этому браузеру/устройству
+  // (Firebase Auth сам хранит анонимную сессию между визитами).
+  async function tryAutoResume(uid){
+    const q = query(collection(db, PROGRESS_COLLECTION), where('ownerUid','==', uid), limit(1));
+    const snap = await getDocs(q);
+    if(snap.empty) return false;
+    const docSnap = snap.docs[0];
+    loadStateFromDoc(docSnap.id, docSnap.data());
+    return true;
+  }
+
+  switchAccountBtn.addEventListener('click', async ()=>{
+    if(!confirm('Выйти из этого сада и войти под другим именем на этом устройстве?')) return;
+    try{ await auth.signOut(); }catch(e){ console.error(e); }
+    gameContent.style.display = 'none';
+    nameInput.value = ''; emailInput.value = '';
+    loginScreen.style.display = 'block';
+    // новая анонимная сессия для нового входа
+    await signInAnonymously(auth);
+  });
+
+  function computeScore(){
+    return PLOT_KEYS.reduce((sum,k)=>sum+state.plots[k].collectedLevel,0) + state.bonusSeeds;
+  }
+
   async function saveProgress(){
     if(!state.docId) return;
-    const ref = doc(db, COLLECTION_NAME, state.docId);
+    const score = computeScore();
     try{
-      await setDoc(ref, {
-        name: state.name,
-        email: state.email,
-        currentDay: state.currentDay,
-        today: state.today,
-        totalGrowth: state.totalGrowth,
-        weeds: state.weeds,
-        history: state.history,
+      await setDoc(doc(db, PROGRESS_COLLECTION, state.docId), {
+        name: state.name, email: state.email, campStartDate: state.campStartDate,
+        log: state.log, plots: state.plots, bonusSeeds: state.bonusSeeds, score,
         updatedAt: serverTimestamp()
-      }, { merge: true });
+      }, { merge:true });
+      await setDoc(doc(db, LEADERBOARD_COLLECTION, state.docId), {
+        name: state.name, score, updatedAt: serverTimestamp()
+      }, { merge:true });
+    }catch(e){ console.error('Не удалось сохранить прогресс:', e); }
+  }
+
+  async function loadLeaderboard(){
+    leaderboardList.textContent = 'Загружаю…';
+    try{
+      const q = query(collection(db, LEADERBOARD_COLLECTION), orderBy('score','desc'), limit(10));
+      const snap = await getDocs(q);
+      if(snap.empty){ leaderboardList.textContent = 'Пока пусто — будь первой!'; return; }
+      let rank = 0, html = '';
+      snap.forEach(docSnap=>{
+        rank++;
+        const d = docSnap.data();
+        const isMe = docSnap.id === state.docId;
+        html += `<div class="lb-row ${isMe?'me':''}"><span class="lb-rank">${rank}</span><span class="lb-name">${escapeHtml(d.name||'')}</span><span class="lb-score">${d.score||0}</span></div>`;
+      });
+      leaderboardList.innerHTML = html;
     }catch(e){
-      console.error('Не удалось сохранить прогресс:', e);
+      console.error(e);
+      leaderboardList.textContent = 'Не удалось загрузить рейтинг.';
     }
   }
 
+  // ---------- game logic ----------
+  function targetLevel(key){
+    return Math.min(7, Object.values(state.log).filter(e=>e && e[key]).length);
+  }
+
+  function markTask(key){
+    const today = todayStr();
+    if(!state.log[today]) state.log[today] = { steps:false, training:false, meal:false };
+    if(state.log[today][key]) return; // уже отмечено сегодня
+    state.log[today][key] = true;
+    const plot = state.plots[key];
+    const target = targetLevel(key);
+    if(plot.collectedLevel < target && !plot.pendingSince){
+      plot.pendingSince = Date.now();
+      plot.sparkle = Math.random() < 0.35;
+    }
+    saveProgress();
+    renderAll();
+    showToast('Отмечено! Грядка начала расти — загляни чуть позже.');
+  }
+
+  function collectPlot(key){
+    const plot = state.plots[key];
+    if(!plot.pendingSince) return;
+    if(Date.now() - plot.pendingSince < GROWTH_DURATION_MS) return;
+    const target = targetLevel(key);
+    plot.collectedLevel = Math.min(target, plot.collectedLevel + 1);
+    let msg = PLOT_META[key].collectMsg;
+    if(plot.sparkle){
+      state.bonusSeeds += 1;
+      msg += ' ✨ Бонусное семечко!';
+    }
+    plot.pendingSince = null;
+    plot.sparkle = false;
+    saveProgress();
+    renderAll();
+    showToast(msg);
+  }
+
+  function showToast(msg){ toast.textContent = msg; }
+
+  function formatCountdown(ms){
+    const totalMin = Math.max(0, Math.ceil(ms/60000));
+    const h = Math.floor(totalMin/60), m = totalMin%60;
+    if(h>0) return `${h} ч ${m} мин`;
+    return `${m} мин`;
+  }
+
+  function computeWeeds(){
+    let count = 0;
+    const today = todayStr();
+    for(let i=0;i<7;i++){
+      const d = addDays(state.campStartDate, i);
+      if(d >= today) break;
+      const entry = state.log[d];
+      const done = entry && (entry.steps || entry.training || entry.meal);
+      if(!done) count++;
+    }
+    return Math.min(count, 3);
+  }
+
+  // ---------- rendering ----------
+  function renderDayDots(){
+    dayTrack.innerHTML = '';
+    const today = todayStr();
+    for(let i=0;i<7;i++){
+      const d = addDays(state.campStartDate, i);
+      const dot = document.createElement('div');
+      dot.className = 'day-dot';
+      dot.textContent = i+1;
+      if(d < today){
+        const entry = state.log[d];
+        const c = entry ? [entry.steps, entry.training, entry.meal].filter(Boolean).length : 0;
+        dot.classList.add(c===3 ? 'full' : c>0 ? 'partial' : 'empty');
+      } else if(d === today){
+        dot.classList.add('today');
+      }
+      dayTrack.appendChild(dot);
+    }
+  }
+
+  function renderPlots(){
+    const today = todayStr();
+    PLOT_KEYS.forEach(key=>{
+      const plot = state.plots[key];
+      const card = document.querySelector(`.plot-card[data-plot="${key}"]`);
+      const emojiEl = document.getElementById('emoji-'+key);
+      const statusEl = document.getElementById('status-'+key);
+      const btn = document.getElementById('btn-'+key);
+      const target = targetLevel(key);
+      const level = Math.min(7, plot.collectedLevel);
+      emojiEl.textContent = STAGE_EMOJI[level];
+
+      const doneToday = !!(state.log[today] && state.log[today][key]);
+      const pending = plot.pendingSince && plot.collectedLevel < target;
+      const remaining = pending ? GROWTH_DURATION_MS - (Date.now() - plot.pendingSince) : 0;
+      const ready = pending && remaining <= 0;
+
+      card.classList.toggle('ready', !!ready);
+
+      if(ready){
+        statusEl.textContent = 'Готова к сбору!';
+        btn.textContent = '✨ Собрать';
+        btn.className = 'plot-btn collect';
+        btn.disabled = false;
+        btn.onclick = ()=>collectPlot(key);
+      } else if(pending){
+        statusEl.textContent = `Распустится через ${formatCountdown(remaining)}`;
+        btn.textContent = 'Растёт…';
+        btn.className = 'plot-btn';
+        btn.disabled = true;
+        btn.onclick = null;
+      } else if(!doneToday){
+        statusEl.textContent = PLOT_META[key].statusLabel;
+        btn.textContent = 'Полить';
+        btn.className = 'plot-btn water';
+        btn.disabled = false;
+        btn.onclick = ()=>markTask(key);
+      } else {
+        statusEl.textContent = 'Сегодня уже полито 🌿';
+        btn.textContent = 'Готово';
+        btn.className = 'plot-btn';
+        btn.disabled = true;
+        btn.onclick = null;
+      }
+    });
+  }
+
+  function renderWeedsNote(){
+    const weeds = computeWeeds();
+    weedsNote.textContent = weeds > 0
+      ? `Сорняков на грядке: ${weeds} — это просто пропущенные дни, не приговор.`
+      : '';
+  }
+
+  function checkFinale(){
+    const finished = getDayNumber() > 7;
+    document.getElementById('plots').style.display = finished ? 'none' : 'flex';
+    finale.style.display = finished ? 'block' : 'none';
+    if(finished){
+      const totalCollected = PLOT_KEYS.reduce((s,k)=>s+state.plots[k].collectedLevel,0);
+      const fullDays = Object.values(state.log).filter(e=>e.steps && e.training && e.meal).length;
+      document.getElementById('statRow').innerHTML = `
+        <div class="stat"><b>${fullDays}</b><span>идеальных дней</span></div>
+        <div class="stat"><b>${totalCollected}</b><span>собрано роста</span></div>
+        <div class="stat"><b>${state.bonusSeeds}</b><span>бонусных семян</span></div>
+      `;
+    }
+    return finished;
+  }
+
+  function renderAll(){
+    renderDayDots();
+    const finished = checkFinale();
+    if(!finished) renderPlots();
+    renderWeedsNote();
+  }
+
+  // ---------- login ----------
   enterBtn.addEventListener('click', handleEnter);
-  nameInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') handleEnter(); });
-  emailInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') handleEnter(); });
+  nameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') handleEnter(); });
+  emailInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') handleEnter(); });
 
   async function handleEnter(){
     const rawName = nameInput.value;
@@ -509,25 +598,17 @@ const COLLECTION_NAME = 'garden_progress';
     loginNote.classList.remove('error');
     loginNote.textContent = '';
     try{
-      await signInAnonymously(auth);
-      await loadOrCreateParticipant(rawName, rawEmail);
+      const cred = await signInAnonymously(auth);
+      await loadOrCreateParticipant(rawName, rawEmail, cred.user.uid);
       loginScreen.style.display = 'none';
       gameContent.style.display = 'block';
       participantHeading.textContent = `Грядка ${state.name}`;
-      finishBtn.textContent = `Завершить день ${Math.min(state.currentDay, TOTAL_DAYS)} →`;
-      renderTodayCards();
-      updateDayDots();
-      renderPlant();
-      if(state.currentDay > TOTAL_DAYS){
-        showFinale();
-      }
+      renderAll();
     }catch(err){
       console.error(err);
-      if(err.code === 'name-mismatch'){
-        loginNote.textContent = `Эта почта уже зарегистрирована на другое имя. Если это твой сад — введи имя так же, как в первый раз.`;
-      } else {
-        loginNote.textContent = 'Не получилось подключиться. Проверь интернет и попробуй ещё раз.';
-      }
+      loginNote.textContent = err.code === 'name-mismatch'
+        ? 'Эта почта уже зарегистрирована на другое имя. Введи имя так же, как в первый раз.'
+        : 'Не получилось подключиться. Проверь интернет и попробуй ещё раз.';
       loginNote.classList.add('error');
     }finally{
       enterBtn.disabled = false;
@@ -535,157 +616,61 @@ const COLLECTION_NAME = 'garden_progress';
     }
   }
 
-  function renderTodayCards(){
-    document.getElementById('card-steps').classList.toggle('done', !!state.today.steps);
-    document.getElementById('card-training').classList.toggle('done', !!state.today.training);
-    document.getElementById('card-meal').classList.toggle('done', !!state.today.meal);
-  }
-
-  const dayTrack = document.getElementById('dayTrack');
-  const stageLabel = document.getElementById('stageLabel');
-  const feedback = document.getElementById('feedback');
-  const finishBtn = document.getElementById('finishDayBtn');
-  const weedsNote = document.getElementById('weedsNote');
-  const resources = document.getElementById('resources');
-  const gardenPanel = document.getElementById('gardenPanel');
-  const finale = document.getElementById('finale');
-
-  const stageNames = [
-    'семя посажено','проклюнулся росток','тянется вверх',
-    'листья окрепли','набух бутон','бутон раскрывается',
-    'в полном цвету','урожай собран'
-  ];
-
-  // build day dots
-  for(let i=1;i<=TOTAL_DAYS;i++){
-    const dot = document.createElement('div');
-    dot.className = 'day-dot';
-    dot.id = 'dot'+i;
-    dot.textContent = i;
-    dayTrack.appendChild(dot);
-  }
-
-  function updateDayDots(){
-    for(let i=1;i<=TOTAL_DAYS;i++){
-      const dot = document.getElementById('dot'+i);
-      dot.className = 'day-dot';
-      if(i < state.currentDay){
-        const c = state.history[i-1];
-        if(c === 3) dot.classList.add('full');
-        else if(c > 0) dot.classList.add('partial');
-        else dot.classList.add('empty');
-      } else if(i === state.currentDay){
-        dot.classList.add('today');
-      }
-    }
-  }
-
-  function renderPlant(){
-    const stage = Math.min(Math.floor(state.totalGrowth/3), 6);
-    const seed = document.getElementById('seed');
-    const stem = document.getElementById('stemGroup');
-    const leaves1 = document.getElementById('leaves1');
-    const leaves2 = document.getElementById('leaves2');
-    const bud = document.getElementById('bud');
-    const bloom = document.getElementById('bloom');
-    const harvest = document.getElementById('harvest');
-
-    seed.style.opacity = stage === 0 ? '1' : '0';
-    stem.style.transform = `scaleY(${Math.min(stage,3)/3})`;
-    leaves1.style.opacity = stage >= 2 ? '1' : '0';
-    leaves1.style.transform = stage >= 2 ? 'scale(1)' : 'scale(.6)';
-    leaves2.style.opacity = stage >= 3 ? '1' : '0';
-    leaves2.style.transform = stage >= 3 ? 'scale(1)' : 'scale(.6)';
-    bud.style.opacity = (stage >= 4 && stage < 6) ? '1' : (stage >= 6 ? '0' : '0');
-    bud.style.transform = stage >= 4 ? 'scale(1)' : 'scale(.4)';
-    bloom.style.opacity = stage >= 5 ? '1' : '0';
-    bloom.style.transform = stage >= 5 ? 'scale(1)' : 'scale(.5)';
-
-    const finished = state.currentDay > TOTAL_DAYS;
-    harvest.style.opacity = finished ? '1' : '0';
-    harvest.style.transform = finished ? 'scale(1) translateY(0)' : 'scale(.6) translateY(10px)';
-    gardenPanel.style.display = finished ? 'none' : 'block';
-
-    stageLabel.textContent = finished
-      ? 'Урожай собран'
-      : `День ${state.currentDay} · ${stageNames[stage]}`;
-
-    // weeds
-    for(let i=1;i<=3;i++){
-      const w = document.getElementById('weed'+i);
-      w.style.opacity = i <= state.weeds ? '1' : '0';
-    }
-    weedsNote.textContent = state.weeds > 0
-      ? `Сорняков на грядке: ${state.weeds} — это просто пропущенные дни, не приговор. Завтра можно снова полить.`
-      : '';
-  }
-
-  function resetTodayCards(){
-    document.getElementById('card-steps').classList.remove('done');
-    document.getElementById('card-training').classList.remove('done');
-    document.getElementById('card-meal').classList.remove('done');
-    state.today = { steps:false, training:false, meal:false };
-  }
-
-  resources.addEventListener('click', (e)=>{
-    const card = e.target.closest('.res-card');
-    if(!card || state.currentDay > TOTAL_DAYS) return;
-    const task = card.dataset.task;
-    state.today[task] = !state.today[task];
-    card.classList.toggle('done', state.today[task]);
-    saveProgress();
+  // ---------- leaderboard ----------
+  let lbOpen = false;
+  lbToggle.addEventListener('click', ()=>{
+    lbOpen = !lbOpen;
+    leaderboard.style.display = lbOpen ? 'block' : 'none';
+    lbToggle.textContent = lbOpen ? '🌿 Скрыть рейтинг' : '🏆 Сад лагеря — рейтинг участниц';
+    if(lbOpen) loadLeaderboard();
   });
 
-  finishBtn.addEventListener('click', async ()=>{
-    const doneCount = Object.values(state.today).filter(Boolean).length;
-    state.history.push(doneCount);
-    state.totalGrowth += doneCount;
-    if(doneCount === 0) state.weeds = Math.min(state.weeds+1, 3);
-
-    if(doneCount === 3){
-      feedback.textContent = 'Отличный день — грядка потянулась вверх! 🌱';
-    } else if(doneCount > 0){
-      feedback.textContent = 'Неплохо — росток держится. Завтра можно добавить ещё немного заботы.';
-    } else {
-      feedback.textContent = 'Сегодня грядка отдыхала без полива. Ничего страшного — просто начни заново завтра.';
-    }
-
-    state.currentDay += 1;
-    resetTodayCards();
-    updateDayDots();
-    renderPlant();
-    await saveProgress();
-
-    if(state.currentDay > TOTAL_DAYS){
-      setTimeout(showFinale, 500);
-    } else {
-      finishBtn.textContent = `Завершить день ${state.currentDay} →`;
-    }
-  });
-
-  function showFinale(){
-    finale.style.display = 'block';
-    const fullDays = state.history.filter(c=>c===3).length;
-    const totalTasks = state.history.reduce((a,b)=>a+b,0);
-    document.getElementById('statRow').innerHTML = `
-      <div class="stat"><b>${fullDays}</b><span>идеальных дней</span></div>
-      <div class="stat"><b>${totalTasks}</b><span>задач выполнено</span></div>
-      <div class="stat"><b>${state.weeds}</b><span>сорняков</span></div>
-    `;
-    finishBtn.style.display = 'none';
-    weedsNote.textContent = '';
-  }
-
+  // ---------- share ----------
   document.getElementById('shareBtn').addEventListener('click', async ()=>{
-    const text = `Я вырастила свою грядку стройности за 7 дней летнего лагеря Шагай Дома 🌻`;
+    const text = 'Я вырастила свою грядку стройности за 7 дней летнего лагеря Шагай Дома 🌻';
     try{
-      if(navigator.share){
-        await navigator.share({ text });
-      } else {
-        await navigator.clipboard.writeText(text);
-        alert('Текст скопирован — вставь его в сторис!');
+      if(navigator.share){ await navigator.share({ text }); }
+      else{ await navigator.clipboard.writeText(text); alert('Текст скопирован — вставь его в сторис!'); }
+    }catch(e){ /* пользователь отменил шеринг */ }
+  });
+
+  // ---------- live ticking ----------
+  setInterval(()=>{
+    if(gameContent.style.display !== 'none' && loginScreen.style.display === 'none'){
+      renderAll();
+    }
+  }, 30000);
+
+  // ---------- session auto-resume ----------
+  // Firebase Auth сам хранит анонимную сессию в этом браузере между визитами
+  // (через IndexedDB), поэтому при повторном открытии страницы имя и почту
+  // спрашивать заново не нужно — просто ищем сад, привязанный к этому uid.
+  onAuthStateChanged(auth, async (user)=>{
+    if(user){
+      try{
+        const resumed = await tryAutoResume(user.uid);
+        loadingScreen.style.display = 'none';
+        if(resumed){
+          gameContent.style.display = 'block';
+          participantHeading.textContent = `Грядка ${state.name}`;
+          renderAll();
+        } else {
+          loginScreen.style.display = 'block';
+        }
+      }catch(e){
+        console.error(e);
+        loadingScreen.style.display = 'none';
+        loginScreen.style.display = 'block';
       }
-    }catch(e){ /* пользователь отменил шеринг — ничего не делаем */ }
+    } else {
+      // сессии ещё нет — создаём анонимную и ждём следующего срабатывания
+      try{ await signInAnonymously(auth); }
+      catch(e){
+        console.error(e);
+        loadingScreen.style.display = 'none';
+        loginScreen.style.display = 'block';
+      }
+    }
   });
 
 })();
