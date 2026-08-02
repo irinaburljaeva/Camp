@@ -8,182 +8,104 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --cream:#F6F1E4;
-    --cream-deep:#EFE6D2;
-    --soil:#6B4A34;
-    --soil-dark:#4A3324;
-    --leaf:#6B8F47;
-    --leaf-dark:#4F6B34;
-    --bloom:#C1502E;
-    --bloom-light:#E0895F;
-    --sun:#E8B84B;
-    --plum:#7C5568;
-    --ink:#3B2E22;
-    --ink-soft:#6B5D4E;
-    --weed:#8B9574;
+    --cream:#F6F1E4; --cream-deep:#EFE6D2;
+    --soil:#6B4A34; --soil-dark:#4A3324;
+    --leaf:#6B8F47; --leaf-dark:#4F6B34;
+    --bloom:#C1502E; --bloom-light:#E0895F;
+    --sun:#E8B84B; --plum:#7C5568;
+    --ink:#3B2E22; --ink-soft:#6B5D4E;
     --card:#FFFDF8;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   body{
-    margin:0;
-    min-height:100vh;
+    margin:0; min-height:100vh;
     background:radial-gradient(ellipse at top, var(--cream-deep), var(--cream) 60%);
-    font-family:'Nunito Sans', sans-serif;
-    color:var(--ink);
-    display:flex;
-    justify-content:center;
-    padding:28px 14px 60px;
+    font-family:'Nunito Sans', sans-serif; color:var(--ink);
+    display:flex; justify-content:center; padding:24px 12px 60px;
   }
-  .app{ width:100%; max-width:430px; }
+  .app{ width:100%; max-width:440px; }
   h1,h2,h3{ font-family:'Fraunces', serif; margin:0; }
-  header{ text-align:center; margin-bottom:14px; }
-  .eyebrow{
-    font-size:12.5px; letter-spacing:.12em; text-transform:uppercase;
-    color:var(--plum); font-weight:800; margin-bottom:6px;
-  }
-  h1{ font-size:24px; font-weight:700; color:var(--soil-dark); line-height:1.15; }
-  .subtitle{ margin-top:6px; font-size:13.5px; color:var(--ink-soft); line-height:1.4; }
-  .switch-account{
-    display:inline-block; margin-top:10px; border:none; background:none; padding:0;
-    font-family:'Nunito Sans', sans-serif; font-size:11.5px; color:var(--plum);
-    text-decoration:underline; cursor:pointer; font-weight:700;
-  }
+  header{ text-align:center; margin-bottom:12px; }
+  .eyebrow{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--plum); font-weight:800; }
+  h1{ font-size:21px; font-weight:700; color:var(--soil-dark); margin-top:4px; }
+  .greeting{ margin-top:8px; font-family:'Fraunces', serif; font-size:16px; font-weight:600; color:var(--bloom); }
+  .subtitle{ margin-top:6px; font-size:12.5px; color:var(--ink-soft); line-height:1.4; }
+  .header-meta{ display:flex; align-items:center; justify-content:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
+  .bonus-badge, .streak-badge{ background:#FBF3E4; border:1px solid #EAD9B8; border-radius:20px; padding:4px 10px; font-size:11.5px; font-weight:800; color:#8A6220; }
+  .switch-account{ display:inline-block; margin-top:8px; border:none; background:none; padding:0; font-family:'Nunito Sans',sans-serif; font-size:11px; color:var(--plum); text-decoration:underline; cursor:pointer; font-weight:700; }
 
-  .login-screen{
-    text-align:center; background:var(--card); border-radius:22px;
-    padding:26px 22px 24px; box-shadow:0 10px 30px -12px rgba(74,51,36,0.25); margin-top:40px;
-  }
+  .login-screen{ text-align:center; background:var(--card); border-radius:22px; padding:26px 22px 24px; box-shadow:0 10px 30px -12px rgba(74,51,36,0.25); margin-top:40px; }
   .loading-screen{ text-align:center; margin-top:60px; }
   .loading-screen .subtitle{ margin-top:14px; }
-  .name-input{
-    width:100%; margin-top:12px; padding:14px 16px; border-radius:12px;
-    border:2px solid #E4D9C4; background:#fff; font-family:'Nunito Sans', sans-serif;
-    font-size:15px; color:var(--ink); outline:none;
-  }
+  .name-input{ width:100%; margin-top:12px; padding:14px 16px; border-radius:12px; border:2px solid #E4D9C4; background:#fff; font-family:'Nunito Sans', sans-serif; font-size:15px; color:var(--ink); outline:none; }
   .name-input:first-of-type{ margin-top:18px; }
   .name-input:focus{ border-color:var(--bloom); }
   .login-note{ margin-top:12px; font-size:12.5px; color:var(--ink-soft); min-height:16px; }
   .login-note.error{ color:var(--bloom); font-weight:700; }
 
-  .greeting{
-    margin-top:8px; font-family:'Fraunces', serif; font-size:16px; font-weight:600;
-    color:var(--bloom);
-  }
-  .header-meta{
-    display:flex; align-items:center; justify-content:center; gap:12px; margin-top:10px; flex-wrap:wrap;
-  }
-  .bonus-badge{
-    background:#FBF3E4; border:1px solid #EAD9B8; border-radius:20px; padding:4px 10px;
-    font-size:12px; font-weight:800; color:#8A6220;
-  }
+  .card{ background:var(--card); border-radius:18px; padding:14px 16px; margin-bottom:12px; box-shadow:0 8px 20px -12px rgba(74,51,36,0.28); }
+  .day-card{ background:linear-gradient(135deg,#FBF3E4,#F3E4C4); }
+  .day-title{ font-size:14.5px; font-weight:800; color:var(--soil-dark); }
+  .day-mode{ display:inline-block; margin-top:4px; font-size:10.5px; font-weight:800; color:#fff; background:var(--plum); border-radius:8px; padding:2px 7px; }
+  .day-desc{ font-size:11.5px; color:var(--ink-soft); margin-top:6px; line-height:1.4; }
+  .day-pill{ display:inline-block; margin-top:8px; font-size:11px; font-weight:800; color:var(--plum); background:#fff; border-radius:10px; padding:3px 8px; }
 
-  .garden-scene{
-    margin-top:14px; border-radius:22px; overflow:hidden;
-    box-shadow:0 10px 30px -12px rgba(74,51,36,0.25);
-  }
-  .sky{
-    position:relative; height:64px;
-    background:linear-gradient(180deg, #BFE3ED, #EAF6EA);
-    overflow:hidden;
-  }
-  .sun{
-    position:absolute; top:12px; right:22px; width:32px; height:32px; border-radius:50%;
-    background:radial-gradient(circle at 35% 35%, #FFEBB0, var(--sun));
-    box-shadow:0 0 18px 6px rgba(232,184,75,0.45);
-    animation:sunPulse 4s ease-in-out infinite;
-  }
-  @keyframes sunPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.1); } }
-  .cloud{
-    position:absolute; top:16px; left:-18%; width:52px; height:16px; border-radius:20px;
-    background:#fff; opacity:.85; animation:drift 26s linear infinite;
-  }
-  .cloud::before, .cloud::after{
-    content:""; position:absolute; background:#fff; border-radius:50%;
-  }
-  .cloud::before{ width:22px; height:22px; top:-10px; left:6px; }
-  .cloud::after{ width:16px; height:16px; top:-6px; left:26px; }
-  .cloud2{ top:32px; transform:scale(.65); opacity:.6; animation-duration:34s; animation-delay:-12s; }
-  @keyframes drift{ from{ left:-18%; } to{ left:112%; } }
-  .decor{
-    position:absolute; top:8px; font-size:18px; opacity:0; transform:translateY(0);
-    transition:opacity .6s ease; pointer-events:none;
-  }
-  .decor.unlocked{ opacity:1; animation:flutter 5s ease-in-out infinite; }
-  @keyframes flutter{
-    0%,100%{ transform:translate(0,0) rotate(0deg); }
-    25%{ transform:translate(6px,-6px) rotate(6deg); }
-    50%{ transform:translate(-4px,2px) rotate(-4deg); }
-    75%{ transform:translate(4px,6px) rotate(3deg); }
-  }
-  .ground{
-    background:linear-gradient(180deg, #EFE1C5, #E5D0A8);
-    padding:14px 14px 16px;
-  }
+  .toast{ text-align:center; font-size:12.5px; font-weight:700; color:var(--soil-dark); min-height:18px; margin:2px 0 10px; }
+  .weeds-note{ text-align:center; font-size:12px; color:#8B9574; font-weight:700; margin-top:2px; min-height:16px; }
 
-  .day-track{ display:flex; justify-content:center; gap:7px; margin:16px 0 4px; }
-  .day-dot{
-    width:28px; height:28px; border-radius:50%; border:2px solid #D8CBB2; background:#fff;
-    display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:800;
-    color:#B7A98C; transition:all .3s ease;
-  }
-  .day-dot.today{ border-color:var(--bloom); color:var(--bloom); box-shadow:0 0 0 4px rgba(193,80,46,0.12); }
-  .day-dot.full{ background:var(--leaf); border-color:var(--leaf-dark); color:#fff; }
-  .day-dot.partial{ background:var(--sun); border-color:#C99A2E; color:#5C4715; }
-  .day-dot.empty{ background:#E4D9C4; border-color:var(--weed); color:var(--ink-soft); }
+  .plots{ display:flex; flex-direction:column; gap:14px; margin-bottom:12px; }
+  .plot-scene{ border-radius:20px; overflow:hidden; box-shadow:0 8px 22px -12px rgba(74,51,36,0.3); border:2px solid transparent; position:relative; }
+  .plot-scene.bonus-ready{ border-color:var(--sun); animation:pulseGlow 1.3s ease-in-out infinite; }
+  @keyframes pulseGlow{ 0%,100%{box-shadow:0 8px 22px -12px rgba(232,184,75,0.2);} 50%{box-shadow:0 8px 26px -4px rgba(232,184,75,0.75);} }
+  .plot-sky{ height:30px; }
+  .plot-sky.steps{ background:linear-gradient(180deg,#CDE8EF,#E9F5F0); }
+  .plot-sky.training{ background:linear-gradient(180deg,#F7E6BE,#F3EFDA); }
+  .plot-sky.meal{ background:linear-gradient(180deg,#F0D9DE,#F5EDE2); }
+  .plot-main{ display:flex; align-items:flex-start; gap:10px; padding:0 12px 10px; }
+  .plot-main.steps{ background:linear-gradient(180deg,#E9F5F0,#DCE9DE); }
+  .plot-main.training{ background:linear-gradient(180deg,#F3EFDA,#EFE1C0); }
+  .plot-main.meal{ background:linear-gradient(180deg,#F5EDE2,#EAD8CE); }
+  .plant-svg{ width:70px; height:96px; flex-shrink:0; overflow:visible; position:relative; margin-top:4px; }
+  .plot-info{ flex:1; min-width:0; padding-top:8px; }
+  .plot-title{ font-size:12.5px; font-weight:800; color:var(--soil-dark); }
+  .plot-status{ font-size:11px; color:var(--ink-soft); margin-top:2px; line-height:1.3; }
+  .progress-track{ height:6px; background:rgba(0,0,0,0.08); border-radius:6px; margin-top:7px; overflow:hidden; }
+  .progress-fill{ height:100%; border-radius:6px; transition:width .5s ease; }
+  .progress-fill.steps{ background:linear-gradient(90deg,#5E8F7C,#8FC6B4); }
+  .progress-fill.training{ background:linear-gradient(90deg,var(--sun),var(--bloom-light)); }
+  .progress-fill.meal{ background:linear-gradient(90deg,var(--bloom),#8B4A6B); }
 
-  .toast{
-    text-align:center; font-size:13.5px; font-weight:700; color:var(--soil-dark);
-    min-height:20px; padding:10px 6px; margin-top:6px;
-  }
+  .action-zone{ margin-top:8px; }
+  .plot-btn{ width:100%; border:none; border-radius:10px; padding:9px 10px; font-size:12px; font-weight:800; cursor:pointer; color:#fff; }
+  .plot-btn.steps{ background:#5E8F7C; } .plot-btn.training{ background:var(--leaf); } .plot-btn.meal{ background:var(--bloom); }
+  .plot-btn.bonus{ background:var(--sun); color:#5C4715; }
+  .plot-btn:disabled{ background:#E4D9C4; color:#A99A80; }
+  .plot-btn:active{ transform:scale(.97); }
 
-  .plots{ display:flex; flex-direction:column; gap:12px; }
-  .plot-card{
-    background:var(--card); border-radius:18px; padding:14px 16px;
-    box-shadow:0 8px 20px -12px rgba(74,51,36,0.28);
-    display:flex; align-items:center; gap:14px;
-    border:2px solid transparent; transition:border-color .3s ease, transform .2s ease;
-    position:relative; overflow:visible;
-  }
-  .plot-card.ready{ border-color:var(--sun); animation:pulseGlow 1.6s ease-in-out infinite; }
-  @keyframes pulseGlow{
-    0%,100%{ box-shadow:0 8px 20px -12px rgba(232,184,75,0.3); }
-    50%{ box-shadow:0 8px 26px -8px rgba(232,184,75,0.7); }
-  }
-  .plot-emoji{
-    font-size:34px; width:46px; text-align:center; flex-shrink:0; position:relative;
-    transition:transform .4s cubic-bezier(.34,1.56,.64,1);
-    animation:sway 3.5s ease-in-out infinite;
-  }
-  @keyframes sway{ 0%,100%{ transform:rotate(-3deg); } 50%{ transform:rotate(3deg); } }
-  .plot-card.ready .plot-emoji{ transform:scale(1.15); animation:sway 1.2s ease-in-out infinite; }
-  .particle{
-    position:absolute; left:50%; top:50%; font-size:15px; pointer-events:none;
-    transform:translate(-50%,-50%); animation:particleFly .9s ease-out forwards;
-  }
-  @keyframes particleFly{
-    0%{ transform:translate(-50%,-50%) scale(.6); opacity:1; }
-    100%{ transform:translate(var(--dx,-50%), -54px) scale(1.15); opacity:0; }
-  }
-  .plot-body{ flex:1; min-width:0; }
-  .plot-title{ font-size:13.5px; font-weight:800; color:var(--soil-dark); }
-  .plot-status{ font-size:12px; color:var(--ink-soft); margin-top:2px; line-height:1.35; }
-  .plot-btn{
-    border:none; border-radius:10px; padding:9px 12px; font-family:'Nunito Sans', sans-serif;
-    font-size:12.5px; font-weight:800; cursor:pointer; white-space:nowrap; flex-shrink:0;
-    transition:transform .15s ease;
-  }
-  .plot-btn:active{ transform:scale(0.95); }
-  .plot-btn.water{ background:var(--leaf); color:#fff; }
-  .plot-btn.collect{ background:var(--sun); color:#5C4715; }
-  .plot-btn:disabled{ background:#E4D9C4; color:#A99A80; cursor:default; }
+  .mood-row{ display:flex; gap:6px; }
+  .mood-btn{ flex:1; border:2px solid #E4D9C4; border-radius:9px; padding:7px 0; font-size:18px; background:#fff; cursor:pointer; }
+  .mood-btn:active{ transform:scale(.92); }
+  .mood-btn:disabled{ opacity:.45; }
 
-  .weeds-note{ text-align:center; font-size:12px; color:var(--weed); font-weight:700; margin-top:12px; min-height:16px; }
+  .hold-btn{ width:56px; height:56px; border-radius:50%; margin:0 auto; position:relative; display:flex; align-items:center; justify-content:center; font-size:22px; background:conic-gradient(var(--leaf) calc(var(--p,0)*1%), #E4D9C4 0); cursor:pointer; user-select:none; touch-action:none; }
+  .hold-btn::after{ content:''; position:absolute; inset:5px; border-radius:50%; background:#fff; }
+  .hold-btn span{ position:relative; z-index:1; }
+  .hold-label{ text-align:center; font-size:10.5px; color:var(--ink-soft); font-weight:700; margin-top:5px; }
 
-  .lb-toggle{
-    width:100%; margin-top:16px; padding:12px; border-radius:12px; border:2px solid #E4D9C4;
-    background:#fff; color:var(--plum); font-weight:800; font-size:13.5px; cursor:pointer;
-  }
-  .leaderboard{ display:none; background:var(--card); border-radius:18px; padding:14px 16px; margin-top:10px; box-shadow:0 8px 20px -12px rgba(74,51,36,0.28); }
+  .timing-track{ position:relative; height:20px; background:#EFE1C5; border-radius:12px; margin-bottom:6px; overflow:hidden; }
+  .timing-zone{ position:absolute; top:0; bottom:0; left:38%; width:24%; background:rgba(107,143,71,0.4); }
+  .timing-marker{ position:absolute; top:2px; bottom:2px; width:11px; border-radius:6px; background:var(--bloom); left:0%; }
+
+  .extra-card{ background:#fff; border:2px dashed var(--sun); border-radius:16px; padding:12px 14px; margin-bottom:12px; }
+  .extra-title{ font-size:12.5px; font-weight:800; color:var(--soil-dark); }
+  .extra-desc{ font-size:11px; color:var(--ink-soft); margin-top:3px; line-height:1.4; }
+  .extra-btn{ margin-top:8px; width:100%; border:none; border-radius:10px; padding:9px; font-size:12px; font-weight:800; background:var(--sun); color:#5C4715; cursor:pointer; }
+  .extra-btn:disabled{ background:#E4D9C4; color:#A99A80; }
+  .finale-btn{ width:100%; border:none; border-radius:16px; padding:18px; font-size:15px; font-weight:800; background:linear-gradient(135deg,var(--bloom),var(--sun)); color:#fff; cursor:pointer; box-shadow:0 10px 20px -8px rgba(193,80,46,0.5); }
+  .finale-btn:disabled{ background:#D8CBB2; box-shadow:none; }
+
+  .lb-toggle{ width:100%; margin-bottom:10px; padding:12px; border-radius:12px; border:2px solid #E4D9C4; background:#fff; color:var(--plum); font-weight:800; font-size:13.5px; cursor:pointer; }
+  .leaderboard{ display:none; }
   .leaderboard h3{ font-size:14.5px; color:var(--soil-dark); margin-bottom:8px; }
   .lb-row{ display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid #EFE6D2; font-size:13px; }
   .lb-row:last-child{ border-bottom:none; }
@@ -192,25 +114,22 @@
   .lb-score{ font-weight:800; color:var(--bloom); }
   .lb-row.me{ background:#FBF3E4; border-radius:8px; padding-left:6px; }
 
-  .primary-btn{
-    width:100%; margin-top:14px; padding:15px; border:none; border-radius:14px;
-    background:var(--bloom); color:#fff; font-family:'Nunito Sans', sans-serif; font-size:15.5px;
-    font-weight:800; cursor:pointer; box-shadow:0 8px 18px -8px rgba(193,80,46,0.55);
-    transition:transform .15s ease;
-  }
-  .primary-btn:active{ transform:translateY(1px) scale(0.99); }
-  .primary-btn:disabled{ background:#D8CBB2; box-shadow:none; cursor:not-allowed; color:#A99A80; }
-
-  .finale{ display:none; text-align:center; animation:fadeUp .6s ease; }
+  .finale-panel{ display:none; text-align:center; animation:fadeUp .6s ease; }
   @keyframes fadeUp{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
-  .finale h2{ font-size:22px; color:var(--soil-dark); margin-bottom:6px; }
-  .finale p{ font-size:14px; color:var(--ink-soft); line-height:1.5; margin:0 0 14px; }
+  .finale-panel h2{ font-size:22px; color:var(--soil-dark); margin-bottom:6px; }
+  .finale-panel p{ font-size:14px; color:var(--ink-soft); line-height:1.5; margin:0 0 14px; }
   .stat-row{ display:flex; justify-content:center; gap:14px; margin:14px 0 6px; flex-wrap:wrap; }
   .stat{ text-align:center; }
   .stat b{ display:block; font-family:'Fraunces',serif; font-size:20px; color:var(--bloom); }
   .stat span{ font-size:10.5px; color:var(--ink-soft); font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+  .primary-btn{ width:100%; margin-top:10px; padding:15px; border:none; border-radius:14px; background:var(--bloom); color:#fff; font-family:'Nunito Sans', sans-serif; font-size:15.5px; font-weight:800; cursor:pointer; box-shadow:0 8px 18px -8px rgba(193,80,46,0.55); }
+  .primary-btn:disabled{ background:#D8CBB2; box-shadow:none; cursor:not-allowed; color:#A99A80; }
 
-  @media (prefers-reduced-motion: reduce){ *{ transition:none!important; animation:none!important; } }
+  .particle{ position:absolute; left:50%; top:35%; font-size:14px; pointer-events:none; animation:pfly 1s ease-out forwards; z-index:6; }
+  @keyframes pfly{ 0%{transform:translate(-50%,-50%) scale(.6); opacity:1;} 100%{transform:translate(var(--dx,-50%),-52px) scale(1.15); opacity:0;} }
+  .ring{ position:absolute; left:50%; top:60%; width:18px; height:18px; margin:-9px 0 0 -9px; border:3px solid var(--sun); border-radius:50%; opacity:0; pointer-events:none; }
+  .ring.go{ animation:ringOut .6s ease-out forwards; }
+  @keyframes ringOut{ 0%{transform:scale(.3); opacity:.9;} 100%{transform:scale(3.4); opacity:0;} }
 </style>
 </head>
 <body>
@@ -238,63 +157,35 @@
       <div class="eyebrow">Летний лагерь · Шагай Дома</div>
       <h1>Грядка стройности</h1>
       <p class="greeting" id="greetingLine"></p>
-      <p class="subtitle">Отмечай активность — грядка расцветёт не сразу: загляни ещё раз позже и собери урожай.</p>
+      <p class="subtitle">Каждый день отмечаешь активность немного по-другому — растение растёт по-настоящему, шаг за шагом.</p>
       <div class="header-meta">
         <span class="bonus-badge" id="bonusBadge">🌟 0</span>
-        <button class="switch-account" id="switchAccountBtn">Это не я — войти под другим именем</button>
+        <span class="streak-badge" id="streakBadge">🔥 Серия: 0</span>
       </div>
+      <button class="switch-account" id="switchAccountBtn">Это не я — войти под другим именем</button>
     </header>
 
-    <div class="day-track" id="dayTrack"></div>
+    <div class="card day-card">
+      <div class="day-title" id="dayTitle">День 1</div>
+      <div class="day-mode" id="dayMode">Обычная кнопка</div>
+      <div class="day-desc" id="dayDesc">...</div>
+      <div class="day-pill" id="dayPill">1 / 7</div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
-    <div class="garden-scene" id="gardenScene">
-      <div class="sky">
-        <div class="sun"></div>
-        <div class="cloud cloud1"></div>
-        <div class="cloud cloud2"></div>
-        <div class="decor" id="decorButterfly" style="left:20%;">🦋</div>
-        <div class="decor" id="decorLadybug" style="left:65%;">🐞</div>
-      </div>
-      <div class="ground">
-        <div class="plots" id="plots">
-          <div class="plot-card" data-plot="steps">
-            <div class="plot-emoji" id="emoji-steps">🌰</div>
-            <div class="plot-body">
-              <div class="plot-title">Грядка шагов 💧</div>
-              <div class="plot-status" id="status-steps">10 000 шагов сегодня</div>
-            </div>
-            <button class="plot-btn water" id="btn-steps">Полить</button>
-          </div>
-          <div class="plot-card" data-plot="training">
-            <div class="plot-emoji" id="emoji-training">🌰</div>
-            <div class="plot-body">
-              <div class="plot-title">Грядка силы ☀️</div>
-              <div class="plot-status" id="status-training">Тренировка сегодня</div>
-            </div>
-            <button class="plot-btn water" id="btn-training">Полить</button>
-          </div>
-          <div class="plot-card" data-plot="meal">
-            <div class="plot-emoji" id="emoji-meal">🌰</div>
-            <div class="plot-body">
-              <div class="plot-title">Грядка вкуса 🍽️</div>
-              <div class="plot-status" id="status-meal">Питание по плану</div>
-            </div>
-            <button class="plot-btn water" id="btn-meal">Полить</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div class="plots" id="plots"></div>
+    <div id="extraZone"></div>
 
     <div class="weeds-note" id="weedsNote"></div>
 
     <button class="lb-toggle" id="lbToggle">🏆 Сад лагеря — рейтинг участниц</button>
-    <div class="leaderboard" id="leaderboard">
+    <div class="card leaderboard" id="leaderboard">
       <h3>Топ участниц</h3>
       <div id="leaderboardList">Загружаю…</div>
     </div>
 
-    <div class="finale" id="finale">
+    <div class="card finale-panel" id="finalePanel">
       <h2>🌻 Грядка расцвела</h2>
       <p>Семь дней — и сад полон. Каждый цветок здесь — это твой выбор идти, тренироваться и есть с заботой о себе.</p>
       <div class="stat-row" id="statRow"></div>
@@ -315,7 +206,6 @@ import {
   getAuth, signInAnonymously, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// Конфигурация Firebase (проект walk-walk-d8a14, как в остальных играх лагеря)
 const firebaseConfig = {
   apiKey: "AIzaSyApSUQxealmL13siDzauRWO_J6-fSHkN-4",
   authDomain: "walk-walk-d8a14.firebaseapp.com",
@@ -324,40 +214,43 @@ const firebaseConfig = {
   messagingSenderId: "1022340791272",
   appId: "1:1022340791272:web:228f98bc590a4f77dac25d"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-const PROGRESS_COLLECTION = 'garden_progress';   // приватный прогресс участницы, doc id = почта
-const LEADERBOARD_COLLECTION = 'garden_leaderboard'; // публичные имя+счёт для общего рейтинга
-
-// Через сколько миллисекунд политая грядка готова к сбору.
-// Для теста можно временно поставить 60 * 1000 (1 минута), для лагеря — 2-3 часа.
-const GROWTH_DURATION_MS = 2 * 60 * 60 * 1000;
+const PROGRESS_COLLECTION = 'garden_progress';
+const LEADERBOARD_COLLECTION = 'garden_leaderboard';
 
 const PLOT_KEYS = ['steps','training','meal'];
 const PLOT_META = {
-  steps:    { statusLabel:'10 000 шагов сегодня',   collectMsg:'Грядка шагов расцвела!' },
-  training: { statusLabel:'Тренировка сегодня',      collectMsg:'Грядка силы расцвела!' },
-  meal:     { statusLabel:'Питание по плану',        collectMsg:'Грядка вкуса расцвела!' }
+  steps:    { title:'Грядка шагов 💧',  status:'10 000 шагов сегодня', stem:'#4F6B34', leaf:'#5E8F7C', bud:'#3F6B57', petal1:'#8FC6B4', petal2:'#5E8F7C', center:'#F7E7B0' },
+  training: { title:'Грядка силы ☀️',   status:'Тренировка сегодня',    stem:'#4F6B34', leaf:'#6B8F47', bud:'#B4831E', petal1:'#E8B84B', petal2:'#E0895F', center:'#8A5A2A' },
+  meal:     { title:'Грядка вкуса 🍽️',  status:'Питание по плану',      stem:'#4F6B34', leaf:'#4F6B34', bud:'#8B3D50', petal1:'#C1502E', petal2:'#8B4A6B', center:'#F3D9C4' }
 };
-const STAGE_EMOJI = ['🌰','🌱','🌿','🍀','🌷','🌸','🌻','🧺'];
+
+// День недели камp — свой способ отметки активности + свои модификаторы роста.
+const DAY_CONFIG = [
+  { title:'Знакомство',        mode:'tap',    modeLabel:'Обычная кнопка',   desc:'Просто отмечай — знакомимся с грядкой.',                      growMul:1,   bonusMinMs:45*60000,  bonusMaxMs:150*60000, sparkleChance:0.3 },
+  { title:'Тёплый дождь',      mode:'hold',   modeLabel:'Полив жестом',     desc:'Сегодня отмечай, зажимая кружок пальцем — как реальный полив.', growMul:1.3, bonusMinMs:30*60000,  bonusMaxMs:90*60000,  sparkleChance:0.3 },
+  { title:'Как самочувствие?', mode:'mood',   modeLabel:'Мини-опрос',       desc:'Сегодня вместо кнопки — отметь, как прошло: весёлый смайл даёт бонус к росту.', growMul:1, bonusMinMs:45*60000, bonusMaxMs:150*60000, sparkleChance:0.35 },
+  { title:'Ветреный день',     mode:'timing', modeLabel:'Поймай момент',    desc:'Бегунок двигается — жми «Полить», когда он в зелёной зоне, ради бонуса.', growMul:1, bonusMinMs:35*60000, bonusMaxMs:120*60000, sparkleChance:0.3 },
+  { title:'Секретное задание', mode:'secret', modeLabel:'Бонусное задание', desc:'Сегодня есть дополнительное необязательное задание — за него награда отдельная.', growMul:1, bonusMinMs:45*60000, bonusMaxMs:150*60000, sparkleChance:0.4 },
+  { title:'Сад соседки',       mode:'social', modeLabel:'Привет соседке',   desc:'Отмечай как обычно, но сегодня можно ещё подбодрить кого-то из лагеря.', growMul:1, bonusMinMs:45*60000, bonusMaxMs:150*60000, sparkleChance:0.3 },
+  { title:'Большой сбор',      mode:'finale', modeLabel:'Общий финал',      desc:'Финальный день — одно действие собирает весь сад разом.',        growMul:2,   bonusMinMs:15*60000,  bonusMaxMs:40*60000,  sparkleChance:0.6 },
+];
 
 (async function(){
   const state = {
-    docId: null, name: '', email: '',
-    campStartDate: null,
-    log: {},               // { 'YYYY-MM-DD': {steps,training,meal} }
-    plots: {                // per task-type growth
-      steps:    { collectedLevel:0, pendingSince:null, sparkle:false },
-      training: { collectedLevel:0, pendingSince:null, sparkle:false },
-      meal:     { collectedLevel:0, pendingSince:null, sparkle:false }
-    },
-    bonusSeeds: 0
+    docId:null, name:'', email:'', campStartDate:null,
+    log:{},
+    plots:{ steps:{level:0,bonusReadyAt:null,sparkle:false}, training:{level:0,bonusReadyAt:null,sparkle:false}, meal:{level:0,bonusReadyAt:null,sparkle:false} },
+    bonusSeeds:0
   };
+  let secretUsedTodayCache = false;
+  let holdState = {};
+  let timingRaf = null;
+  let structureDayNumber = null; // для отслеживания смены дня и перестройки виджетов
 
-  // ---------- DOM refs ----------
   const loadingScreen = document.getElementById('loadingScreen');
   const loginScreen = document.getElementById('loginScreen');
   const gameContent = document.getElementById('gameContent');
@@ -367,44 +260,33 @@ const STAGE_EMOJI = ['🌰','🌱','🌿','🍀','🌷','🌸','🌻','🧺'];
   const loginNote = document.getElementById('loginNote');
   const greetingLine = document.getElementById('greetingLine');
   const bonusBadge = document.getElementById('bonusBadge');
-  const gardenScene = document.getElementById('gardenScene');
-  const decorButterfly = document.getElementById('decorButterfly');
-  const decorLadybug = document.getElementById('decorLadybug');
+  const streakBadge = document.getElementById('streakBadge');
   const switchAccountBtn = document.getElementById('switchAccountBtn');
-  const dayTrack = document.getElementById('dayTrack');
   const toast = document.getElementById('toast');
   const weedsNote = document.getElementById('weedsNote');
-  const finale = document.getElementById('finale');
+  const finalePanel = document.getElementById('finalePanel');
   const lbToggle = document.getElementById('lbToggle');
   const leaderboard = document.getElementById('leaderboard');
   const leaderboardList = document.getElementById('leaderboardList');
 
-  // ---------- date helpers ----------
+  /* ---------- date helpers ---------- */
   function todayStr(){ return dateStr(new Date()); }
-  function dateStr(d){
-    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
-    return `${y}-${m}-${day}`;
+  function dateStr(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+  function addDays(dStr,n){ const [y,m,d]=dStr.split('-').map(Number); return dateStr(new Date(y,m-1,d+n)); }
+  function diffDays(fromStr,toStr){ const [y1,m1,d1]=fromStr.split('-').map(Number); const [y2,m2,d2]=toStr.split('-').map(Number); return Math.round((new Date(y2,m2-1,d2)-new Date(y1,m1-1,d1))/86400000); }
+  function getDayNumber(){ return diffDays(state.campStartDate, todayStr())+1; }
+  function currentDayConfig(){ const n=Math.min(Math.max(getDayNumber(),1),7); return DAY_CONFIG[n-1]; }
+  function clamp01(x){ return Math.max(0, Math.min(1,x)); }
+  function escapeHtml(str){ return String(str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function normalizeEmail(e){ return e.trim().toLowerCase(); }
+  function isValidEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+  function formatCountdown(ms){
+    const totalMin = Math.max(0, Math.ceil(ms/60000));
+    const h = Math.floor(totalMin/60), m = totalMin%60;
+    return h>0 ? `${h} ч ${m} мин` : `${m} мин`;
   }
-  function addDays(dStr, n){
-    const [y,m,d] = dStr.split('-').map(Number);
-    const dt = new Date(y, m-1, d+n);
-    return dateStr(dt);
-  }
-  function diffDays(fromStr, toStr){
-    const [y1,m1,d1]=fromStr.split('-').map(Number);
-    const [y2,m2,d2]=toStr.split('-').map(Number);
-    const a = new Date(y1,m1-1,d1), b = new Date(y2,m2-1,d2);
-    return Math.round((b-a)/86400000);
-  }
-  function getDayNumber(){ return diffDays(state.campStartDate, todayStr()) + 1; }
 
-  function escapeHtml(str){
-    return String(str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-  function normalizeEmail(email){ return email.trim().toLowerCase(); }
-  function isValidEmail(email){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
-
-  // ---------- Firestore ----------
+  /* ---------- Firestore ---------- */
   function loadStateFromDoc(id, data){
     state.docId = id;
     state.name = data.name || '';
@@ -414,7 +296,6 @@ const STAGE_EMOJI = ['🌰','🌱','🌿','🍀','🌷','🌸','🌻','🧺'];
     state.plots = data.plots || state.plots;
     state.bonusSeeds = data.bonusSeeds ?? 0;
   }
-
   async function loadOrCreateParticipant(rawName, rawEmail, uid){
     const email = normalizeEmail(rawEmail);
     const name = rawName.trim();
@@ -422,54 +303,32 @@ const STAGE_EMOJI = ['🌰','🌱','🌿','🍀','🌷','🌸','🌻','🧺'];
     const snap = await getDoc(ref);
     if(snap.exists()){
       const data = snap.data();
-      const storedName = (data.name || '').trim().toLowerCase();
+      const storedName = (data.name||'').trim().toLowerCase();
       if(storedName !== name.toLowerCase()){
-        const err = new Error('name-mismatch');
-        err.code = 'name-mismatch';
-        throw err;
+        const err = new Error('name-mismatch'); err.code='name-mismatch'; throw err;
       }
       loadStateFromDoc(email, data);
-      // "запоминаем" это устройство за этой участницей, чтобы в следующий раз
-      // не спрашивать имя и почту заново
-      await setDoc(ref, { ownerUid: uid, updatedAt: serverTimestamp() }, { merge:true });
+      await setDoc(ref, { ownerUid:uid, updatedAt:serverTimestamp() }, { merge:true });
     } else {
-      state.docId = email;
-      state.name = name;
-      state.email = email;
-      state.campStartDate = todayStr();
+      state.docId = email; state.name = name; state.email = email; state.campStartDate = todayStr();
       await setDoc(ref, {
         name: state.name, email: state.email, campStartDate: state.campStartDate,
-        log: {}, plots: state.plots, bonusSeeds: 0, ownerUid: uid,
+        log:{}, plots: state.plots, bonusSeeds:0, ownerUid:uid,
         createdAt: serverTimestamp(), updatedAt: serverTimestamp()
       });
     }
   }
-
-  // Пытаемся найти сад, уже привязанный к этому браузеру/устройству
-  // (Firebase Auth сам хранит анонимную сессию между визитами).
   async function tryAutoResume(uid){
-    const q = query(collection(db, PROGRESS_COLLECTION), where('ownerUid','==', uid), limit(1));
+    const q = query(collection(db, PROGRESS_COLLECTION), where('ownerUid','==',uid), limit(1));
     const snap = await getDocs(q);
     if(snap.empty) return false;
-    const docSnap = snap.docs[0];
-    loadStateFromDoc(docSnap.id, docSnap.data());
+    const d = snap.docs[0];
+    loadStateFromDoc(d.id, d.data());
     return true;
   }
-
-  switchAccountBtn.addEventListener('click', async ()=>{
-    if(!confirm('Выйти из этого сада и войти под другим именем на этом устройстве?')) return;
-    try{ await auth.signOut(); }catch(e){ console.error(e); }
-    gameContent.style.display = 'none';
-    nameInput.value = ''; emailInput.value = '';
-    loginScreen.style.display = 'block';
-    // новая анонимная сессия для нового входа
-    await signInAnonymously(auth);
-  });
-
   function computeScore(){
-    return PLOT_KEYS.reduce((sum,k)=>sum+state.plots[k].collectedLevel,0) + state.bonusSeeds;
+    return PLOT_KEYS.reduce((s,k)=>s+state.plots[k].level,0) + state.bonusSeeds;
   }
-
   async function saveProgress(){
     if(!state.docId) return;
     const score = computeScore();
@@ -484,197 +343,409 @@ const STAGE_EMOJI = ['🌰','🌱','🌿','🍀','🌷','🌸','🌻','🧺'];
       }, { merge:true });
     }catch(e){ console.error('Не удалось сохранить прогресс:', e); }
   }
-
   async function loadLeaderboard(){
     leaderboardList.textContent = 'Загружаю…';
     try{
       const q = query(collection(db, LEADERBOARD_COLLECTION), orderBy('score','desc'), limit(10));
       const snap = await getDocs(q);
       if(snap.empty){ leaderboardList.textContent = 'Пока пусто — будь первой!'; return; }
-      let rank = 0, html = '';
-      snap.forEach(docSnap=>{
+      let rank=0, html='';
+      snap.forEach(d=>{
         rank++;
-        const d = docSnap.data();
-        const isMe = docSnap.id === state.docId;
-        html += `<div class="lb-row ${isMe?'me':''}"><span class="lb-rank">${rank}</span><span class="lb-name">${escapeHtml(d.name||'')}</span><span class="lb-score">${d.score||0}</span></div>`;
+        const data = d.data();
+        const isMe = d.id === state.docId;
+        html += `<div class="lb-row ${isMe?'me':''}"><span class="lb-rank">${rank}</span><span class="lb-name">${escapeHtml(data.name||'')}</span><span class="lb-score">${(data.score||0).toFixed ? Math.round(data.score) : data.score}</span></div>`;
       });
       leaderboardList.innerHTML = html;
-    }catch(e){
-      console.error(e);
-      leaderboardList.textContent = 'Не удалось загрузить рейтинг.';
-    }
+    }catch(e){ console.error(e); leaderboardList.textContent = 'Не удалось загрузить рейтинг.'; }
   }
 
-  // ---------- game logic ----------
-  function targetLevel(key){
-    return Math.min(7, Object.values(state.log).filter(e=>e && e[key]).length);
+  /* ---------- SVG растения ---------- */
+  function plantSVG(key){
+    const m = PLOT_META[key];
+    return `
+    <svg class="plant-svg" viewBox="0 0 120 160">
+      <ellipse cx="60" cy="150" rx="46" ry="9" fill="rgba(0,0,0,0.08)"/>
+      <g id="stem-${key}" style="transform-origin:60px 150px;"><path d="M60 150 L60 60" stroke="${m.stem}" stroke-width="4.5" stroke-linecap="round"/></g>
+      <g id="leavesA-${key}" style="transform-origin:60px 118px;">
+        <path d="M60 118 Q38 110 36 92 Q56 96 60 118Z" fill="${m.leaf}"/>
+        <path d="M60 118 Q82 110 84 92 Q64 96 60 118Z" fill="${m.leaf}"/>
+      </g>
+      <g id="leavesB-${key}" style="transform-origin:60px 88px;">
+        <path d="M60 88 Q40 82 37 66 Q57 69 60 88Z" fill="${m.leaf}" opacity="0.9"/>
+        <path d="M60 88 Q80 82 83 66 Q63 69 60 88Z" fill="${m.leaf}" opacity="0.9"/>
+      </g>
+      <g id="bud-${key}" style="transform-origin:60px 58px;"><ellipse cx="60" cy="56" rx="9" ry="12" fill="${m.bud}"/></g>
+      <g id="bloom-${key}" style="transform-origin:60px 54px;">
+        <circle cx="60" cy="54" r="7" fill="${m.center}"/>
+        <path id="petal0-${key}" class="petal" d="M60 54 Q45 40 52 26 Q66 36 60 54Z" fill="${m.petal1}"/>
+        <path id="petal1-${key}" class="petal" d="M60 54 Q75 40 68 26 Q54 36 60 54Z" fill="${m.petal1}"/>
+        <path id="petal2-${key}" class="petal" d="M60 54 Q40 58 34 46 Q50 42 60 54Z" fill="${m.petal2}"/>
+        <path id="petal3-${key}" class="petal" d="M60 54 Q80 58 86 46 Q70 42 60 54Z" fill="${m.petal2}"/>
+      </g>
+    </svg>`;
   }
-
-  function markTask(key){
-    const today = todayStr();
-    if(!state.log[today]) state.log[today] = { steps:false, training:false, meal:false };
-    if(state.log[today][key]) return; // уже отмечено сегодня
-    state.log[today][key] = true;
-    const plot = state.plots[key];
-    const target = targetLevel(key);
-    if(plot.collectedLevel < target && !plot.pendingSince){
-      plot.pendingSince = Date.now();
-      plot.sparkle = Math.random() < 0.35;
-    }
-    saveProgress();
-    renderAll();
-    showToast('Отмечено! Грядка начала расти — загляни чуть позже.');
-  }
-
-  function collectPlot(key){
-    const plot = state.plots[key];
-    if(!plot.pendingSince) return;
-    if(Date.now() - plot.pendingSince < GROWTH_DURATION_MS) return;
-    const target = targetLevel(key);
-    plot.collectedLevel = Math.min(target, plot.collectedLevel + 1);
-    let msg = PLOT_META[key].collectMsg;
-    if(plot.sparkle){
-      state.bonusSeeds += 1;
-      msg += ' ✨ Бонусное семечко!';
-    }
-    plot.pendingSince = null;
-    plot.sparkle = false;
-    saveProgress();
-    burstParticles(key);
-    renderAll();
-    showToast(msg);
-  }
-
-  function updateHeaderMeta(){
-    greetingLine.textContent = `Привет, ${state.name}! 👋`;
-    bonusBadge.textContent = `🌟 ${state.bonusSeeds}`;
-    decorButterfly.classList.toggle('unlocked', state.bonusSeeds >= 1);
-    decorLadybug.classList.toggle('unlocked', state.bonusSeeds >= 3);
-  }
-
-  function burstParticles(key){
-    const host = document.getElementById('emoji-'+key);
-    if(!host) return;
-    const petals = ['🌸','✨','🌿'];
-    for(let i=0;i<5;i++){
-      const p = document.createElement('span');
-      p.className = 'particle';
-      p.textContent = petals[Math.floor(Math.random()*petals.length)];
-      const dx = (Math.random()*60 - 30);
-      p.style.setProperty('--dx', `calc(-50% + ${dx}px)`);
-      p.style.animationDelay = (Math.random()*120)+'ms';
-      host.appendChild(p);
-      setTimeout(()=>p.remove(), 1100);
-    }
-  }
-
-  function showToast(msg){ toast.textContent = msg; }
-
-  function formatCountdown(ms){
-    const totalMin = Math.max(0, Math.ceil(ms/60000));
-    const h = Math.floor(totalMin/60), m = totalMin%60;
-    if(h>0) return `${h} ч ${m} мин`;
-    return `${m} мин`;
-  }
-
-  function computeWeeds(){
-    let count = 0;
-    const today = todayStr();
-    for(let i=0;i<7;i++){
-      const d = addDays(state.campStartDate, i);
-      if(d >= today) break;
-      const entry = state.log[d];
-      const done = entry && (entry.steps || entry.training || entry.meal);
-      if(!done) count++;
-    }
-    return Math.min(count, 3);
-  }
-
-  // ---------- rendering ----------
-  function renderDayDots(){
-    dayTrack.innerHTML = '';
-    const today = todayStr();
-    for(let i=0;i<7;i++){
-      const d = addDays(state.campStartDate, i);
-      const dot = document.createElement('div');
-      dot.className = 'day-dot';
-      dot.textContent = i+1;
-      if(d < today){
-        const entry = state.log[d];
-        const c = entry ? [entry.steps, entry.training, entry.meal].filter(Boolean).length : 0;
-        dot.classList.add(c===3 ? 'full' : c>0 ? 'partial' : 'empty');
-      } else if(d === today){
-        dot.classList.add('today');
-      }
-      dayTrack.appendChild(dot);
-    }
-  }
-
-  function renderPlots(){
-    const today = todayStr();
-    PLOT_KEYS.forEach(key=>{
-      const plot = state.plots[key];
-      const card = document.querySelector(`.plot-card[data-plot="${key}"]`);
-      const emojiEl = document.getElementById('emoji-'+key);
-      const statusEl = document.getElementById('status-'+key);
-      const btn = document.getElementById('btn-'+key);
-      const target = targetLevel(key);
-      const level = Math.min(7, plot.collectedLevel);
-      emojiEl.textContent = STAGE_EMOJI[level];
-
-      const doneToday = !!(state.log[today] && state.log[today][key]);
-      const pending = plot.pendingSince && plot.collectedLevel < target;
-      const remaining = pending ? GROWTH_DURATION_MS - (Date.now() - plot.pendingSince) : 0;
-      const ready = pending && remaining <= 0;
-
-      card.classList.toggle('ready', !!ready);
-
-      if(ready){
-        statusEl.textContent = 'Готова к сбору!';
-        btn.textContent = '✨ Собрать';
-        btn.className = 'plot-btn collect';
-        btn.disabled = false;
-        btn.onclick = ()=>collectPlot(key);
-      } else if(pending){
-        statusEl.textContent = `Распустится через ${formatCountdown(remaining)}`;
-        btn.textContent = 'Растёт…';
-        btn.className = 'plot-btn';
-        btn.disabled = true;
-        btn.onclick = null;
-      } else if(!doneToday){
-        statusEl.textContent = PLOT_META[key].statusLabel;
-        btn.textContent = 'Полить';
-        btn.className = 'plot-btn water';
-        btn.disabled = false;
-        btn.onclick = ()=>markTask(key);
-      } else {
-        statusEl.textContent = 'Сегодня уже полито 🌿';
-        btn.textContent = 'Готово';
-        btn.className = 'plot-btn';
-        btn.disabled = true;
-        btn.onclick = null;
-      }
+  function updatePlantVisual(key){
+    const p = state.plots[key], level = p.level;
+    const stemFrac = clamp01(level/3), leavesAFrac = clamp01((level-1)/1.5), leavesBFrac = clamp01((level-2.3)/1.7);
+    const budFrac = clamp01((level-3.6)/1.2), bloomFrac = clamp01((level-4.6)/2.4);
+    const stemEl=document.getElementById('stem-'+key); if(!stemEl) return;
+    const leavesAEl=document.getElementById('leavesA-'+key), leavesBEl=document.getElementById('leavesB-'+key),
+          budEl=document.getElementById('bud-'+key), bloomEl=document.getElementById('bloom-'+key);
+    stemEl.style.transform = `scaleY(${stemFrac})`;
+    leavesAEl.style.opacity = leavesAFrac; leavesAEl.style.transform = `scale(${0.5+0.5*leavesAFrac})`;
+    leavesBEl.style.opacity = leavesBFrac; leavesBEl.style.transform = `scale(${0.5+0.5*leavesBFrac})`;
+    budEl.style.opacity = budFrac*(1-bloomFrac*0.6); budEl.style.transform = `scale(${0.3+0.7*budFrac})`;
+    bloomEl.style.opacity = bloomFrac; bloomEl.style.transform = `scale(${0.4+0.6*bloomFrac})`;
+    ['petal0','petal1','petal2','petal3'].forEach((pid,i)=>{
+      const el = document.getElementById(pid+'-'+key); if(!el) return;
+      const angle = [-14,14,-10,10][i]*bloomFrac;
+      el.style.transition = `transform .5s ease ${i*70}ms`;
+      el.style.transform = `rotate(${angle}deg) scale(${0.6+0.4*bloomFrac})`;
     });
   }
 
-  function renderWeedsNote(){
-    const weeds = computeWeeds();
-    weedsNote.textContent = weeds > 0
-      ? `Сорняков на грядке: ${weeds} — это просто пропущенные дни, не приговор.`
-      : '';
+  /* ---------- feedback ---------- */
+  let audioCtx=null;
+  function chime(freq){
+    try{
+      audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+      const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+      osc.type='sine'; osc.frequency.value=freq;
+      gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.16, audioCtx.currentTime+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+0.32);
+      osc.connect(gain).connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime+0.33);
+    }catch(e){}
+  }
+  function bumpPlant(key,big){
+    const el = document.querySelector(`#plot-${key} .plant-svg`); if(!el) return;
+    el.style.transform = big?'scale(1.14)':'scale(1.07)';
+    setTimeout(()=>{ el.style.transform='scale(1)'; },220);
+  }
+  function spawnParticles(key,count){
+    const host = document.querySelector(`#plot-${key} .plant-svg`); if(!host) return;
+    for(let i=0;i<count;i++){
+      const el=document.createElement('span'); el.className='particle';
+      el.textContent=['🌸','✨','🌿','⭐'][Math.floor(Math.random()*4)];
+      el.style.setProperty('--dx', `calc(-50% + ${(Math.random()*50-25)}px)`);
+      el.style.animationDelay=(Math.random()*100)+'ms';
+      host.appendChild(el); setTimeout(()=>el.remove(),1050);
+    }
+  }
+  function spawnRing(key){
+    const host = document.querySelector(`#plot-${key} .plant-svg`); if(!host) return;
+    const r=document.createElement('div'); r.className='ring go'; host.appendChild(r);
+    setTimeout(()=>r.remove(),650);
+  }
+  function showToast(msg){ toast.textContent = msg; }
+
+  /* ---------- рост / бонус ---------- */
+  function markTask(key, mult){
+    const today = todayStr();
+    if(!state.log[today]) state.log[today] = { steps:false, training:false, meal:false, secret:false };
+    if(state.log[today][key]) return;
+    state.log[today][key] = true;
+    const p = state.plots[key];
+    if(p.level < 7){
+      const cfg = currentDayConfig();
+      const inc = (0.55+Math.random()*0.45) * cfg.growMul * (mult||1);
+      p.level = Math.min(7, p.level+inc);
+      bumpPlant(key); spawnParticles(key, Math.round(4+inc*3)); chime(430+Math.random()*80);
+      if(navigator.vibrate) navigator.vibrate(25);
+      if(!p.bonusReadyAt && p.level<7){
+        const dur = cfg.bonusMinMs + Math.random()*(cfg.bonusMaxMs-cfg.bonusMinMs);
+        p.bonusReadyAt = Date.now()+dur;
+        p.sparkle = Math.random()<cfg.sparkleChance;
+      }
+    }
+    saveProgress();
+    renderPlotsState();
+    updateHeaderMeta();
+    showToast('Растёт! Загляни ещё раз чуть позже — может расцвести сильнее.');
+  }
+  function collectBonus(key){
+    const p = state.plots[key];
+    if(!p.bonusReadyAt || Date.now() < p.bonusReadyAt) return;
+    const gain = p.sparkle ? 1.6 : 0.9;
+    p.level = Math.min(7, p.level+gain);
+    if(p.sparkle) state.bonusSeeds++;
+    p.bonusReadyAt=null; p.sparkle=false;
+    bumpPlant(key,true); spawnParticles(key,9); spawnRing(key); chime(700);
+    if(navigator.vibrate) navigator.vibrate([20,30,20]);
+    saveProgress();
+    renderPlotsState();
+    updateHeaderMeta();
+    showToast(gain>1 ? '✨ Редкий бурный расцвет! Бонусное семечко в копилку.' : 'Цветок раскрылся ещё сильнее!');
+  }
+
+  /* ---------- виджеты по режиму дня ---------- */
+  function actionWidgetHTML(key){
+    const mode = currentDayConfig().mode;
+    if(mode === 'hold') return `<div class="hold-btn" id="hold-${key}" style="--p:0"><span>💧</span></div><div class="hold-label" id="holdLabel-${key}">Зажми</div>`;
+    if(mode === 'mood') return `<div class="mood-row">
+      <button class="mood-btn" data-mood="😄">😄</button>
+      <button class="mood-btn" data-mood="😐">😐</button>
+      <button class="mood-btn" data-mood="😓">😓</button>
+    </div>`;
+    if(mode === 'timing') return `<div class="timing-track"><div class="timing-zone"></div><div class="timing-marker" id="timingMarker-${key}"></div></div>
+      <button class="plot-btn ${key}" id="btn-${key}">Полить!</button>`;
+    return `<button class="plot-btn ${key}" id="btn-${key}">Отметить</button>`;
+  }
+  function attachModeHandlers(key){
+    const mode = currentDayConfig().mode;
+    const scene = document.getElementById('plot-'+key);
+    if(mode === 'hold'){
+      const btn = document.getElementById('hold-'+key);
+      if(btn){
+        btn.addEventListener('pointerdown', ()=>startHold(key));
+        btn.addEventListener('pointerup', ()=>releaseHold(key));
+        btn.addEventListener('pointerleave', ()=>releaseHold(key));
+      }
+    } else if(mode === 'mood'){
+      scene.querySelectorAll('.mood-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>markMood(key, btn.dataset.mood));
+      });
+    } else if(mode === 'timing'){
+      const btn = document.getElementById('btn-'+key);
+      if(btn) btn.addEventListener('click', ()=>timingTap(key));
+    } else {
+      const btn = document.getElementById('btn-'+key);
+      if(btn) btn.addEventListener('click', ()=>markTask(key));
+    }
+  }
+  function startHold(key){
+    const today = todayStr();
+    if(state.log[today] && state.log[today][key]) return;
+    cancelHold(key);
+    const start = Date.now(), HOLD_MS = 1000;
+    const lbl = document.getElementById('holdLabel-'+key); if(lbl) lbl.textContent = 'Держи…';
+    holdState[key] = setInterval(()=>{
+      const pct = Math.min(100, ((Date.now()-start)/HOLD_MS)*100);
+      const btn = document.getElementById('hold-'+key); if(btn) btn.style.setProperty('--p', pct);
+      if(pct >= 100){
+        cancelHold(key);
+        markTask(key, 1);
+        const lbl2 = document.getElementById('holdLabel-'+key); if(lbl2) lbl2.textContent = 'Полито!';
+      }
+    }, 30);
+  }
+  function cancelHold(key){ if(holdState[key]){ clearInterval(holdState[key]); holdState[key]=null; } }
+  function releaseHold(key){
+    const today = todayStr();
+    if(holdState[key] && !(state.log[today] && state.log[today][key])){
+      cancelHold(key);
+      const btn = document.getElementById('hold-'+key); if(btn) btn.style.setProperty('--p',0);
+      const lbl = document.getElementById('holdLabel-'+key); if(lbl) lbl.textContent = 'Не долила';
+    }
+  }
+  function markMood(key, mood){
+    const today = todayStr();
+    if(state.log[today] && state.log[today][key]) return;
+    markTask(key, mood==='😄' ? 1.4 : 1);
+    showToast(mood==='😄' ? 'Отлично! Бонус к росту 🌟' : 'Записано — движение вперёд важнее идеала.');
+  }
+  function timingLoopStart(){
+    if(timingRaf) return;
+    const t0 = Date.now();
+    function loop(){
+      const t = (Date.now()-t0)/1000;
+      PLOT_KEYS.forEach((key,i)=>{
+        const marker = document.getElementById('timingMarker-'+key);
+        if(marker) marker.style.left = ((Math.sin(t*1.5+i*1.3)+1)/2*86)+'%';
+      });
+      timingRaf = requestAnimationFrame(loop);
+    }
+    loop();
+  }
+  function timingTap(key){
+    const today = todayStr();
+    if(state.log[today] && state.log[today][key]) return;
+    const marker = document.getElementById('timingMarker-'+key);
+    const left = parseFloat(marker.style.left||'0');
+    const inZone = left>=38 && left<=62;
+    markTask(key, inZone ? 1.8 : 1);
+    showToast(inZone ? '✨ Идеальный полив!' : 'Полито — можно точнее в следующий раз.');
+  }
+
+  /* ---------- доп. блок (secret / social / finale) ---------- */
+  function renderExtraZone(){
+    const zone = document.getElementById('extraZone');
+    const mode = currentDayConfig().mode;
+    const today = todayStr();
+    if(mode === 'secret'){
+      secretUsedTodayCache = !!(state.log[today] && state.log[today].secret);
+      zone.innerHTML = `<div class="extra-card">
+        <div class="extra-title">🎁 Секретное задание дня</div>
+        <div class="extra-desc">Сделай 5-минутную растяжку у окна — необязательно, но грядка скажет спасибо.</div>
+        <button class="extra-btn" id="secretBtn" ${secretUsedTodayCache?'disabled':''}>${secretUsedTodayCache?'Выполнено сегодня':'Выполнила'}</button>
+      </div>`;
+      const btn = document.getElementById('secretBtn');
+      if(btn) btn.addEventListener('click', doSecret);
+    } else if(mode === 'social'){
+      zone.innerHTML = `<div class="extra-card">
+        <div class="extra-title">💌 Привет соседке по лагерю</div>
+        <div class="extra-desc">Выбери короткое подбадривание — оно ничего не меняет в твоём саду, просто приятно.</div>
+        <button class="extra-btn" id="cheerBtn">Ты молодец, продолжай! 💪</button>
+      </div>`;
+      const btn = document.getElementById('cheerBtn');
+      if(btn) btn.addEventListener('click', ()=>{ chime(600); showToast('Отправлено соседке: «Ты молодец, продолжай!» 💌'); });
+    } else if(mode === 'finale'){
+      const alreadyDoneAll = PLOT_KEYS.every(k => state.log[today] && state.log[today][k]);
+      zone.innerHTML = `<div class="extra-card" style="border-color:var(--bloom)">
+        <div class="extra-title">🎉 Финал лагеря</div>
+        <div class="extra-desc">Собери весь сад одним действием — символ того, что все 7 дней уже позади.</div>
+        <button class="finale-btn" id="collectAllBtn" ${alreadyDoneAll?'disabled':''}>${alreadyDoneAll?'Уже собрано сегодня':'Собрать весь урожай'}</button>
+      </div>`;
+      const btn = document.getElementById('collectAllBtn');
+      if(btn) btn.addEventListener('click', collectAll);
+    } else {
+      zone.innerHTML = '';
+    }
+  }
+  function doSecret(){
+    const today = todayStr();
+    if(!state.log[today]) state.log[today] = { steps:false, training:false, meal:false, secret:false };
+    if(state.log[today].secret) return;
+    state.log[today].secret = true;
+    state.bonusSeeds += 1;
+    saveProgress();
+    updateHeaderMeta();
+    const randomKey = PLOT_KEYS[Math.floor(Math.random()*3)];
+    spawnParticles(randomKey, 6); chime(760);
+    showToast('Секретное задание выполнено — бонусное семечко в копилку! 🌟');
+    renderExtraZone();
+  }
+  function collectAll(){
+    PLOT_KEYS.forEach(key=>markTask(key, 2));
+    chime(880);
+    if(navigator.vibrate) navigator.vibrate([30,40,30,40,30]);
+    showToast('🎉 Весь сад лагеря собран сегодня! Отличная неделя.');
+    renderExtraZone();
+  }
+
+  /* ---------- streak / weeds ---------- */
+  function computeStreak(){
+    let count=0, d=todayStr(), guard=0;
+    while(guard++ < 30){
+      if(diffDays(state.campStartDate, d) < 0) break;
+      const entry = state.log[d];
+      const done = entry && (entry.steps||entry.training||entry.meal);
+      if(!done){
+        if(d === todayStr()){ d = addDays(d,-1); continue; }
+        break;
+      }
+      count++; d = addDays(d,-1);
+    }
+    return count;
+  }
+  function computeWeeds(){
+    let count=0; const today=todayStr();
+    for(let i=0;i<7;i++){
+      const d = addDays(state.campStartDate,i);
+      if(d >= today) break;
+      const entry = state.log[d];
+      const done = entry && (entry.steps||entry.training||entry.meal);
+      if(!done) count++;
+    }
+    return Math.min(count,3);
+  }
+
+  /* ---------- header ---------- */
+  function updateHeaderMeta(){
+    greetingLine.textContent = `Привет, ${state.name}! 👋`;
+    bonusBadge.textContent = '🌟 ' + state.bonusSeeds;
+    streakBadge.textContent = '🔥 Серия: ' + computeStreak();
+  }
+  function renderDayCard(){
+    const n = Math.min(Math.max(getDayNumber(),1),7);
+    const cfg = DAY_CONFIG[n-1];
+    document.getElementById('dayTitle').textContent = `День ${n} — ${cfg.title}`;
+    document.getElementById('dayMode').textContent = cfg.modeLabel;
+    document.getElementById('dayDesc').textContent = cfg.desc;
+    document.getElementById('dayPill').textContent = `${n} / 7`;
+  }
+
+  /* ---------- построение / рендер грядок ---------- */
+  function renderPlotsStructure(){
+    const box = document.getElementById('plots');
+    box.innerHTML = PLOT_KEYS.map(key=>{
+      const m = PLOT_META[key];
+      return `
+      <div class="plot-scene" id="plot-${key}">
+        <div class="plot-sky ${key}"></div>
+        <div class="plot-main ${key}">
+          ${plantSVG(key)}
+          <div class="plot-info">
+            <div class="plot-title">${m.title}</div>
+            <div class="plot-status" id="status-${key}"></div>
+            <div class="progress-track"><div class="progress-fill ${key}" id="progress-${key}" style="width:0%"></div></div>
+            <div class="action-zone">${actionWidgetHTML(key)}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    PLOT_KEYS.forEach(key=>attachModeHandlers(key));
+    if(currentDayConfig().mode === 'timing') timingLoopStart();
+    renderExtraZone();
+    renderPlotsState();
+    structureDayNumber = Math.min(Math.max(getDayNumber(),1),7);
+  }
+  function renderPlotsState(){
+    const today = todayStr();
+    PLOT_KEYS.forEach(key=>{
+      const p = state.plots[key], meta = PLOT_META[key];
+      const sceneEl = document.getElementById('plot-'+key);
+      if(!sceneEl) return;
+      const stageFrac = p.level>=7 ? 100 : (p.level%1)*100;
+      const bonusReady = p.bonusReadyAt && Date.now() >= p.bonusReadyAt;
+      const bonusPending = p.bonusReadyAt && !bonusReady;
+      sceneEl.classList.toggle('bonus-ready', !!bonusReady);
+      document.getElementById('progress-'+key).style.width = stageFrac + '%';
+
+      let statusText;
+      if(bonusReady) statusText = 'Готово расцвести сильнее!';
+      else if(bonusPending) statusText = `Может зацвести ещё через ~${formatCountdown(p.bonusReadyAt-Date.now())}`;
+      else if(p.level>=7) statusText = 'Полностью расцвела 🎉';
+      else statusText = meta.status;
+      document.getElementById('status-'+key).textContent = statusText;
+
+      const actionZone = sceneEl.querySelector('.action-zone');
+      const doneToday = !!(state.log[today] && state.log[today][key]);
+      if(bonusReady){
+        actionZone.innerHTML = `<button class="plot-btn bonus" id="bonusBtn-${key}">✨ Собрать бонус</button>`;
+        const b = document.getElementById('bonusBtn-'+key); if(b) b.addEventListener('click', ()=>collectBonus(key));
+      } else {
+        const mode = currentDayConfig().mode;
+        if(mode === 'tap' || mode === 'secret' || mode === 'social' || mode === 'finale'){
+          const btn = document.getElementById('btn-'+key);
+          if(btn){ btn.disabled = doneToday || p.level>=7; btn.textContent = doneToday ? 'Отмечено сегодня' : (p.level>=7 ? 'Расцвело 🧺' : 'Отметить'); }
+        } else if(mode === 'mood'){
+          actionZone.querySelectorAll('.mood-btn').forEach(b=>{ b.disabled = doneToday || p.level>=7; });
+        } else if(mode === 'hold'){
+          const lbl = document.getElementById('holdLabel-'+key);
+          if(lbl && (doneToday || p.level>=7)) lbl.textContent = 'Отмечено сегодня';
+        } else if(mode === 'timing'){
+          const btn = document.getElementById('btn-'+key);
+          if(btn) btn.disabled = doneToday || p.level>=7;
+        }
+      }
+      updatePlantVisual(key);
+    });
+    weedsNote.textContent = computeWeeds()>0 ? `Сорняков на грядке: ${computeWeeds()} — это просто пропущенные дни, не приговор.` : '';
   }
 
   function checkFinale(){
     const finished = getDayNumber() > 7;
-    gardenScene.style.display = finished ? 'none' : 'block';
-    finale.style.display = finished ? 'block' : 'none';
+    document.getElementById('plots').style.display = finished ? 'none' : 'flex';
+    document.getElementById('extraZone').style.display = finished ? 'none' : 'block';
+    finalePanel.style.display = finished ? 'block' : 'none';
     if(finished){
-      const totalCollected = PLOT_KEYS.reduce((s,k)=>s+state.plots[k].collectedLevel,0);
-      const fullDays = Object.values(state.log).filter(e=>e.steps && e.training && e.meal).length;
+      const totalCollected = PLOT_KEYS.reduce((s,k)=>s+state.plots[k].level,0);
       document.getElementById('statRow').innerHTML = `
-        <div class="stat"><b>${fullDays}</b><span>идеальных дней</span></div>
-        <div class="stat"><b>${totalCollected}</b><span>собрано роста</span></div>
+        <div class="stat"><b>${totalCollected.toFixed(1)}</b><span>уровней роста</span></div>
         <div class="stat"><b>${state.bonusSeeds}</b><span>бонусных семян</span></div>
+        <div class="stat"><b>${computeStreak()}</b><span>дней подряд</span></div>
       `;
     }
     return finished;
@@ -682,40 +753,35 @@ const STAGE_EMOJI = ['🌰','🌱','🌿','🍀','🌷','🌸','🌻','🧺'];
 
   function renderAll(){
     updateHeaderMeta();
-    renderDayDots();
+    renderDayCard();
     const finished = checkFinale();
-    if(!finished) renderPlots();
-    renderWeedsNote();
+    if(!finished){
+      const n = Math.min(Math.max(getDayNumber(),1),7);
+      if(n !== structureDayNumber){ renderPlotsStructure(); }
+      else { renderPlotsState(); }
+    }
   }
 
-  // ---------- login ----------
+  /* ---------- login ---------- */
   enterBtn.addEventListener('click', handleEnter);
-  nameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') handleEnter(); });
-  emailInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') handleEnter(); });
+  nameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') handleEnter(); });
+  emailInput.addEventListener('keydown', e=>{ if(e.key==='Enter') handleEnter(); });
 
   async function handleEnter(){
-    const rawName = nameInput.value;
-    const rawEmail = emailInput.value;
+    const rawName = nameInput.value, rawEmail = emailInput.value;
     if(!rawName.trim() || !rawEmail.trim()){
-      loginNote.textContent = 'Укажи имя и почту, чтобы посадить грядку.';
-      loginNote.classList.add('error');
-      return;
+      loginNote.textContent = 'Укажи имя и почту, чтобы посадить грядку.'; loginNote.classList.add('error'); return;
     }
     if(!isValidEmail(rawEmail)){
-      loginNote.textContent = 'Проверь адрес почты — что-то не так с форматом.';
-      loginNote.classList.add('error');
-      return;
+      loginNote.textContent = 'Проверь адрес почты — что-то не так с форматом.'; loginNote.classList.add('error'); return;
     }
-    enterBtn.disabled = true;
-    enterBtn.textContent = 'Заходим в сад…';
-    loginNote.classList.remove('error');
-    loginNote.textContent = '';
+    enterBtn.disabled = true; enterBtn.textContent = 'Заходим в сад…';
+    loginNote.classList.remove('error'); loginNote.textContent = '';
     try{
       const cred = await signInAnonymously(auth);
       await loadOrCreateParticipant(rawName, rawEmail, cred.user.uid);
       loginScreen.style.display = 'none';
       gameContent.style.display = 'block';
-      updateHeaderMeta();
       renderAll();
     }catch(err){
       console.error(err);
@@ -724,12 +790,20 @@ const STAGE_EMOJI = ['🌰','🌱','🌿','🍀','🌷','🌸','🌻','🧺'];
         : 'Не получилось подключиться. Проверь интернет и попробуй ещё раз.';
       loginNote.classList.add('error');
     }finally{
-      enterBtn.disabled = false;
-      enterBtn.textContent = 'Войти в сад →';
+      enterBtn.disabled = false; enterBtn.textContent = 'Войти в сад →';
     }
   }
 
-  // ---------- leaderboard ----------
+  switchAccountBtn.addEventListener('click', async ()=>{
+    if(!confirm('Выйти из этого сада и войти под другим именем на этом устройстве?')) return;
+    try{ await auth.signOut(); }catch(e){ console.error(e); }
+    gameContent.style.display = 'none';
+    nameInput.value=''; emailInput.value='';
+    loginScreen.style.display = 'block';
+    await signInAnonymously(auth);
+  });
+
+  /* ---------- leaderboard ---------- */
   let lbOpen = false;
   lbToggle.addEventListener('click', ()=>{
     lbOpen = !lbOpen;
@@ -738,53 +812,40 @@ const STAGE_EMOJI = ['🌰','🌱','🌿','🍀','🌷','🌸','🌻','🧺'];
     if(lbOpen) loadLeaderboard();
   });
 
-  // ---------- share ----------
+  /* ---------- share ---------- */
   document.getElementById('shareBtn').addEventListener('click', async ()=>{
     const text = 'Я вырастила свою грядку стройности за 7 дней летнего лагеря Шагай Дома 🌻';
     try{
       if(navigator.share){ await navigator.share({ text }); }
       else{ await navigator.clipboard.writeText(text); alert('Текст скопирован — вставь его в сторис!'); }
-    }catch(e){ /* пользователь отменил шеринг */ }
+    }catch(e){}
   });
 
-  // ---------- live ticking ----------
-  setInterval(()=>{
-    if(gameContent.style.display !== 'none' && loginScreen.style.display === 'none'){
-      renderAll();
-    }
-  }, 30000);
-
-  // ---------- session auto-resume ----------
-  // Firebase Auth сам хранит анонимную сессию в этом браузере между визитами
-  // (через IndexedDB), поэтому при повторном открытии страницы имя и почту
-  // спрашивать заново не нужно — просто ищем сад, привязанный к этому uid.
+  /* ---------- session auto-resume ---------- */
   onAuthStateChanged(auth, async (user)=>{
     if(user){
       try{
         const resumed = await tryAutoResume(user.uid);
         loadingScreen.style.display = 'none';
-        if(resumed){
-          gameContent.style.display = 'block';
-          updateHeaderMeta();
-          renderAll();
-        } else {
-          loginScreen.style.display = 'block';
-        }
+        if(resumed){ gameContent.style.display = 'block'; renderAll(); }
+        else{ loginScreen.style.display = 'block'; }
       }catch(e){
         console.error(e);
         loadingScreen.style.display = 'none';
         loginScreen.style.display = 'block';
       }
     } else {
-      // сессии ещё нет — создаём анонимную и ждём следующего срабатывания
       try{ await signInAnonymously(auth); }
-      catch(e){
-        console.error(e);
-        loadingScreen.style.display = 'none';
-        loginScreen.style.display = 'block';
-      }
+      catch(e){ console.error(e); loadingScreen.style.display='none'; loginScreen.style.display='block'; }
     }
   });
+
+  /* ---------- тики ---------- */
+  setInterval(()=>{
+    if(gameContent.style.display !== 'none' && loginScreen.style.display === 'none'){
+      renderAll();
+    }
+  }, 1000);
 
 })();
 </script>
