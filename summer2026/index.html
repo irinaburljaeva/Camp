@@ -33,14 +33,27 @@
   .res-badge{ background:#FBF3E4; border:1px solid #EAD9B8; border-radius:20px; padding:4px 10px; font-size:11.5px; font-weight:800; color:#8A6220; }
   .switch-account{ display:inline-block; margin-top:8px; border:none; background:none; padding:0; font-family:'Nunito Sans',sans-serif; font-size:10.5px; color:var(--plum); text-decoration:underline; cursor:pointer; font-weight:700; }
 
-  .login-screen{ text-align:center; background:var(--card); border-radius:22px; padding:26px 22px 24px; box-shadow:0 10px 30px -12px rgba(74,51,36,0.25); margin-top:40px; }
+  .login-screen{
+    position:fixed; inset:0; z-index:100; overflow:auto;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .login-content{
+    position:relative; z-index:2; width:100%; max-width:400px; padding:30px 20px;
+    text-align:center; animation:loadRise .8s ease both;
+  }
+  .login-panel{
+    margin-top:20px; background:rgba(255,251,240,0.92); backdrop-filter:blur(8px);
+    border-radius:22px; padding:20px 18px; text-align:center;
+    box-shadow:0 16px 40px -12px rgba(0,0,0,0.45);
+  }
+  .login-intro{ font-size:12.5px; color:var(--ink-soft); line-height:1.45; margin:0 0 4px; }
   .loading-screen{
     position:fixed; inset:0; z-index:100; overflow:hidden;
     display:flex; align-items:flex-end; justify-content:center;
   }
   .loading-bg{
     position:absolute; inset:0;
-    background:url('garden-loading.png') center 30% / cover no-repeat, linear-gradient(180deg,#BFE3ED,#EFE6D2);
+    background:url('garden-loading.jpg') center 30% / cover no-repeat, linear-gradient(180deg,#BFE3ED,#EFE6D2);
     animation:slowZoom 14s ease-in-out infinite alternate;
   }
   @keyframes slowZoom{ from{ transform:scale(1); } to{ transform:scale(1.08); } }
@@ -73,7 +86,6 @@
   @keyframes dotBlink{ 0%,60%,100%{ opacity:.25; } 30%{ opacity:1; } }
   .subtitle{ margin-top:6px; font-size:12.5px; color:var(--ink-soft); line-height:1.4; }
   .name-input{ width:100%; margin-top:12px; padding:14px 16px; border-radius:12px; border:2px solid #E4D9C4; background:#fff; font-family:'Nunito Sans', sans-serif; font-size:15px; color:var(--ink); outline:none; }
-  .name-input:first-of-type{ margin-top:18px; }
   .name-input:focus{ border-color:var(--bloom); }
   .login-note{ margin-top:12px; font-size:12.5px; color:var(--ink-soft); min-height:16px; }
   .login-note.error{ color:var(--bloom); font-weight:700; }
@@ -236,13 +248,19 @@
   </div>
 
   <div class="login-screen" id="loginScreen" style="display:none;">
-    <div class="eyebrow">Летний лагерь · Шагай Дома</div>
-    <h1>Грядка стройности</h1>
-    <p class="subtitle">Введи имя и почту, чтобы посадить свою грядку. Прогресс сохранится — можно возвращаться в любое время.</p>
-    <input type="text" id="nameInput" class="name-input" placeholder="Твоё имя" autocomplete="off">
-    <input type="email" id="emailInput" class="name-input" placeholder="Электронная почта" autocomplete="off">
-    <button class="primary-btn" id="enterBtn">Войти в сад →</button>
-    <div class="login-note" id="loginNote"></div>
+    <div class="loading-bg"></div>
+    <div class="loading-veil"></div>
+    <div class="login-content">
+      <div class="loading-eyebrow">Летний лагерь · Шагай Дома</div>
+      <div class="loading-title" style="font-size:36px;">Грядка<br>стройности</div>
+      <div class="login-panel">
+        <p class="login-intro">Введи имя и почту, чтобы посадить свою грядку. Прогресс сохранится — можно возвращаться в любое время.</p>
+        <input type="text" id="nameInput" class="name-input" placeholder="Твоё имя" autocomplete="off">
+        <input type="email" id="emailInput" class="name-input" placeholder="Электронная почта" autocomplete="off">
+        <button class="primary-btn" id="enterBtn">Войти в сад →</button>
+        <div class="login-note" id="loginNote"></div>
+      </div>
+    </div>
   </div>
 
   <div class="game-content" id="gameContent" style="display:none;">
