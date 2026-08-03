@@ -49,7 +49,7 @@
   .login-intro{ font-size:12.5px; color:var(--ink-soft); line-height:1.45; margin:0 0 4px; }
   .loading-screen{
     position:fixed; inset:0; z-index:100; overflow:hidden;
-    display:flex; align-items:flex-end; justify-content:center;
+    display:flex; align-items:center; justify-content:center;
   }
   .loading-bg{
     position:absolute; inset:0;
@@ -62,7 +62,7 @@
     background:linear-gradient(180deg, rgba(59,46,34,0.05) 30%, rgba(59,46,34,0.55) 78%, rgba(59,46,34,0.78) 100%);
   }
   .loading-content{
-    position:relative; z-index:2; text-align:center; padding:0 24px 64px; width:100%;
+    position:relative; z-index:2; text-align:center; padding:0 24px; width:100%;
     animation:loadRise 1s ease both;
   }
   @keyframes loadRise{ from{ opacity:0; transform:translateY(18px); } to{ opacity:1; transform:translateY(0); } }
@@ -275,7 +275,6 @@
         <span class="res-badge" id="bonusBadge">🌟 0</span>
         <span class="res-badge" id="streakBadge">🔥 0</span>
       </div>
-      <button class="switch-account" id="switchAccountBtn">Это не я — войти под другим именем</button>
     </header>
 
     <div class="day-chip" id="dayChip">День 1 / 7</div>
@@ -310,12 +309,11 @@
     </div>
 
     <div class="card">
-      <div class="tasks-title">Сегодняшняя забота о себе → ресурсы для сада</div>
+      <div class="tasks-title">Забота о себе → ресурсы сада</div>
       <div class="task-row">
         <div class="task-icon">🚶‍♀️</div>
         <div class="task-info">
-          <div class="task-name">Прошла ещё 2 500 шагов</div>
-          <div class="task-sub">+1 💧 за каждые 2 500 (до 4 раз = 10 000)</div>
+          <div class="task-name">Ещё 2 500 шагов</div>
           <div class="task-pips" id="pips-steps"></div>
         </div>
         <button class="task-btn" id="task-steps">+1 💧</button>
@@ -323,8 +321,7 @@
       <div class="task-row">
         <div class="task-icon">💪</div>
         <div class="task-info">
-          <div class="task-name">Тренировка выполнена</div>
-          <div class="task-sub">+2 💧 и +1 🌿 (до 2 тренировок в день)</div>
+          <div class="task-name">Тренировка</div>
           <div class="task-pips" id="pips-training"></div>
         </div>
         <button class="task-btn" id="task-training">+2 💧</button>
@@ -332,8 +329,7 @@
       <div class="task-row">
         <div class="task-icon">🍲</div>
         <div class="task-info">
-          <div class="task-name">Приготовила блюдо по меню</div>
-          <div class="task-sub">+1 💧 и +1 🌿 (до 3 блюд в день)</div>
+          <div class="task-name">Блюдо по меню</div>
           <div class="task-pips" id="pips-meal"></div>
         </div>
         <button class="task-btn" id="task-meal">+1 🌿</button>
@@ -346,12 +342,16 @@
     <div class="card">
       <div class="lb-title">🏆 Сад лагеря</div>
       <div id="leaderboardList">Загружаю…</div>
-      <div class="lb-hint">Нажми на участницу, чтобы заглянуть в её сад</div>
+      <div class="lb-hint">Тапни по участнице — увидишь её сад</div>
     </div>
 
     <div class="card">
       <div class="lb-title">📖 Мой гербарий</div>
       <div id="collectionZone"><div class="coll-empty-note">Вырасти цветок до полного расцвета — и он попадёт сюда. Редкие расцветы дают особые цветы!</div></div>
+    </div>
+
+    <div style="text-align:center; margin-bottom:8px;">
+      <button class="switch-account" id="switchAccountBtn">Это не я — войти под другим именем</button>
     </div>
 
     <div class="card finale-panel" id="finalePanel">
@@ -486,6 +486,15 @@ const RARE_FLOWERS = [
     state.campStartDate=data.campStartDate||todayStr();
     state.log=data.log||{};
     state.plots=data.plots||state.plots;
+    // нормализация: у записей из старых версий могли быть другие поля
+    PLOT_KEYS.forEach(k=>{
+      const p=state.plots[k]||{};
+      state.plots[k]={
+        level: Number(p.level ?? p.collectedLevel ?? 0) || 0,
+        bonusReadyAt: p.bonusReadyAt||null,
+        sparkle: !!p.sparkle
+      };
+    });
     state.water=data.water??0; state.fert=data.fert??0; state.bonusSeeds=data.bonusSeeds??0;
     state.collection=data.collection||[];
     state.lastSeenCheersAt=data.lastSeenCheersAt||0;
@@ -517,7 +526,7 @@ const RARE_FLOWERS = [
     loadStateFromDoc(snap.docs[0].id, snap.docs[0].data());
     return true;
   }
-  function computeScore(){ return Math.round(PLOT_KEYS.reduce((s,k)=>s+state.plots[k].level,0)*10 + state.bonusSeeds*15); }
+  function computeScore(){ return Math.round(PLOT_KEYS.reduce((s,k)=>s+(Number(state.plots[k].level)||0),0)*10 + (state.bonusSeeds||0)*15); }
   async function saveProgress(){
     if(!state.docId) return;
     const score=computeScore();
@@ -818,7 +827,7 @@ const RARE_FLOWERS = [
       if(bonusReady) statusText='Готова к бонусу!';
       else if(bonusPending) statusText=`Бонус через ~${formatCountdown(p.bonusReadyAt-Date.now())}`;
       else if(p.level>=7) statusText='Расцвела 🎉';
-      else statusText='Ждёт заботы';
+      else statusText='';
       $('status-'+key).textContent=statusText;
 
       const wBtn=$('waterBtn-'+key), fBtn=$('fertBtn-'+key);
@@ -830,8 +839,8 @@ const RARE_FLOWERS = [
         wBtn.textContent='💧 Полить'; wBtn.className='farm-btn water';
         wBtn.disabled=state.water<=0 || p.level>=7;
         wBtn.onclick=()=>waterPlot(key);
-        fBtn.style.display='block';
-        fBtn.disabled=state.fert<=0 || p.level>=7;
+        fBtn.style.display = (state.fert>0 && p.level<7) ? 'block' : 'none';
+        fBtn.disabled=false;
       }
       updatePlantVisual(key, p.level, '');
     });
@@ -1039,7 +1048,7 @@ const RARE_FLOWERS = [
     try{ await auth.signOut(); }catch(e){ console.error(e); }
     gameContent.style.display='none';
     nameInput.value=''; emailInput.value='';
-    loginScreen.style.display='block';
+    loginScreen.style.display='flex';
     await signInAnonymously(auth);
   });
 
@@ -1131,14 +1140,14 @@ const RARE_FLOWERS = [
           gameContent.style.display='block';
           renderAll(); maybeDailyGift(); loadLeaderboard(); checkCheers();
         }
-        else loginScreen.style.display='block';
+        else loginScreen.style.display='flex';
       }catch(e){
         console.error(e);
-        loadingScreen.style.display='none'; loginScreen.style.display='block';
+        loadingScreen.style.display='none'; loginScreen.style.display='flex';
       }
     } else {
       try{ await signInAnonymously(auth); }
-      catch(e){ console.error(e); loadingScreen.style.display='none'; loginScreen.style.display='block'; }
+      catch(e){ console.error(e); loadingScreen.style.display='none'; loginScreen.style.display='flex'; }
     }
   });
 
