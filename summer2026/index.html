@@ -148,6 +148,44 @@
   .shop-buy:disabled{ background:#E4D9C4; color:#A99A80; }
   .shop-decor-item{ position:absolute; font-size:18px; z-index:1; animation:decorPop .5s cubic-bezier(.34,1.56,.64,1); }
   @keyframes decorPop{ from{ transform:scale(0); } to{ transform:scale(1); } }
+
+  /* ===== ДЕСКТОП ===== */
+  @media (min-width: 900px){
+    body{ padding:36px 24px 80px; }
+    .app{ max-width:1000px; }
+    header{ margin-bottom:4px; }
+    h1{ font-size:26px; }
+    .greeting{ font-size:17px; }
+    .res-badge{ font-size:13px; padding:5px 13px; }
+    .day-chip{ font-size:12.5px; }
+
+    .game-content{
+      display:grid; grid-template-columns: 1fr 400px; gap:0 24px; align-items:start;
+    }
+    .game-content > header,
+    .game-content > .day-chip,
+    .game-content > .toast{ grid-column:1 / -1; }
+    .game-content > .garden-scene{
+      grid-column:1; grid-row:4 / span 20;
+      position:sticky; top:24px; margin-bottom:0;
+    }
+    .game-content > *:not(header):not(.day-chip):not(.toast):not(.garden-scene){ grid-column:2; }
+    .game-content > .finale-panel{ grid-column:1 / -1; }
+
+    .sky{ height:88px; }
+    .sun{ width:40px; height:40px; top:16px; right:32px; }
+    .ground{ min-height:280px; padding:20px 20px 16px; }
+    .plant-svg{ max-width:130px; height:170px; }
+    .farm-title{ font-size:13px; margin-top:6px; }
+    .farm-status{ font-size:11.5px; }
+    .farm-btn{ font-size:12.5px; padding:10px 4px; }
+    .farm-progress{ height:6px; }
+    .level-bar-wrap{ padding:10px 20px; }
+    .bench{ font-size:28px; }
+    .lantern{ font-size:24px; }
+    .shop-decor-item{ font-size:26px; }
+    .fence{ height:20px; background-image:repeating-linear-gradient(90deg,#B08A5C 0 6px, transparent 6px 15px); }
+  }
   .decor-fly{ position:absolute; top:8px; font-size:16px; opacity:0; transition:opacity .6s ease; pointer-events:none; }
   .decor-fly.unlocked{ opacity:1; animation:flutter 5s ease-in-out infinite; }
   @keyframes flutter{ 0%,100%{transform:translate(0,0) rotate(0deg);} 25%{transform:translate(6px,-6px) rotate(6deg);} 50%{transform:translate(-4px,2px) rotate(-4deg);} 75%{transform:translate(4px,6px) rotate(3deg);} }
