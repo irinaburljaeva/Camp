@@ -128,7 +128,7 @@
   .rain-layer.on{ display:block; }
   .rain-drop{ position:absolute; top:-14px; width:2px; height:11px; border-radius:2px; background:rgba(120,170,200,0.55); animation:rainfall linear infinite; }
   @keyframes rainfall{ from{ transform:translateY(-14px); } to{ transform:translateY(320px); } }
-  .windy .plant-svg{ animation:windSway 1.4s ease-in-out infinite; transform-origin:50% 95%; }
+  .windy .plant-wrap{ animation:windSway 1.4s ease-in-out infinite; transform-origin:50% 95%; }
   @keyframes windSway{ 0%,100%{ transform:rotate(-2.5deg); } 50%{ transform:rotate(2.5deg); } }
   /* гербарий */
   .collection-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
@@ -175,7 +175,8 @@
     .sky{ height:88px; }
     .sun{ width:40px; height:40px; top:16px; right:32px; }
     .ground{ min-height:280px; padding:20px 20px 16px; }
-    .plant-svg{ max-width:130px; height:170px; }
+    .plant-wrap{ max-width:150px; height:190px; }
+    .plant-fallback{ font-size:72px; }
     .farm-title{ font-size:13px; margin-top:6px; }
     .farm-status{ font-size:11.5px; }
     .farm-btn{ font-size:12.5px; padding:10px 4px; }
@@ -198,8 +199,12 @@
   .ground{ background:linear-gradient(180deg,#EFE1C5,#E5D0A8); padding:10px 10px 8px; position:relative; min-height:150px; }
   .farm-row{ display:flex; justify-content:space-between; align-items:flex-end; gap:6px; position:relative; z-index:2; }
   .farm-plot{ flex:1; text-align:center; min-width:0; }
-  .farm-plot.bonus-ready .plant-svg{ filter:drop-shadow(0 0 6px rgba(232,184,75,0.8)); }
-  .plant-svg{ width:100%; max-width:78px; height:100px; margin:0 auto; overflow:visible; position:relative; }
+  .farm-plot.bonus-ready .plant-img{ filter:drop-shadow(0 0 8px rgba(232,184,75,0.85)); }
+  .plant-wrap{ position:relative; width:100%; max-width:90px; height:110px; margin:0 auto; display:flex; align-items:flex-end; justify-content:center; }
+  .plant-img{ max-width:100%; max-height:100%; display:block; transition:transform .3s cubic-bezier(.34,1.56,.64,1), filter .3s ease; transform-origin:50% 95%; }
+  .plant-fallback{ display:none; font-size:44px; }
+  .plant-wrap.img-failed .plant-img{ display:none; }
+  .plant-wrap.img-failed .plant-fallback{ display:block; }
   .farm-title{ font-size:10.5px; font-weight:800; color:var(--soil-dark); margin-top:2px; }
   .farm-status{ font-size:9.5px; color:var(--ink-soft); line-height:1.25; min-height:24px; margin-top:1px; }
   .farm-progress{ height:5px; background:rgba(0,0,0,0.1); border-radius:5px; margin-top:5px; overflow:hidden; }
@@ -468,6 +473,21 @@ const PROGRESS_COLLECTION = 'garden_progress';
 const LEADERBOARD_COLLECTION = 'garden_leaderboard';
 
 const PLOT_KEYS = ['steps','training','meal'];
+
+// ===== КАРТИНКИ РАСТЕНИЙ =====
+// Файлы должны лежать рядом с html (или укажи подпапку в ASSET_PATH, например 'img/').
+// seed.png — общее семечко для всех. Дальше 4 стадии роста,
+// в каждой стадии несколько вариантов — растение выбирает случайный.
+const ASSET_PATH = '';
+const SEED_IMG = 'seed.png';
+const STAGE_VARIANTS = [
+  ['seed1.png','seed11.png','seed21.png','seed31.png'],   // стадия 1
+  ['seed2.png','seed12.png','seed22.png','seed32.png'],   // стадия 2
+  ['seed3.png','seed13.png','seed23.png','seed33.png'],   // стадия 3
+  ['seed4.png','seed14.png','seed24.png','seed34.png']    // стадия 4 — цветение
+];
+// Запасные эмодзи, если какая-то картинка не загрузится
+const FALLBACK_EMOJI = ['🌰','🌱','🌿','🌷','🌸'];
 const PLOT_META = {
   steps:    { title:'Шаги 💧',  stem:'#4F6B34', leaf:'#5E8F7C', bud:'#3F6B57', petal1:'#8FC6B4', petal2:'#5E8F7C', center:'#F7E7B0' },
   training: { title:'Сила ☀️',   stem:'#4F6B34', leaf:'#6B8F47', bud:'#B4831E', petal1:'#E8B84B', petal2:'#E0895F', center:'#8A5A2A' },
@@ -580,7 +600,8 @@ const DAILY_QUESTS = [
       state.plots[k]={
         level: Number(p.level ?? p.collectedLevel ?? 0) || 0,
         bonusReadyAt: p.bonusReadyAt||null,
-        sparkle: !!p.sparkle
+        sparkle: !!p.sparkle,
+        vars: Array.isArray(p.vars) ? p.vars : undefined
       };
     });
     state.water=data.water??0; state.fert=data.fert??0; state.bonusSeeds=data.bonusSeeds??0;
@@ -636,48 +657,61 @@ const DAILY_QUESTS = [
     }catch(e){ console.error('Сохранение не удалось:',e); }
   }
 
-  /* ---------- растения ---------- */
-  function plantSVG(key, idPrefix){
-    const m=PLOT_META[key]; const p = idPrefix||'';
-    return `
-    <svg class="plant-svg" viewBox="0 0 120 160">
-      <ellipse cx="60" cy="150" rx="46" ry="9" fill="rgba(0,0,0,0.08)"/>
-      <g id="${p}stem-${key}" style="transform-origin:60px 150px;"><path d="M60 150 L60 60" stroke="${m.stem}" stroke-width="4.5" stroke-linecap="round"/></g>
-      <g id="${p}leavesA-${key}" style="transform-origin:60px 118px;">
-        <path d="M60 118 Q38 110 36 92 Q56 96 60 118Z" fill="${m.leaf}"/>
-        <path d="M60 118 Q82 110 84 92 Q64 96 60 118Z" fill="${m.leaf}"/>
-      </g>
-      <g id="${p}leavesB-${key}" style="transform-origin:60px 88px;">
-        <path d="M60 88 Q40 82 37 66 Q57 69 60 88Z" fill="${m.leaf}" opacity="0.9"/>
-        <path d="M60 88 Q80 82 83 66 Q63 69 60 88Z" fill="${m.leaf}" opacity="0.9"/>
-      </g>
-      <g id="${p}bud-${key}" style="transform-origin:60px 58px;"><ellipse cx="60" cy="56" rx="9" ry="12" fill="${m.bud}"/></g>
-      <g id="${p}bloom-${key}" style="transform-origin:60px 54px;">
-        <circle cx="60" cy="54" r="7" fill="${m.center}"/>
-        <path id="${p}petal0-${key}" d="M60 54 Q45 40 52 26 Q66 36 60 54Z" fill="${m.petal1}"/>
-        <path id="${p}petal1-${key}" d="M60 54 Q75 40 68 26 Q54 36 60 54Z" fill="${m.petal1}"/>
-        <path id="${p}petal2-${key}" d="M60 54 Q40 58 34 46 Q50 42 60 54Z" fill="${m.petal2}"/>
-        <path id="${p}petal3-${key}" d="M60 54 Q80 58 86 46 Q70 42 60 54Z" fill="${m.petal2}"/>
-      </g>
-    </svg>`;
+  /* ---------- растения (спрайты) ---------- */
+  function stageIndexForLevel(level){
+    if(level < 1) return -1;      // семечко
+    if(level < 2.75) return 0;    // стадия 1
+    if(level < 4.5) return 1;     // стадия 2
+    if(level < 6) return 2;       // стадия 3
+    return 3;                     // стадия 4 — полное цветение
   }
-  function updatePlantVisual(key, level, idPrefix){
-    const p=idPrefix||'';
-    const stemFrac=clamp01(level/3), leavesAFrac=clamp01((level-1)/1.5), leavesBFrac=clamp01((level-2.3)/1.7);
-    const budFrac=clamp01((level-3.6)/1.2), bloomFrac=clamp01((level-4.6)/2.4);
-    const stemEl=$(p+'stem-'+key); if(!stemEl) return;
-    $(p+'leavesA-'+key).style.opacity=leavesAFrac; $(p+'leavesA-'+key).style.transform=`scale(${0.5+0.5*leavesAFrac})`;
-    $(p+'leavesB-'+key).style.opacity=leavesBFrac; $(p+'leavesB-'+key).style.transform=`scale(${0.5+0.5*leavesBFrac})`;
-    stemEl.style.transform=`scaleY(${stemFrac})`;
-    $(p+'bud-'+key).style.opacity=budFrac*(1-bloomFrac*0.6); $(p+'bud-'+key).style.transform=`scale(${0.3+0.7*budFrac})`;
-    $(p+'bloom-'+key).style.opacity=bloomFrac; $(p+'bloom-'+key).style.transform=`scale(${0.4+0.6*bloomFrac})`;
-    ['petal0','petal1','petal2','petal3'].forEach((pid,i)=>{
-      const el=$(p+pid+'-'+key); if(!el) return;
-      const angle=[-14,14,-10,10][i]*bloomFrac;
-      el.style.transition=`transform .5s ease ${i*70}ms`;
-      el.style.transformOrigin='60px 54px';
-      el.style.transform=`rotate(${angle}deg) scale(${0.6+0.4*bloomFrac})`;
-    });
+  function plantImgSrc(key, level, vars){
+    const s = stageIndexForLevel(level);
+    if(s < 0) return ASSET_PATH + SEED_IMG;
+    const pool = STAGE_VARIANTS[s];
+    const idx = (vars && vars[s] !== undefined) ? (vars[s] % pool.length) : 0;
+    return ASSET_PATH + pool[idx];
+  }
+  // у каждого растения свой набор случайных вариантов на 4 стадии
+  function ensureVariants(p){
+    if(!Array.isArray(p.vars) || p.vars.length < 4){
+      p.vars = STAGE_VARIANTS.map(pool => Math.floor(Math.random()*pool.length));
+    }
+    return p.vars;
+  }
+  // для чужих садов: стабильный псевдослучайный выбор из id участницы
+  function hashVariants(seedStr){
+    let h = 0;
+    for(let i=0;i<seedStr.length;i++){ h = (h*31 + seedStr.charCodeAt(i)) >>> 0; }
+    return STAGE_VARIANTS.map((pool,s) => (h >> (s*3)) % pool.length);
+  }
+  function plantMarkup(key, idPrefix){
+    const p = idPrefix||'';
+    return `<div class="plant-wrap" id="${p}wrap-${key}">
+      <img class="plant-img" id="${p}img-${key}" alt="">
+      <span class="plant-fallback" id="${p}fb-${key}">🌰</span>
+    </div>`;
+  }
+  function updatePlantVisual(key, level, idPrefix, vars){
+    const p = idPrefix||'';
+    const img = $(p+'img-'+key), wrap = $(p+'wrap-'+key), fb = $(p+'fb-'+key);
+    if(!img) return;
+    const src = plantImgSrc(key, level, vars);
+    const stage = stageIndexForLevel(level);
+    fb.textContent = FALLBACK_EMOJI[Math.max(0, stage+1)];
+    if(img.dataset.src !== src){
+      const prevStage = img.dataset.stage !== undefined ? Number(img.dataset.stage) : null;
+      img.dataset.src = src;
+      img.dataset.stage = stage;
+      wrap.classList.remove('img-failed');
+      img.onerror = ()=>{ wrap.classList.add('img-failed'); };
+      img.src = src;
+      // при переходе на новую стадию — радостный подскок
+      if(prevStage !== null && stage > prevStage){
+        img.style.transform = 'scale(1.25)';
+        setTimeout(()=>{ img.style.transform = 'scale(1)'; }, 280);
+      }
+    }
   }
 
   /* ---------- эффекты ---------- */
@@ -694,12 +728,12 @@ const DAILY_QUESTS = [
     }catch(e){}
   }
   function bumpPlant(key,big){
-    const el=document.querySelector(`#plot-${key} .plant-svg`); if(!el) return;
+    const el=document.querySelector(`#plot-${key} .plant-wrap`); if(!el) return;
     el.style.transform=big?'scale(1.13)':'scale(1.06)';
     setTimeout(()=>{el.style.transform='scale(1)';},220);
   }
   function spawnParticles(key,count){
-    const host=document.querySelector(`#plot-${key} .plant-svg`); if(!host) return;
+    const host=document.querySelector(`#plot-${key} .plant-wrap`); if(!host) return;
     for(let i=0;i<count;i++){
       const el=document.createElement('span'); el.className='particle';
       el.textContent=['🌸','✨','🌿'][Math.floor(Math.random()*3)];
@@ -798,6 +832,7 @@ const DAILY_QUESTS = [
     const coinsGain = 8 + Math.floor(Math.random()*5); // 8–12 монет
     state.coins += coinsGain;
     p.level = 1.5; // пересадка не с нуля, чтобы не было обидно
+    p.vars = STAGE_VARIANTS.map(pool => Math.floor(Math.random()*pool.length)); // новое растение выглядит иначе
     p.bonusReadyAt = null; p.sparkle = false;
     bumpPlant(key,true); spawnParticles(key,10); chime(760);
     if(navigator.vibrate) navigator.vibrate([25,30,25]);
@@ -934,7 +969,7 @@ const DAILY_QUESTS = [
       const m=PLOT_META[key];
       return `
       <div class="farm-plot" id="plot-${key}">
-        ${plantSVG(key,'')}
+        ${plantMarkup(key,'')}
         <div class="farm-title">${m.title}</div>
         <div class="farm-status" id="status-${key}"></div>
         <div class="farm-progress"><div class="farm-progress-fill ${key}" id="progress-${key}" style="width:0%"></div></div>
@@ -981,7 +1016,7 @@ const DAILY_QUESTS = [
         fBtn.style.display = (state.fert>0) ? 'block' : 'none';
         fBtn.disabled=false;
       }
-      updatePlantVisual(key, p.level, '');
+      updatePlantVisual(key, p.level, '', ensureVariants(p));
     });
     $('weedsNote').textContent = computeWeeds()>0 ? `Сорняков: ${computeWeeds()} — пропущенные дни, не приговор.` : '';
   }
@@ -1056,10 +1091,10 @@ const DAILY_QUESTS = [
     saveProgress();
     $('visitName').textContent=`Сад: ${entry.name||'участница'}`;
     $('visitSub').textContent=`${entry.score||0} очков`;
-    $('visitRow').innerHTML = PLOT_KEYS.map(key=>`<div style="width:31%;">${plantSVG(key,'v-')}</div>`).join('');
+    $('visitRow').innerHTML = PLOT_KEYS.map(key=>`<div style="width:31%;">${plantMarkup(key,'v-')}</div>`).join('');
     PLOT_KEYS.forEach(key=>{
       const lvl = entry.plotLevels ? (entry.plotLevels[key]||0) : 0;
-      updatePlantVisual(key, lvl, 'v-');
+      updatePlantVisual(key, lvl, 'v-', hashVariants(String(entry.id||'')+key));
     });
     $('visitCheerBtn').onclick=async()=>{
       chime(600); showToast(`Помахала ${entry.name} 👋 — пусть день будет добрым!`);
