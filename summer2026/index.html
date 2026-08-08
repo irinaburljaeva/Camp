@@ -136,6 +136,7 @@
   .coll-slot.filled{ border-style:solid; border-color:var(--leaf); background:#F1F6EA; }
   .coll-slot.rare{ border-color:var(--sun); background:#FBF3E4; }
   .coll-slot .coll-name{ font-size:8px; font-weight:800; color:var(--ink-soft); margin-top:2px; }
+  .coll-img{ max-width:80%; max-height:64%; object-fit:contain; }
   .coll-empty-note{ font-size:11px; color:var(--ink-soft); text-align:center; }
   .postcard-canvas{ display:none; }
   /* лавка */
@@ -196,7 +197,19 @@
   .level-track{ height:7px; background:#EAD9B8; border-radius:6px; overflow:hidden; }
   .level-fill{ height:100%; background:linear-gradient(90deg,var(--sun),var(--bloom-light)); border-radius:6px; transition:width .5s ease; }
 
-  .ground{ background:linear-gradient(180deg,#EFE1C5,#E5D0A8); padding:10px 10px 8px; position:relative; min-height:150px; }
+  .ground{
+    background:url('garden-ground.jpg') center 68% / cover no-repeat, linear-gradient(180deg,#EFE1C5,#E5D0A8);
+    padding:10px 10px 8px; position:relative; min-height:150px;
+  }
+  .ground::before{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(246,241,228,0.15), rgba(246,241,228,0) 35%);
+    pointer-events:none;
+  }
+  .farm-title, .farm-status{
+    text-shadow:0 1px 4px rgba(246,241,228,0.9), 0 0 10px rgba(246,241,228,0.8);
+  }
+  .plant-img{ filter:drop-shadow(0 3px 4px rgba(40,50,30,0.35)); }
   .farm-row{ display:flex; justify-content:space-between; align-items:flex-end; gap:6px; position:relative; z-index:2; }
   .farm-plot{ flex:1; text-align:center; min-width:0; }
   .farm-plot.bonus-ready .plant-img{ filter:drop-shadow(0 0 8px rgba(232,184,75,0.85)); }
@@ -512,16 +525,13 @@ const DAY_CONFIG = [
   { title:'Большой расцвет',   desc:'Финальный день — рост почти вдвое сильнее.', growMul:1.9, bonusMinMs:15*60000, bonusMaxMs:40*60000, sparkleChance:0.6, special:null, weather:null },
 ];
 
-// Гербарий: базовые цветы за полный расцвет грядки + редкие за бурные расцветы
-const BASE_FLOWERS = {
-  steps:    { emoji:'🌼', name:'Ромашка шагов' },
-  training: { emoji:'🌻', name:'Подсолнух силы' },
-  meal:     { emoji:'🌺', name:'Гибискус вкуса' }
-};
-const RARE_FLOWERS = [
-  { emoji:'🌷', name:'Тюльпан' }, { emoji:'🌹', name:'Роза' },
-  { emoji:'💮', name:'Белый цвет' }, { emoji:'🪻', name:'Лаванда' },
-  { emoji:'🏵️', name:'Розетка' }
+// Гербарий: коллекционируются финальные цветы (4-я стадия).
+// Названия можно переименовать под реальные цветы на картинках.
+const FINAL_FLOWERS = [
+  { file:'seed4.png',  name:'Белый цветок' },
+  { file:'seed14.png', name:'Кремовая роза' },
+  { file:'seed24.png', name:'Алая роза' },
+  { file:'seed34.png', name:'Розовая лилия' }
 ];
 
 // Лавка декора: покупается за монеты, появляется в саду навсегда
@@ -809,20 +819,22 @@ const DAILY_QUESTS = [
     showToast(gain>1?'✨ Редкий бурный расцвет! Бонусное семечко.':'Цветок раскрылся сильнее!');
   }
   function awardBaseFlower(key){
-    const f=BASE_FLOWERS[key];
-    if(state.collection.some(c=>c.name===f.name)) return;
-    state.collection.push({ emoji:f.emoji, name:f.name, rare:false, date:todayStr() });
-    setTimeout(()=>showToast(`📖 В гербарий добавлен цветок: ${f.emoji} ${f.name}!`), 700);
+    // в гербарий попадает именно тот цветок, которым расцвела грядка
+    const p = state.plots[key];
+    const idx = (ensureVariants(p)[3] || 0) % FINAL_FLOWERS.length;
+    const f = FINAL_FLOWERS[idx];
+    if(state.collection.some(c=>c.img===f.file)) return;
+    state.collection.push({ img:f.file, name:f.name, rare:false, date:todayStr() });
+    setTimeout(()=>showToast(`📖 В гербарий добавлен цветок: ${f.name}!`), 700);
   }
   function awardRareFlower(){
-    const owned = new Set(state.collection.filter(c=>c.rare).map(c=>c.name));
-    const available = RARE_FLOWERS.filter(f=>!owned.has(f.name));
-    const pick = available.length ? available[Math.floor(Math.random()*available.length)]
-                                  : RARE_FLOWERS[Math.floor(Math.random()*RARE_FLOWERS.length)];
-    if(available.length){
-      state.collection.push({ emoji:pick.emoji, name:pick.name, rare:true, date:todayStr() });
-      setTimeout(()=>showToast(`📖 Редкий цветок в гербарий: ${pick.emoji} ${pick.name}!`), 900);
-    }
+    // редкий бурный расцвет открывает случайный ещё не собранный цветок
+    const owned = new Set(state.collection.map(c=>c.img));
+    const available = FINAL_FLOWERS.filter(f=>!owned.has(f.file));
+    if(!available.length) return;
+    const pick = available[Math.floor(Math.random()*available.length)];
+    state.collection.push({ img:pick.file, name:pick.name, rare:true, date:todayStr() });
+    setTimeout(()=>showToast(`📖 Редкая находка для гербария: ${pick.name}!`), 900);
   }
 
   /* ---------- урожай: цикл посадки как в FarmVille ---------- */
@@ -1155,23 +1167,21 @@ const DAILY_QUESTS = [
   }
   function renderCollection(){
     const zone=$('collectionZone');
-    if(!state.collection.length){
-      zone.innerHTML='<div class="coll-empty-note">Вырасти цветок до полного расцвета — и он попадёт сюда. Редкие расцветы дают особые цветы!</div>';
+    const ownedFiles = new Set(state.collection.map(c=>c.img));
+    if(!ownedFiles.size){
+      zone.innerHTML='<div class="coll-empty-note">Вырасти цветок до полного расцвета — и он попадёт сюда. Редкие расцветы открывают новые цветы!</div>';
       return;
     }
-    const totalSlots = 3 + RARE_FLOWERS.length;
-    const slots=[];
-    Object.values(BASE_FLOWERS).forEach(f=>{
-      const owned=state.collection.find(c=>c.name===f.name);
-      slots.push(owned ? {emoji:f.emoji,name:f.name,cls:'filled'} : {emoji:'❔',name:f.name,cls:''});
-    });
-    RARE_FLOWERS.forEach(f=>{
-      const owned=state.collection.find(c=>c.name===f.name);
-      slots.push(owned ? {emoji:f.emoji,name:f.name,cls:'filled rare'} : {emoji:'❔',name:'???',cls:''});
-    });
-    zone.innerHTML='<div class="collection-grid">'+slots.map(s=>
-      `<div class="coll-slot ${s.cls}">${s.emoji}<span class="coll-name">${s.name}</span></div>`
-    ).join('')+'</div>';
+    zone.innerHTML='<div class="collection-grid">'+FINAL_FLOWERS.map(f=>{
+      const entry=state.collection.find(c=>c.img===f.file);
+      if(entry){
+        return `<div class="coll-slot filled ${entry.rare?'rare':''}">
+          <img class="coll-img" src="${ASSET_PATH+f.file}" alt="${f.name}">
+          <span class="coll-name">${f.name}</span>
+        </div>`;
+      }
+      return `<div class="coll-slot">❔<span class="coll-name">???</span></div>`;
+    }).join('')+'</div>';
   }
 
   function renderQuests(){
@@ -1280,7 +1290,15 @@ const DAILY_QUESTS = [
   });
 
   /* ---------- финальная открытка ---------- */
-  function drawPostcard(){
+  function loadImg(src){
+    return new Promise(res=>{
+      const im=new Image();
+      im.onload=()=>res(im);
+      im.onerror=()=>res(null);
+      im.src=src;
+    });
+  }
+  async function drawPostcard(){
     const cv=$('postcardCanvas'), ctx=cv.getContext('2d');
     const W=cv.width, H=cv.height;
     // фон: небо → земля
@@ -1304,19 +1322,33 @@ const DAILY_QUESTS = [
     ctx.fillStyle='#6B5D4E';
     ctx.font='600 40px "Nunito Sans", sans-serif';
     ctx.fillText('7 дней заботы о себе — и сад расцвёл', W/2, 290);
-    // цветы сада (крупные эмодзи трёх грядок + гербарий)
-    ctx.font='220px serif';
-    const flowers = PLOT_KEYS.map(k=>{
-      const lvl=state.plots[k].level;
-      return lvl>=7 ? BASE_FLOWERS[k].emoji : (lvl>=4.6?'🌸':lvl>=2.5?'🌿':'🌱');
+    // растения сада — реальные спрайты текущих стадий
+    const plantImgs = await Promise.all(PLOT_KEYS.map(k=>{
+      const p=state.plots[k];
+      return loadImg(plantImgSrc(k, p.level, ensureVariants(p)));
+    }));
+    plantImgs.forEach((im,i)=>{
+      const cx=W*(0.25+0.25*i);
+      if(im){
+        const ih=300, iw=ih*(im.width/im.height);
+        ctx.drawImage(im, cx-iw/2, H*0.62-ih, iw, ih);
+      } else {
+        ctx.font='220px serif';
+        ctx.fillText('🌸', cx, H*0.62);
+      }
     });
-    flowers.forEach((f,i)=>{ ctx.fillText(f, W*(0.25+0.25*i), H*0.62); });
-    // редкие цветы из гербария внизу
-    const rares=state.collection.filter(c=>c.rare).map(c=>c.emoji).slice(0,5);
-    if(rares.length){
-      ctx.font='96px serif';
-      const startX = W/2 - (rares.length-1)*70;
-      rares.forEach((e,i)=>ctx.fillText(e, startX+i*140, H*0.76));
+    // собранные цветы гербария внизу
+    const ownedFlowers = FINAL_FLOWERS.filter(f=>state.collection.some(c=>c.img===f.file));
+    if(ownedFlowers.length){
+      const imgs = await Promise.all(ownedFlowers.map(f=>loadImg(ASSET_PATH+f.file)));
+      const startX = W/2 - (ownedFlowers.length-1)*80;
+      imgs.forEach((im,i)=>{
+        const cx=startX+i*160;
+        if(im){
+          const ih=140, iw=ih*(im.width/im.height);
+          ctx.drawImage(im, cx-iw/2, H*0.76-ih, iw, ih);
+        }
+      });
     }
     // статистика
     const total=PLOT_KEYS.reduce((s,k)=>s+state.plots[k].level,0);
@@ -1328,7 +1360,7 @@ const DAILY_QUESTS = [
     ctx.fillText('Каждый цветок — мой выбор двигаться и заботиться о себе', W/2, H*0.92);
   }
   async function downloadPostcard(){
-    drawPostcard();
+    await drawPostcard();
     const cv=$('postcardCanvas');
     cv.toBlob(async(blob)=>{
       if(!blob) return;
