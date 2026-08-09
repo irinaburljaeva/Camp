@@ -27,179 +27,66 @@
   h1,h2,h3{ font-family:'Fraunces', serif; margin:0; }
   header{ text-align:center; margin-bottom:10px; }
   .eyebrow{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--plum); font-weight:800; }
-  h1{ font-size:20px; font-weight:700; color:var(--soil-dark); margin-top:4px; }
-  .greeting{ margin-top:6px; font-family:'Fraunces', serif; font-size:15px; font-weight:600; color:var(--bloom); }
-  .header-meta{ display:flex; justify-content:center; gap:8px; margin-top:8px; flex-wrap:wrap; }
-  .res-badge{ background:#FBF3E4; border:1px solid #EAD9B8; border-radius:20px; padding:4px 10px; font-size:11.5px; font-weight:800; color:#8A6220; }
+  .greeting{ margin-top:6px; font-family:'Fraunces', serif; font-size:16px; font-weight:600; color:var(--bloom); }
   .switch-account{ display:inline-block; margin-top:8px; border:none; background:none; padding:0; font-family:'Nunito Sans',sans-serif; font-size:10.5px; color:var(--plum); text-decoration:underline; cursor:pointer; font-weight:700; }
 
-  .login-screen{
-    position:fixed; inset:0; z-index:100; overflow:auto;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .login-content{
-    position:relative; z-index:2; width:100%; max-width:400px; padding:30px 20px;
-    text-align:center; animation:loadRise .8s ease both;
-  }
-  .login-panel{
-    margin-top:20px; background:rgba(255,251,240,0.92); backdrop-filter:blur(8px);
-    border-radius:22px; padding:20px 18px; text-align:center;
-    box-shadow:0 16px 40px -12px rgba(0,0,0,0.45);
-  }
-  .login-intro{ font-size:12.5px; color:var(--ink-soft); line-height:1.45; margin:0 0 4px; }
-  .loading-screen{
-    position:fixed; inset:0; z-index:100; overflow:hidden;
-    display:flex; align-items:center; justify-content:center;
-  }
+  .loading-screen{ position:fixed; inset:0; z-index:100; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .login-screen{ position:fixed; inset:0; z-index:100; overflow:auto; display:flex; align-items:center; justify-content:center; }
   .loading-bg{
     position:absolute; inset:0;
-    background:linear-gradient(180deg,#BFE3ED,#EFE6D2) center / cover no-repeat;
-    background-position:center 30%; background-size:cover;
+    background-color:#CFE3EA; background-image:linear-gradient(180deg,#BFE3ED,#EFE6D2);
+    background-position:center 30%; background-size:cover; background-repeat:no-repeat;
     animation:slowZoom 14s ease-in-out infinite alternate;
   }
   @keyframes slowZoom{ from{ transform:scale(1); } to{ transform:scale(1.08); } }
-  .loading-veil{
-    position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(59,46,34,0.05) 30%, rgba(59,46,34,0.55) 78%, rgba(59,46,34,0.78) 100%);
-  }
-  .loading-content{
-    position:relative; z-index:2; text-align:center; padding:0 24px; width:100%;
-    animation:loadRise 1s ease both;
-  }
+  .loading-veil{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(59,46,34,0.05) 30%, rgba(59,46,34,0.55) 78%, rgba(59,46,34,0.78) 100%); }
+  .loading-content, .login-content{ position:relative; z-index:2; text-align:center; padding:0 24px; width:100%; animation:loadRise 1s ease both; }
+  .login-content{ max-width:400px; padding:30px 20px; }
   @keyframes loadRise{ from{ opacity:0; transform:translateY(18px); } to{ opacity:1; transform:translateY(0); } }
-  .loading-eyebrow{
-    font-size:12px; letter-spacing:.16em; text-transform:uppercase; font-weight:800;
-    color:rgba(255,251,240,0.85); text-shadow:0 1px 8px rgba(0,0,0,0.4);
-  }
-  .loading-title{
-    font-family:'Fraunces', serif; font-size:44px; line-height:1.05; font-weight:700;
-    color:#FFFBF0; margin-top:8px; text-shadow:0 2px 16px rgba(0,0,0,0.45);
-  }
+  .loading-eyebrow{ font-size:12px; letter-spacing:.16em; text-transform:uppercase; font-weight:800; color:rgba(255,251,240,0.85); text-shadow:0 1px 8px rgba(0,0,0,0.4); }
+  .loading-title{ font-family:'Fraunces', serif; font-size:44px; line-height:1.05; font-weight:700; color:#FFFBF0; margin-top:8px; text-shadow:0 2px 16px rgba(0,0,0,0.45); }
   .loading-sprout{ font-size:26px; margin-top:16px; display:inline-block; animation:sproutBob 1.6s ease-in-out infinite; }
   @keyframes sproutBob{ 0%,100%{ transform:translateY(0) rotate(-4deg); } 50%{ transform:translateY(-6px) rotate(4deg); } }
-  .loading-sub{
-    margin-top:8px; font-size:14px; font-weight:700; color:rgba(255,251,240,0.9);
-    text-shadow:0 1px 8px rgba(0,0,0,0.4);
-  }
+  .loading-sub{ margin-top:8px; font-size:14px; font-weight:700; color:rgba(255,251,240,0.9); text-shadow:0 1px 8px rgba(0,0,0,0.4); }
   .loading-dots span{ animation:dotBlink 1.4s infinite; }
   .loading-dots span:nth-child(2){ animation-delay:.2s; }
   .loading-dots span:nth-child(3){ animation-delay:.4s; }
   @keyframes dotBlink{ 0%,60%,100%{ opacity:.25; } 30%{ opacity:1; } }
-  .subtitle{ margin-top:6px; font-size:12.5px; color:var(--ink-soft); line-height:1.4; }
+  .login-panel{ margin-top:20px; background:rgba(255,251,240,0.94); backdrop-filter:blur(8px); border-radius:22px; padding:20px 18px; box-shadow:0 16px 40px -12px rgba(0,0,0,0.45); }
+  .login-intro{ font-size:12.5px; color:var(--ink-soft); line-height:1.45; margin:0 0 4px; }
   .name-input{ width:100%; margin-top:12px; padding:14px 16px; border-radius:12px; border:2px solid #E4D9C4; background:#fff; font-family:'Nunito Sans', sans-serif; font-size:15px; color:var(--ink); outline:none; }
   .name-input:focus{ border-color:var(--bloom); }
   .login-note{ margin-top:12px; font-size:12.5px; color:var(--ink-soft); min-height:16px; }
   .login-note.error{ color:var(--bloom); font-weight:700; }
+  .primary-btn{ width:100%; margin-top:10px; padding:15px; border:none; border-radius:14px; background:var(--bloom); color:#fff; font-family:'Nunito Sans', sans-serif; font-size:15.5px; font-weight:800; cursor:pointer; box-shadow:0 8px 18px -8px rgba(193,80,46,0.55); }
+  .primary-btn:disabled{ background:#D8CBB2; box-shadow:none; cursor:not-allowed; color:#A99A80; }
 
   .day-chip{ display:block; width:fit-content; margin:6px auto 10px; background:#fff; border:1px solid #EAD9B8; border-radius:14px; padding:5px 12px; font-size:11px; font-weight:800; color:var(--plum); cursor:pointer; }
   .toast{ text-align:center; font-size:12px; font-weight:700; color:var(--soil-dark); min-height:16px; margin:2px 0 8px; }
 
-  /* ===== ФЕРМА ===== */
-  .garden-scene{ border-radius:22px; overflow:hidden; box-shadow:0 10px 30px -12px rgba(74,51,36,0.25); margin-bottom:12px; }
+  .garden-scene{ border-radius:22px; overflow:hidden; box-shadow:0 10px 30px -12px rgba(74,51,36,0.25); margin-bottom:12px; position:relative; }
   .sky{ position:relative; height:56px; background:linear-gradient(180deg,#BFE3ED,#EAF6EA); overflow:hidden; }
-  .sun{ position:absolute; top:10px; right:20px; width:28px; height:28px; border-radius:50%;
-        background:radial-gradient(circle at 35% 35%,#FFEBB0,var(--sun)); box-shadow:0 0 16px 5px rgba(232,184,75,0.45); animation:sunPulse 4s ease-in-out infinite; }
+  .sky.t-morning{ background:linear-gradient(180deg,#F7DFC4,#EAF2E4); }
+  .sky.t-day{ background:linear-gradient(180deg,#BFE3ED,#EAF6EA); }
+  .sky.t-evening{ background:linear-gradient(180deg,#E8B3A0,#F2E0CC); }
+  .sky.t-night{ background:linear-gradient(180deg,#3E4463,#6B6486); }
+  .sun{ position:absolute; top:10px; right:20px; width:28px; height:28px; border-radius:50%; background:radial-gradient(circle at 35% 35%,#FFEBB0,var(--sun)); box-shadow:0 0 16px 5px rgba(232,184,75,0.45); animation:sunPulse 4s ease-in-out infinite; }
   @keyframes sunPulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+  .moon{ position:absolute; top:10px; right:22px; font-size:22px; display:none; }
+  .sky.t-night .moon{ display:block; }
+  .sky.t-night .sun{ display:none; }
   .cloud{ position:absolute; top:14px; left:-18%; width:44px; height:14px; border-radius:20px; background:#fff; opacity:.85; animation:drift 24s linear infinite; }
   .cloud::before,.cloud::after{ content:""; position:absolute; background:#fff; border-radius:50%; }
   .cloud::before{ width:18px; height:18px; top:-8px; left:5px; }
   .cloud::after{ width:13px; height:13px; top:-5px; left:22px; }
   .cloud2{ top:28px; transform:scale(.65); opacity:.6; animation-duration:34s; animation-delay:-12s; }
   @keyframes drift{ from{left:-18%;} to{left:112%;} }
-  /* время суток */
-  .sky.t-morning{ background:linear-gradient(180deg,#F7DFC4,#EAF2E4); }
-  .sky.t-day{ background:linear-gradient(180deg,#BFE3ED,#EAF6EA); }
-  .sky.t-evening{ background:linear-gradient(180deg,#E8B3A0,#F2E0CC); }
-  .sky.t-night{ background:linear-gradient(180deg,#3E4463,#6B6486); }
-  .moon{ position:absolute; top:10px; right:22px; font-size:22px; display:none; }
-  .sky.t-night .moon{ display:block; }
-  .sky.t-night .sun{ display:none; }
-  .sky.t-evening .sun{ opacity:.75; }
   .star{ position:absolute; width:3px; height:3px; border-radius:50%; background:#FFF6D8; opacity:0; }
   .sky.t-night .star{ opacity:1; animation:twinkle 2.6s ease-in-out infinite; }
   @keyframes twinkle{ 0%,100%{opacity:.9;} 50%{opacity:.25;} }
   .firefly{ position:absolute; width:4px; height:4px; border-radius:50%; background:#F5E27A; box-shadow:0 0 6px 2px rgba(245,226,122,0.8); opacity:0; }
   .sky.t-evening .firefly, .sky.t-night .firefly{ opacity:1; animation:flyabout 6s ease-in-out infinite; }
   @keyframes flyabout{ 0%,100%{transform:translate(0,0);} 25%{transform:translate(10px,-8px);} 50%{transform:translate(-8px,4px);} 75%{transform:translate(6px,8px);} }
-  .sky.t-night ~ .ground, .garden-scene.night .ground{ filter:brightness(0.92); }
-  /* погода */
-  .garden-scene{ position:relative; }
-  .rain-layer{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:8; display:none; }
-  .rain-layer.on{ display:block; }
-  .rain-drop{ position:absolute; top:-14px; width:2px; height:11px; border-radius:2px; background:rgba(120,170,200,0.55); animation:rainfall linear infinite; }
-  @keyframes rainfall{ from{ transform:translateY(-14px); } to{ transform:translateY(320px); } }
-  .windy .plant-wrap{ animation:windSway 1.4s ease-in-out infinite; transform-origin:50% 95%; }
-  @keyframes windSway{ 0%,100%{ transform:rotate(-2.5deg); } 50%{ transform:rotate(2.5deg); } }
-  /* гербарий */
-  .collection-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
-  .coll-slot{ aspect-ratio:1; border-radius:12px; background:#fff; border:2px dashed #E4D9C4; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:22px; position:relative; }
-  .coll-slot.filled{ border-style:solid; border-color:var(--leaf); background:#F1F6EA; }
-  .coll-slot.rare{ border-color:var(--sun); background:#FBF3E4; }
-  .coll-slot .coll-name{ font-size:8px; font-weight:800; color:var(--ink-soft); margin-top:2px; }
-  .coll-img{ max-width:80%; max-height:64%; object-fit:contain; }
-  .coll-empty-note{ font-size:11px; color:var(--ink-soft); text-align:center; }
-  .postcard-canvas{ display:none; }
-  /* лавка */
-  .shop-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-  .shop-item{ text-align:center; background:#fff; border:2px solid #E4D9C4; border-radius:12px; padding:8px 4px; }
-  .shop-item.owned{ border-color:var(--leaf); background:#F1F6EA; }
-  .shop-img{ width:100%; height:46px; object-fit:contain; display:block; }
-  .shop-name{ font-size:9.5px; font-weight:800; color:var(--ink-soft); margin-top:3px; }
-  .shop-buy{ margin-top:5px; width:100%; border:none; border-radius:8px; padding:5px 2px; font-size:9.5px; font-weight:800; background:var(--sun); color:#5C4715; cursor:pointer; }
-  .shop-buy:disabled{ background:#E4D9C4; color:#A99A80; }
-  .shop-decor-item{
-    position:absolute; z-index:3; animation:decorPop .5s cubic-bezier(.34,1.56,.64,1);
-    cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none;
-    transform:translate(-50%,-100%);
-  }
-  .shop-decor-item img{ width:100%; height:auto; display:block; pointer-events:none; filter:drop-shadow(0 3px 5px rgba(40,50,30,0.4)); }
-  .shop-decor-item.dragging{ cursor:grabbing; z-index:9; animation:none; }
-  .shop-decor-item.dragging img{ filter:drop-shadow(0 8px 12px rgba(40,50,30,0.55)); }
-  .shop-decor-item.selected{ z-index:8; }
-  .shop-decor-item.selected img{ filter:drop-shadow(0 0 6px rgba(232,184,75,0.95)) drop-shadow(0 3px 5px rgba(40,50,30,0.4)); }
-  .decor-tools{ display:none; position:absolute; left:50%; bottom:-14px; transform:translateX(-50%); gap:5px; }
-  .shop-decor-item.selected .decor-tools{ display:flex; }
-  .decor-tool{
-    width:24px; height:24px; border-radius:50%; border:none; background:rgba(255,251,240,0.96);
-    box-shadow:0 2px 6px rgba(40,50,30,0.35); color:var(--soil-dark);
-    font-size:15px; font-weight:800; line-height:1; cursor:pointer; touch-action:manipulation;
-  }
-  .decor-tool:active{ transform:scale(0.9); }
-  @keyframes decorPop{ from{ transform:translate(-50%,-100%) scale(0); } to{ transform:translate(-50%,-100%) scale(1); } }
-
-  /* ===== ДЕСКТОП ===== */
-  @media (min-width: 900px){
-    body{ padding:36px 24px 80px; }
-    .app{ max-width:1000px; }
-    header{ margin-bottom:4px; }
-    h1{ font-size:26px; }
-    .greeting{ font-size:17px; }
-    .res-badge{ font-size:13px; padding:5px 13px; }
-    .day-chip{ font-size:12.5px; }
-
-    .game-content{
-      display:grid; grid-template-columns: 1fr 400px; gap:0 24px; align-items:start;
-    }
-    .game-content > header,
-    .game-content > .day-chip,
-    .game-content > .toast{ grid-column:1 / -1; }
-    .game-content > .garden-scene{ grid-column:1; grid-row:4; position:sticky; top:24px; margin-bottom:10px; }
-    .game-content > *:not(header):not(.day-chip):not(.toast):not(.garden-scene){ grid-column:2; grid-row:auto; }
-    .game-content > .finale-badge{ grid-column:1 / -1; }
-
-    .sky{ height:88px; }
-    .sun{ width:40px; height:40px; top:16px; right:32px; }
-    .ground{ min-height:340px; padding:20px 20px 34px; }
-    .plant-wrap{ max-width:150px; height:170px; }
-    .farm-plot::before{ bottom:60px; height:120px; }
-    .plant-fallback{ font-size:72px; }
-    .farm-progress{ height:6px; }
-    .level-bar-wrap{ padding:10px 20px; }
-    .shop-img{ height:64px; }
-    .shop-name{ font-size:11px; }
-    .shop-buy{ font-size:11px; padding:7px 2px; }
-    .fence{ height:20px; background-image:repeating-linear-gradient(90deg,#B08A5C 0 6px, transparent 6px 15px); }
-  }
   .decor-fly{ position:absolute; top:8px; font-size:16px; opacity:0; transition:opacity .6s ease; pointer-events:none; }
   .decor-fly.unlocked{ opacity:1; animation:flutter 5s ease-in-out infinite; }
   @keyframes flutter{ 0%,100%{transform:translate(0,0) rotate(0deg);} 25%{transform:translate(6px,-6px) rotate(6deg);} 50%{transform:translate(-4px,2px) rotate(-4deg);} 75%{transform:translate(4px,6px) rotate(3deg);} }
@@ -209,80 +96,85 @@
   .level-track{ height:7px; background:#EAD9B8; border-radius:6px; overflow:hidden; }
   .level-fill{ height:100%; background:linear-gradient(90deg,var(--sun),var(--bloom-light)); border-radius:6px; transition:width .5s ease; }
 
-  .ground{
-    background-color:#E5D0A8;
-    background-image:linear-gradient(180deg,#EFE1C5,#E5D0A8);
+  .field{
+    background-color:#E5D0A8; background-image:linear-gradient(180deg,#EFE1C5,#E5D0A8);
     background-position:center 60%; background-size:cover; background-repeat:no-repeat;
-    padding:12px 10px 26px; position:relative; min-height:230px;
-    display:flex; flex-direction:column; justify-content:flex-end;
+    position:relative; height:280px; overflow:hidden; touch-action:manipulation;
   }
-  .farm-row{ display:flex; justify-content:space-between; align-items:flex-end; gap:6px; position:relative; z-index:2; }
-  .farm-plot{ flex:1; text-align:center; min-width:0; position:relative; cursor:default; padding-bottom:2px; }
-  .farm-plot.actionable{ cursor:pointer; }
-  /* мягкая подложка-грядка: делает растение читаемым на фото газона */
-  .farm-plot::before{
-    content:''; position:absolute; left:50%; bottom:44px; transform:translateX(-50%);
-    width:88%; height:74px; border-radius:50%; pointer-events:none; z-index:0;
-    background:radial-gradient(ellipse at 50% 65%, rgba(255,252,240,0.72), rgba(255,252,240,0.32) 55%, rgba(255,252,240,0) 75%);
+  .field.planting{ cursor:crosshair; }
+  .field.planting::after{
+    content:'Коснись места, где посадить семечко';
+    position:absolute; left:50%; top:12px; transform:translateX(-50%);
+    background:rgba(255,251,240,0.95); color:var(--soil-dark); font-size:11px; font-weight:800;
+    padding:6px 12px; border-radius:14px; box-shadow:0 3px 10px rgba(20,30,15,0.3); z-index:20;
   }
-  .plant-wrap{ position:relative; z-index:1; width:100%; max-width:90px; height:96px; margin:0 auto; display:flex; align-items:flex-end; justify-content:center; }
-  .ground::before{
-    content:''; position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(246,241,228,0.12), rgba(246,241,228,0) 40%);
-    pointer-events:none;
+  .field-hud{ position:absolute; top:8px; left:0; right:0; display:flex; justify-content:space-between; padding:0 10px; z-index:6; pointer-events:none; }
+  .hud-pill{
+    display:flex; align-items:center; gap:4px; background:rgba(255,251,240,0.92);
+    border-radius:14px; padding:4px 9px; font-size:11.5px; font-weight:800; color:var(--soil-dark);
+    box-shadow:0 2px 6px rgba(20,30,15,0.25);
   }
-  .plot-badge{
-    display:none; position:absolute; top:-2px; left:50%; transform:translateX(-50%);
-    font-size:19px; z-index:4; animation:badgeBob 1.4s ease-in-out infinite; pointer-events:none;
-    filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  .rain-layer{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:8; display:none; }
+  .rain-layer.on{ display:block; }
+  .rain-drop{ position:absolute; top:-14px; width:2px; height:11px; border-radius:2px; background:rgba(120,170,200,0.55); animation:rainfall linear infinite; }
+  @keyframes rainfall{ from{ transform:translateY(-14px); } to{ transform:translateY(320px); } }
+
+  .plant{
+    position:absolute; transform:translate(-50%,-100%); z-index:3;
+    display:flex; flex-direction:column; align-items:center; cursor:pointer;
+    animation:decorPop .45s cubic-bezier(.34,1.56,.64,1);
+  }
+  .plant img{ display:block; width:100%; height:auto; filter:drop-shadow(0 2px 3px rgba(20,30,15,0.45)); pointer-events:none; }
+  .plant .plant-shadow{
+    position:absolute; left:50%; bottom:-4px; transform:translateX(-50%);
+    width:56%; height:11px; border-radius:50%; z-index:-1;
+    background:radial-gradient(ellipse at 50% 50%, rgba(28,40,20,0.4), rgba(28,40,20,0) 75%);
+  }
+  .plant.ready img{ animation:readyBob 1.5s ease-in-out infinite; }
+  @keyframes readyBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
+  .plant-mark{
+    position:absolute; top:-16px; left:50%; transform:translateX(-50%);
+    font-size:17px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.35));
+    animation:badgeBob 1.4s ease-in-out infinite;
   }
   @keyframes badgeBob{ 0%,100%{ transform:translate(-50%,0); } 50%{ transform:translate(-50%,-5px); } }
-  .plot-bar{
-    height:6px; width:70%; margin:4px auto 0; border-radius:5px; overflow:hidden;
-    background:rgba(255,255,255,0.55); box-shadow:0 1px 3px rgba(40,50,30,0.2);
+  .windy .plant img{ animation:windSway 1.4s ease-in-out infinite; transform-origin:50% 95%; }
+  @keyframes windSway{ 0%,100%{ transform:rotate(-2.5deg); } 50%{ transform:rotate(2.5deg); } }
+  .weed-mark{ position:absolute; bottom:-2px; left:-8px; font-size:15px; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+
+  .decor-item{ position:absolute; transform:translate(-50%,-100%); z-index:2; cursor:grab; touch-action:none; user-select:none; }
+  .decor-item img{ width:100%; height:auto; display:block; pointer-events:none; filter:drop-shadow(0 3px 5px rgba(20,30,15,0.42)); }
+  .decor-item.dragging{ cursor:grabbing; z-index:9; }
+  .decor-item.selected img{ filter:drop-shadow(0 0 6px rgba(232,184,75,0.95)) drop-shadow(0 3px 5px rgba(20,30,15,0.4)); }
+  .decor-tools{ display:none; position:absolute; left:50%; bottom:-14px; transform:translateX(-50%); gap:5px; }
+  .decor-item.selected .decor-tools{ display:flex; }
+  .decor-tool{ width:24px; height:24px; border-radius:50%; border:none; background:rgba(255,251,240,0.96); box-shadow:0 2px 6px rgba(40,50,30,0.35); color:var(--soil-dark); font-size:15px; font-weight:800; line-height:1; cursor:pointer; }
+  @keyframes decorPop{ from{ transform:translate(-50%,-100%) scale(0); } to{ transform:translate(-50%,-100%) scale(1); } }
+
+  .field-actions{ display:flex; gap:8px; margin-bottom:12px; }
+  .field-btn{
+    flex:1; border:none; border-radius:12px; padding:11px 6px; font-family:'Nunito Sans',sans-serif;
+    font-size:12px; font-weight:800; cursor:pointer; background:var(--card); color:var(--soil-dark);
+    box-shadow:0 6px 16px -10px rgba(74,51,36,0.3); border:2px solid transparent;
   }
-  .plot-bar-fill{ height:100%; border-radius:5px; transition:width .5s ease; }
-  .plot-bar-fill.steps{ background:#5E8F7C; }
-  .plot-bar-fill.training{ background:var(--sun); }
-  .plot-bar-fill.meal{ background:var(--bloom); }
-  .fert-mini{
-    position:absolute; right:14%; bottom:34px; width:26px; height:26px; border-radius:50%;
-    border:none; background:rgba(255,251,240,0.96); box-shadow:0 2px 6px rgba(40,50,30,0.35);
-    font-size:13px; cursor:pointer; display:none; align-items:center; justify-content:center; z-index:5;
-  }
-  .fert-mini:active{ transform:scale(0.9); }
-  .plant-img{ filter:drop-shadow(0 4px 6px rgba(20,30,15,0.55)) drop-shadow(0 0 3px rgba(255,255,255,0.55)); }
+  .field-btn.active{ border-color:var(--bloom); background:#FBF3E4; }
+  .field-btn:disabled{ opacity:.45; cursor:not-allowed; }
 
-  .farm-plot.bonus-ready .plant-img{ filter:drop-shadow(0 0 8px rgba(232,184,75,0.85)); }
-  .plant-img{ max-width:100%; max-height:100%; display:block; transition:transform .3s cubic-bezier(.34,1.56,.64,1), filter .3s ease; transform-origin:50% 95%; }
-  .plant-fallback{ display:none; font-size:44px; }
-  .plant-wrap.img-failed .plant-img{ display:none; }
-  .plant-wrap.img-failed .plant-fallback{ display:block; }
-  .farm-progress{ height:5px; background:rgba(0,0,0,0.1); border-radius:5px; margin-top:5px; overflow:hidden; }
-  .farm-progress-fill{ height:100%; border-radius:5px; transition:width .5s ease; }
-  .farm-progress-fill.steps{ background:#5E8F7C; } .farm-progress-fill.training{ background:var(--sun); } .farm-progress-fill.meal{ background:var(--bloom); }
-
-  .fence{ position:absolute; left:6px; right:6px; bottom:0; height:14px; background-image:repeating-linear-gradient(90deg,#B08A5C 0 4px, transparent 4px 10px); opacity:0; transition:opacity .5s ease; z-index:1; }
-  .fence.unlocked{ opacity:1; }
-
-  .particle{ position:absolute; left:50%; top:35%; font-size:13px; pointer-events:none; animation:pfly 1s ease-out forwards; z-index:6; }
-  @keyframes pfly{ 0%{transform:translate(-50%,-50%) scale(.6); opacity:1;} 100%{transform:translate(var(--dx,-50%),-46px) scale(1.15); opacity:0;} }
-
-  /* ===== ЗАДАНИЯ ДНЯ (источник ресурсов) ===== */
   .card{ background:var(--card); border-radius:18px; padding:14px 16px; margin-bottom:12px; box-shadow:0 8px 20px -12px rgba(74,51,36,0.28); }
-  .tasks-title{ font-size:13.5px; font-weight:800; color:var(--soil-dark); margin-bottom:10px; }
+  .card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px; }
+  .card-title{ font-size:13.5px; font-weight:800; color:var(--soil-dark); }
+  .card-badge{ background:#FBF3E4; border:1px solid #EAD9B8; border-radius:20px; padding:3px 10px; font-size:11.5px; font-weight:800; color:#8A6220; white-space:nowrap; }
+
   .task-row{ display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #EFE6D2; }
   .task-row:last-child{ border-bottom:none; }
   .task-icon{ font-size:22px; width:30px; text-align:center; flex-shrink:0; }
   .task-info{ flex:1; min-width:0; }
   .task-name{ font-size:12px; font-weight:800; color:var(--soil-dark); }
-  .task-sub{ font-size:10.5px; color:var(--ink-soft); margin-top:1px; }
   .task-pips{ display:flex; gap:3px; margin-top:4px; }
   .pip{ width:10px; height:10px; border-radius:50%; background:#E4D9C4; }
   .pip.full{ background:var(--leaf); }
   .task-btn{ border:none; border-radius:9px; padding:8px 10px; font-size:11px; font-weight:800; cursor:pointer; background:var(--bloom); color:#fff; white-space:nowrap; flex-shrink:0; }
   .task-btn:disabled{ background:#E4D9C4; color:#A99A80; }
-  .task-btn:active{ transform:scale(.95); }
 
   .extra-card{ background:#fff; border:2px dashed var(--sun); border-radius:16px; padding:12px 14px; margin-bottom:12px; }
   .extra-title{ font-size:12.5px; font-weight:800; color:var(--soil-dark); }
@@ -290,69 +182,93 @@
   .extra-btn{ margin-top:8px; width:100%; border:none; border-radius:10px; padding:9px; font-size:12px; font-weight:800; background:var(--sun); color:#5C4715; cursor:pointer; }
   .extra-btn:disabled{ background:#E4D9C4; color:#A99A80; }
 
-  /* ===== РЕЙТИНГ + ВИЗИТЫ ===== */
-  .lb-title{ font-size:13.5px; font-weight:800; color:var(--soil-dark); margin-bottom:8px; }
+  .shop-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .shop-item{ text-align:center; background:#fff; border:2px solid #E4D9C4; border-radius:12px; padding:8px 4px; }
+  .shop-item.owned{ border-color:var(--leaf); background:#F1F6EA; }
+  .shop-img{ width:100%; height:46px; object-fit:contain; display:block; }
+  .shop-name{ font-size:9.5px; font-weight:800; color:var(--ink-soft); margin-top:3px; }
+  .shop-buy{ margin-top:5px; width:100%; border:none; border-radius:8px; padding:5px 2px; font-size:9.5px; font-weight:800; background:var(--sun); color:#5C4715; cursor:pointer; }
+  .shop-buy:disabled{ background:#E4D9C4; color:#A99A80; }
+
   .lb-row{ display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid #EFE6D2; cursor:pointer; }
-  .lb-gap{ text-align:center; color:#C4B79C; font-size:12px; font-weight:800; letter-spacing:2px; padding:2px 0; }
-  .lb-more{
-    width:100%; margin-top:8px; border:none; background:none; padding:6px;
-    font-family:'Nunito Sans',sans-serif; font-size:11.5px; font-weight:800;
-    color:var(--plum); text-decoration:underline; cursor:pointer;
-  }
   .lb-row:last-child{ border-bottom:none; }
   .lb-row.me{ background:#FBF3E4; border-radius:10px; padding-left:8px; cursor:default; }
   .lb-rank{ width:18px; font-weight:800; color:var(--plum); font-size:12.5px; }
-  .lb-name{ flex:1; min-width:0; font-weight:700; font-size:12.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .lb-score{ font-weight:800; color:var(--bloom); font-size:12.5px; width:34px; text-align:right; }
+  .lb-name{ flex:1; min-width:0; font-weight:700; font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lb-score{ font-weight:800; color:var(--bloom); font-size:12.5px; }
+  .lb-gap{ text-align:center; color:#C4B79C; font-size:12px; font-weight:800; letter-spacing:2px; }
+  .lb-more{ width:100%; margin-top:8px; border:none; background:none; padding:6px; font-family:'Nunito Sans',sans-serif; font-size:11.5px; font-weight:800; color:var(--plum); text-decoration:underline; cursor:pointer; }
 
-  .visit-overlay{ position:fixed; inset:0; background:rgba(59,46,34,0.5); display:none; align-items:center; justify-content:center; z-index:50; padding:20px; }
-  .visit-overlay.open{ display:flex; }
-  .visit-modal{ background:var(--card); border-radius:22px; max-width:400px; width:100%; overflow:hidden; box-shadow:0 20px 50px -12px rgba(0,0,0,0.4); animation:fadeUp .3s ease; }
-  @keyframes fadeUp{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
-  .visit-sky{ position:relative; height:48px; background:linear-gradient(180deg,#D8C9E8,#F0E9F5); overflow:hidden; }
-  .visit-ground{
-    background-color:#E5D0A8; background-image:linear-gradient(180deg,#EFE1C5,#E5D0A8);
-    background-repeat:no-repeat; padding:12px 10px 16px; position:relative; min-height:190px;
-    display:flex; flex-direction:column; justify-content:flex-end;
-  }
-  .visit-decor-item{ position:absolute; transform:translate(-50%,-100%); z-index:1; }
-  .visit-decor-item img{ width:100%; height:auto; display:block; filter:drop-shadow(0 3px 5px rgba(20,30,15,0.45)); }
-  .visit-header{ padding:12px 16px 4px; text-align:center; }
-  .visit-name{ font-family:'Fraunces',serif; font-size:16px; font-weight:700; color:var(--soil-dark); }
-  .visit-sub{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
-  .visit-row{ display:flex; justify-content:space-around; align-items:flex-end; position:relative; z-index:2; }
-  .visit-plot{ width:31%; position:relative; text-align:center; }
-  .visit-plot::before{
-    content:''; position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
-    width:88%; height:70px; border-radius:50%; pointer-events:none; z-index:0;
-    background:radial-gradient(ellipse at 50% 65%, rgba(255,252,240,0.7), rgba(255,252,240,0.3) 55%, rgba(255,252,240,0) 75%);
-  }
-  .visit-plot .plant-wrap{ position:relative; z-index:1; height:96px; }
-  .visit-actions{ display:flex; gap:8px; padding:12px 16px 16px; }
-  .visit-cheer{ flex:1; border:none; border-radius:11px; padding:11px; font-size:12px; font-weight:800; background:var(--bloom); color:#fff; cursor:pointer; }
-  .visit-close{ flex:1; border:2px solid #E4D9C4; border-radius:11px; padding:11px; font-size:12px; font-weight:800; background:#fff; color:var(--ink-soft); cursor:pointer; }
+  .collection-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .coll-slot{ aspect-ratio:1; border-radius:12px; background:#fff; border:2px dashed #E4D9C4; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:22px; }
+  .coll-slot.filled{ border-style:solid; border-color:var(--leaf); background:#F1F6EA; }
+  .coll-slot.rare{ border-color:var(--sun); background:#FBF3E4; }
+  .coll-img{ max-width:80%; max-height:64%; object-fit:contain; }
+  .coll-name{ font-size:8px; font-weight:800; color:var(--ink-soft); margin-top:2px; }
+  .coll-empty-note{ font-size:11px; color:var(--ink-soft); text-align:center; }
 
   .finale-badge{
-    display:flex; align-items:center; justify-content:center; gap:6px;
-    width:fit-content; margin:0 auto 12px; padding:8px 16px; border-radius:20px;
-    border:2px solid var(--sun); background:#FBF3E4; color:#8A6220;
-    font-family:'Nunito Sans',sans-serif; font-size:12.5px; font-weight:800; cursor:pointer;
-    box-shadow:0 4px 12px -6px rgba(232,184,75,0.8);
-    animation:badgePulse 2.4s ease-in-out infinite;
+    display:flex; align-items:center; justify-content:center; gap:6px; width:fit-content;
+    margin:0 auto 12px; padding:8px 16px; border-radius:20px; border:2px solid var(--sun);
+    background:#FBF3E4; color:#8A6220; font-family:'Nunito Sans',sans-serif; font-size:12.5px;
+    font-weight:800; cursor:pointer; animation:badgePulse 2.4s ease-in-out infinite;
   }
   @keyframes badgePulse{ 0%,100%{ box-shadow:0 4px 12px -6px rgba(232,184,75,0.6); } 50%{ box-shadow:0 4px 18px -4px rgba(232,184,75,1); } }
-  .finale-badge:active{ transform:scale(.96); }
-  .finale-modal{ padding:0; }
-  .finale-head{ padding:22px 18px 18px; text-align:center; }
-  .finale-title{ font-family:'Fraunces',serif; font-size:20px; font-weight:700; color:var(--soil-dark); }
-  .finale-text{ font-size:13px; color:var(--ink-soft); line-height:1.5; margin:8px 0 4px; }
+
+  .overlay{ position:fixed; inset:0; background:rgba(59,46,34,0.55); display:none; align-items:center; justify-content:center; z-index:60; padding:18px; }
+  .overlay.open{ display:flex; }
+  .modal{ background:var(--card); border-radius:22px; max-width:400px; width:100%; overflow:hidden; box-shadow:0 20px 50px -12px rgba(0,0,0,0.4); animation:fadeUp .3s ease; max-height:90vh; overflow-y:auto; }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+  .modal-pad{ padding:22px 18px 18px; text-align:center; }
+  .modal-title{ font-family:'Fraunces',serif; font-size:19px; font-weight:700; color:var(--soil-dark); }
+  .modal-text{ font-size:13px; color:var(--ink-soft); line-height:1.5; margin:8px 0 4px; }
+  .ghost-btn{ width:100%; margin-top:8px; border:2px solid #E4D9C4; border-radius:12px; padding:11px; font-family:'Nunito Sans',sans-serif; font-size:12.5px; font-weight:800; background:#fff; color:var(--ink-soft); cursor:pointer; }
+
+  .intro-steps{ text-align:left; margin:14px 0 4px; }
+  .intro-step{ display:flex; gap:11px; align-items:flex-start; padding:9px 0; border-bottom:1px solid #EFE6D2; }
+  .intro-step:last-child{ border-bottom:none; }
+  .intro-emoji{ font-size:22px; width:28px; text-align:center; flex-shrink:0; }
+  .intro-body b{ display:block; font-size:12.5px; color:var(--soil-dark); }
+  .intro-body span{ font-size:11.5px; color:var(--ink-soft); line-height:1.4; }
+
+  .hold-circle{
+    width:120px; height:120px; border-radius:50%; margin:14px auto 6px; position:relative;
+    display:flex; align-items:center; justify-content:center; font-size:40px;
+    background:conic-gradient(var(--leaf) calc(var(--p,0)*1%), #E4D9C4 0);
+    cursor:pointer; user-select:none; touch-action:none;
+  }
+  .hold-circle::after{ content:''; position:absolute; inset:8px; border-radius:50%; background:#fff; }
+  .hold-circle span{ position:relative; z-index:1; }
+  .hold-label{ font-size:12px; font-weight:800; color:var(--ink-soft); min-height:16px; }
+  .choice-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:12px 0 4px; }
+  .choice-btn{ background:#fff; border:2px solid #E4D9C4; border-radius:12px; padding:12px 6px; font-family:'Nunito Sans',sans-serif; font-size:11.5px; font-weight:800; color:var(--soil-dark); cursor:pointer; }
+  .choice-btn.picked{ border-color:var(--bloom); background:#FBF3E4; }
+  .choice-emoji{ display:block; font-size:24px; margin-bottom:4px; }
+
+  .visit-sky{ position:relative; height:44px; background:linear-gradient(180deg,#BFE3ED,#EAF6EA); }
+  .visit-field{
+    background-color:#E5D0A8; background-image:linear-gradient(180deg,#EFE1C5,#E5D0A8);
+    background-position:center 60%; background-size:cover; background-repeat:no-repeat;
+    position:relative; height:220px; overflow:hidden;
+  }
   .stat-row{ display:flex; justify-content:center; gap:12px; margin:14px 0 10px; flex-wrap:wrap; }
   .stat{ text-align:center; }
   .stat b{ display:block; font-family:'Fraunces',serif; font-size:19px; color:var(--bloom); }
-  .stat span{ font-size:9.5px; color:var(--ink-soft); font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
-  .primary-btn{ width:100%; margin-top:10px; padding:15px; border:none; border-radius:14px; background:var(--bloom); color:#fff; font-family:'Nunito Sans', sans-serif; font-size:15.5px; font-weight:800; cursor:pointer; box-shadow:0 8px 18px -8px rgba(193,80,46,0.55); }
-  .primary-btn:disabled{ background:#D8CBB2; box-shadow:none; cursor:not-allowed; color:#A99A80; }
-  .weeds-note{ text-align:center; font-size:11.5px; color:#8B9574; font-weight:700; margin-top:2px; min-height:14px; }
+  .stat span{ font-size:9.5px; color:var(--ink-soft); font-weight:700; text-transform:uppercase; }
+  .postcard-canvas{ display:none; }
+
+  @media (min-width: 900px){
+    body{ padding:36px 24px 80px; }
+    .app{ max-width:1000px; }
+    .game-content{ display:grid; grid-template-columns: 1fr 400px; gap:0 24px; align-items:start; }
+    .game-content > header, .game-content > .day-chip, .game-content > .toast{ grid-column:1 / -1; }
+    .game-content > .garden-scene{ grid-column:1; grid-row:4; position:sticky; top:24px; }
+    .game-content > .field-actions{ grid-column:1; grid-row:5; }
+    .game-content > *:not(header):not(.day-chip):not(.toast):not(.garden-scene):not(.field-actions){ grid-column:2; grid-row:auto; }
+    .game-content > .finale-badge{ grid-column:1 / -1; }
+    .field{ height:400px; }
+    .sky{ height:80px; }
+  }
 </style>
 </head>
 <body>
@@ -376,7 +292,7 @@
       <div class="loading-eyebrow">Летний лагерь · Шагай Дома</div>
       <div class="loading-title" style="font-size:36px;">Грядка<br>стройности</div>
       <div class="login-panel">
-        <p class="login-intro">Введи имя и почту, чтобы посадить свою грядку. Прогресс сохранится — можно возвращаться в любое время.</p>
+        <p class="login-intro">Введи имя и почту, чтобы посадить свой сад. Прогресс сохранится — можно возвращаться в любое время.</p>
         <input type="text" id="nameInput" class="name-input" placeholder="Твоё имя" autocomplete="off">
         <input type="email" id="emailInput" class="name-input" placeholder="Электронная почта" autocomplete="off">
         <button class="primary-btn" id="enterBtn">Войти в сад →</button>
@@ -390,13 +306,6 @@
     <header>
       <div class="eyebrow">Летний лагерь · Шагай Дома</div>
       <p class="greeting" id="greetingLine"></p>
-      <div class="header-meta">
-        <span class="res-badge" id="waterBadge">💧 0</span>
-        <span class="res-badge" id="fertBadge">🌿 0</span>
-        <span class="res-badge" id="coinsBadge">🪙 0</span>
-        <span class="res-badge" id="bonusBadge">🌟 0</span>
-        <span class="res-badge" id="streakBadge">🔥 0</span>
-      </div>
     </header>
 
     <div class="day-chip" id="dayChip">День 1 / 7</div>
@@ -417,67 +326,74 @@
         <div class="decor-fly" id="decorButterfly" style="left:16%;">🦋</div>
         <div class="decor-fly" id="decorLadybug" style="left:70%;">🐞</div>
       </div>
-      <div class="rain-layer" id="rainLayer"></div>
       <div class="level-bar-wrap">
         <div class="level-line"><span id="levelLabel">Уровень сада: 1</span><span id="levelXp">0 / 50 XP</span></div>
         <div class="level-track"><div class="level-fill" id="levelFill" style="width:0%"></div></div>
       </div>
-      <div class="ground">
-        <div class="fence" id="decorFence"></div>
-        <div id="shopDecorLayer"></div>
-        <div class="farm-row" id="farmRow"></div>
+      <div class="field" id="field">
+        <div class="field-hud">
+          <span class="hud-pill" id="seedPill">🌰 0</span>
+          <span class="hud-pill" id="waterPill">💧 0</span>
+        </div>
+        <div class="rain-layer" id="rainLayer"></div>
+        <div id="decorLayer"></div>
+        <div id="plantLayer"></div>
       </div>
     </div>
 
+    <div class="field-actions">
+      <button class="field-btn" id="plantModeBtn">🌰 Посадить</button>
+      <button class="field-btn" id="helpBtn">❔ Как играть</button>
+    </div>
+
     <div class="card">
-      <div class="tasks-title">Забота о себе → ресурсы сада</div>
+      <div class="card-head">
+        <span class="card-title">Забота о себе → ресурсы</span>
+        <span class="card-badge" id="streakBadge">🔥 0</span>
+      </div>
       <div class="task-row">
         <div class="task-icon">🚶‍♀️</div>
-        <div class="task-info">
-          <div class="task-name">Ещё 2 500 шагов</div>
-          <div class="task-pips" id="pips-steps"></div>
-        </div>
-        <button class="task-btn" id="task-steps">+1 💧</button>
+        <div class="task-info"><div class="task-name">Ещё 2 500 шагов</div><div class="task-pips" id="pips-steps"></div></div>
+        <button class="task-btn" id="task-steps">Отметить</button>
       </div>
       <div class="task-row">
         <div class="task-icon">💪</div>
-        <div class="task-info">
-          <div class="task-name">Тренировка</div>
-          <div class="task-pips" id="pips-training"></div>
-        </div>
-        <button class="task-btn" id="task-training">+2 💧</button>
+        <div class="task-info"><div class="task-name">Тренировка</div><div class="task-pips" id="pips-training"></div></div>
+        <button class="task-btn" id="task-training">Отметить</button>
       </div>
       <div class="task-row">
         <div class="task-icon">🍲</div>
-        <div class="task-info">
-          <div class="task-name">Блюдо по меню</div>
-          <div class="task-pips" id="pips-meal"></div>
-        </div>
-        <button class="task-btn" id="task-meal">+1 🌿</button>
+        <div class="task-info"><div class="task-name">Блюдо по меню</div><div class="task-pips" id="pips-meal"></div></div>
+        <button class="task-btn" id="task-meal">Отметить</button>
       </div>
     </div>
 
     <div id="extraZone"></div>
 
     <div class="card">
-      <div class="tasks-title">🎯 Задания сада на сегодня</div>
+      <div class="card-head"><span class="card-title">🎯 Задания сада на сегодня</span></div>
       <div id="questsZone"></div>
     </div>
 
     <div class="card">
-      <div class="tasks-title">🛒 Лавка декора</div>
+      <div class="card-head">
+        <span class="card-title">🛒 Лавка декора</span>
+        <span class="card-badge" id="coinsBadge">🪙 0</span>
+      </div>
       <div class="shop-grid" id="shopZone"></div>
     </div>
-    <div class="weeds-note" id="weedsNote"></div>
 
     <div class="card">
-      <div class="lb-title">🏆 Сад лагеря</div>
+      <div class="card-head"><span class="card-title">🏆 Сад лагеря</span></div>
       <div id="leaderboardList">Загружаю…</div>
     </div>
 
     <div class="card">
-      <div class="lb-title">📖 Мой гербарий</div>
-      <div id="collectionZone"><div class="coll-empty-note">Вырасти цветок до полного расцвета — и он попадёт сюда. Редкие расцветы дают особые цветы!</div></div>
+      <div class="card-head">
+        <span class="card-title">📖 Мой гербарий</span>
+        <span class="card-badge" id="bonusBadge">🌟 0</span>
+      </div>
+      <div id="collectionZone"></div>
     </div>
 
     <div style="text-align:center; margin-bottom:8px;">
@@ -488,38 +404,49 @@
 
   </div>
 
-  <!-- итоги недели -->
-  <div class="visit-overlay" id="finaleOverlay">
-    <div class="visit-modal finale-modal">
-      <div class="finale-head">
-        <div class="finale-title">🌻 Твой сад расцвёл</div>
-        <p class="finale-text">Неделя лагеря позади — а сад продолжает расти. Забери открытку на память!</p>
-        <div class="stat-row" id="statRow"></div>
-        <button class="primary-btn" id="postcardBtn">🖼️ Скачать открытку сада</button>
-        <button class="primary-btn" id="shareBtn" style="margin-top:8px;">Поделиться результатом</button>
-        <button class="visit-close" id="finaleCloseBtn" style="margin-top:8px; width:100%;">Вернуться в сад</button>
+  <div class="overlay" id="introOverlay">
+    <div class="modal"><div class="modal-pad">
+      <div class="modal-title">🌱 Как играть</div>
+      <p class="modal-text">Твоя реальная активность превращается в ресурсы, а ресурсы — в цветущий сад.</p>
+      <div class="intro-steps">
+        <div class="intro-step"><div class="intro-emoji">🚶‍♀️</div><div class="intro-body"><b>Отмечай активность</b><span>Шаги, тренировки и блюда по меню дают воду 💧, удобрения 🌿 и семена 🌰.</span></div></div>
+        <div class="intro-step"><div class="intro-emoji">🌰</div><div class="intro-body"><b>Сажай где хочешь</b><span>Нажми «Посадить» и коснись любого места на поле — там появится росток.</span></div></div>
+        <div class="intro-step"><div class="intro-emoji">💧</div><div class="intro-body"><b>Поливай и полоть</b><span>Тапни по растению, чтобы полить. Появились сорняки 🌿 — сначала прополи, рост стоит.</span></div></div>
+        <div class="intro-step"><div class="intro-emoji">🧺</div><div class="intro-body"><b>Собирай урожай</b><span>Расцветший цветок дай монеты 🪙 и попадает в гербарий. На монеты купи украшения.</span></div></div>
       </div>
-      <canvas id="postcardCanvas" class="postcard-canvas" width="1080" height="1350"></canvas>
+      <button class="primary-btn" id="introCloseBtn">Понятно, в сад!</button>
+    </div></div>
+  </div>
+
+  <div class="overlay" id="taskOverlay">
+    <div class="modal"><div class="modal-pad" id="taskModalBody"></div></div>
+  </div>
+
+  <div class="overlay" id="visitOverlay">
+    <div class="modal">
+      <div class="modal-pad" style="padding-bottom:8px;">
+        <div class="modal-title" id="visitName">Сад</div>
+        <div class="modal-text" id="visitSub" style="margin:4px 0 0;"></div>
+      </div>
+      <div class="visit-sky"></div>
+      <div class="visit-field" id="visitField"></div>
+      <div class="modal-pad" style="padding-top:14px;">
+        <button class="primary-btn" id="visitCheerBtn">Помахать 👋</button>
+        <button class="ghost-btn" id="visitCloseBtn">Закрыть</button>
+      </div>
     </div>
   </div>
 
-  <!-- визит в чужой сад -->
-  <div class="visit-overlay" id="visitOverlay">
-    <div class="visit-modal">
-      <div class="visit-header">
-        <div class="visit-name" id="visitName">Сад</div>
-        <div class="visit-sub" id="visitSub"></div>
-      </div>
-      <div class="visit-sky"></div>
-      <div class="visit-ground" id="visitGround">
-        <div id="visitDecor"></div>
-        <div class="visit-row" id="visitRow"></div>
-      </div>
-      <div class="visit-actions">
-        <button class="visit-cheer" id="visitCheerBtn">Помахать 👋</button>
-        <button class="visit-close" id="visitCloseBtn">Закрыть</button>
-      </div>
-    </div>
+  <div class="overlay" id="finaleOverlay">
+    <div class="modal"><div class="modal-pad">
+      <div class="modal-title">🌻 Твой сад расцвёл</div>
+      <p class="modal-text">Неделя лагеря позади — а сад продолжает расти. Забери открытку на память!</p>
+      <div class="stat-row" id="statRow"></div>
+      <button class="primary-btn" id="postcardBtn">🖼️ Скачать открытку</button>
+      <button class="primary-btn" id="shareBtn" style="margin-top:8px;">Поделиться результатом</button>
+      <button class="ghost-btn" id="finaleCloseBtn">Вернуться в сад</button>
+      <canvas id="postcardCanvas" class="postcard-canvas" width="1080" height="1350"></canvas>
+    </div></div>
   </div>
 
 </div>
@@ -547,36 +474,32 @@ const auth = getAuth(app);
 const PROGRESS_COLLECTION = 'garden_progress';
 const LEADERBOARD_COLLECTION = 'garden_leaderboard';
 
-const PLOT_KEYS = ['steps','training','meal'];
-
-// ===== КАРТИНКИ РАСТЕНИЙ =====
-// Файлы должны лежать рядом с html (или укажи подпапку в ASSET_PATH, например 'img/').
-// seed.png — общее семечко для всех. Дальше 4 стадии роста,
-// в каждой стадии несколько вариантов — растение выбирает случайный.
 const ASSET_PATH = '';
 const SEED_IMG = 'seed.png';
 const STAGE_VARIANTS = [
-  ['seed1.png','seed11.png','seed21.png','seed31.png'],   // стадия 1
-  ['seed2.png','seed12.png','seed22.png','seed32.png'],   // стадия 2
-  ['seed3.png','seed13.png','seed23.png','seed33.png'],   // стадия 3
-  ['seed4.png','seed14.png','seed24.png','seed34.png']    // стадия 4 — цветение
+  ['seed1.png','seed11.png','seed21.png','seed31.png'],
+  ['seed2.png','seed12.png','seed22.png','seed32.png'],
+  ['seed3.png','seed13.png','seed23.png','seed33.png'],
+  ['seed4.png','seed14.png','seed24.png','seed34.png']
 ];
-// Запасные эмодзи, если какая-то картинка не загрузится
-const FALLBACK_EMOJI = ['🌰','🌱','🌿','🌷','🌸'];
-const PLOT_META = {
-  steps:    { title:'Шаги 💧',  stem:'#4F6B34', leaf:'#5E8F7C', bud:'#3F6B57', petal1:'#8FC6B4', petal2:'#5E8F7C', center:'#F7E7B0' },
-  training: { title:'Сила ☀️',   stem:'#4F6B34', leaf:'#6B8F47', bud:'#B4831E', petal1:'#E8B84B', petal2:'#E0895F', center:'#8A5A2A' },
-  meal:     { title:'Вкус 🍽️',  stem:'#4F6B34', leaf:'#4F6B34', bud:'#8B3D50', petal1:'#C1502E', petal2:'#8B4A6B', center:'#F3D9C4' }
-};
-// дневные лимиты реальных действий
+const FINAL_FLOWERS = [
+  { file:'seed4.png',  name:'Белый цветок' },
+  { file:'seed14.png', name:'Кремовая роза' },
+  { file:'seed24.png', name:'Алая роза' },
+  { file:'seed34.png', name:'Розовая лилия' }
+];
+
+const MAX_PLANTS = 6;
+const MAX_LEVEL = 7;
+const WEED_CHANCE_PER_MIN = 0.012;
+
 const TASK_LIMITS = { steps:4, training:2, meal:3 };
-// награды за реальные действия
 const TASK_REWARDS = {
-  steps:    { water:1, fert:0 },
-  training: { water:2, fert:1 },
-  meal:     { water:1, fert:1 }
+  steps:    { water:1, fert:0, seed:0 },
+  training: { water:2, fert:1, seed:1 },
+  meal:     { water:1, fert:1, seed:0 }
 };
-// темы дней — модификаторы той же механики
+
 const DAY_CONFIG = [
   { title:'Знакомство',        desc:'Обычный день — знакомимся с садом.', growMul:1,   bonusMinMs:45*60000, bonusMaxMs:150*60000, sparkleChance:0.3, special:null, weather:null },
   { title:'Тёплый дождь',      desc:'Полив сегодня действует сильнее.',    growMul:1.3, bonusMinMs:30*60000, bonusMaxMs:90*60000,  sparkleChance:0.3, special:null, weather:'rain' },
@@ -587,17 +510,6 @@ const DAY_CONFIG = [
   { title:'Большой расцвет',   desc:'Финальный день — рост почти вдвое сильнее.', growMul:1.9, bonusMinMs:15*60000, bonusMaxMs:40*60000, sparkleChance:0.6, special:null, weather:null },
 ];
 
-// Гербарий: коллекционируются финальные цветы (4-я стадия).
-// Названия можно переименовать под реальные цветы на картинках.
-const FINAL_FLOWERS = [
-  { file:'seed4.png',  name:'Белый цветок' },
-  { file:'seed14.png', name:'Кремовая роза' },
-  { file:'seed24.png', name:'Алая роза' },
-  { file:'seed34.png', name:'Розовая лилия' }
-];
-
-// Лавка декора: покупается за монеты, ставится в саду, перетаскивается и масштабируется
-// defX/defY — позиция по умолчанию в % от поля, w — базовая ширина в % от поля
 const SHOP_ITEMS = [
   { id:'pot',      img:'decor-pot.png',       name:'Кашпо',      price:8,  defX:12, defY:88, w:13 },
   { id:'bench',    img:'decor-bench.png',     name:'Лавочка',    price:12, defX:34, defY:92, w:15 },
@@ -607,15 +519,22 @@ const SHOP_ITEMS = [
 ];
 const DECOR_MIN_SCALE = 0.5, DECOR_MAX_SCALE = 2.2;
 
-// Задания сада на день (сбрасываются каждый день)
 const DAILY_QUESTS = [
-  { id:'water2', name:'Полей грядки 2 раза',        key:'qWater', target:2, reward:6 },
-  { id:'bonus1', name:'Собери 1 бонусный расцвет',  key:'qBonus', target:1, reward:8 },
-  { id:'visit1', name:'Загляни в чужой сад',        key:'qVisit', target:1, reward:5 }
+  { id:'water2', name:'Полей растения 2 раза',       key:'qWater', target:2, reward:6 },
+  { id:'weed1',  name:'Прополи сорняки',             key:'qWeed',  target:1, reward:5 },
+  { id:'visit1', name:'Загляни в чужой сад',         key:'qVisit', target:1, reward:5 }
+];
+
+const MEAL_CHOICES = [
+  { emoji:'🥗', name:'Салат' }, { emoji:'🍲', name:'Суп' },
+  { emoji:'🍳', name:'Завтрак' }, { emoji:'🐟', name:'Рыба/мясо' }
+];
+const TRAINING_CHOICES = [
+  { emoji:'🚶‍♀️', name:'Ходьба' }, { emoji:'💪', name:'Силовая' },
+  { emoji:'🧘‍♀️', name:'Растяжка' }, { emoji:'🤸‍♀️', name:'Кардио' }
 ];
 
 (async function(){
-  /* ---------- фоны: перебираем варианты имени и папки ---------- */
   (function pickBackgrounds(){
     const dirs=['', 'img/', 'images/', 'assets/', 'pics/', 'лето2026/'];
     const exts=['.jpg','.jpeg','.png','.JPG','.JPEG','.PNG','.webp'];
@@ -625,196 +544,57 @@ const DAILY_QUESTS = [
       let i=0;
       const probe=new Image();
       probe.onload=()=>apply(candidates[i]);
-      probe.onerror=()=>{
-        i++;
-        if(i<candidates.length) probe.src=candidates[i];
-        else console.warn('Файл фона не найден:', baseName, '— проверь, что он загружен в репозиторий');
-      };
+      probe.onerror=()=>{ i++; if(i<candidates.length) probe.src=candidates[i]; };
       probe.src=candidates[0];
     }
     resolve('garden-loading', src=>{
       document.querySelectorAll('.loading-bg').forEach(el=>{ el.style.backgroundImage=`url('${src}')`; });
     });
     resolve('garden-ground', src=>{
-      const g=document.querySelector('.ground');
-      if(g) g.style.backgroundImage=`url('${src}')`;
+      window.__groundBg = `url('${src}')`;
+      const f=document.getElementById('field');
+      if(f) f.style.backgroundImage = window.__groundBg;
+      const vf=document.getElementById('visitField');
+      if(vf) vf.style.backgroundImage = window.__groundBg;
     });
   })();
 
   const state = {
     docId:null, name:'', email:'', campStartDate:null,
-    log:{},              // {'YYYY-MM-DD': {steps:0..4, training:0..2, meal:0..3, secret:false, gift:false}}
-    plots:{ steps:{level:0,bonusReadyAt:null,sparkle:false}, training:{level:0,bonusReadyAt:null,sparkle:false}, meal:{level:0,bonusReadyAt:null,sparkle:false} },
-    water:0, fert:0, bonusSeeds:0, coins:0,
-    ownedDecor:[],
-    decorPos:{},         // {itemId:{x,y}} — где участница поставила украшение (в % поля)
-    collection:[],       // [{emoji,name,rare,date}]
-    lastSeenCheersAt:0
+    log:{},
+    plants:[],
+    water:0, fert:0, seeds:2, coins:0, bonusSeeds:0,
+    ownedDecor:[], decorPos:{},
+    collection:[], lastSeenCheersAt:0, seenIntro:false
   };
-  let structureBuilt = false;
+  let plantMode=false, lbCache=[], lbExpanded=false, renderedPlantsKey='', renderedDecorKey='';
 
   const $ = id => document.getElementById(id);
   const loadingScreen=$('loadingScreen'), loginScreen=$('loginScreen'), gameContent=$('gameContent');
   const nameInput=$('nameInput'), emailInput=$('emailInput'), enterBtn=$('enterBtn'), loginNote=$('loginNote');
-  const toast=$('toast');
+  const field=$('field'), toast=$('toast');
 
-  /* ---------- helpers ---------- */
   function todayStr(){ return dateStr(new Date()); }
   function dateStr(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
   function addDays(dStr,n){ const [y,m,d]=dStr.split('-').map(Number); return dateStr(new Date(y,m-1,d+n)); }
   function diffDays(a,b){ const [y1,m1,d1]=a.split('-').map(Number),[y2,m2,d2]=b.split('-').map(Number); return Math.round((new Date(y2,m2-1,d2)-new Date(y1,m1-1,d1))/86400000); }
   function getDayNumber(){ return diffDays(state.campStartDate, todayStr())+1; }
-  function dayCfg(){
-    const n=Math.max(getDayNumber(),1);
-    // после 7-го дня темы идут по кругу — игра продолжается бесконечно
-    return DAY_CONFIG[(n-1) % DAY_CONFIG.length];
-  }
-  function clamp01(x){ return Math.max(0, Math.min(1,x)); }
+  function dayCfg(){ const n=Math.max(getDayNumber(),1); return DAY_CONFIG[(n-1)%DAY_CONFIG.length]; }
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function normalizeEmail(e){ return e.trim().toLowerCase(); }
   function isValidEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
-  function formatCountdown(ms){ const t=Math.max(0,Math.ceil(ms/60000)); const h=Math.floor(t/60),m=t%60; return h>0?`${h}ч ${m}м`:`${m} мин`; }
-  function showToast(msg){ toast.textContent = msg; }
+  function showToast(msg){ toast.textContent=msg; }
+  function uid(){ return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
   function todayLog(){
-    const t = todayStr();
-    if(!state.log[t]) state.log[t] = { steps:0, training:0, meal:0, secret:false, gift:false, qWater:0, qBonus:0, qVisit:0, qClaimed:[] };
-    // миграция от старого bool-формата
-    PLOT_KEYS.forEach(k=>{ if(typeof state.log[t][k] === 'boolean') state.log[t][k] = state.log[t][k]?1:0; });
-    if(state.log[t].qWater===undefined){ state.log[t].qWater=0; state.log[t].qBonus=0; state.log[t].qVisit=0; state.log[t].qClaimed=[]; }
-    return state.log[t];
+    const t=todayStr();
+    if(!state.log[t]) state.log[t]={ steps:0, training:0, meal:0, secret:false, gift:false, qWater:0, qWeed:0, qVisit:0, qClaimed:[] };
+    const L=state.log[t];
+    ['steps','training','meal'].forEach(k=>{ if(typeof L[k]==='boolean') L[k]=L[k]?1:0; });
+    if(L.qWater===undefined){ L.qWater=0; L.qWeed=0; L.qVisit=0; L.qClaimed=[]; }
+    if(L.qWeed===undefined) L.qWeed=0;
+    return L;
   }
 
-  /* ---------- Firestore ---------- */
-  function loadStateFromDoc(id, data){
-    state.docId=id; state.name=data.name||''; state.email=data.email||id;
-    state.campStartDate=data.campStartDate||todayStr();
-    state.log=data.log||{};
-    state.plots=data.plots||state.plots;
-    // нормализация: у записей из старых версий могли быть другие поля
-    PLOT_KEYS.forEach(k=>{
-      const p=state.plots[k]||{};
-      state.plots[k]={
-        level: Number(p.level ?? p.collectedLevel ?? 0) || 0,
-        bonusReadyAt: p.bonusReadyAt||null,
-        sparkle: !!p.sparkle,
-        vars: Array.isArray(p.vars) ? p.vars : undefined
-      };
-    });
-    state.water=data.water??0; state.fert=data.fert??0; state.bonusSeeds=data.bonusSeeds??0;
-    state.coins=data.coins??0;
-    state.ownedDecor=data.ownedDecor||[];
-    state.decorPos=data.decorPos||{};
-    state.collection=data.collection||[];
-    state.lastSeenCheersAt=data.lastSeenCheersAt||0;
-  }
-  async function loadOrCreateParticipant(rawName, rawEmail, uid){
-    const email=normalizeEmail(rawEmail), name=rawName.trim();
-    const ref=doc(db,PROGRESS_COLLECTION,email);
-    const snap=await getDoc(ref);
-    if(snap.exists()){
-      const data=snap.data();
-      if((data.name||'').trim().toLowerCase() !== name.toLowerCase()){
-        const err=new Error('name-mismatch'); err.code='name-mismatch'; throw err;
-      }
-      loadStateFromDoc(email,data);
-      await setDoc(ref,{ ownerUid:uid, updatedAt:serverTimestamp() },{merge:true});
-    } else {
-      state.docId=email; state.name=name; state.email=email; state.campStartDate=todayStr();
-      await setDoc(ref,{
-        name, email, campStartDate:state.campStartDate, log:{}, plots:state.plots,
-        water:0, fert:0, bonusSeeds:0, ownerUid:uid,
-        createdAt:serverTimestamp(), updatedAt:serverTimestamp()
-      });
-    }
-  }
-  async function tryAutoResume(uid){
-    const q=query(collection(db,PROGRESS_COLLECTION), where('ownerUid','==',uid), limit(1));
-    const snap=await getDocs(q);
-    if(snap.empty) return false;
-    loadStateFromDoc(snap.docs[0].id, snap.docs[0].data());
-    return true;
-  }
-  function computeScore(){ return Math.round(PLOT_KEYS.reduce((s,k)=>s+(Number(state.plots[k].level)||0),0)*10 + (state.bonusSeeds||0)*15); }
-  async function saveProgress(){
-    if(!state.docId) return;
-    const score=computeScore();
-    const plotLevels = {};
-    PLOT_KEYS.forEach(k=>plotLevels[k]=Math.round(state.plots[k].level*10)/10);
-    try{
-      await setDoc(doc(db,PROGRESS_COLLECTION,state.docId),{
-        name:state.name, email:state.email, campStartDate:state.campStartDate,
-        log:state.log, plots:state.plots, water:state.water, fert:state.fert,
-        bonusSeeds:state.bonusSeeds, coins:state.coins, ownedDecor:state.ownedDecor,
-        decorPos:state.decorPos,
-        collection:state.collection,
-        lastSeenCheersAt:state.lastSeenCheersAt, score, updatedAt:serverTimestamp()
-      },{merge:true});
-      await setDoc(doc(db,LEADERBOARD_COLLECTION,state.docId),{
-        name:state.name, score, plotLevels,
-        ownedDecor:state.ownedDecor, decorPos:state.decorPos,
-        updatedAt:serverTimestamp()
-      },{merge:true});
-    }catch(e){ console.error('Сохранение не удалось:',e); }
-  }
-
-  /* ---------- растения (спрайты) ---------- */
-  function stageIndexForLevel(level){
-    if(level < 1) return -1;      // семечко
-    if(level < 2.75) return 0;    // стадия 1
-    if(level < 4.5) return 1;     // стадия 2
-    if(level < 6) return 2;       // стадия 3
-    return 3;                     // стадия 4 — полное цветение
-  }
-  function plantImgSrc(key, level, vars){
-    const s = stageIndexForLevel(level);
-    if(s < 0) return ASSET_PATH + SEED_IMG;
-    const pool = STAGE_VARIANTS[s];
-    const idx = (vars && vars[s] !== undefined) ? (vars[s] % pool.length) : 0;
-    return ASSET_PATH + pool[idx];
-  }
-  // у каждого растения свой набор случайных вариантов на 4 стадии
-  function ensureVariants(p){
-    if(!Array.isArray(p.vars) || p.vars.length < 4){
-      p.vars = STAGE_VARIANTS.map(pool => Math.floor(Math.random()*pool.length));
-    }
-    return p.vars;
-  }
-  // для чужих садов: стабильный псевдослучайный выбор из id участницы
-  function hashVariants(seedStr){
-    let h = 0;
-    for(let i=0;i<seedStr.length;i++){ h = (h*31 + seedStr.charCodeAt(i)) >>> 0; }
-    return STAGE_VARIANTS.map((pool,s) => (h >> (s*3)) % pool.length);
-  }
-  function plantMarkup(key, idPrefix){
-    const p = idPrefix||'';
-    return `<div class="plant-wrap" id="${p}wrap-${key}">
-      <img class="plant-img" id="${p}img-${key}" alt="">
-      <span class="plant-fallback" id="${p}fb-${key}">🌰</span>
-    </div>`;
-  }
-  function updatePlantVisual(key, level, idPrefix, vars){
-    const p = idPrefix||'';
-    const img = $(p+'img-'+key), wrap = $(p+'wrap-'+key), fb = $(p+'fb-'+key);
-    if(!img) return;
-    const src = plantImgSrc(key, level, vars);
-    const stage = stageIndexForLevel(level);
-    fb.textContent = FALLBACK_EMOJI[Math.max(0, stage+1)];
-    if(img.dataset.src !== src){
-      const prevStage = img.dataset.stage !== undefined ? Number(img.dataset.stage) : null;
-      img.dataset.src = src;
-      img.dataset.stage = stage;
-      wrap.classList.remove('img-failed');
-      img.onerror = ()=>{ wrap.classList.add('img-failed'); };
-      img.src = src;
-      // при переходе на новую стадию — радостный подскок
-      if(prevStage !== null && stage > prevStage){
-        img.style.transform = 'scale(1.25)';
-        setTimeout(()=>{ img.style.transform = 'scale(1)'; }, 280);
-      }
-    }
-  }
-
-  /* ---------- эффекты ---------- */
   let audioCtx=null;
   function chime(freq){
     try{
@@ -827,441 +607,421 @@ const DAILY_QUESTS = [
       osc.connect(gain).connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime+0.33);
     }catch(e){}
   }
-  function bumpPlant(key,big){
-    const el=document.querySelector(`#plot-${key} .plant-wrap`); if(!el) return;
-    el.style.transform=big?'scale(1.13)':'scale(1.06)';
-    setTimeout(()=>{el.style.transform='scale(1)';},220);
-  }
-  function spawnParticles(key,count){
-    const host=document.querySelector(`#plot-${key} .plant-wrap`); if(!host) return;
-    for(let i=0;i<count;i++){
-      const el=document.createElement('span'); el.className='particle';
-      el.textContent=['🌸','✨','🌿'][Math.floor(Math.random()*3)];
-      el.style.setProperty('--dx',`calc(-50% + ${(Math.random()*40-20)}px)`);
-      el.style.animationDelay=(Math.random()*100)+'ms';
-      host.appendChild(el); setTimeout(()=>el.remove(),1000);
+  function buzz(pattern){ if(navigator.vibrate) navigator.vibrate(pattern||25); }
+  function burstAt(el, count, chars){
+    if(!el) return;
+    for(let i=0;i<(count||6);i++){
+      const s=document.createElement('span');
+      s.textContent=(chars||['🌸','✨','🌿'])[Math.floor(Math.random()*(chars||['a','b','c']).length)];
+      s.style.cssText=`position:absolute; left:50%; top:30%; font-size:14px; pointer-events:none; z-index:12;
+        transform:translate(-50%,-50%); animation:pfly 1s ease-out forwards; animation-delay:${Math.random()*120}ms;`;
+      s.style.setProperty('--dx', `calc(-50% + ${(Math.random()*50-25)}px)`);
+      el.appendChild(s);
+      setTimeout(()=>s.remove(),1150);
     }
   }
+  const styleEl=document.createElement('style');
+  styleEl.textContent='@keyframes pfly{0%{transform:translate(-50%,-50%) scale(.6);opacity:1}100%{transform:translate(var(--dx,-50%),-58px) scale(1.15);opacity:0}}';
+  document.head.appendChild(styleEl);
 
-  /* ---------- экономика: реальные действия → ресурсы ---------- */
-  function doTask(key){
-    const log=todayLog();
-    if(log[key] >= TASK_LIMITS[key]) return;
-    log[key]++;
-    const rw=TASK_REWARDS[key];
-    state.water += rw.water;
-    state.fert += rw.fert;
-    chime(520); if(navigator.vibrate) navigator.vibrate(25);
-    const parts=[];
-    if(rw.water) parts.push(`+${rw.water} 💧`);
-    if(rw.fert) parts.push(`+${rw.fert} 🌿`);
-    showToast(`Записано! ${parts.join(' и ')} — теперь можно полить сад.`);
-    saveProgress();
-    renderAll();
+  function stageIndexForLevel(level){
+    if(level<1) return -1;
+    if(level<2.75) return 0;
+    if(level<4.5) return 1;
+    if(level<6) return 2;
+    return 3;
+  }
+  function plantImgSrc(level, vars){
+    const s=stageIndexForLevel(level);
+    if(s<0) return ASSET_PATH+SEED_IMG;
+    const pool=STAGE_VARIANTS[s];
+    return ASSET_PATH+pool[(vars&&vars[s]!==undefined?vars[s]:0)%pool.length];
+  }
+  function randVariants(){ return STAGE_VARIANTS.map(pool=>Math.floor(Math.random()*pool.length)); }
+  function hashVariants(seedStr){
+    let h=0; for(let i=0;i<seedStr.length;i++){ h=(h*31+seedStr.charCodeAt(i))>>>0; }
+    return STAGE_VARIANTS.map((pool,s)=>(h>>(s*3))%pool.length);
   }
 
-  /* ---------- полив / удобрение / бонус ---------- */
-  function waterPlot(key){
-    const p=state.plots[key];
-    if(state.water<=0 || p.level>=7) return;
+  function loadStateFromDoc(id,data){
+    state.docId=id; state.name=data.name||''; state.email=data.email||id;
+    state.campStartDate=data.campStartDate||todayStr();
+    state.log=data.log||{};
+    state.plants=Array.isArray(data.plants)?data.plants:[];
+    state.plants.forEach(p=>{
+      p.level=Number(p.level)||0;
+      if(!Array.isArray(p.vars)) p.vars=randVariants();
+      if(p.weeds===undefined) p.weeds=false;
+      if(!p.lastTick) p.lastTick=Date.now();
+    });
+    state.water=data.water??0; state.fert=data.fert??0;
+    state.seeds=data.seeds??2; state.coins=data.coins??0; state.bonusSeeds=data.bonusSeeds??0;
+    state.ownedDecor=data.ownedDecor||[]; state.decorPos=data.decorPos||{};
+    state.collection=data.collection||[]; state.lastSeenCheersAt=data.lastSeenCheersAt||0;
+    state.seenIntro=!!data.seenIntro;
+  }
+  async function loadOrCreateParticipant(rawName,rawEmail,authUid){
+    const email=normalizeEmail(rawEmail), name=rawName.trim();
+    const ref=doc(db,PROGRESS_COLLECTION,email);
+    const snap=await getDoc(ref);
+    if(snap.exists()){
+      const data=snap.data();
+      if((data.name||'').trim().toLowerCase()!==name.toLowerCase()){
+        const err=new Error('name-mismatch'); err.code='name-mismatch'; throw err;
+      }
+      loadStateFromDoc(email,data);
+      await setDoc(ref,{ ownerUid:authUid, updatedAt:serverTimestamp() },{merge:true});
+    } else {
+      state.docId=email; state.name=name; state.email=email; state.campStartDate=todayStr();
+      state.plants=[]; state.seeds=2;
+      await setDoc(ref,{
+        name, email, campStartDate:state.campStartDate, log:{}, plants:[],
+        water:0, fert:0, seeds:2, coins:0, bonusSeeds:0, ownedDecor:[], decorPos:{},
+        collection:[], seenIntro:false, ownerUid:authUid,
+        createdAt:serverTimestamp(), updatedAt:serverTimestamp()
+      });
+    }
+  }
+  async function tryAutoResume(authUid){
+    const q=query(collection(db,PROGRESS_COLLECTION), where('ownerUid','==',authUid), limit(1));
+    const snap=await getDocs(q);
+    if(snap.empty) return false;
+    loadStateFromDoc(snap.docs[0].id, snap.docs[0].data());
+    return true;
+  }
+  function computeScore(){
+    return Math.round(state.plants.reduce((s,p)=>s+(Number(p.level)||0),0)*10 + state.bonusSeeds*15 + state.collection.length*20);
+  }
+  async function saveProgress(){
+    if(!state.docId) return;
+    const score=computeScore();
+    try{
+      await setDoc(doc(db,PROGRESS_COLLECTION,state.docId),{
+        name:state.name, email:state.email, campStartDate:state.campStartDate,
+        log:state.log, plants:state.plants, water:state.water, fert:state.fert,
+        seeds:state.seeds, coins:state.coins, bonusSeeds:state.bonusSeeds,
+        ownedDecor:state.ownedDecor, decorPos:state.decorPos, collection:state.collection,
+        lastSeenCheersAt:state.lastSeenCheersAt, seenIntro:state.seenIntro,
+        score, updatedAt:serverTimestamp()
+      },{merge:true});
+      await setDoc(doc(db,LEADERBOARD_COLLECTION,state.docId),{
+        name:state.name, score,
+        plants:state.plants.map(p=>({ level:p.level, x:p.x, y:p.y, vars:p.vars })),
+        ownedDecor:state.ownedDecor, decorPos:state.decorPos,
+        updatedAt:serverTimestamp()
+      },{merge:true});
+    }catch(e){ console.error(e); }
+  }
+
+  function tickPlants(){
+    const now=Date.now();
+    let changed=false;
+    state.plants.forEach(p=>{
+      const mins=(now-(p.lastTick||now))/60000;
+      if(mins>=1){
+        p.lastTick=now;
+        if(!p.weeds && p.level<MAX_LEVEL && Math.random() < 1-Math.pow(1-WEED_CHANCE_PER_MIN, Math.min(mins,120))){
+          p.weeds=true; changed=true;
+        }
+      }
+    });
+    if(changed) saveProgress();
+  }
+
+  function plantSeedAt(xPct,yPct){
+    if(state.seeds<=0){ showToast('Нет семян 🌰 — отметь тренировку, чтобы их получить.'); return; }
+    if(state.plants.length>=MAX_PLANTS){ showToast(`На поле максимум ${MAX_PLANTS} растений — собери урожай.`); return; }
+    state.seeds--;
+    state.plants.push({
+      id:uid(), level:0.2, x:Math.round(xPct*10)/10, y:Math.round(yPct*10)/10,
+      vars:randVariants(), weeds:false, bonusReadyAt:null, sparkle:false, lastTick:Date.now()
+    });
+    chime(560); buzz(25);
+    setPlantMode(false);
+    renderedPlantsKey='';
+    saveProgress(); renderAll();
+    showToast('Семечко посажено! Полей его 💧');
+  }
+  function plantAction(p){
+    if(p.weeds){ weedPlant(p); return; }
+    if(p.bonusReadyAt && Date.now()>=p.bonusReadyAt){ collectBonus(p); return; }
+    if(p.level>=MAX_LEVEL){ harvestPlant(p); return; }
+    if(state.water>0){ waterPlant(p); return; }
+    showToast('Нет воды 💧 — отметь активность ниже.');
+  }
+  function weedPlant(p){
+    p.weeds=false;
+    todayLog().qWeed++;
+    chime(380); buzz([15,25,15]);
+    const el=document.querySelector(`[data-plant="${p.id}"]`);
+    burstAt(el,5,['🍃','💨']);
+    saveProgress(); renderAll();
+    showToast('Прополото! Теперь растение снова растёт.');
+  }
+  function waterPlant(p){
+    if(state.water<=0) return;
     state.water--;
     todayLog().qWater++;
-    growPlot(key, 1);
-    showToast('Полито! Растение подросло.');
+    growPlant(p,1);
+    showToast('Полито 💧');
   }
-  function fertPlot(key){
-    const p=state.plots[key];
-    if(state.fert<=0 || p.level>=7) return;
+  function fertPlant(p){
+    if(state.fert<=0) return;
     state.fert--;
-    growPlot(key, 1.8);
-    showToast('Удобрено! Мощный рывок роста.');
+    growPlant(p,1.8);
+    showToast('Удобрено 🌿 — мощный рывок роста!');
   }
-  function growPlot(key, mult){
-    const p=state.plots[key], cfg=dayCfg();
+  function growPlant(p,mult){
+    const cfg=dayCfg();
     const inc=(0.35+Math.random()*0.25)*cfg.growMul*mult;
-    const wasBelow7 = p.level < 7;
-    p.level=Math.min(7,p.level+inc);
-    if(wasBelow7 && p.level>=7) awardBaseFlower(key);
-    bumpPlant(key); spawnParticles(key,Math.round(4+inc*4)); chime(430+Math.random()*80);
-    if(navigator.vibrate) navigator.vibrate(25);
-    if(!p.bonusReadyAt && p.level<7){
+    p.level=Math.min(MAX_LEVEL,p.level+inc);
+    const el=document.querySelector(`[data-plant="${p.id}"]`);
+    if(el){ const im=el.querySelector('img'); if(im){ im.style.transform='scale(1.18)'; setTimeout(()=>im.style.transform='scale(1)',220); } }
+    burstAt(el,Math.round(4+inc*4));
+    chime(430+Math.random()*80); buzz(25);
+    if(!p.bonusReadyAt && p.level<MAX_LEVEL){
       p.bonusReadyAt=Date.now()+cfg.bonusMinMs+Math.random()*(cfg.bonusMaxMs-cfg.bonusMinMs);
       p.sparkle=Math.random()<cfg.sparkleChance;
     }
-    saveProgress();
-    renderAll();
+    renderedPlantsKey='';
+    saveProgress(); renderAll();
   }
-  function collectBonus(key){
-    const p=state.plots[key];
-    if(!p.bonusReadyAt || Date.now()<p.bonusReadyAt) return;
+  function collectBonus(p){
     const gain=p.sparkle?1.4:0.8;
-    const wasSparkle=p.sparkle;
-    const wasBelow7 = p.level < 7;
-    p.level=Math.min(7,p.level+gain);
-    if(wasBelow7 && p.level>=7) awardBaseFlower(key);
-    if(wasSparkle){ state.bonusSeeds++; awardRareFlower(); }
-    todayLog().qBonus++;
+    p.level=Math.min(MAX_LEVEL,p.level+gain);
+    if(p.sparkle) state.bonusSeeds++;
     p.bonusReadyAt=null; p.sparkle=false;
-    bumpPlant(key,true); spawnParticles(key,9); chime(700);
-    if(navigator.vibrate) navigator.vibrate([20,30,20]);
-    saveProgress();
-    renderAll();
-    showToast(gain>1?'✨ Редкий бурный расцвет! Бонусное семечко.':'Цветок раскрылся сильнее!');
+    const el=document.querySelector(`[data-plant="${p.id}"]`);
+    burstAt(el,9,['✨','🌸','⭐']);
+    chime(700); buzz([20,30,20]);
+    renderedPlantsKey='';
+    saveProgress(); renderAll();
+    showToast(gain>1?'✨ Бурный расцвет! Бонусное семечко.':'Цветок раскрылся сильнее!');
   }
-  function awardBaseFlower(key){
-    // в гербарий попадает именно тот цветок, которым расцвела грядка
-    const p = state.plots[key];
-    const idx = (ensureVariants(p)[3] || 0) % FINAL_FLOWERS.length;
-    const f = FINAL_FLOWERS[idx];
-    if(state.collection.some(c=>c.img===f.file)) return;
-    state.collection.push({ img:f.file, name:f.name, rare:false, date:todayStr() });
-    setTimeout(()=>showToast(`📖 В гербарий добавлен цветок: ${f.name}!`), 700);
-  }
-  function awardRareFlower(){
-    // редкий бурный расцвет открывает случайный ещё не собранный цветок
-    const owned = new Set(state.collection.map(c=>c.img));
-    const available = FINAL_FLOWERS.filter(f=>!owned.has(f.file));
-    if(!available.length) return;
-    const pick = available[Math.floor(Math.random()*available.length)];
-    state.collection.push({ img:pick.file, name:pick.name, rare:true, date:todayStr() });
-    setTimeout(()=>showToast(`📖 Редкая находка для гербария: ${pick.name}!`), 900);
-  }
-
-  /* ---------- урожай: цикл посадки как в FarmVille ---------- */
-  function harvestPlot(key){
-    const p=state.plots[key];
-    if(p.level<7) return;
-    const coinsGain = 8 + Math.floor(Math.random()*5); // 8–12 монет
-    state.coins += coinsGain;
-    p.level = 1.5; // пересадка не с нуля, чтобы не было обидно
-    p.vars = STAGE_VARIANTS.map(pool => Math.floor(Math.random()*pool.length)); // новое растение выглядит иначе
-    p.bonusReadyAt = null; p.sparkle = false;
-    bumpPlant(key,true); spawnParticles(key,10); chime(760);
-    if(navigator.vibrate) navigator.vibrate([25,30,25]);
-    saveProgress();
-    renderAll();
-    showToast(`🧺 Урожай собран: +${coinsGain} 🪙! Посажено новое семечко.`);
+  function harvestPlant(p){
+    const coinsGain=8+Math.floor(Math.random()*5);
+    state.coins+=coinsGain;
+    state.seeds+=1;
+    const idx=(p.vars[3]||0)%FINAL_FLOWERS.length;
+    const f=FINAL_FLOWERS[idx];
+    if(!state.collection.some(c=>c.img===f.file)){
+      state.collection.push({ img:f.file, name:f.name, date:todayStr() });
+      setTimeout(()=>showToast(`📖 В гербарий добавлен цветок: ${f.name}!`),800);
+    }
+    const el=document.querySelector(`[data-plant="${p.id}"]`);
+    burstAt(el,10,['🌸','✨','🪙']);
+    state.plants=state.plants.filter(x=>x.id!==p.id);
+    chime(760); buzz([25,30,25]);
+    renderedPlantsKey='';
+    saveProgress(); renderAll();
+    showToast(`🧺 Урожай собран: +${coinsGain} 🪙 и +1 🌰`);
   }
 
-  /* ---------- задания сада ---------- */
+  function setPlantMode(on){
+    plantMode=on;
+    field.classList.toggle('planting',on);
+    $('plantModeBtn').classList.toggle('active',on);
+    $('plantModeBtn').textContent = on ? '✕ Отменить' : '🌰 Посадить';
+  }
+  $('plantModeBtn').addEventListener('click',()=>{
+    if(plantMode){ setPlantMode(false); return; }
+    if(state.seeds<=0){ showToast('Нет семян 🌰 — отметь тренировку, чтобы их получить.'); return; }
+    setPlantMode(true);
+    showToast('Коснись места на поле, где посадить семечко.');
+  });
+  field.addEventListener('click',(e)=>{
+    if(!plantMode) return;
+    if(e.target.closest('[data-decor]')) return;
+    const r=field.getBoundingClientRect();
+    const x=Math.max(6,Math.min(94,((e.clientX-r.left)/r.width)*100));
+    const y=Math.max(30,Math.min(97,((e.clientY-r.top)/r.height)*100));
+    plantSeedAt(x,y);
+  });
+
+  function openTaskModal(key){
+    const L=todayLog();
+    if(L[key]>=TASK_LIMITS[key]) return;
+    const body=$('taskModalBody');
+    if(key==='steps'){
+      body.innerHTML=`
+        <div class="modal-title">🚶‍♀️ Прогулка</div>
+        <p class="modal-text">Держи палец на круге, пока он не заполнится — как будто проходишь свои 2 500 шагов.</p>
+        <div class="hold-circle" id="holdCircle" style="--p:0"><span>👣</span></div>
+        <div class="hold-label" id="holdLabel">Зажми и держи</div>
+        <button class="ghost-btn" id="taskCancelBtn">Отмена</button>`;
+      setupHold(()=>completeTask('steps'));
+    } else if(key==='training'){
+      body.innerHTML=`
+        <div class="modal-title">💪 Тренировка</div>
+        <p class="modal-text">Что делала сегодня?</p>
+        <div class="choice-grid" id="choiceGrid">
+          ${TRAINING_CHOICES.map((c,i)=>`<button class="choice-btn" data-i="${i}"><span class="choice-emoji">${c.emoji}</span>${c.name}</button>`).join('')}
+        </div>
+        <div id="holdZone" style="display:none;">
+          <div class="hold-circle" id="holdCircle" style="--p:0"><span>💪</span></div>
+          <div class="hold-label" id="holdLabel">Держи, чтобы подтвердить</div>
+        </div>
+        <button class="ghost-btn" id="taskCancelBtn">Отмена</button>`;
+      setupChoice(TRAINING_CHOICES,(pick)=>{
+        $('holdZone').style.display='block';
+        setupHold(()=>completeTask('training',pick.name));
+      });
+    } else {
+      body.innerHTML=`
+        <div class="modal-title">🍲 Блюдо по меню</div>
+        <p class="modal-text">Что приготовила?</p>
+        <div class="choice-grid" id="choiceGrid">
+          ${MEAL_CHOICES.map((c,i)=>`<button class="choice-btn" data-i="${i}"><span class="choice-emoji">${c.emoji}</span>${c.name}</button>`).join('')}
+        </div>
+        <div id="holdZone" style="display:none;">
+          <div class="hold-circle" id="holdCircle" style="--p:0"><span>🍽️</span></div>
+          <div class="hold-label" id="holdLabel">Держи, чтобы подтвердить</div>
+        </div>
+        <button class="ghost-btn" id="taskCancelBtn">Отмена</button>`;
+      setupChoice(MEAL_CHOICES,(pick)=>{
+        $('holdZone').style.display='block';
+        setupHold(()=>completeTask('meal',pick.name));
+      });
+    }
+    $('taskCancelBtn').addEventListener('click',()=>$('taskOverlay').classList.remove('open'));
+    $('taskOverlay').classList.add('open');
+  }
+  function setupChoice(list,onPick){
+    $('choiceGrid').querySelectorAll('.choice-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        $('choiceGrid').querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('picked'));
+        btn.classList.add('picked');
+        chime(520);
+        onPick(list[Number(btn.dataset.i)]);
+      });
+    });
+  }
+  function setupHold(onDone){
+    const circle=$('holdCircle'), label=$('holdLabel');
+    if(!circle) return;
+    const HOLD_MS=1600;
+    let timer=null, done=false;
+    const start=()=>{
+      if(done) return;
+      const t0=Date.now();
+      label.textContent='Держи…';
+      timer=setInterval(()=>{
+        const pct=Math.min(100,((Date.now()-t0)/HOLD_MS)*100);
+        circle.style.setProperty('--p',pct);
+        if(pct>=100){
+          clearInterval(timer); timer=null; done=true;
+          label.textContent='Готово!';
+          chime(700); buzz([20,30,20]);
+          setTimeout(onDone,250);
+        }
+      },30);
+    };
+    const stop=()=>{
+      if(timer){ clearInterval(timer); timer=null; }
+      if(!done){ circle.style.setProperty('--p',0); label.textContent='Не дотерпела — попробуй ещё'; }
+    };
+    circle.addEventListener('pointerdown',e=>{ e.preventDefault(); circle.setPointerCapture(e.pointerId); start(); });
+    circle.addEventListener('pointerup',stop);
+    circle.addEventListener('pointercancel',stop);
+    circle.addEventListener('pointerleave',stop);
+  }
+  function completeTask(key,label){
+    const L=todayLog();
+    if(L[key]>=TASK_LIMITS[key]) return;
+    L[key]++;
+    const rw=TASK_REWARDS[key];
+    state.water+=rw.water; state.fert+=rw.fert; state.seeds+=rw.seed;
+    $('taskOverlay').classList.remove('open');
+    const parts=[];
+    if(rw.water) parts.push(`+${rw.water} 💧`);
+    if(rw.fert) parts.push(`+${rw.fert} 🌿`);
+    if(rw.seed) parts.push(`+${rw.seed} 🌰`);
+    saveProgress(); renderAll();
+    showToast(`${label?label+': ':''}записано! ${parts.join(', ')}`);
+  }
+
   function claimQuest(qid){
-    const log=todayLog();
-    const q=DAILY_QUESTS.find(x=>x.id===qid);
-    if(!q || log.qClaimed.includes(qid)) return;
-    if((log[q.key]||0) < q.target) return;
-    log.qClaimed.push(qid);
-    state.coins += q.reward;
-    chime(700);
-    showToast(`Задание выполнено: +${q.reward} 🪙!`);
-    saveProgress();
-    renderAll();
+    const L=todayLog(), q=DAILY_QUESTS.find(x=>x.id===qid);
+    if(!q||L.qClaimed.includes(qid)||(L[q.key]||0)<q.target) return;
+    L.qClaimed.push(qid); state.coins+=q.reward;
+    chime(700); saveProgress(); renderAll();
+    showToast(`Задание выполнено: +${q.reward} 🪙`);
   }
-
-  /* ---------- лавка декора ---------- */
   function buyDecor(id){
     const item=SHOP_ITEMS.find(x=>x.id===id);
-    if(!item || state.ownedDecor.includes(id) || state.coins<item.price) return;
-    state.coins -= item.price;
-    state.ownedDecor.push(id);
-    chime(820);
-    showToast(`${item.name} теперь украшает твой сад! 🌿`);
-    saveProgress();
-    renderAll();
+    if(!item||state.ownedDecor.includes(id)||state.coins<item.price) return;
+    state.coins-=item.price; state.ownedDecor.push(id);
+    renderedDecorKey='';
+    chime(820); saveProgress(); renderAll();
+    showToast(`${item.name} теперь украшает твой сад!`);
   }
-
-  /* ---------- реакции: кто помахал моему саду ---------- */
+  function maybeDailyGift(){
+    const L=todayLog();
+    if(L.gift) return;
+    L.gift=true;
+    const mult=dayCfg().special==='gift2x'?2:1;
+    const roll=Math.random();
+    let msg;
+    if(roll<0.45){ state.water+=1*mult; msg=`Подарок за вход: +${1*mult} 💧`; }
+    else if(roll<0.75){ state.fert+=1*mult; msg=`Подарок за вход: +${1*mult} 🌿`; }
+    else { state.seeds+=1*mult; msg=`Подарок за вход: +${1*mult} 🌰 семечко!`; }
+    chime(640);
+    setTimeout(()=>showToast(msg),600);
+    saveProgress();
+  }
   async function checkCheers(){
     try{
       const q=query(collection(db,'garden_cheers'), where('to','==',state.docId), limit(30));
       const snap=await getDocs(q);
       const fresh=[];
-      snap.forEach(d=>{
-        const c=d.data();
-        if((c.ts||0) > state.lastSeenCheersAt) fresh.push(c);
-      });
+      snap.forEach(d=>{ const c=d.data(); if((c.ts||0)>state.lastSeenCheersAt) fresh.push(c); });
       if(fresh.length){
-        const names=[...new Set(fresh.map(c=>c.fromName).filter(Boolean))];
-        const shown=names.slice(0,3).join(', ');
-        const more=names.length>3 ? ` и ещё ${names.length-3}` : '';
-        setTimeout(()=>{
-          showToast(`👋 Твоему саду помахали: ${shown}${more}!`);
-          chime(680);
-        }, 1400);
+        const names=[...new Set(fresh.map(c=>c.fromName).filter(Boolean))].slice(0,3).join(', ');
+        setTimeout(()=>{ showToast(`👋 Твоему саду помахали: ${names}!`); chime(680); },1400);
         state.lastSeenCheersAt=Date.now();
         saveProgress();
       }
-    }catch(e){ console.error('Не удалось проверить приветы:', e); }
+    }catch(e){ console.error(e); }
   }
 
-  /* ---------- подарок за вход ---------- */
-  function maybeDailyGift(){
-    const log=todayLog();
-    if(log.gift) return;
-    log.gift=true;
-    const mult = dayCfg().special==='gift2x' ? 2 : 1;
-    const roll = Math.random();
-    let msg;
-    if(roll < 0.5){ const n=1*mult; state.water+=n; msg=`Утренний подарок: +${n} 💧 за то, что заглянула!`; }
-    else if(roll < 0.8){ const n=1*mult; state.fert+=n; msg=`Утренний подарок: +${n} 🌿 удобрения!`; }
-    else { const n=2*mult; state.water+=n; msg=`Повезло! Целых +${n} 💧 за вход!`; }
-    chime(640);
-    setTimeout(()=>showToast(msg), 600);
-    saveProgress();
-  }
-
-  /* ---------- streak / weeds / уровень ---------- */
   function dayHasActivity(entry){
     if(!entry) return false;
-    return PLOT_KEYS.some(k=>{
-      const v=entry[k];
-      return typeof v==='boolean' ? v : (v||0)>0;
-    });
+    return ['steps','training','meal'].some(k=>{ const v=entry[k]; return typeof v==='boolean'?v:(v||0)>0; });
   }
   function computeStreak(){
-    let count=0, d=todayStr(), guard=0;
-    while(guard++<30){
+    let count=0,d=todayStr(),guard=0;
+    while(guard++<60){
       if(diffDays(state.campStartDate,d)<0) break;
-      if(!dayHasActivity(state.log[d])){
-        if(d===todayStr()){ d=addDays(d,-1); continue; }
-        break;
-      }
+      if(!dayHasActivity(state.log[d])){ if(d===todayStr()){ d=addDays(d,-1); continue; } break; }
       count++; d=addDays(d,-1);
     }
     return count;
   }
-  function computeWeeds(){
-    // считаем пропуски за последние 7 дней (скользящее окно)
-    let count=0;
-    for(let i=1;i<=7;i++){
-      const d=addDays(todayStr(),-i);
-      if(diffDays(state.campStartDate,d)<0) break;
-      if(!dayHasActivity(state.log[d])) count++;
-    }
-    return Math.min(count,3);
-  }
   function farmXP(){ return computeScore(); }
   function farmLevel(xp){ return Math.floor(xp/50)+1; }
 
-  /* ---------- рендер ---------- */
   function renderHeader(){
     $('greetingLine').textContent=`Привет, ${state.name}! 👋`;
-    $('waterBadge').textContent='💧 '+state.water;
-    $('fertBadge').textContent='🌿 '+state.fert;
+    $('seedPill').textContent='🌰 '+state.seeds;
+    $('waterPill').textContent='💧 '+state.water+(state.fert>0?'  🌿 '+state.fert:'');
     $('coinsBadge').textContent='🪙 '+state.coins;
     $('bonusBadge').textContent='🌟 '+state.bonusSeeds;
     $('streakBadge').textContent='🔥 '+computeStreak();
-    const n=Math.max(getDayNumber(),1);
-    const cfg=dayCfg();
-    const chip=$('dayChip');
+    const n=Math.max(getDayNumber(),1), cfg=dayCfg(), chip=$('dayChip');
     chip.textContent = n<=7 ? `День ${n} / 7 · ${cfg.title}` : `День ${n} · ${cfg.title}`;
     chip.onclick=()=>showToast(cfg.desc);
   }
-  function renderLevelAndDecor(){
-    const xp=farmXP(), lvl=farmLevel(xp), into=xp%50;
-    $('levelLabel').textContent='Уровень сада: '+lvl;
-    $('levelXp').textContent=`${into} / 50 XP`;
-    $('levelFill').style.width=(into/50*100)+'%';
-    $('decorFence').classList.toggle('unlocked', lvl>=2);
-    $('decorButterfly').classList.toggle('unlocked', state.bonusSeeds>=1);
-    $('decorLadybug').classList.toggle('unlocked', state.bonusSeeds>=3);
-  }
-  function renderFarmStructure(){
-    $('farmRow').innerHTML = PLOT_KEYS.map(key=>`
-      <div class="farm-plot" id="plot-${key}">
-        <div class="plot-badge" id="badge-${key}"></div>
-        ${plantMarkup(key,'')}
-        <div class="plot-bar"><div class="plot-bar-fill ${key}" id="progress-${key}" style="width:0%"></div></div>
-        <button class="fert-mini" id="fertBtn-${key}">🌿</button>
-      </div>`).join('');
-    PLOT_KEYS.forEach(key=>{
-      // тап по растению — основное действие: полить / собрать бонус / собрать урожай
-      $('plot-'+key).addEventListener('click',(e)=>{
-        if(e.target.closest('.fert-mini')) return;
-        primaryAction(key);
-      });
-      $('fertBtn-'+key).addEventListener('click',(e)=>{ e.stopPropagation(); fertPlot(key); });
-    });
-    structureBuilt=true;
-  }
-  function primaryAction(key){
-    const p=state.plots[key];
-    if(p.bonusReadyAt && Date.now()>=p.bonusReadyAt){ collectBonus(key); return; }
-    if(p.level>=7){ harvestPlot(key); return; }
-    if(state.water>0){ waterPlot(key); return; }
-    showToast('Нет воды 💧 — отметь шаги, тренировку или блюдо ниже.');
-  }
-  function renderFarmState(){
-    PLOT_KEYS.forEach(key=>{
-      const p=state.plots[key];
-      const el=$('plot-'+key); if(!el) return;
-      const stageFrac=p.level>=7?100:(p.level%1)*100;
-      const bonusReady=p.bonusReadyAt && Date.now()>=p.bonusReadyAt;
-      const bonusPending=p.bonusReadyAt && !bonusReady;
-      el.classList.toggle('bonus-ready',!!bonusReady);
-      $('progress-'+key).style.width=stageFrac+'%';
-
-      // значок над растением, когда есть действие
-      const badge=$('badge-'+key);
-      badge.textContent = bonusReady ? '✨' : (p.level>=7 ? '🧺' : '');
-      badge.style.display = badge.textContent ? 'block' : 'none';
-
-      // мини-кнопка удобрения только когда удобрение есть
-      const fBtn=$('fertBtn-'+key);
-      fBtn.style.display = (state.fert>0 && p.level<7 && !bonusReady) ? 'flex' : 'none';
-
-      el.classList.toggle('actionable', !!(bonusReady || p.level>=7 || state.water>0));
-      updatePlantVisual(key, p.level, '', ensureVariants(p));
-    });
-    $('weedsNote').textContent = computeWeeds()>0 ? `Сорняков: ${computeWeeds()} — пропущенные дни, не приговор.` : '';
-  }
-  function renderTasks(){
-    const log=todayLog();
-    PLOT_KEYS.forEach(key=>{
-      const used=log[key]||0, max=TASK_LIMITS[key];
-      const pips=$('pips-'+key);
-      pips.innerHTML='';
-      for(let i=0;i<max;i++){
-        const pip=document.createElement('div');
-        pip.className='pip'+(i<used?' full':'');
-        pips.appendChild(pip);
-      }
-      const btn=$('task-'+key);
-      btn.disabled = used>=max;
-      btn.textContent = used>=max ? 'Всё ✓' : (key==='steps'?'+1 💧':key==='training'?'+2 💧':'+1 🌿');
-    });
-  }
-  function renderExtraZone(){
-    const zone=$('extraZone'), special=dayCfg().special, log=todayLog();
-    if(special==='secret'){
-      zone.innerHTML=`<div class="extra-card">
-        <div class="extra-title">🎁 Секретное задание дня</div>
-        <div class="extra-desc">Сделай 5-минутную растяжку у окна — необязательно, но сад скажет спасибо.</div>
-        <button class="extra-btn" id="secretBtn" ${log.secret?'disabled':''}>${log.secret?'Выполнено сегодня':'Выполнила'}</button>
-      </div>`;
-      const b=$('secretBtn');
-      if(b) b.addEventListener('click',()=>{
-        if(log.secret) return;
-        log.secret=true; state.bonusSeeds++;
-        chime(760); showToast('Секретное задание выполнено — бонусное семечко! 🌟');
-        saveProgress(); renderAll();
-      });
-    } else { zone.innerHTML=''; }
-  }
-
-  /* ---------- рейтинг + визиты ---------- */
-  let lbCache=[];
-  let lbExpanded=false;
-  async function loadLeaderboard(){
-    try{
-      const q=query(collection(db,LEADERBOARD_COLLECTION), orderBy('score','desc'), limit(10));
-      const snap=await getDocs(q);
-      lbCache=[];
-      snap.forEach(d=>lbCache.push({ id:d.id, ...d.data() }));
-      renderLeaderboard();
-    }catch(e){ console.error(e); $('leaderboardList').textContent='Не удалось загрузить рейтинг.'; }
-  }
-  function renderLeaderboard(){
-    if(!lbCache.length){ $('leaderboardList').textContent='Пока пусто — будь первой!'; return; }
-    const myIdx = lbCache.findIndex(r=>r.id===state.docId);
-    const rowHtml = (r,i)=>`<div class="lb-row ${r.id===state.docId?'me':''}" data-idx="${i}">
-        <span class="lb-rank">${i+1}</span>
-        <span class="lb-name">${escapeHtml(r.name||'')}</span>
-        <span class="lb-score">${r.score||0}</span>
-      </div>`;
-    let html;
-    if(lbExpanded || lbCache.length<=4){
-      html = lbCache.map(rowHtml).join('');
-    } else {
-      // компактно: топ-3 + своя строка, если она ниже
-      html = lbCache.slice(0,3).map(rowHtml).join('');
-      if(myIdx>2) html += `<div class="lb-gap">···</div>` + rowHtml(lbCache[myIdx], myIdx);
-      html += `<button class="lb-more" id="lbMore">Показать всех (${lbCache.length})</button>`;
-    }
-    $('leaderboardList').innerHTML = html;
-    const more=$('lbMore');
-    if(more) more.addEventListener('click',()=>{ lbExpanded=true; renderLeaderboard(); });
-    document.querySelectorAll('.lb-row:not(.me)').forEach(row=>{
-      row.addEventListener('click',()=>openVisit(lbCache[Number(row.dataset.idx)]));
-    });
-  }
-  function openVisit(entry){
-    if(!entry) return;
-    todayLog().qVisit++;
-    saveProgress();
-    $('visitName').textContent=`Сад: ${entry.name||'участница'}`;
-    $('visitSub').textContent=`${entry.score||0} очков`;
-    // фон газона — тот же, что в своём саду
-    const vg=$('visitGround');
-    const myGround=document.querySelector('.ground');
-    if(myGround && myGround.style.backgroundImage){
-      vg.style.backgroundImage=myGround.style.backgroundImage;
-      vg.style.backgroundPosition='center 60%';
-      vg.style.backgroundSize='cover';
-    }
-    // её украшения на её же местах
-    const owned = entry.ownedDecor || [];
-    const dpos = entry.decorPos || {};
-    $('visitDecor').innerHTML = owned.map(id=>{
-      const item=SHOP_ITEMS.find(x=>x.id===id);
-      if(!item) return '';
-      const pos = dpos[id] || { x:item.defX, y:item.defY, s:1 };
-      const s = pos.s || 1;
-      return `<div class="visit-decor-item" style="left:${pos.x}%; top:${pos.y}%; width:${item.w*s}%;">
-        <img src="${ASSET_PATH+item.img}" alt="${item.name}">
-      </div>`;
-    }).join('');
-    $('visitRow').innerHTML = PLOT_KEYS.map(key=>`<div class="visit-plot">${plantMarkup(key,'v-')}</div>`).join('');
-    PLOT_KEYS.forEach(key=>{
-      const lvl = entry.plotLevels ? (entry.plotLevels[key]||0) : 0;
-      updatePlantVisual(key, lvl, 'v-', hashVariants(String(entry.id||'')+key));
-    });
-    $('visitCheerBtn').onclick=async()=>{
-      chime(600); showToast(`Помахала ${entry.name} 👋 — пусть день будет добрым!`);
-      closeVisit();
-      try{
-        await setDoc(doc(collection(db,'garden_cheers')),{
-          to: entry.id, fromName: state.name, ts: Date.now(), createdAt: serverTimestamp()
-        });
-      }catch(e){ console.error('Не удалось отправить привет:', e); }
-    };
-    $('visitOverlay').classList.add('open');
-  }
-  function closeVisit(){ $('visitOverlay').classList.remove('open'); }
-  $('visitCloseBtn').addEventListener('click', closeVisit);
-  $('visitOverlay').addEventListener('click',(e)=>{ if(e.target.id==='visitOverlay') closeVisit(); });
-
-  /* ---------- финал ---------- */
-  function checkFinale(){
-    const day = getDayNumber();
-    const finished = day > 7;
-    // игра продолжается бесконечно — просто показываем значок с итогами
-    const badge = $('finaleBadge');
-    if(badge) badge.style.display = finished ? 'flex' : 'none';
-    if(finished) fillFinaleStats();
-    return false;
-  }
-  function fillFinaleStats(){
-    const total=PLOT_KEYS.reduce((s,k)=>s+state.plots[k].level,0);
-    $('statRow').innerHTML=`
-      <div class="stat"><b>${total.toFixed(1)}</b><span>уровней роста</span></div>
-      <div class="stat"><b>${state.bonusSeeds}</b><span>бонусных семян</span></div>
-      <div class="stat"><b>${farmLevel(farmXP())}</b><span>уровень сада</span></div>
-      <div class="stat"><b>${state.collection.length}</b><span>цветов в гербарии</span></div>`;
-  }
-
   function renderSkyTime(){
-    const h = new Date().getHours();
-    const cls = h>=5&&h<10 ? 't-morning' : h>=10&&h<17 ? 't-day' : h>=17&&h<22 ? 't-evening' : 't-night';
+    const h=new Date().getHours();
+    const cls=h>=5&&h<10?'t-morning':h>=10&&h<17?'t-day':h>=17&&h<22?'t-evening':'t-night';
     const sky=$('skyEl');
-    ['t-morning','t-day','t-evening','t-night'].forEach(c=>sky.classList.toggle(c, c===cls));
-    $('gardenScene').classList.toggle('night', cls==='t-night');
+    ['t-morning','t-day','t-evening','t-night'].forEach(c=>sky.classList.toggle(c,c===cls));
   }
   let rainBuilt=false;
   function renderWeather(){
-    const w = dayCfg().weather;
-    const rain=$('rainLayer');
-    rain.classList.toggle('on', w==='rain');
-    if(w==='rain' && !rainBuilt){
+    const w=dayCfg().weather, rain=$('rainLayer');
+    rain.classList.toggle('on',w==='rain');
+    if(w==='rain'&&!rainBuilt){
       rainBuilt=true;
       for(let i=0;i<26;i++){
         const d=document.createElement('div');
@@ -1272,84 +1032,39 @@ const DAILY_QUESTS = [
         rain.appendChild(d);
       }
     }
-    $('gardenScene').classList.toggle('windy', w==='wind');
+    $('gardenScene').classList.toggle('windy',w==='wind');
   }
-  function renderCollection(){
-    const zone=$('collectionZone');
-    const ownedFiles = new Set(state.collection.map(c=>c.img));
-    if(!ownedFiles.size){
-      zone.innerHTML='<div class="coll-empty-note">Вырасти цветок до полного расцвета — и он попадёт сюда. Редкие расцветы открывают новые цветы!</div>';
-      return;
-    }
-    zone.innerHTML='<div class="collection-grid">'+FINAL_FLOWERS.map(f=>{
-      const entry=state.collection.find(c=>c.img===f.file);
-      if(entry){
-        return `<div class="coll-slot filled ${entry.rare?'rare':''}">
-          <img class="coll-img" src="${ASSET_PATH+f.file}" alt="${f.name}">
-          <span class="coll-name">${f.name}</span>
-        </div>`;
-      }
-      return `<div class="coll-slot">❔<span class="coll-name">???</span></div>`;
-    }).join('')+'</div>';
+  function renderLevel(){
+    const xp=farmXP(), lvl=farmLevel(xp), into=xp%50;
+    $('levelLabel').textContent='Уровень сада: '+lvl;
+    $('levelXp').textContent=`${into} / 50 XP`;
+    $('levelFill').style.width=(into/50*100)+'%';
+    $('decorButterfly').classList.toggle('unlocked',state.bonusSeeds>=1);
+    $('decorLadybug').classList.toggle('unlocked',state.bonusSeeds>=3);
   }
-
-  function renderQuests(){
-    const log=todayLog();
-    $('questsZone').innerHTML = DAILY_QUESTS.map(q=>{
-      const done=(log[q.key]||0);
-      const claimed=log.qClaimed.includes(q.id);
-      const complete=done>=q.target;
-      const pips=Array.from({length:q.target},(_,i)=>`<div class="pip ${i<done?'full':''}"></div>`).join('');
-      const btn = claimed
-        ? `<button class="task-btn" disabled>Получено ✓</button>`
-        : complete
-          ? `<button class="task-btn" data-quest="${q.id}">+${q.reward} 🪙</button>`
-          : `<button class="task-btn" disabled>${done}/${q.target}</button>`;
-      return `<div class="task-row">
-        <div class="task-icon">🎯</div>
-        <div class="task-info"><div class="task-name">${q.name}</div><div class="task-pips">${pips}</div></div>
-        ${btn}
+  function renderPlants(){
+    const key=state.plants.map(p=>`${p.id}:${Math.floor(p.level*10)}:${p.weeds?1:0}:${p.bonusReadyAt&&Date.now()>=p.bonusReadyAt?1:0}`).join('|');
+    if(key===renderedPlantsKey) return;
+    renderedPlantsKey=key;
+    $('plantLayer').innerHTML=state.plants.map(p=>{
+      const ready=p.bonusReadyAt&&Date.now()>=p.bonusReadyAt;
+      const full=p.level>=MAX_LEVEL;
+      const mark = p.weeds ? '🌾' : ready ? '✨' : full ? '🧺' : '';
+      const w = 10 + stageIndexForLevel(p.level)*3.2;
+      return `<div class="plant ${ready||full?'ready':''}" data-plant="${p.id}" style="left:${p.x}%; top:${p.y}%; width:${w}%;">
+        ${mark?`<span class="plant-mark">${mark}</span>`:''}
+        <img src="${plantImgSrc(p.level,p.vars)}" alt="">
+        <span class="plant-shadow"></span>
+        ${p.weeds?'<span class="weed-mark">🌿</span>':''}
       </div>`;
     }).join('');
-    $('questsZone').querySelectorAll('[data-quest]').forEach(b=>{
-      b.addEventListener('click',()=>claimQuest(b.dataset.quest));
+    $('plantLayer').querySelectorAll('[data-plant]').forEach(el=>{
+      const p=state.plants.find(x=>x.id===el.dataset.plant);
+      el.addEventListener('click',(e)=>{ if(plantMode) return; e.stopPropagation(); plantAction(p); });
+      let pressTimer=null;
+      el.addEventListener('pointerdown',()=>{ pressTimer=setTimeout(()=>{ if(state.fert>0&&!p.weeds&&p.level<MAX_LEVEL) fertPlant(p); },600); });
+      ['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,()=>{ if(pressTimer) clearTimeout(pressTimer); }));
     });
-  }
-  function renderShop(){
-    $('shopZone').innerHTML = SHOP_ITEMS.map(item=>{
-      const owned=state.ownedDecor.includes(item.id);
-      return `<div class="shop-item ${owned?'owned':''}">
-        <img class="shop-img" src="${ASSET_PATH+item.img}" alt="${item.name}">
-        <div class="shop-name">${item.name}</div>
-        ${owned
-          ? `<button class="shop-buy" disabled>В саду ✓</button>`
-          : `<button class="shop-buy" data-shop="${item.id}" ${state.coins<item.price?'disabled':''}>${item.price} 🪙</button>`}
-      </div>`;
-    }).join('');
-    $('shopZone').querySelectorAll('[data-shop]').forEach(b=>{
-      b.addEventListener('click',()=>buyDecor(b.dataset.shop));
-    });
-  }
-  let renderedDecorIds='';
-  function renderShopDecor(){
-    const idsKey=state.ownedDecor.join(',');
-    if(idsKey===renderedDecorIds) return;
-    renderedDecorIds=idsKey;
-    $('shopDecorLayer').innerHTML = state.ownedDecor.map(id=>{
-      const item=SHOP_ITEMS.find(x=>x.id===id);
-      if(!item) return '';
-      const pos = state.decorPos[id] || { x:item.defX, y:item.defY, s:1 };
-      const s = pos.s || 1;
-      return `<div class="shop-decor-item" data-decor="${id}"
-        style="left:${pos.x}%; top:${pos.y}%; width:${item.w*s}%;">
-        <img src="${ASSET_PATH+item.img}" alt="${item.name}" draggable="false">
-        <div class="decor-tools">
-          <button class="decor-tool" data-scale="down" aria-label="Уменьшить">−</button>
-          <button class="decor-tool" data-scale="up" aria-label="Увеличить">+</button>
-        </div>
-      </div>`;
-    }).join('');
-    attachDecorDrag();
   }
   function decorState(id){
     const item=SHOP_ITEMS.find(x=>x.id===id);
@@ -1357,47 +1072,55 @@ const DAILY_QUESTS = [
     if(!state.decorPos[id].s) state.decorPos[id].s=1;
     return state.decorPos[id];
   }
-  function applyDecorStyle(el, id){
-    const item=SHOP_ITEMS.find(x=>x.id===id), st=decorState(id);
-    el.style.left=st.x+'%'; el.style.top=st.y+'%';
-    el.style.width=(item.w*st.s)+'%';
+  function renderDecor(){
+    const key=state.ownedDecor.join(',');
+    if(key===renderedDecorKey) return;
+    renderedDecorKey=key;
+    $('decorLayer').innerHTML=state.ownedDecor.map(id=>{
+      const item=SHOP_ITEMS.find(x=>x.id===id);
+      if(!item) return '';
+      const st=decorState(id);
+      return `<div class="decor-item" data-decor="${id}" style="left:${st.x}%; top:${st.y}%; width:${item.w*st.s}%;">
+        <img src="${ASSET_PATH+item.img}" alt="" draggable="false">
+        <div class="decor-tools">
+          <button class="decor-tool" data-scale="down">−</button>
+          <button class="decor-tool" data-scale="up">+</button>
+        </div>
+      </div>`;
+    }).join('');
+    attachDecorDrag();
   }
-  function scaleDecor(id, dir){
-    const st=decorState(id);
-    st.s = Math.min(DECOR_MAX_SCALE, Math.max(DECOR_MIN_SCALE, st.s + dir*0.18));
-    st.s = Math.round(st.s*100)/100;
-    const el=$('shopDecorLayer').querySelector(`[data-decor="${id}"]`);
-    if(el) applyDecorStyle(el, id);
-    saveProgress();
+  function applyDecorStyle(el,id){
+    const item=SHOP_ITEMS.find(x=>x.id===id), st=decorState(id);
+    el.style.left=st.x+'%'; el.style.top=st.y+'%'; el.style.width=(item.w*st.s)+'%';
   }
   function attachDecorDrag(){
-    const field = document.querySelector('.ground');
-    const layer = $('shopDecorLayer');
+    const layer=$('decorLayer');
     layer.querySelectorAll('[data-decor]').forEach(el=>{
-      const id = el.dataset.decor;
-      // кнопки размера
+      const id=el.dataset.decor;
       el.querySelectorAll('[data-scale]').forEach(btn=>{
-        btn.addEventListener('pointerdown', e=>e.stopPropagation());
-        btn.addEventListener('click', e=>{
+        btn.addEventListener('pointerdown',e=>e.stopPropagation());
+        btn.addEventListener('click',e=>{
           e.stopPropagation();
-          scaleDecor(id, btn.dataset.scale==='up' ? 1 : -1);
+          const st=decorState(id);
+          st.s=Math.min(DECOR_MAX_SCALE,Math.max(DECOR_MIN_SCALE,st.s+(btn.dataset.scale==='up'?0.18:-0.18)));
+          st.s=Math.round(st.s*100)/100;
+          applyDecorStyle(el,id); saveProgress();
         });
       });
-      el.addEventListener('pointerdown', (e)=>{
+      el.addEventListener('pointerdown',(e)=>{
+        if(plantMode) return;
         e.preventDefault();
-        // выделяем: показываем кнопки размера только у активного
         layer.querySelectorAll('[data-decor]').forEach(o=>o.classList.remove('selected'));
         el.classList.add('selected');
         let moved=false;
-        el.classList.add('dragging');
-        el.setPointerCapture(e.pointerId);
+        el.classList.add('dragging'); el.setPointerCapture(e.pointerId);
         const move=(ev)=>{
           moved=true;
-          const r=field.getBoundingClientRect();
-          const st=decorState(id);
-          st.x=Math.round(Math.max(5, Math.min(95, ((ev.clientX-r.left)/r.width)*100))*10)/10;
-          st.y=Math.round(Math.max(15, Math.min(99, ((ev.clientY-r.top)/r.height)*100))*10)/10;
-          applyDecorStyle(el, id);
+          const r=field.getBoundingClientRect(), st=decorState(id);
+          st.x=Math.round(Math.max(5,Math.min(95,((ev.clientX-r.left)/r.width)*100))*10)/10;
+          st.y=Math.round(Math.max(20,Math.min(99,((ev.clientY-r.top)/r.height)*100))*10)/10;
+          applyDecorStyle(el,id);
         };
         const up=()=>{
           el.classList.remove('dragging');
@@ -1411,45 +1134,245 @@ const DAILY_QUESTS = [
         el.addEventListener('pointercancel',up);
       });
     });
-    // клик по пустому полю снимает выделение
     field.addEventListener('pointerdown',(e)=>{
-      if(!e.target.closest('[data-decor]')){
-        layer.querySelectorAll('[data-decor]').forEach(o=>o.classList.remove('selected'));
-      }
+      if(!e.target.closest('[data-decor]')) layer.querySelectorAll('[data-decor]').forEach(o=>o.classList.remove('selected'));
     });
   }
-
-  function renderAll(){
-    renderHeader();
-    renderSkyTime();
-    const finished=checkFinale();
-    if(!finished){
-      if(!structureBuilt) renderFarmStructure();
-      renderLevelAndDecor();
-      renderWeather();
-      renderShopDecor();
-      renderFarmState();
-      renderTasks();
-      renderQuests();
-      renderShop();
-      renderExtraZone();
-    }
-    renderCollection();
+  function renderTasks(){
+    const L=todayLog();
+    ['steps','training','meal'].forEach(key=>{
+      const used=L[key]||0, max=TASK_LIMITS[key];
+      const pips=$('pips-'+key);
+      pips.innerHTML='';
+      for(let i=0;i<max;i++){
+        const pip=document.createElement('div');
+        pip.className='pip'+(i<used?' full':'');
+        pips.appendChild(pip);
+      }
+      const btn=$('task-'+key);
+      btn.disabled=used>=max;
+      btn.textContent=used>=max?'Всё ✓':'Отметить';
+    });
   }
+  function renderQuests(){
+    const L=todayLog();
+    $('questsZone').innerHTML=DAILY_QUESTS.map(q=>{
+      const done=L[q.key]||0, claimed=L.qClaimed.includes(q.id), complete=done>=q.target;
+      const pips=Array.from({length:q.target},(_,i)=>`<div class="pip ${i<done?'full':''}"></div>`).join('');
+      const btn=claimed?`<button class="task-btn" disabled>Получено ✓</button>`
+        :complete?`<button class="task-btn" data-quest="${q.id}">+${q.reward} 🪙</button>`
+        :`<button class="task-btn" disabled>${done}/${q.target}</button>`;
+      return `<div class="task-row"><div class="task-icon">🎯</div>
+        <div class="task-info"><div class="task-name">${q.name}</div><div class="task-pips">${pips}</div></div>${btn}</div>`;
+    }).join('');
+    $('questsZone').querySelectorAll('[data-quest]').forEach(b=>b.addEventListener('click',()=>claimQuest(b.dataset.quest)));
+  }
+  function renderShop(){
+    $('shopZone').innerHTML=SHOP_ITEMS.map(item=>{
+      const owned=state.ownedDecor.includes(item.id);
+      return `<div class="shop-item ${owned?'owned':''}">
+        <img class="shop-img" src="${ASSET_PATH+item.img}" alt="">
+        <div class="shop-name">${item.name}</div>
+        ${owned?`<button class="shop-buy" disabled>В саду ✓</button>`
+          :`<button class="shop-buy" data-shop="${item.id}" ${state.coins<item.price?'disabled':''}>${item.price} 🪙</button>`}
+      </div>`;
+    }).join('');
+    $('shopZone').querySelectorAll('[data-shop]').forEach(b=>b.addEventListener('click',()=>buyDecor(b.dataset.shop)));
+  }
+  function renderExtraZone(){
+    const zone=$('extraZone'), special=dayCfg().special, L=todayLog();
+    if(special==='secret'){
+      zone.innerHTML=`<div class="extra-card">
+        <div class="extra-title">🎁 Секретное задание дня</div>
+        <div class="extra-desc">Сделай 5-минутную растяжку у окна — необязательно, но сад скажет спасибо.</div>
+        <button class="extra-btn" id="secretBtn" ${L.secret?'disabled':''}>${L.secret?'Выполнено сегодня':'Выполнила'}</button>
+      </div>`;
+      const b=$('secretBtn');
+      if(b) b.addEventListener('click',()=>{
+        if(L.secret) return;
+        L.secret=true; state.bonusSeeds++; state.seeds++;
+        chime(760); saveProgress(); renderAll();
+        showToast('Секретное задание выполнено — +1 🌟 и +1 🌰!');
+      });
+    } else zone.innerHTML='';
+  }
+  function renderCollection(){
+    const zone=$('collectionZone');
+    const owned=new Set(state.collection.map(c=>c.img));
+    if(!owned.size){
+      zone.innerHTML='<div class="coll-empty-note">Вырасти цветок до конца и собери урожай — он попадёт сюда.</div>';
+      return;
+    }
+    zone.innerHTML='<div class="collection-grid">'+FINAL_FLOWERS.map(f=>{
+      return owned.has(f.file)
+        ? `<div class="coll-slot filled"><img class="coll-img" src="${ASSET_PATH+f.file}" alt=""><span class="coll-name">${f.name}</span></div>`
+        : `<div class="coll-slot">❔<span class="coll-name">???</span></div>`;
+    }).join('')+'</div>';
+  }
+  async function loadLeaderboard(){
+    try{
+      const q=query(collection(db,LEADERBOARD_COLLECTION), orderBy('score','desc'), limit(20));
+      const snap=await getDocs(q);
+      lbCache=[]; snap.forEach(d=>lbCache.push({ id:d.id, ...d.data() }));
+      renderLeaderboard();
+    }catch(e){ console.error(e); $('leaderboardList').textContent='Не удалось загрузить рейтинг.'; }
+  }
+  function renderLeaderboard(){
+    if(!lbCache.length){ $('leaderboardList').textContent='Пока пусто — будь первой!'; return; }
+    const myIdx=lbCache.findIndex(r=>r.id===state.docId);
+    const row=(r,i)=>`<div class="lb-row ${r.id===state.docId?'me':''}" data-idx="${i}">
+      <span class="lb-rank">${i+1}</span><span class="lb-name">${escapeHtml(r.name||'')}</span>
+      <span class="lb-score">${r.score||0}</span></div>`;
+    let html;
+    if(lbExpanded||lbCache.length<=4) html=lbCache.map(row).join('');
+    else{
+      html=lbCache.slice(0,3).map(row).join('');
+      if(myIdx>2) html+=`<div class="lb-gap">···</div>`+row(lbCache[myIdx],myIdx);
+      html+=`<button class="lb-more" id="lbMore">Показать всех (${lbCache.length})</button>`;
+    }
+    $('leaderboardList').innerHTML=html;
+    const more=$('lbMore');
+    if(more) more.addEventListener('click',()=>{ lbExpanded=true; renderLeaderboard(); });
+    document.querySelectorAll('.lb-row:not(.me)').forEach(r=>r.addEventListener('click',()=>openVisit(lbCache[Number(r.dataset.idx)])));
+  }
+  function openVisit(entry){
+    if(!entry) return;
+    todayLog().qVisit++; saveProgress();
+    $('visitName').textContent=`Сад: ${entry.name||'участница'}`;
+    $('visitSub').textContent=`${entry.score||0} очков`;
+    const vf=$('visitField');
+    if(window.__groundBg) vf.style.backgroundImage=window.__groundBg;
+    const owned=entry.ownedDecor||[], dpos=entry.decorPos||{};
+    const decorHtml=owned.map(id=>{
+      const item=SHOP_ITEMS.find(x=>x.id===id);
+      if(!item) return '';
+      const pos=dpos[id]||{ x:item.defX, y:item.defY, s:1 };
+      return `<div class="decor-item" style="left:${pos.x}%; top:${pos.y}%; width:${item.w*(pos.s||1)}%; cursor:default;">
+        <img src="${ASSET_PATH+item.img}" alt=""></div>`;
+    }).join('');
+    const plants=Array.isArray(entry.plants)?entry.plants:[];
+    const plantsHtml=plants.map((p,i)=>{
+      const vars=Array.isArray(p.vars)?p.vars:hashVariants(String(entry.id||'')+i);
+      const w=10+stageIndexForLevel(p.level||0)*3.2;
+      return `<div class="plant" style="left:${p.x||50}%; top:${p.y||80}%; width:${w}%; cursor:default;">
+        <img src="${plantImgSrc(p.level||0,vars)}" alt=""><span class="plant-shadow"></span></div>`;
+    }).join('');
+    vf.innerHTML=decorHtml+plantsHtml+(plants.length?'':'<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:12px;font-weight:800;color:#6B5D4E;background:rgba(255,251,240,.9);padding:6px 12px;border-radius:12px;">Сад ещё пустой</div>');
+    $('visitCheerBtn').onclick=async()=>{
+      chime(600); showToast(`Помахала ${entry.name} 👋`);
+      $('visitOverlay').classList.remove('open');
+      try{
+        await setDoc(doc(collection(db,'garden_cheers')),{ to:entry.id, fromName:state.name, ts:Date.now(), createdAt:serverTimestamp() });
+      }catch(e){ console.error(e); }
+    };
+    $('visitOverlay').classList.add('open');
+  }
+  $('visitCloseBtn').addEventListener('click',()=>$('visitOverlay').classList.remove('open'));
+  $('visitOverlay').addEventListener('click',e=>{ if(e.target.id==='visitOverlay') $('visitOverlay').classList.remove('open'); });
 
-  /* ---------- задания: обработчики ---------- */
-  PLOT_KEYS.forEach(key=>{
-    $('task-'+key).addEventListener('click',()=>doTask(key));
+  function fillFinaleStats(){
+    const total=state.plants.reduce((s,p)=>s+p.level,0);
+    $('statRow').innerHTML=`
+      <div class="stat"><b>${total.toFixed(1)}</b><span>роста в саду</span></div>
+      <div class="stat"><b>${state.bonusSeeds}</b><span>бонусов</span></div>
+      <div class="stat"><b>${farmLevel(farmXP())}</b><span>уровень</span></div>
+      <div class="stat"><b>${state.collection.length}</b><span>цветов</span></div>`;
+  }
+  function checkFinale(){
+    const badge=$('finaleBadge');
+    if(badge) badge.style.display = getDayNumber()>7 ? 'flex' : 'none';
+  }
+  $('finaleBadge').addEventListener('click',()=>{ fillFinaleStats(); $('finaleOverlay').classList.add('open'); });
+  $('finaleCloseBtn').addEventListener('click',()=>$('finaleOverlay').classList.remove('open'));
+  $('finaleOverlay').addEventListener('click',e=>{ if(e.target.id==='finaleOverlay') $('finaleOverlay').classList.remove('open'); });
+
+  function loadImg(src){
+    return new Promise(res=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>res(null); im.src=src; });
+  }
+  async function drawPostcard(){
+    const cv=$('postcardCanvas'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+    const sg=ctx.createLinearGradient(0,0,0,H*0.55);
+    sg.addColorStop(0,'#BFE3ED'); sg.addColorStop(1,'#EAF6EA');
+    ctx.fillStyle=sg; ctx.fillRect(0,0,W,H*0.55);
+    const gg=ctx.createLinearGradient(0,H*0.55,0,H);
+    gg.addColorStop(0,'#EFE1C5'); gg.addColorStop(1,'#E5D0A8');
+    ctx.fillStyle=gg; ctx.fillRect(0,H*0.55,W,H*0.45);
+    ctx.fillStyle='#E8B84B'; ctx.beginPath(); ctx.arc(W-140,130,64,0,Math.PI*2); ctx.fill();
+    ctx.textAlign='center';
+    ctx.fillStyle='#7C5568'; ctx.font='800 34px "Nunito Sans", sans-serif';
+    ctx.fillText('ЛЕТНИЙ ЛАГЕРЬ · ШАГАЙ ДОМА', W/2, 110);
+    ctx.fillStyle='#4A3324'; ctx.font='700 84px "Fraunces", serif';
+    ctx.fillText('Сад: '+state.name, W/2, 220);
+    ctx.fillStyle='#6B5D4E'; ctx.font='600 38px "Nunito Sans", sans-serif';
+    ctx.fillText('Мой сад в летнем лагере', W/2, 288);
+    const top=[...state.plants].sort((a,b)=>b.level-a.level).slice(0,3);
+    const imgs=await Promise.all(top.map(p=>loadImg(plantImgSrc(p.level,p.vars))));
+    imgs.forEach((im,i)=>{
+      const cx=W*(0.25+0.25*i);
+      if(im){ const ih=300, iw=ih*(im.width/im.height); ctx.drawImage(im,cx-iw/2,H*0.64-ih,iw,ih); }
+    });
+    const ownedF=FINAL_FLOWERS.filter(f=>state.collection.some(c=>c.img===f.file));
+    if(ownedF.length){
+      const fi=await Promise.all(ownedF.map(f=>loadImg(ASSET_PATH+f.file)));
+      const startX=W/2-(ownedF.length-1)*80;
+      fi.forEach((im,i)=>{ if(im){ const ih=140, iw=ih*(im.width/im.height); ctx.drawImage(im,startX+i*160-iw/2,H*0.78-ih,iw,ih); } });
+    }
+    ctx.fillStyle='#4A3324'; ctx.font='800 42px "Nunito Sans", sans-serif';
+    ctx.fillText(`🌟 ${state.bonusSeeds}  ·  📖 ${state.collection.length}  ·  Ур. ${farmLevel(farmXP())}`, W/2, H*0.87);
+    ctx.fillStyle='#6B5D4E'; ctx.font='600 32px "Nunito Sans", sans-serif';
+    ctx.fillText('Каждый цветок — мой выбор двигаться', W/2, H*0.93);
+  }
+  async function downloadPostcard(){
+    await drawPostcard();
+    $('postcardCanvas').toBlob(async(blob)=>{
+      if(!blob) return;
+      const file=new File([blob],'moy-sad.png',{type:'image/png'});
+      try{
+        if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+          await navigator.share({ files:[file], text:'Мой сад в летнем лагере Шагай Дома 🌻' });
+          return;
+        }
+      }catch(e){}
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download='moy-sad.png'; a.click();
+      URL.revokeObjectURL(a.href);
+    },'image/png');
+  }
+  $('postcardBtn').addEventListener('click',downloadPostcard);
+  $('shareBtn').addEventListener('click',async()=>{
+    const text='Я выращиваю свой сад в летнем лагере Шагай Дома 🌻';
+    try{
+      if(navigator.share){ await navigator.share({text}); }
+      else{ await navigator.clipboard.writeText(text); alert('Текст скопирован!'); }
+    }catch(e){}
   });
 
-  /* ---------- login ---------- */
+  function showIntro(){ $('introOverlay').classList.add('open'); }
+  $('introCloseBtn').addEventListener('click',()=>{
+    $('introOverlay').classList.remove('open');
+    if(!state.seenIntro){ state.seenIntro=true; saveProgress(); }
+  });
+  $('helpBtn').addEventListener('click',showIntro);
+
+  ['steps','training','meal'].forEach(key=>{
+    $('task-'+key).addEventListener('click',()=>openTaskModal(key));
+  });
+
+  function renderAll(){
+    tickPlants();
+    renderHeader(); renderSkyTime(); renderWeather(); renderLevel();
+    renderDecor(); renderPlants();
+    renderTasks(); renderQuests(); renderShop(); renderExtraZone(); renderCollection();
+    checkFinale();
+  }
+
   enterBtn.addEventListener('click',handleEnter);
   nameInput.addEventListener('keydown',e=>{ if(e.key==='Enter') handleEnter(); });
   emailInput.addEventListener('keydown',e=>{ if(e.key==='Enter') handleEnter(); });
   async function handleEnter(){
     const rawName=nameInput.value, rawEmail=emailInput.value;
-    if(!rawName.trim()||!rawEmail.trim()){ loginNote.textContent='Укажи имя и почту, чтобы посадить грядку.'; loginNote.classList.add('error'); return; }
-    if(!isValidEmail(rawEmail)){ loginNote.textContent='Проверь адрес почты — что-то не так с форматом.'; loginNote.classList.add('error'); return; }
+    if(!rawName.trim()||!rawEmail.trim()){ loginNote.textContent='Укажи имя и почту.'; loginNote.classList.add('error'); return; }
+    if(!isValidEmail(rawEmail)){ loginNote.textContent='Проверь адрес почты.'; loginNote.classList.add('error'); return; }
     enterBtn.disabled=true; enterBtn.textContent='Заходим в сад…';
     loginNote.classList.remove('error'); loginNote.textContent='';
     try{
@@ -1457,133 +1380,26 @@ const DAILY_QUESTS = [
       await loadOrCreateParticipant(rawName,rawEmail,cred.user.uid);
       loginScreen.style.display='none'; gameContent.style.display='block';
       renderAll(); maybeDailyGift(); loadLeaderboard(); checkCheers();
+      if(!state.seenIntro) showIntro();
     }catch(err){
       console.error(err);
       loginNote.textContent = err.code==='name-mismatch'
-        ? 'Эта почта уже зарегистрирована на другое имя. Введи имя так же, как в первый раз.'
-        : 'Не получилось подключиться. Проверь интернет и попробуй ещё раз.';
+        ? 'Эта почта уже зарегистрирована на другое имя.'
+        : 'Не получилось подключиться. Попробуй ещё раз.';
       loginNote.classList.add('error');
     }finally{
       enterBtn.disabled=false; enterBtn.textContent='Войти в сад →';
     }
   }
   $('switchAccountBtn').addEventListener('click',async()=>{
-    if(!confirm('Выйти из этого сада и войти под другим именем на этом устройстве?')) return;
-    try{ await auth.signOut(); }catch(e){ console.error(e); }
+    if(!confirm('Выйти и войти под другим именем?')) return;
+    try{ await auth.signOut(); }catch(e){}
     gameContent.style.display='none';
     nameInput.value=''; emailInput.value='';
     loginScreen.style.display='flex';
     await signInAnonymously(auth);
   });
 
-  /* ---------- финальная открытка ---------- */
-  function loadImg(src){
-    return new Promise(res=>{
-      const im=new Image();
-      im.onload=()=>res(im);
-      im.onerror=()=>res(null);
-      im.src=src;
-    });
-  }
-  async function drawPostcard(){
-    const cv=$('postcardCanvas'), ctx=cv.getContext('2d');
-    const W=cv.width, H=cv.height;
-    // фон: небо → земля
-    const skyGrad=ctx.createLinearGradient(0,0,0,H*0.55);
-    skyGrad.addColorStop(0,'#BFE3ED'); skyGrad.addColorStop(1,'#EAF6EA');
-    ctx.fillStyle=skyGrad; ctx.fillRect(0,0,W,H*0.55);
-    const groundGrad=ctx.createLinearGradient(0,H*0.55,0,H);
-    groundGrad.addColorStop(0,'#EFE1C5'); groundGrad.addColorStop(1,'#E5D0A8');
-    ctx.fillStyle=groundGrad; ctx.fillRect(0,H*0.55,W,H*0.45);
-    // солнце
-    ctx.fillStyle='#E8B84B'; ctx.beginPath(); ctx.arc(W-140,130,64,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='rgba(232,184,75,0.3)'; ctx.beginPath(); ctx.arc(W-140,130,96,0,Math.PI*2); ctx.fill();
-    // заголовок
-    ctx.fillStyle='#7C5568';
-    ctx.font='800 34px "Nunito Sans", sans-serif';
-    ctx.textAlign='center';
-    ctx.fillText('ЛЕТНИЙ ЛАГЕРЬ · ШАГАЙ ДОМА', W/2, 110);
-    ctx.fillStyle='#4A3324';
-    ctx.font='700 84px "Fraunces", serif';
-    ctx.fillText('Сад: ' + state.name, W/2, 220);
-    ctx.fillStyle='#6B5D4E';
-    ctx.font='600 40px "Nunito Sans", sans-serif';
-    ctx.fillText('7 дней заботы о себе — и сад расцвёл', W/2, 290);
-    // растения сада — реальные спрайты текущих стадий
-    const plantImgs = await Promise.all(PLOT_KEYS.map(k=>{
-      const p=state.plots[k];
-      return loadImg(plantImgSrc(k, p.level, ensureVariants(p)));
-    }));
-    plantImgs.forEach((im,i)=>{
-      const cx=W*(0.25+0.25*i);
-      if(im){
-        const ih=300, iw=ih*(im.width/im.height);
-        ctx.drawImage(im, cx-iw/2, H*0.62-ih, iw, ih);
-      } else {
-        ctx.font='220px serif';
-        ctx.fillText('🌸', cx, H*0.62);
-      }
-    });
-    // собранные цветы гербария внизу
-    const ownedFlowers = FINAL_FLOWERS.filter(f=>state.collection.some(c=>c.img===f.file));
-    if(ownedFlowers.length){
-      const imgs = await Promise.all(ownedFlowers.map(f=>loadImg(ASSET_PATH+f.file)));
-      const startX = W/2 - (ownedFlowers.length-1)*80;
-      imgs.forEach((im,i)=>{
-        const cx=startX+i*160;
-        if(im){
-          const ih=140, iw=ih*(im.width/im.height);
-          ctx.drawImage(im, cx-iw/2, H*0.76-ih, iw, ih);
-        }
-      });
-    }
-    // статистика
-    const total=PLOT_KEYS.reduce((s,k)=>s+state.plots[k].level,0);
-    ctx.fillStyle='#4A3324';
-    ctx.font='800 44px "Nunito Sans", sans-serif';
-    ctx.fillText(`🌟 ${state.bonusSeeds} семян  ·  📖 ${state.collection.length} цветов  ·  Ур. сада ${farmLevel(farmXP())}`, W/2, H*0.86);
-    ctx.fillStyle='#6B5D4E';
-    ctx.font='600 34px "Nunito Sans", sans-serif';
-    ctx.fillText('Каждый цветок — мой выбор двигаться и заботиться о себе', W/2, H*0.92);
-  }
-  async function downloadPostcard(){
-    await drawPostcard();
-    const cv=$('postcardCanvas');
-    cv.toBlob(async(blob)=>{
-      if(!blob) return;
-      const file=new File([blob], 'moy-sad-shagai-doma.png', {type:'image/png'});
-      try{
-        if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-          await navigator.share({ files:[file], text:'Мой сад за 7 дней летнего лагеря Шагай Дома 🌻' });
-          return;
-        }
-      }catch(e){ /* пользователь отменил — падаем на скачивание */ }
-      const a=document.createElement('a');
-      a.href=URL.createObjectURL(blob);
-      a.download='moy-sad-shagai-doma.png';
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }, 'image/png');
-  }
-  $('finaleBadge').addEventListener('click',()=>{
-    fillFinaleStats();
-    $('finaleOverlay').classList.add('open');
-  });
-  $('finaleCloseBtn').addEventListener('click',()=>$('finaleOverlay').classList.remove('open'));
-  $('finaleOverlay').addEventListener('click',(e)=>{ if(e.target.id==='finaleOverlay') $('finaleOverlay').classList.remove('open'); });
-
-  $('postcardBtn').addEventListener('click', downloadPostcard);
-
-  /* ---------- share ---------- */
-  $('shareBtn').addEventListener('click',async()=>{
-    const text='Я вырастила свою грядку стройности за 7 дней летнего лагеря Шагай Дома 🌻';
-    try{
-      if(navigator.share){ await navigator.share({text}); }
-      else{ await navigator.clipboard.writeText(text); alert('Текст скопирован — вставь его в сторис!'); }
-    }catch(e){}
-  });
-
-  /* ---------- сессия ---------- */
   onAuthStateChanged(auth,async(user)=>{
     if(user){
       try{
@@ -1592,21 +1408,21 @@ const DAILY_QUESTS = [
         if(resumed){
           gameContent.style.display='block';
           renderAll(); maybeDailyGift(); loadLeaderboard(); checkCheers();
-        }
-        else loginScreen.style.display='flex';
+          if(!state.seenIntro) showIntro();
+        } else loginScreen.style.display='flex';
       }catch(e){
         console.error(e);
         loadingScreen.style.display='none'; loginScreen.style.display='flex';
       }
     } else {
       try{ await signInAnonymously(auth); }
-      catch(e){ console.error(e); loadingScreen.style.display='none'; loginScreen.style.display='flex'; }
+      catch(e){ loadingScreen.style.display='none'; loginScreen.style.display='flex'; }
     }
   });
 
   setInterval(()=>{
-    if(gameContent.style.display!=='none' && loginScreen.style.display==='none') renderAll();
-  },1000);
+    if(gameContent.style.display!=='none'&&loginScreen.style.display==='none') renderAll();
+  },5000);
 
 })();
 </script>
