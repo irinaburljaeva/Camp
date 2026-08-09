@@ -34,7 +34,7 @@
   .ic-water{ width:11px; height:14px; background:var(--water); border-radius:50% 50% 50% 50% / 62% 62% 38% 38%; transform:rotate(0deg); position:relative; }
   .ic-water::before{ content:''; position:absolute; top:0; left:50%; width:0; height:0; margin-left:-4px; border-left:4px solid transparent; border-right:4px solid transparent; border-bottom:6px solid var(--water); transform:translateY(-4px); }
   .ic-coin{ width:14px; height:14px; border-radius:50%; background:radial-gradient(circle at 35% 32%, #F7D97A, var(--sun)); border:1.5px solid #C9971F; }
-  .ic-seed{ width:15px; height:15px; object-fit:contain; }
+  .ic-seed{ width:22px; height:22px; object-fit:contain; vertical-align:-6px; margin-right:-2px; }
   .ic-lg{ transform:scale(1.7); margin:0 5px; }
 
   .loading-screen, .login-screen{ position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; }
@@ -120,6 +120,15 @@
   .plant img{ display:block; width:100%; height:auto; filter:drop-shadow(0 2px 3px rgba(20,30,15,0.45)); pointer-events:none; transition:transform .25s cubic-bezier(.34,1.56,.64,1); }
   .plant-shadow{ position:absolute; left:50%; bottom:-4px; transform:translateX(-50%); width:56%; height:11px; border-radius:50%; z-index:-1; background:radial-gradient(ellipse at 50% 50%, rgba(28,40,20,0.4), rgba(28,40,20,0) 75%); }
   .plant.ready img{ animation:readyBob 1.5s ease-in-out infinite; }
+  .plant.seedling img{ filter:drop-shadow(0 0 7px rgba(232,184,75,0.95)) drop-shadow(0 2px 4px rgba(20,30,15,0.5)); animation:seedGlow 2s ease-in-out infinite; }
+  @keyframes seedGlow{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.08); } }
+  .plant.seedling::before{
+    content:''; position:absolute; left:50%; bottom:-6px; transform:translateX(-50%);
+    width:130%; height:26px; border-radius:50%; z-index:-2; pointer-events:none;
+    background:radial-gradient(ellipse at 50% 50%, rgba(232,184,75,0.45), rgba(232,184,75,0) 70%);
+    animation:seedHalo 2s ease-in-out infinite;
+  }
+  @keyframes seedHalo{ 0%,100%{ opacity:.55; } 50%{ opacity:1; } }
   @keyframes readyBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }
   .plant-mark{
     position:absolute; top:-14px; left:50%; transform:translateX(-50%);
@@ -155,18 +164,15 @@
   .card-title{ font-size:13.5px; font-weight:800; color:var(--soil-dark); }
   .card-badge{ display:flex; align-items:center; gap:5px; background:#FBF3E4; border:1px solid #EAD9B8; border-radius:20px; padding:4px 11px; font-size:12px; font-weight:800; color:#8A6220; white-space:nowrap; }
 
-  .task-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #EFE6D2; }
+  .task-row{ display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #EFE6D2; }
   .task-row:last-child{ border-bottom:none; }
-  .task-dot{ width:26px; height:26px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#fff; }
-  .task-dot.move{ background:#5E8F7C; } .task-dot.gym{ background:var(--leaf); }
-  .task-dot.food{ background:var(--bloom); } .task-dot.garden{ background:var(--plum); }
   .task-info{ flex:1; min-width:0; }
-  .task-name{ font-size:12px; font-weight:800; color:var(--soil-dark); }
-  .task-reward{ display:flex; align-items:center; gap:4px; font-size:10.5px; color:var(--ink-soft); font-weight:700; margin-top:2px; }
-  .task-pips{ display:flex; gap:3px; margin-top:4px; }
-  .pip{ width:9px; height:9px; border-radius:50%; background:#E4D9C4; }
-  .pip.full{ background:var(--leaf); }
-  .task-btn{ border:none; border-radius:9px; padding:8px 11px; font-size:11px; font-weight:800; cursor:pointer; background:var(--bloom); color:#fff; white-space:nowrap; flex-shrink:0; }
+  .task-name{ font-size:12.5px; font-weight:800; color:var(--soil-dark); line-height:1.3; }
+  .task-progress{ font-size:10.5px; color:var(--ink-soft); font-weight:700; margin-top:3px; }
+  .task-right{ display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+  .task-reward{ display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:800; color:#8A6220; }
+  .task-reward span{ display:flex; align-items:center; gap:3px; }
+  .task-btn{ border:none; border-radius:9px; padding:7px 14px; font-size:11px; font-weight:800; cursor:pointer; background:var(--bloom); color:#fff; white-space:nowrap; }
   .task-btn:disabled{ background:#E4D9C4; color:#A99A80; }
 
   .shop-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
@@ -218,6 +224,17 @@
   .hold-circle::after{ content:''; position:absolute; inset:9px; border-radius:50%; background:#fff; }
   .hold-inner{ position:relative; z-index:1; font-size:13px; font-weight:800; color:var(--soil-dark); }
   .hold-label{ font-size:12px; font-weight:800; color:var(--ink-soft); min-height:16px; }
+  .tap-pad{ width:130px; height:130px; border-radius:50%; margin:16px auto 8px; background:#FBF3E4; border:3px solid var(--sun);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; }
+  .tap-pad.pulse{ animation:tapPulse .18s ease; }
+  @keyframes tapPulse{ 0%{transform:scale(1);} 50%{transform:scale(.93);} 100%{transform:scale(1);} }
+  .tap-count{ font-family:'Fraunces',serif; font-size:34px; font-weight:700; color:var(--soil-dark); }
+  .slide-track{ position:relative; height:52px; border-radius:26px; background:#EFE1C5; margin:18px 0 8px; overflow:hidden; }
+  .slide-fill{ position:absolute; left:0; top:0; bottom:0; width:0; background:linear-gradient(90deg,#8FC6B4,var(--leaf)); }
+  .slide-knob{ position:absolute; top:4px; left:0; width:44px; height:44px; margin-left:4px; border-radius:50%;
+    background:#fff; box-shadow:0 3px 8px rgba(40,50,30,.35); cursor:grab; touch-action:none; z-index:2; }
+  .slide-knob::after{ content:'›'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:800; color:var(--leaf-dark); }
+  .slide-hint{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:var(--ink-soft); pointer-events:none; }
   .choice-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:12px 0 4px; }
   .choice-btn{ background:#fff; border:2px solid #E4D9C4; border-radius:12px; padding:14px 6px; font-family:'Nunito Sans',sans-serif; font-size:12px; font-weight:800; color:var(--soil-dark); cursor:pointer; }
   .choice-btn.picked{ border-color:var(--bloom); background:#FBF3E4; }
@@ -420,9 +437,9 @@ const FINAL_FLOWERS=[
   { file:'seed34.png', name:'Розовая лилия' }
 ];
 
-const BASE_PLANT_LIMIT=3, EXTRA_SLOT_PRICE=500, MAX_LEVEL=7;
-const DRIP_INTERVAL_MS=90*60000, DRIP_CAP=5, DAILY_MIN_WATER=3;
-const WEED_CHANCE_PER_MIN=0.010, WEED_COST=1;
+const BASE_PLANT_LIMIT=3, EXTRA_SLOT_PRICE=300, MAX_LEVEL=7;
+const DRIP_INTERVAL_MS=180*60000, DRIP_CAP=2, DAILY_MIN_WATER=1;
+const WEED_CHANCE_PER_MIN=0.010, WEED_COST=2;
 
 const WEATHERS=[
   { id:'clear', name:'Ясно',        desc:'Обычный день — сад растёт как всегда.',        growMul:1,    weight:34 },
@@ -443,30 +460,32 @@ const DECOR_MIN_SCALE=0.5, DECOR_MAX_SCALE=2.2;
 
 const MOVE_CHOICES=[{n:'Ходьба'},{n:'Силовая'},{n:'Растяжка'},{n:'Кардио'}];
 const FOOD_CHOICES=[{n:'Салат'},{n:'Суп'},{n:'Завтрак'},{n:'Рыба или мясо'}];
+const VEG_CHOICES=[{n:'Огурцы и помидоры'},{n:'Капуста'},{n:'Зелень'},{n:'Тушёные овощи'}];
+const BREAKFAST_CHOICES=[{n:'Каша'},{n:'Яйца'},{n:'Творог'},{n:'Смузи'}];
 
 const QUEST_POOL=[
-  { id:'steps2500', group:'move', cls:'move', name:'Пройти 2 500 шагов', target:4, reward:{water:1}, modal:{type:'hold', title:'Прогулка', text:'Держи палец на круге — отметь свои 2 500 шагов.'} },
-  { id:'steps5000', group:'move', cls:'move', name:'Пройти 5 000 шагов', target:2, reward:{water:2}, modal:{type:'hold', title:'Долгая прогулка', text:'Держи палец на круге — отметь 5 000 шагов.'} },
-  { id:'walkOut',   group:'move', cls:'move', name:'Прогулка на улице', target:1, reward:{water:2, coins:3}, modal:{type:'hold', title:'Прогулка на воздухе', text:'Была на улице хотя бы 20 минут? Подтверди удержанием.'} },
-  { id:'stairs',    group:'move', cls:'move', name:'Лестница вместо лифта', target:2, reward:{water:1, coins:2}, modal:{type:'hold', title:'Лестница', text:'Поднялась пешком? Подтверди удержанием.'} },
-  { id:'eveWalk',   group:'move', cls:'move', name:'Вечерняя прогулка', target:1, reward:{water:2, seed:1}, modal:{type:'hold', title:'Вечерняя прогулка', text:'Прогулялась после ужина? Подтверди удержанием.'} },
-  { id:'training',  group:'gym',  cls:'gym',  name:'Тренировка', target:2, reward:{water:2, seed:1}, modal:{type:'choice', title:'Тренировка', text:'Что делала сегодня?', options:MOVE_CHOICES} },
-  { id:'stretch',   group:'gym',  cls:'gym',  name:'Растяжка 10 минут', target:1, reward:{water:1, coins:3}, modal:{type:'hold', title:'Растяжка', text:'Потянулась 10 минут? Подтверди удержанием.'} },
-  { id:'morningEx', group:'gym',  cls:'gym',  name:'Утренняя зарядка', target:1, reward:{water:2, coins:2}, modal:{type:'hold', title:'Зарядка', text:'Размялась утром? Подтверди удержанием.'} },
-  { id:'strength',  group:'gym',  cls:'gym',  name:'Силовая тренировка', target:1, reward:{water:2, seed:1}, modal:{type:'hold', title:'Силовая', text:'Поработала с весом или резинкой? Подтверди.'} },
-  { id:'meal',      group:'food', cls:'food', name:'Блюдо по меню', target:3, reward:{water:1, coins:2}, modal:{type:'choice', title:'Блюдо по меню', text:'Что приготовила?', options:FOOD_CHOICES} },
-  { id:'drinkWater',group:'food', cls:'food', name:'Стакан воды', target:6, reward:{water:1}, modal:{type:'hold', title:'Стакан воды', text:'Выпила стакан? Подтверди удержанием.'} },
-  { id:'veggies',   group:'food', cls:'food', name:'Порция овощей', target:2, reward:{water:1, coins:2}, modal:{type:'hold', title:'Овощи', text:'Съела порцию овощей? Подтверди удержанием.'} },
-  { id:'noSugar',   group:'food', cls:'food', name:'День без сладкого', target:1, reward:{coins:6, seed:1}, modal:{type:'hold', title:'Без сладкого', text:'День прошёл без сладкого? Подтверди удержанием.'} },
-  { id:'breakfast', group:'food', cls:'food', name:'Полезный завтрак', target:1, reward:{water:2, coins:2}, modal:{type:'hold', title:'Завтрак', text:'Позавтракала по меню? Подтверди удержанием.'} },
-  { id:'noSnack',   group:'food', cls:'food', name:'Без перекусов после 20:00', target:1, reward:{coins:5}, modal:{type:'hold', title:'Вечер без перекусов', text:'Вечер прошёл спокойно? Подтверди удержанием.'} },
-  { id:'water2',  group:'garden', cls:'garden', name:'Полить растения', target:2, reward:{coins:5}, track:'water' },
-  { id:'water4',  group:'garden', cls:'garden', name:'Полить растения 4 раза', target:4, reward:{coins:8, seed:1}, track:'water' },
-  { id:'weed1',   group:'garden', cls:'garden', name:'Прополоть сорняки', target:1, reward:{coins:4}, track:'weed' },
-  { id:'harvest1',group:'garden', cls:'garden', name:'Собрать цветок в гербарий', target:1, reward:{coins:10, seed:1}, track:'harvest' },
-  { id:'plant1',  group:'garden', cls:'garden', name:'Посадить новое семечко', target:1, reward:{coins:4}, track:'plant' },
-  { id:'visit1',  group:'garden', cls:'garden', name:'Заглянуть в чужой сад', target:1, reward:{coins:5, seed:1}, track:'visit' },
-  { id:'cheer2',  group:'garden', cls:'garden', name:'Помахать двум соседкам', target:2, reward:{coins:6}, track:'cheer' }
+  { id:'steps2500', group:'move', name:'Пройти 2 500 шагов', target:4, reward:{water:1}, modal:{type:'taps', title:'Прогулка', text:'Сделай 8 шагов пальцем — тапай по кругу.', goal:8} },
+  { id:'steps5000', group:'move', name:'Пройти 5 000 шагов', target:2, reward:{water:2}, modal:{type:'taps', title:'Долгая прогулка', text:'Тапай по кругу — 15 шагов до отметки.', goal:15} },
+  { id:'walkOut',   group:'move', name:'Прогулка на улице', target:1, reward:{water:1, coins:2}, modal:{type:'slide', title:'Прогулка на воздухе', text:'Была на улице хотя бы 20 минут? Проведи ползунок вправо.'} },
+  { id:'stairs',    group:'move', name:'Лестница вместо лифта', target:2, reward:{water:1}, modal:{type:'taps', title:'Лестница', text:'Тапай по ступенькам — 10 этажей.', goal:10} },
+  { id:'eveWalk',   group:'move', name:'Вечерняя прогулка', target:1, reward:{water:1, seed:1}, modal:{type:'slide', title:'Вечерняя прогулка', text:'Прогулялась после ужина? Проведи ползунок вправо.'} },
+  { id:'training',  group:'gym', name:'Тренировка', target:2, reward:{water:2}, modal:{type:'choice', title:'Тренировка', text:'Что делала сегодня?', options:MOVE_CHOICES} },
+  { id:'stretch',   group:'gym', name:'Растяжка 10 минут', target:1, reward:{water:1, coins:2}, modal:{type:'hold', title:'Растяжка', text:'Тянись вместе с кругом — держи палец, пока он заполняется.'} },
+  { id:'morningEx', group:'gym', name:'Утренняя зарядка', target:1, reward:{water:1, coins:2}, modal:{type:'slide', title:'Зарядка', text:'Размялась утром? Проведи ползунок вправо.'} },
+  { id:'strength',  group:'gym', name:'Силовая тренировка', target:1, reward:{water:2, seed:1}, modal:{type:'taps', title:'Силовая', text:'Сделай 12 повторов — тапай в ритме.', goal:12} },
+  { id:'meal',      group:'food', name:'Блюдо по меню', target:3, reward:{water:1, coins:1}, modal:{type:'choice', title:'Блюдо по меню', text:'Что приготовила?', options:FOOD_CHOICES} },
+  { id:'drinkWater',group:'food', name:'Стакан воды', target:6, reward:{water:1}, modal:{type:'hold', title:'Стакан воды', text:'Держи палец — наполни стакан до краёв.'} },
+  { id:'veggies',   group:'food', name:'Порция овощей', target:2, reward:{water:1}, modal:{type:'choice', title:'Овощи', text:'Какие овощи были на тарелке?', options:VEG_CHOICES} },
+  { id:'noSugar',   group:'food', name:'День без сладкого', target:1, reward:{coins:5, seed:1}, modal:{type:'slide', title:'Без сладкого', text:'День прошёл без сладкого? Проведи ползунок вправо.'} },
+  { id:'breakfast', group:'food', name:'Полезный завтрак', target:1, reward:{water:1, coins:2}, modal:{type:'choice', title:'Завтрак', text:'Что было на завтрак?', options:BREAKFAST_CHOICES} },
+  { id:'noSnack',   group:'food', name:'Без перекусов после 20:00', target:1, reward:{coins:4}, modal:{type:'slide', title:'Вечер без перекусов', text:'Вечер прошёл спокойно? Проведи ползунок вправо.'} },
+  { id:'water2',  group:'garden', name:'Полить растения', target:2, reward:{coins:4}, track:'water' },
+  { id:'water4',  group:'garden', name:'Полить растения 4 раза', target:4, reward:{coins:7, seed:1}, track:'water' },
+  { id:'weed1',   group:'garden', name:'Прополоть сорняки', target:1, reward:{coins:4}, track:'weed' },
+  { id:'harvest1',group:'garden', name:'Собрать цветок в гербарий', target:1, reward:{coins:12, seed:1}, track:'harvest' },
+  { id:'plant1',  group:'garden', name:'Посадить новое семечко', target:1, reward:{coins:3}, track:'plant' },
+  { id:'visit1',  group:'garden', name:'Заглянуть в чужой сад', target:1, reward:{coins:4}, track:'visit' },
+  { id:'cheer2',  group:'garden', name:'Помахать двум соседкам', target:2, reward:{coins:5}, track:'cheer' }
 ];
 
 
@@ -491,7 +510,7 @@ const QUEST_POOL=[
 const ICON={
   water:'<span class="ic ic-water"></span>',
   coin:'<span class="ic ic-coin"></span>',
-  seed:`<img class="ic ic-seed" src="${ASSET_PATH+SEED_IMG}" alt="">`
+  seed:`<img class="ic ic-seed" src="${ASSET_PATH+SEED_IMG}" alt="семя" title="семечко">`
 };
 
 (async function(){
@@ -550,7 +569,7 @@ const ICON={
     return [
       ...seededPick(move,1,seed),
       ...seededPick(gym,1,seed+7),
-      ...seededPick(food,2,seed+13),
+      ...seededPick(food,1,seed+13),
       ...seededPick(garden,2,seed+29)
     ];
   }
@@ -594,6 +613,8 @@ const ICON={
   document.head.appendChild(st);
 
   function stageIndexForLevel(l){ if(l<1) return -1; if(l<2.75) return 0; if(l<4.5) return 1; if(l<6) return 2; return 3; }
+  const STAGE_WIDTH=[13,15,18,21,24];
+  function plantWidth(level){ return STAGE_WIDTH[stageIndexForLevel(level)+1]; }
   function plantImgSrc(level,vars){
     const s=stageIndexForLevel(level);
     if(s<0) return ASSET_PATH+SEED_IMG;
@@ -636,10 +657,10 @@ const ICON={
       await setDoc(ref,{ownerUid:authUid,updatedAt:serverTimestamp()},{merge:true});
     } else {
       state.docId=email; state.name=name; state.email=email; state.campStartDate=todayStr();
-      state.plants=[]; state.seeds=1; state.water=2; state.coins=5; state.collection={};
+      state.plants=[]; state.seeds=1; state.water=2; state.coins=3; state.collection={};
       await setDoc(ref,{
         name,email,campStartDate:state.campStartDate,log:{},plants:[],
-        water:2,seeds:1,coins:5,plantLimit:BASE_PLANT_LIMIT,ownedDecor:[],decorPos:{},
+        water:2,seeds:1,coins:3,plantLimit:BASE_PLANT_LIMIT,ownedDecor:[],decorPos:{},
         collection:{},seenIntro:false,lastDripAt:Date.now(),ownerUid:authUid,
         createdAt:serverTimestamp(),updatedAt:serverTimestamp()
       });
@@ -694,9 +715,9 @@ const ICON={
     const t=todayStr(), L=todayLog();
     if(L.minWaterGiven) return;
     L.minWaterGiven=true;
-    if(state.water<DAILY_MIN_WATER){
+    if(state.water<=0){
       state.water=DAILY_MIN_WATER;
-      showToast('Утренняя роса наполнила лейку');
+      showToast('Утренняя роса дала каплю воды');
     }
     saveProgress();
   }
@@ -744,7 +765,7 @@ const ICON={
   function waterPlant(p){
     if(state.water<=0) return;
     state.water--; todayLog().water++;
-    const inc=(0.42+Math.random()*0.28)*todayWeather().growMul;
+    const inc=(0.30+Math.random()*0.22)*todayWeather().growMul;
     p.level=Math.min(MAX_LEVEL,p.level+inc);
     const el=document.querySelector(`[data-plant="${p.id}"]`);
     if(el){ const im=el.querySelector('img'); if(im){ im.style.transform='scale(1.18)'; setTimeout(()=>im.style.transform='scale(1)',220); } }
@@ -803,10 +824,10 @@ const ICON={
 
   function rewardText(rw){
     const parts=[];
-    if(rw.water) parts.push(`+${rw.water} ${ICON.water}`);
-    if(rw.seed) parts.push(`+${rw.seed} ${ICON.seed}`);
-    if(rw.coins) parts.push(`+${rw.coins} ${ICON.coin}`);
-    return parts.join(' ');
+    if(rw.water) parts.push(`<span>${ICON.water}${rw.water}</span>`);
+    if(rw.coins) parts.push(`<span>${ICON.coin}${rw.coins}</span>`);
+    if(rw.seed) parts.push(`<span>${ICON.seed}${rw.seed}</span>`);
+    return parts.join('');
   }
   function grantReward(rw){
     if(rw.water) state.water+=rw.water;
@@ -818,33 +839,73 @@ const ICON={
     const q=QUEST_POOL.find(x=>x.id===qid), L=todayLog();
     if(!q||!q.modal||L[qid]>=q.target) return;
     const body=$('taskModalBody'), m=q.modal;
+    const head=`<div class="modal-title">${m.title}</div><p class="modal-text">${m.text}</p>`;
+    const cancel=`<button class="ghost-btn" id="taskCancelBtn">Отмена</button>`;
+
     if(m.type==='hold'){
-      body.innerHTML=`<div class="modal-title">${m.title}</div>
-        <p class="modal-text">${m.text}</p>
+      body.innerHTML=head+`
         <div class="hold-circle" id="holdCircle" style="--p:0"><span class="hold-inner">Держи</span></div>
-        <div class="hold-label" id="holdLabel">Зажми и держи</div>
-        <button class="ghost-btn" id="taskCancelBtn">Отмена</button>`;
+        <div class="hold-label" id="holdLabel">Зажми и держи</div>`+cancel;
       setupHold(()=>completeQuest(qid));
+    } else if(m.type==='taps'){
+      body.innerHTML=head+`
+        <div class="tap-pad" id="tapPad"><span class="tap-count" id="tapCount">0</span></div>
+        <div class="hold-label" id="tapLabel">Осталось: ${m.goal}</div>`+cancel;
+      setupTaps(m.goal,()=>completeQuest(qid));
+    } else if(m.type==='slide'){
+      body.innerHTML=head+`
+        <div class="slide-track" id="slideTrack">
+          <div class="slide-fill" id="slideFill"></div>
+          <div class="slide-knob" id="slideKnob"></div>
+          <span class="slide-hint" id="slideHint">Проведи вправо</span>
+        </div>`+cancel;
+      setupSlide(()=>completeQuest(qid));
     } else {
-      body.innerHTML=`<div class="modal-title">${m.title}</div>
-        <p class="modal-text">${m.text}</p>
-        <div class="choice-grid" id="choiceGrid">${m.options.map((o,i)=>`<button class="choice-btn" data-i="${i}">${o.n}</button>`).join('')}</div>
-        <div id="holdZone" style="display:none;">
-          <div class="hold-circle" id="holdCircle" style="--p:0"><span class="hold-inner">Держи</span></div>
-          <div class="hold-label" id="holdLabel">Держи, чтобы подтвердить</div>
-        </div>
-        <button class="ghost-btn" id="taskCancelBtn">Отмена</button>`;
+      body.innerHTML=head+`
+        <div class="choice-grid" id="choiceGrid">${m.options.map((o,i)=>`<button class="choice-btn" data-i="${i}">${o.n}</button>`).join('')}</div>`+cancel;
       $('choiceGrid').querySelectorAll('.choice-btn').forEach(btn=>{
         btn.addEventListener('click',()=>{
           $('choiceGrid').querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('picked'));
-          btn.classList.add('picked'); chime(520);
-          $('holdZone').style.display='block';
-          setupHold(()=>completeQuest(qid,m.options[Number(btn.dataset.i)].n));
+          btn.classList.add('picked'); chime(560);
+          setTimeout(()=>completeQuest(qid,m.options[Number(btn.dataset.i)].n),300);
         });
       });
     }
     $('taskCancelBtn').addEventListener('click',()=>$('taskOverlay').classList.remove('open'));
     $('taskOverlay').classList.add('open');
+  }
+  function setupTaps(goal,onDone){
+    const pad=$('tapPad'), cnt=$('tapCount'), label=$('tapLabel');
+    let n=0, done=false;
+    pad.addEventListener('click',()=>{
+      if(done) return;
+      n++; cnt.textContent=n;
+      pad.classList.remove('pulse'); void pad.offsetWidth; pad.classList.add('pulse');
+      chime(380+n*12); buzz(12);
+      label.textContent = n>=goal ? 'Готово!' : `Осталось: ${goal-n}`;
+      if(n>=goal){ done=true; chime(760); buzz([20,30,20]); setTimeout(onDone,300); }
+    });
+  }
+  function setupSlide(onDone){
+    const track=$('slideTrack'), knob=$('slideKnob'), fill=$('slideFill'), hint=$('slideHint');
+    let dragging=false, done=false;
+    const setPos=(pct)=>{ knob.style.left=pct+'%'; fill.style.width=pct+'%'; };
+    const onMove=(ev)=>{
+      if(!dragging||done) return;
+      const r=track.getBoundingClientRect();
+      const pct=Math.max(0,Math.min(100,((ev.clientX-r.left)/r.width)*100));
+      setPos(pct);
+      if(pct>92){
+        done=true; dragging=false; setPos(100);
+        hint.textContent='Готово!'; chime(740); buzz([20,30,20]);
+        setTimeout(onDone,300);
+      }
+    };
+    const onUp=()=>{ dragging=false; if(!done) setPos(0); };
+    knob.addEventListener('pointerdown',e=>{ e.preventDefault(); dragging=true; knob.setPointerCapture(e.pointerId); });
+    knob.addEventListener('pointermove',onMove);
+    knob.addEventListener('pointerup',onUp);
+    knob.addEventListener('pointercancel',onUp);
   }
   function setupHold(onDone){
     const circle=$('holdCircle'), label=$('holdLabel');
@@ -919,7 +980,7 @@ const ICON={
     if(state.lastGiftDate===t) return;
     state.lastGiftDate=t;
     const streak=Math.max(1,computeStreak());
-    const gift={ water:1+Math.floor(streak/3), coins:2+streak, seed:(streak%3===0)?1:0 };
+    const gift={ water:(streak%2===0)?1:0, coins:1+Math.min(streak,6), seed:(streak%5===0)?1:0 };
     grantReward(gift);
     saveProgress();
     $('giftBody').innerHTML=`
@@ -996,8 +1057,8 @@ const ICON={
     $('plantLayer').innerHTML=state.plants.map(p=>{
       const full=p.level>=MAX_LEVEL;
       const mark = p.weeds?'<span class="plant-mark weed">!</span>' : full?'<span class="plant-mark done">✓</span>' : '';
-      const w=10+stageIndexForLevel(p.level)*3.2;
-      return `<div class="plant ${full?'ready':''}" data-plant="${p.id}" style="left:${p.x}%; top:${p.y}%; width:${w}%;">
+      const w=plantWidth(p.level);
+      return `<div class="plant ${full?'ready':''} ${p.level<1?'seedling':''}" data-plant="${p.id}" style="left:${p.x}%; top:${p.y}%; width:${w}%;">
         ${mark}<img src="${plantImgSrc(p.level,p.vars)}" alt=""><span class="plant-shadow"></span>
         ${p.weeds?'<span class="weed-tuft"></span>':''}
       </div>`;
@@ -1079,22 +1140,24 @@ const ICON={
     $('questsZone').innerHTML=list.map(q=>{
       const done=Math.min(questProgress(q,L),q.target), complete=done>=q.target;
       const claimed=L.claimed.includes(q.id);
-      const pips=Array.from({length:Math.min(q.target,6)},(_,i)=>`<div class="pip ${i<done?'full':''}"></div>`).join('');
       let btn;
       if(q.modal){
-        btn=complete?`<button class="task-btn" disabled>Всё ✓</button>`:`<button class="task-btn" data-task="${q.id}">Отметить</button>`;
+        btn=complete?`<button class="task-btn" disabled>Готово</button>`:`<button class="task-btn" data-task="${q.id}">Отметить</button>`;
       } else {
-        btn=claimed?`<button class="task-btn" disabled>Получено ✓</button>`
+        btn=claimed?`<button class="task-btn" disabled>Получено</button>`
           :complete?`<button class="task-btn" data-claim="${q.id}">Забрать</button>`
-          :`<button class="task-btn" disabled>${done}/${q.target}</button>`;
+          :`<button class="task-btn" disabled>Ждём</button>`;
       }
       return `<div class="task-row">
-        <div class="task-dot ${q.cls}">${q.target}</div>
         <div class="task-info">
           <div class="task-name">${q.name}</div>
-          <div class="task-reward">${rewardText(q.reward)}${q.modal?' за раз':''}</div>
-          <div class="task-pips">${pips}</div>
-        </div>${btn}</div>`;
+          <div class="task-progress">${done} из ${q.target}</div>
+        </div>
+        <div class="task-right">
+          <div class="task-reward">${rewardText(q.reward)}</div>
+          ${btn}
+        </div>
+      </div>`;
     }).join('');
     $('questsZone').querySelectorAll('[data-task]').forEach(b=>b.addEventListener('click',()=>openTaskModal(b.dataset.task)));
     $('questsZone').querySelectorAll('[data-claim]').forEach(b=>b.addEventListener('click',()=>claimQuest(b.dataset.claim)));
@@ -1176,7 +1239,7 @@ const ICON={
     const plants=Array.isArray(entry.plants)?entry.plants:[];
     const plantsHtml=plants.map((p,i)=>{
       const vars=Array.isArray(p.vars)?p.vars:hashVariants(String(entry.id||'')+i);
-      const w=10+stageIndexForLevel(p.level||0)*3.2;
+      const w=plantWidth(p.level||0);
       return `<div class="plant" style="left:${p.x||50}%; top:${p.y||80}%; width:${w}%; cursor:default;">
         <img src="${plantImgSrc(p.level||0,vars)}" alt=""><span class="plant-shadow"></span></div>`;
     }).join('');
