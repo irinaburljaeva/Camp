@@ -311,7 +311,7 @@
       <div class="field" id="field">
         <div class="field-hud">
           <button class="hud-pill hud-btn" id="seedPill" type="button"></button>
-          <span class="hud-pill" id="waterPill"></span>
+          <button class="hud-pill hud-btn" id="waterPill" type="button"></button>
         </div>
         <div class="rain-layer" id="rainLayer"></div>
         <div class="heat-layer" id="heatLayer"></div>
@@ -361,11 +361,39 @@
   <div class="overlay" id="introOverlay">
     <div class="modal"><div class="modal-pad">
       <div class="modal-title">Как играть</div>
-      <p class="modal-text">Твоя реальная активность превращается в ресурсы, а ресурсы — в цветущий сад.</p>
-      <div class="intro-step"><div class="intro-num">1</div><div class="intro-body"><b>Выполняй задания дня</b><span>Шаги, тренировки, блюда по меню и уход за садом дают воду, семена и монеты.</span></div></div>
-      <div class="intro-step"><div class="intro-num">2</div><div class="intro-body"><b>Сажай семечко сам</b><span>Нажми «Посадить» и коснись любого места на поле. Семена даются за задания.</span></div></div>
-      <div class="intro-step"><div class="intro-num">3</div><div class="intro-body"><b>Поливай и полоть</b><span>Тапни по растению, чтобы полить. Появились сорняки — рост стоит, прополка стоит 1 монету.</span></div></div>
-      <div class="intro-step"><div class="intro-num">4</div><div class="intro-body"><b>Собирай в гербарий</b><span>Расцветший цветок попадает в коллекцию. На монеты покупай украшения и место под новое растение.</span></div></div>
+      <p class="modal-text">Вы двигаетесь и заботитесь о себе в жизни — в игре за это растёт ваш сад.</p>
+
+      <div class="intro-step"><div class="intro-num">1</div><div class="intro-body">
+        <b>Отмечайте задания дня</b>
+        <span>Каждый день появляется 5 заданий: прогулка, тренировка, еда по меню и уход за садом. Выполнили в жизни — нажмите «Отметить» и ответьте на короткий вопрос. За это дают воду, монеты и семена.</span>
+      </div></div>
+
+      <div class="intro-step"><div class="intro-num">2</div><div class="intro-body">
+        <b>Сажайте семена</b>
+        <span>Нажмите на семечко в углу поля, потом на место, где хотите его посадить. Можно и просто перетащить его пальцем. В саду помещается 3 растения.</span>
+      </div></div>
+
+      <div class="intro-step"><div class="intro-num">3</div><div class="intro-body">
+        <b>Поливайте, чтобы росли</b>
+        <span>Нажмите на растение — потратится одна вода, и оно немного подрастёт. Чем чаще поливаете, тем быстрее вырастает цветок.</span>
+      </div></div>
+
+      <div class="intro-step"><div class="intro-num">4</div><div class="intro-body">
+        <b>Полите сорняки</b>
+        <span>Иногда рядом с растением вырастают сорняки — тогда оно перестаёт расти. Нажмите на него и заплатите 2 монеты, чтобы прополоть.</span>
+      </div></div>
+
+      <div class="intro-step"><div class="intro-num">5</div><div class="intro-body">
+        <b>Собирайте цветы</b>
+        <span>Когда растение зацвело, нажмите на него — цветок отправится в гербарий, а место освободится для нового семечка.</span>
+      </div></div>
+
+      <div class="intro-step"><div class="intro-num">6</div><div class="intro-body">
+        <b>Тратьте монеты</b>
+        <span>В лавке продаются украшения для сада — их можно двигать по полю и менять размер. Ещё за монеты открывается место под четвёртое растение.</span>
+      </div></div>
+
+      <p class="modal-text" style="font-size:12px; margin-top:12px;">Вода понемногу набирается сама, но её мало — основной запас дают задания. Заходите в гости к другим участницам: за это тоже начисляют монеты.</p>
       <button class="primary-btn" id="introCloseBtn">Понятно, в сад!</button>
     </div></div>
   </div>
@@ -796,14 +824,38 @@ const ICON={
     showToast(`${f.name} — в гербарий! Всего таких: ${state.collection[f.file]}`);
   }
 
+  function nextDripText(){
+    if(state.water>=DRIP_CAP) return `Лейка полна до краёв (${DRIP_CAP} из ${DRIP_CAP}). Капли снова начнут копиться, когда польёшь сад.`;
+    const left=Math.max(0,DRIP_INTERVAL_MS-(Date.now()-(state.lastDripAt||Date.now())));
+    const mins=Math.ceil(left/60000);
+    if(mins<=1) return 'Следующая капля вот-вот появится.';
+    if(mins<60) return `Следующая капля накапает через ${mins} мин.`;
+    const h=Math.floor(mins/60), m=mins%60;
+    return `Следующая капля накапает через ${h} ч ${m} мин.`;
+  }
+  function showWaterInfo(){
+    $('taskModalBody').innerHTML=`
+      <div class="modal-title">Вода в лейке</div>
+      <div class="gift-row">${ICON.water} ${state.water}</div>
+      <p class="modal-text">${nextDripText()}</p>
+      <p class="modal-text" style="font-size:12px;">Больше воды дают задания дня — прогулки, тренировки и блюда по меню.</p>
+      <button class="primary-btn" id="waterGoBtn">К заданиям дня</button>
+      <button class="ghost-btn" id="waterCloseBtn">Закрыть</button>`;
+    $('taskOverlay').classList.add('open');
+    $('waterCloseBtn').addEventListener('click',()=>$('taskOverlay').classList.remove('open'));
+    $('waterGoBtn').addEventListener('click',()=>{
+      $('taskOverlay').classList.remove('open');
+      $('questsZone').scrollIntoView({behavior:'smooth',block:'center'});
+    });
+  }
+  $('waterPill').addEventListener('click',showWaterInfo);
+
   function showNoWaterModal(){
-    const nextMs=Math.max(0, DRIP_INTERVAL_MS-(Date.now()-(state.lastDripAt||Date.now())));
-    const mins=Math.ceil(nextMs/60000);
     $('taskModalBody').innerHTML=`
       <div class="modal-title">Вода закончилась</div>
       <p class="modal-text">Чтобы полить растения, нужна вода. Её дают задания дня — прогулка, тренировка, блюдо по меню и уход за садом.</p>
       <div class="gift-row">${ICON.water} 0</div>
-      <p class="modal-text" style="font-size:12px;">Ещё капля накапает сама примерно через ${mins} мин. И не забудь про ежедневный подарок за визит.</p>
+      <p class="modal-text" style="font-size:12px;">${nextDripText()}</p>
       <button class="primary-btn" id="noWaterGoBtn">К заданиям дня</button>
       <button class="ghost-btn" id="noWaterCloseBtn">Закрыть</button>`;
     $('taskOverlay').classList.add('open');
@@ -1024,7 +1076,9 @@ const ICON={
     pill.innerHTML=`${ICON.seed} ${state.seeds}`;
     pill.disabled=!canPlant();
     pill.title=canPlant()?'Нажми или перетащи на поле, чтобы посадить':plantBlockReason();
-    $('waterPill').innerHTML=`${ICON.water} ${state.water}`;
+    const wp=$('waterPill');
+    wp.innerHTML=`${ICON.water} ${state.water}`;
+    wp.title='Нажми, чтобы узнать, когда накапает следующая';
     $('coinsBadge').innerHTML=`${ICON.coin} ${state.coins}`;
     $('streakBadge').textContent=`${computeStreak()} дн. подряд`;
     const n=Math.max(getDayNumber(),1), w=todayWeather(), chip=$('dayChip');
