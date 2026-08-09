@@ -245,12 +245,6 @@
   .plot-bar-fill.steps{ background:#5E8F7C; }
   .plot-bar-fill.training{ background:var(--sun); }
   .plot-bar-fill.meal{ background:var(--bloom); }
-  .plot-hint{
-    display:inline-block; font-size:10px; font-weight:800; color:#3B2E22; margin-top:4px; min-height:15px;
-    background:rgba(255,251,240,0.88); border-radius:9px; padding:2px 8px;
-    box-shadow:0 1px 4px rgba(20,30,15,0.25);
-  }
-  .plot-hint:empty{ background:none; box-shadow:none; padding:0; }
   .fert-mini{
     position:absolute; right:14%; bottom:34px; width:26px; height:26px; border-radius:50%;
     border:none; background:rgba(255,251,240,0.96); box-shadow:0 2px 6px rgba(40,50,30,0.35);
@@ -310,18 +304,30 @@
   .lb-rank{ width:18px; font-weight:800; color:var(--plum); font-size:12.5px; }
   .lb-name{ flex:1; min-width:0; font-weight:700; font-size:12.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .lb-score{ font-weight:800; color:var(--bloom); font-size:12.5px; width:34px; text-align:right; }
-  .lb-hint{ font-size:10px; color:var(--ink-soft); text-align:center; margin-top:6px; }
 
   .visit-overlay{ position:fixed; inset:0; background:rgba(59,46,34,0.5); display:none; align-items:center; justify-content:center; z-index:50; padding:20px; }
   .visit-overlay.open{ display:flex; }
   .visit-modal{ background:var(--card); border-radius:22px; max-width:400px; width:100%; overflow:hidden; box-shadow:0 20px 50px -12px rgba(0,0,0,0.4); animation:fadeUp .3s ease; }
   @keyframes fadeUp{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
   .visit-sky{ position:relative; height:48px; background:linear-gradient(180deg,#D8C9E8,#F0E9F5); overflow:hidden; }
-  .visit-ground{ background:linear-gradient(180deg,#EFE1C5,#E5D0A8); padding:12px 10px 14px; }
+  .visit-ground{
+    background-color:#E5D0A8; background-image:linear-gradient(180deg,#EFE1C5,#E5D0A8);
+    background-repeat:no-repeat; padding:12px 10px 16px; position:relative; min-height:190px;
+    display:flex; flex-direction:column; justify-content:flex-end;
+  }
+  .visit-decor-item{ position:absolute; transform:translate(-50%,-100%); z-index:1; }
+  .visit-decor-item img{ width:100%; height:auto; display:block; filter:drop-shadow(0 3px 5px rgba(20,30,15,0.45)); }
   .visit-header{ padding:12px 16px 4px; text-align:center; }
   .visit-name{ font-family:'Fraunces',serif; font-size:16px; font-weight:700; color:var(--soil-dark); }
   .visit-sub{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
-  .visit-row{ display:flex; justify-content:space-around; align-items:flex-end; }
+  .visit-row{ display:flex; justify-content:space-around; align-items:flex-end; position:relative; z-index:2; }
+  .visit-plot{ width:31%; position:relative; text-align:center; }
+  .visit-plot::before{
+    content:''; position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
+    width:88%; height:70px; border-radius:50%; pointer-events:none; z-index:0;
+    background:radial-gradient(ellipse at 50% 65%, rgba(255,252,240,0.7), rgba(255,252,240,0.3) 55%, rgba(255,252,240,0) 75%);
+  }
+  .visit-plot .plant-wrap{ position:relative; z-index:1; height:96px; }
   .visit-actions{ display:flex; gap:8px; padding:12px 16px 16px; }
   .visit-cheer{ flex:1; border:none; border-radius:11px; padding:11px; font-size:12px; font-weight:800; background:var(--bloom); color:#fff; cursor:pointer; }
   .visit-close{ flex:1; border:2px solid #E4D9C4; border-radius:11px; padding:11px; font-size:12px; font-weight:800; background:#fff; color:var(--ink-soft); cursor:pointer; }
@@ -467,7 +473,6 @@
     <div class="card">
       <div class="lb-title">🏆 Сад лагеря</div>
       <div id="leaderboardList">Загружаю…</div>
-      <div class="lb-hint">Тапни по участнице — увидишь её сад</div>
     </div>
 
     <div class="card">
@@ -506,7 +511,10 @@
         <div class="visit-sub" id="visitSub"></div>
       </div>
       <div class="visit-sky"></div>
-      <div class="visit-ground"><div class="visit-row" id="visitRow"></div></div>
+      <div class="visit-ground" id="visitGround">
+        <div id="visitDecor"></div>
+        <div class="visit-row" id="visitRow"></div>
+      </div>
       <div class="visit-actions">
         <button class="visit-cheer" id="visitCheerBtn">Помахать 👋</button>
         <button class="visit-close" id="visitCloseBtn">Закрыть</button>
@@ -742,7 +750,9 @@ const DAILY_QUESTS = [
         lastSeenCheersAt:state.lastSeenCheersAt, score, updatedAt:serverTimestamp()
       },{merge:true});
       await setDoc(doc(db,LEADERBOARD_COLLECTION,state.docId),{
-        name:state.name, score, plotLevels, updatedAt:serverTimestamp()
+        name:state.name, score, plotLevels,
+        ownedDecor:state.ownedDecor, decorPos:state.decorPos,
+        updatedAt:serverTimestamp()
       },{merge:true});
     }catch(e){ console.error('Сохранение не удалось:',e); }
   }
@@ -1061,7 +1071,6 @@ const DAILY_QUESTS = [
         <div class="plot-badge" id="badge-${key}"></div>
         ${plantMarkup(key,'')}
         <div class="plot-bar"><div class="plot-bar-fill ${key}" id="progress-${key}" style="width:0%"></div></div>
-        <div class="plot-hint" id="status-${key}"></div>
         <button class="fert-mini" id="fertBtn-${key}">🌿</button>
       </div>`).join('');
     PLOT_KEYS.forEach(key=>{
@@ -1091,16 +1100,7 @@ const DAILY_QUESTS = [
       el.classList.toggle('bonus-ready',!!bonusReady);
       $('progress-'+key).style.width=stageFrac+'%';
 
-      // подсказка под растением
-      let hint;
-      if(bonusReady) hint='Собрать ✨';
-      else if(p.level>=7) hint='Урожай 🧺';
-      else if(bonusPending) hint=formatCountdown(p.bonusReadyAt-Date.now());
-      else if(state.water>0) hint='Полить 💧';
-      else hint='';
-      $('status-'+key).textContent=hint;
-
-      // значок-подсказка над растением, когда есть действие
+      // значок над растением, когда есть действие
       const badge=$('badge-'+key);
       badge.textContent = bonusReady ? '✨' : (p.level>=7 ? '🧺' : '');
       badge.style.display = badge.textContent ? 'block' : 'none';
@@ -1190,7 +1190,27 @@ const DAILY_QUESTS = [
     saveProgress();
     $('visitName').textContent=`Сад: ${entry.name||'участница'}`;
     $('visitSub').textContent=`${entry.score||0} очков`;
-    $('visitRow').innerHTML = PLOT_KEYS.map(key=>`<div style="width:31%;">${plantMarkup(key,'v-')}</div>`).join('');
+    // фон газона — тот же, что в своём саду
+    const vg=$('visitGround');
+    const myGround=document.querySelector('.ground');
+    if(myGround && myGround.style.backgroundImage){
+      vg.style.backgroundImage=myGround.style.backgroundImage;
+      vg.style.backgroundPosition='center 60%';
+      vg.style.backgroundSize='cover';
+    }
+    // её украшения на её же местах
+    const owned = entry.ownedDecor || [];
+    const dpos = entry.decorPos || {};
+    $('visitDecor').innerHTML = owned.map(id=>{
+      const item=SHOP_ITEMS.find(x=>x.id===id);
+      if(!item) return '';
+      const pos = dpos[id] || { x:item.defX, y:item.defY, s:1 };
+      const s = pos.s || 1;
+      return `<div class="visit-decor-item" style="left:${pos.x}%; top:${pos.y}%; width:${item.w*s}%;">
+        <img src="${ASSET_PATH+item.img}" alt="${item.name}">
+      </div>`;
+    }).join('');
+    $('visitRow').innerHTML = PLOT_KEYS.map(key=>`<div class="visit-plot">${plantMarkup(key,'v-')}</div>`).join('');
     PLOT_KEYS.forEach(key=>{
       const lvl = entry.plotLevels ? (entry.plotLevels[key]||0) : 0;
       updatePlantVisual(key, lvl, 'v-', hashVariants(String(entry.id||'')+key));
