@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Грядка стройности — Летний лагерь Шагай Дома</title>
+<title>Сад стройности — Летний лагерь Шагай Дома</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -34,7 +34,7 @@
   .ic-water{ width:11px; height:14px; background:var(--water); border-radius:50% 50% 50% 50% / 62% 62% 38% 38%; transform:rotate(0deg); position:relative; }
   .ic-water::before{ content:''; position:absolute; top:0; left:50%; width:0; height:0; margin-left:-4px; border-left:4px solid transparent; border-right:4px solid transparent; border-bottom:6px solid var(--water); transform:translateY(-4px); }
   .ic-coin{ width:14px; height:14px; border-radius:50%; background:radial-gradient(circle at 35% 32%, #F7D97A, var(--sun)); border:1.5px solid #C9971F; }
-  .ic-seed{ width:22px; height:22px; object-fit:contain; vertical-align:-6px; margin-right:-2px; }
+  .ic-seed{ width:28px; height:28px; object-fit:contain; vertical-align:-9px; margin:-6px -2px -6px 0; }
   .ic-lg{ transform:scale(1.7); margin:0 5px; }
 
   .loading-screen, .login-screen{ position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; }
@@ -172,6 +172,8 @@
   .task-row:last-child{ border-bottom:none; }
   .task-info{ flex:1; min-width:0; }
   .task-name{ font-size:12.5px; font-weight:800; color:var(--soil-dark); line-height:1.3; }
+  .task-row.done .task-name{ text-decoration:line-through; text-decoration-thickness:1.5px; color:var(--ink-soft); }
+  .task-row.done{ opacity:.72; }
   .task-progress{ font-size:10.5px; color:var(--ink-soft); font-weight:700; margin-top:3px; }
   .task-right{ display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
   .task-reward{ display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:800; color:#8A6220; }
@@ -224,21 +226,12 @@
   .intro-num{ width:22px; height:22px; border-radius:50%; background:var(--plum); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .intro-body b{ display:block; font-size:12.5px; color:var(--soil-dark); }
   .intro-body span{ font-size:11.5px; color:var(--ink-soft); line-height:1.4; }
-  .hold-circle{ width:120px; height:120px; border-radius:50%; margin:14px auto 6px; position:relative; display:flex; align-items:center; justify-content:center; background:conic-gradient(var(--leaf) calc(var(--p,0)*1%), #E4D9C4 0); cursor:pointer; user-select:none; touch-action:none; }
-  .hold-circle::after{ content:''; position:absolute; inset:9px; border-radius:50%; background:#fff; }
-  .hold-inner{ position:relative; z-index:1; font-size:13px; font-weight:800; color:var(--soil-dark); }
-  .hold-label{ font-size:12px; font-weight:800; color:var(--ink-soft); min-height:16px; }
-  .tap-pad{ width:130px; height:130px; border-radius:50%; margin:16px auto 8px; background:#FBF3E4; border:3px solid var(--sun);
-    display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; }
-  .tap-pad.pulse{ animation:tapPulse .18s ease; }
-  @keyframes tapPulse{ 0%{transform:scale(1);} 50%{transform:scale(.93);} 100%{transform:scale(1);} }
-  .tap-count{ font-family:'Fraunces',serif; font-size:34px; font-weight:700; color:var(--soil-dark); }
-  .slide-track{ position:relative; height:52px; border-radius:26px; background:#EFE1C5; margin:18px 0 8px; overflow:hidden; }
-  .slide-fill{ position:absolute; left:0; top:0; bottom:0; width:0; background:linear-gradient(90deg,#8FC6B4,var(--leaf)); }
-  .slide-knob{ position:absolute; top:4px; left:0; width:44px; height:44px; margin-left:4px; border-radius:50%;
-    background:#fff; box-shadow:0 3px 8px rgba(40,50,30,.35); cursor:grab; touch-action:none; z-index:2; }
-  .slide-knob::after{ content:'›'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:800; color:var(--leaf-dark); }
-  .slide-hint{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:var(--ink-soft); pointer-events:none; }
+  .num-row{ display:flex; align-items:center; justify-content:center; gap:10px; margin:16px 0 6px; }
+  .num-input{ width:130px; padding:14px 12px; border-radius:12px; border:2px solid #E4D9C4; background:#fff;
+    font-family:'Fraunces',serif; font-size:26px; font-weight:700; text-align:center; color:var(--soil-dark); outline:none; }
+  .num-input:focus{ border-color:var(--bloom); }
+  .num-unit{ font-size:13px; font-weight:800; color:var(--ink-soft); }
+  .num-note{ font-size:11.5px; font-weight:700; color:var(--bloom); min-height:16px; }
   .choice-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:12px 0 4px; }
   .choice-btn{ background:#fff; border:2px solid #E4D9C4; border-radius:12px; padding:14px 6px; font-family:'Nunito Sans',sans-serif; font-size:12px; font-weight:800; color:var(--soil-dark); cursor:pointer; }
   .choice-btn.picked{ border-color:var(--bloom); background:#FBF3E4; }
@@ -272,7 +265,7 @@
     <div class="loading-bg"></div><div class="loading-veil"></div>
     <div class="loading-content">
       <div class="loading-eyebrow">Летний лагерь · Шагай Дома</div>
-      <div class="loading-title">Грядка<br>стройности</div>
+      <div class="loading-title">Сад<br>стройности</div>
       <div class="loading-sub">Открываем твой сад<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></div>
     </div>
   </div>
@@ -281,7 +274,7 @@
     <div class="loading-bg"></div><div class="loading-veil"></div>
     <div class="login-content">
       <div class="loading-eyebrow">Летний лагерь · Шагай Дома</div>
-      <div class="loading-title" style="font-size:36px;">Грядка<br>стройности</div>
+      <div class="loading-title" style="font-size:36px;">Сад<br>стройности</div>
       <div class="login-panel">
         <p class="login-intro">Введи имя и почту, чтобы посадить свой сад. Прогресс сохранится — можно возвращаться в любое время.</p>
         <input type="text" id="nameInput" class="name-input" placeholder="Твоё имя" autocomplete="off">
@@ -467,21 +460,36 @@ const VEG_CHOICES=[{n:'Огурцы и помидоры'},{n:'Капуста'},{
 const BREAKFAST_CHOICES=[{n:'Каша'},{n:'Яйца'},{n:'Творог'},{n:'Смузи'}];
 
 const QUEST_POOL=[
-  { id:'steps2500', group:'move', name:'Пройти 2 500 шагов', target:4, reward:{water:1}, modal:{type:'taps', title:'Прогулка', text:'Сделай 8 шагов пальцем — тапай по кругу.', goal:8} },
-  { id:'steps5000', group:'move', name:'Пройти 5 000 шагов', target:2, reward:{water:2}, modal:{type:'taps', title:'Долгая прогулка', text:'Тапай по кругу — 15 шагов до отметки.', goal:15} },
-  { id:'walkOut',   group:'move', name:'Прогулка на улице', target:1, reward:{water:1, coins:2}, modal:{type:'slide', title:'Прогулка на воздухе', text:'Была на улице хотя бы 20 минут? Проведи ползунок вправо.'} },
-  { id:'stairs',    group:'move', name:'Лестница вместо лифта', target:2, reward:{water:1}, modal:{type:'taps', title:'Лестница', text:'Тапай по ступенькам — 10 этажей.', goal:10} },
-  { id:'eveWalk',   group:'move', name:'Вечерняя прогулка', target:1, reward:{water:1, seed:1}, modal:{type:'slide', title:'Вечерняя прогулка', text:'Прогулялась после ужина? Проведи ползунок вправо.'} },
-  { id:'training',  group:'gym', name:'Тренировка', target:2, reward:{water:2}, modal:{type:'choice', title:'Тренировка', text:'Что делала сегодня?', options:MOVE_CHOICES} },
-  { id:'stretch',   group:'gym', name:'Растяжка 10 минут', target:1, reward:{water:1, coins:2}, modal:{type:'hold', title:'Растяжка', text:'Тянись вместе с кругом — держи палец, пока он заполняется.'} },
-  { id:'morningEx', group:'gym', name:'Утренняя зарядка', target:1, reward:{water:1, coins:2}, modal:{type:'slide', title:'Зарядка', text:'Размялась утром? Проведи ползунок вправо.'} },
-  { id:'strength',  group:'gym', name:'Силовая тренировка', target:1, reward:{water:2, seed:1}, modal:{type:'taps', title:'Силовая', text:'Сделай 12 повторов — тапай в ритме.', goal:12} },
-  { id:'meal',      group:'food', name:'Блюдо по меню', target:3, reward:{water:1, coins:1}, modal:{type:'choice', title:'Блюдо по меню', text:'Что приготовила?', options:FOOD_CHOICES} },
-  { id:'drinkWater',group:'food', name:'Стакан воды', target:6, reward:{water:1}, modal:{type:'hold', title:'Стакан воды', text:'Держи палец — наполни стакан до краёв.'} },
-  { id:'veggies',   group:'food', name:'Порция овощей', target:2, reward:{water:1}, modal:{type:'choice', title:'Овощи', text:'Какие овощи были на тарелке?', options:VEG_CHOICES} },
-  { id:'noSugar',   group:'food', name:'День без сладкого', target:1, reward:{coins:5, seed:1}, modal:{type:'slide', title:'Без сладкого', text:'День прошёл без сладкого? Проведи ползунок вправо.'} },
-  { id:'breakfast', group:'food', name:'Полезный завтрак', target:1, reward:{water:1, coins:2}, modal:{type:'choice', title:'Завтрак', text:'Что было на завтрак?', options:BREAKFAST_CHOICES} },
-  { id:'noSnack',   group:'food', name:'Без перекусов после 20:00', target:1, reward:{coins:4}, modal:{type:'slide', title:'Вечер без перекусов', text:'Вечер прошёл спокойно? Проведи ползунок вправо.'} },
+  { id:'steps2500', group:'move', name:'Пройти 2 500 шагов', target:4, reward:{water:1},
+    modal:{type:'number', title:'Отлично прошлась!', text:'Каждая тысяча шагов — это вклад в себя. Сколько шагов получилось пройти?', unit:'шагов', min:500, placeholder:'2500'} },
+  { id:'steps5000', group:'move', name:'Пройти 5 000 шагов', target:2, reward:{water:2},
+    modal:{type:'number', title:'Вот это дистанция!', text:'Ты сегодня хорошо поработала ногами. Сколько шагов на счётчике?', unit:'шагов', min:1000, placeholder:'5000'} },
+  { id:'walkOut',   group:'move', name:'Прогулка на улице', target:1, reward:{water:1, coins:2},
+    modal:{type:'choice', title:'Свежий воздух — это сила!', text:'Сколько времени провела на улице?', options:[{n:'15–20 минут'},{n:'30 минут'},{n:'Около часа'},{n:'Больше часа'}]} },
+  { id:'stairs',    group:'move', name:'Лестница вместо лифта', target:2, reward:{water:1},
+    modal:{type:'number', title:'Вау, ты молодец!', text:'Не каждый решится подниматься пешком. Сколько этажей получилось пройти?', unit:'этажей', min:1, placeholder:'5'} },
+  { id:'eveWalk',   group:'move', name:'Вечерняя прогулка', target:1, reward:{water:1, seed:1},
+    modal:{type:'choice', title:'Вечер прошёл с пользой!', text:'Сколько длилась прогулка?', options:[{n:'15 минут'},{n:'Полчаса'},{n:'Час'},{n:'Больше часа'}]} },
+  { id:'training',  group:'gym', name:'Тренировка', target:2, reward:{water:2},
+    modal:{type:'choice', title:'Ты потренировалась — здорово!', text:'Какая была тренировка?', options:MOVE_CHOICES} },
+  { id:'stretch',   group:'gym', name:'Растяжка 10 минут', target:1, reward:{water:1, coins:2},
+    modal:{type:'choice', title:'Тело скажет спасибо!', text:'Сколько времени тянулась?', options:[{n:'5 минут'},{n:'10 минут'},{n:'15 минут'},{n:'20 и больше'}]} },
+  { id:'morningEx', group:'gym', name:'Утренняя зарядка', target:1, reward:{water:1, coins:2},
+    modal:{type:'choice', title:'Отличное начало дня!', text:'Сколько длилась зарядка?', options:[{n:'5 минут'},{n:'10 минут'},{n:'15 минут'},{n:'20 и больше'}]} },
+  { id:'strength',  group:'gym', name:'Силовая тренировка', target:1, reward:{water:2, seed:1},
+    modal:{type:'choice', title:'Круто, силовая — это серьёзно!', text:'Сколько времени занималась?', options:[{n:'10 минут'},{n:'20 минут'},{n:'30 минут'},{n:'45 и больше'}]} },
+  { id:'meal',      group:'food', name:'Блюдо по меню', target:3, reward:{water:1, coins:1},
+    modal:{type:'choice', title:'Приготовила по меню — отлично!', text:'Что это было за блюдо?', options:FOOD_CHOICES} },
+  { id:'drinkWater',group:'food', name:'Стакан воды', target:6, reward:{water:1},
+    modal:{type:'number', title:'Вода — лучшее для тела!', text:'Сколько стаканов воды выпила с прошлой отметки?', unit:'стаканов', min:1, placeholder:'1'} },
+  { id:'veggies',   group:'food', name:'Порция овощей', target:2, reward:{water:1},
+    modal:{type:'choice', title:'Овощи в тарелке — это победа!', text:'Какие овощи были?', options:VEG_CHOICES} },
+  { id:'noSugar',   group:'food', name:'День без сладкого', target:1, reward:{coins:5, seed:1},
+    modal:{type:'confirm', title:'День без сладкого — сильно!', text:'Подтверди честно: сегодня обошлась без сладкого?', yes:'Да, обошлась', no:'Пока нет'} },
+  { id:'breakfast', group:'food', name:'Полезный завтрак', target:1, reward:{water:1, coins:2},
+    modal:{type:'choice', title:'Завтрак — фундамент дня!', text:'Что было на завтрак?', options:BREAKFAST_CHOICES} },
+  { id:'noSnack',   group:'food', name:'Без перекусов после 20:00', target:1, reward:{coins:4},
+    modal:{type:'confirm', title:'Вечер без перекусов — не всем даётся!', text:'Подтверди честно: после 20:00 ничего не ела?', yes:'Да, получилось', no:'Пока нет'} },
   { id:'water2',  group:'garden', name:'Полить растения', target:2, reward:{coins:4}, track:'water' },
   { id:'water4',  group:'garden', name:'Полить растения 4 раза', target:4, reward:{coins:7, seed:1}, track:'water' },
   { id:'weed1',   group:'garden', name:'Прополоть сорняки', target:1, reward:{coins:4}, track:'weed' },
@@ -892,95 +900,45 @@ const ICON={
     const head=`<div class="modal-title">${m.title}</div><p class="modal-text">${m.text}</p>`;
     const cancel=`<button class="ghost-btn" id="taskCancelBtn">Отмена</button>`;
 
-    if(m.type==='hold'){
+    if(m.type==='number'){
       body.innerHTML=head+`
-        <div class="hold-circle" id="holdCircle" style="--p:0"><span class="hold-inner">Держи</span></div>
-        <div class="hold-label" id="holdLabel">Зажми и держи</div>`+cancel;
-      setupHold(()=>completeQuest(qid));
-    } else if(m.type==='taps'){
+        <div class="num-row">
+          <input class="num-input" id="numInput" type="number" inputmode="numeric" placeholder="${m.placeholder||''}" min="${m.min||1}">
+          <span class="num-unit">${m.unit||''}</span>
+        </div>
+        <div class="num-note" id="numNote"></div>
+        <button class="primary-btn" id="numOkBtn">Записать</button>`+cancel;
+      const inp=$('numInput');
+      setTimeout(()=>inp.focus(),150);
+      const submit=()=>{
+        const v=Number(inp.value);
+        if(!v||v<(m.min||1)){ $('numNote').textContent=`Впиши число не меньше ${m.min||1}`; return; }
+        chime(700); buzz([20,30,20]);
+        completeQuest(qid,`${v} ${m.unit||''}`.trim());
+      };
+      $('numOkBtn').addEventListener('click',submit);
+      inp.addEventListener('keydown',e=>{ if(e.key==='Enter') submit(); });
+    } else if(m.type==='confirm'){
       body.innerHTML=head+`
-        <div class="tap-pad" id="tapPad"><span class="tap-count" id="tapCount">0</span></div>
-        <div class="hold-label" id="tapLabel">Осталось: ${m.goal}</div>`+cancel;
-      setupTaps(m.goal,()=>completeQuest(qid));
-    } else if(m.type==='slide'){
-      body.innerHTML=head+`
-        <div class="slide-track" id="slideTrack">
-          <div class="slide-fill" id="slideFill"></div>
-          <div class="slide-knob" id="slideKnob"></div>
-          <span class="slide-hint" id="slideHint">Проведи вправо</span>
-        </div>`+cancel;
-      setupSlide(()=>completeQuest(qid));
+        <button class="primary-btn" id="confirmYes">${m.yes||'Да'}</button>
+        <button class="ghost-btn" id="confirmNo">${m.no||'Ещё нет'}</button>`;
+      $('confirmYes').addEventListener('click',()=>{ chime(700); buzz([20,30,20]); completeQuest(qid); });
+      $('confirmNo').addEventListener('click',()=>$('taskOverlay').classList.remove('open'));
+      $('taskOverlay').classList.add('open');
+      return;
     } else {
       body.innerHTML=head+`
         <div class="choice-grid" id="choiceGrid">${m.options.map((o,i)=>`<button class="choice-btn" data-i="${i}">${o.n}</button>`).join('')}</div>`+cancel;
       $('choiceGrid').querySelectorAll('.choice-btn').forEach(btn=>{
         btn.addEventListener('click',()=>{
           $('choiceGrid').querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('picked'));
-          btn.classList.add('picked'); chime(560);
-          setTimeout(()=>completeQuest(qid,m.options[Number(btn.dataset.i)].n),300);
+          btn.classList.add('picked'); chime(620); buzz(20);
+          setTimeout(()=>completeQuest(qid,m.options[Number(btn.dataset.i)].n),280);
         });
       });
     }
     $('taskCancelBtn').addEventListener('click',()=>$('taskOverlay').classList.remove('open'));
     $('taskOverlay').classList.add('open');
-  }
-  function setupTaps(goal,onDone){
-    const pad=$('tapPad'), cnt=$('tapCount'), label=$('tapLabel');
-    let n=0, done=false;
-    pad.addEventListener('click',()=>{
-      if(done) return;
-      n++; cnt.textContent=n;
-      pad.classList.remove('pulse'); void pad.offsetWidth; pad.classList.add('pulse');
-      chime(380+n*12); buzz(12);
-      label.textContent = n>=goal ? 'Готово!' : `Осталось: ${goal-n}`;
-      if(n>=goal){ done=true; chime(760); buzz([20,30,20]); setTimeout(onDone,300); }
-    });
-  }
-  function setupSlide(onDone){
-    const track=$('slideTrack'), knob=$('slideKnob'), fill=$('slideFill'), hint=$('slideHint');
-    let dragging=false, done=false;
-    const setPos=(pct)=>{ knob.style.left=pct+'%'; fill.style.width=pct+'%'; };
-    const onMove=(ev)=>{
-      if(!dragging||done) return;
-      const r=track.getBoundingClientRect();
-      const pct=Math.max(0,Math.min(100,((ev.clientX-r.left)/r.width)*100));
-      setPos(pct);
-      if(pct>92){
-        done=true; dragging=false; setPos(100);
-        hint.textContent='Готово!'; chime(740); buzz([20,30,20]);
-        setTimeout(onDone,300);
-      }
-    };
-    const onUp=()=>{ dragging=false; if(!done) setPos(0); };
-    knob.addEventListener('pointerdown',e=>{ e.preventDefault(); dragging=true; knob.setPointerCapture(e.pointerId); });
-    knob.addEventListener('pointermove',onMove);
-    knob.addEventListener('pointerup',onUp);
-    knob.addEventListener('pointercancel',onUp);
-  }
-  function setupHold(onDone){
-    const circle=$('holdCircle'), label=$('holdLabel');
-    if(!circle||circle.dataset.bound) return;
-    circle.dataset.bound='1';
-    const HOLD_MS=1600; let timer=null, done=false;
-    const start=()=>{
-      if(done) return;
-      const t0=Date.now(); label.textContent='Держи…';
-      timer=setInterval(()=>{
-        const pct=Math.min(100,((Date.now()-t0)/HOLD_MS)*100);
-        circle.style.setProperty('--p',pct);
-        if(pct>=100){
-          clearInterval(timer); timer=null; done=true;
-          label.textContent='Готово!'; chime(700); buzz([20,30,20]);
-          setTimeout(onDone,250);
-        }
-      },30);
-    };
-    const stop=()=>{
-      if(timer){ clearInterval(timer); timer=null; }
-      if(!done){ circle.style.setProperty('--p',0); label.textContent='Не дотерпела — попробуй ещё'; }
-    };
-    circle.addEventListener('pointerdown',e=>{ e.preventDefault(); circle.setPointerCapture(e.pointerId); start(); });
-    ['pointerup','pointercancel','pointerleave'].forEach(ev=>circle.addEventListener(ev,stop));
   }
   function completeQuest(qid,label){
     const q=QUEST_POOL.find(x=>x.id===qid), L=todayLog();
@@ -1201,7 +1159,8 @@ const ICON={
           :complete?`<button class="task-btn" data-claim="${q.id}">Забрать</button>`
           :`<button class="task-btn" disabled>Ждём</button>`;
       }
-      return `<div class="task-row">
+      const doneCls = complete ? ' done' : '';
+      return `<div class="task-row${doneCls}">
         <div class="task-info">
           <div class="task-name">${q.name}</div>
           <div class="task-progress">${done} из ${q.target}</div>
