@@ -185,7 +185,7 @@
     .game-content > .toast{ grid-column:1 / -1; }
     .game-content > .garden-scene{ grid-column:1; grid-row:4; position:sticky; top:24px; margin-bottom:10px; }
     .game-content > *:not(header):not(.day-chip):not(.toast):not(.garden-scene){ grid-column:2; grid-row:auto; }
-    .game-content > .finale-panel{ grid-column:1 / -1; }
+    .game-content > .finale-badge{ grid-column:1 / -1; }
 
     .sky{ height:88px; }
     .sun{ width:40px; height:40px; top:16px; right:32px; }
@@ -312,13 +312,24 @@
   .visit-cheer{ flex:1; border:none; border-radius:11px; padding:11px; font-size:12px; font-weight:800; background:var(--bloom); color:#fff; cursor:pointer; }
   .visit-close{ flex:1; border:2px solid #E4D9C4; border-radius:11px; padding:11px; font-size:12px; font-weight:800; background:#fff; color:var(--ink-soft); cursor:pointer; }
 
-  .finale-panel{ display:none; text-align:center; animation:fadeUp .6s ease; }
-  .finale-panel h2{ font-size:22px; color:var(--soil-dark); margin-bottom:6px; }
-  .finale-panel p{ font-size:14px; color:var(--ink-soft); line-height:1.5; margin:0 0 14px; }
-  .stat-row{ display:flex; justify-content:center; gap:14px; margin:14px 0 6px; flex-wrap:wrap; }
+  .finale-badge{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    width:fit-content; margin:0 auto 12px; padding:8px 16px; border-radius:20px;
+    border:2px solid var(--sun); background:#FBF3E4; color:#8A6220;
+    font-family:'Nunito Sans',sans-serif; font-size:12.5px; font-weight:800; cursor:pointer;
+    box-shadow:0 4px 12px -6px rgba(232,184,75,0.8);
+    animation:badgePulse 2.4s ease-in-out infinite;
+  }
+  @keyframes badgePulse{ 0%,100%{ box-shadow:0 4px 12px -6px rgba(232,184,75,0.6); } 50%{ box-shadow:0 4px 18px -4px rgba(232,184,75,1); } }
+  .finale-badge:active{ transform:scale(.96); }
+  .finale-modal{ padding:0; }
+  .finale-head{ padding:22px 18px 18px; text-align:center; }
+  .finale-title{ font-family:'Fraunces',serif; font-size:20px; font-weight:700; color:var(--soil-dark); }
+  .finale-text{ font-size:13px; color:var(--ink-soft); line-height:1.5; margin:8px 0 4px; }
+  .stat-row{ display:flex; justify-content:center; gap:12px; margin:14px 0 10px; flex-wrap:wrap; }
   .stat{ text-align:center; }
-  .stat b{ display:block; font-family:'Fraunces',serif; font-size:20px; color:var(--bloom); }
-  .stat span{ font-size:10.5px; color:var(--ink-soft); font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+  .stat b{ display:block; font-family:'Fraunces',serif; font-size:19px; color:var(--bloom); }
+  .stat span{ font-size:9.5px; color:var(--ink-soft); font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
   .primary-btn{ width:100%; margin-top:10px; padding:15px; border:none; border-radius:14px; background:var(--bloom); color:#fff; font-family:'Nunito Sans', sans-serif; font-size:15.5px; font-weight:800; cursor:pointer; box-shadow:0 8px 18px -8px rgba(193,80,46,0.55); }
   .primary-btn:disabled{ background:#D8CBB2; box-shadow:none; cursor:not-allowed; color:#A99A80; }
   .weeds-note{ text-align:center; font-size:11.5px; color:#8B9574; font-weight:700; margin-top:2px; min-height:14px; }
@@ -454,15 +465,23 @@
       <button class="switch-account" id="switchAccountBtn">Это не я — войти под другим именем</button>
     </div>
 
-    <div class="card finale-panel" id="finalePanel">
-      <h2>🌻 Грядка расцвела</h2>
-      <p>Семь дней — и сад полон. Каждый цветок здесь — это твой выбор идти, тренироваться и есть с заботой о себе.</p>
-      <div class="stat-row" id="statRow"></div>
-      <button class="primary-btn" id="postcardBtn">🖼️ Скачать открытку сада</button>
-      <button class="primary-btn" id="shareBtn" style="margin-top:8px;">Поделиться результатом</button>
+    <button class="finale-badge" id="finaleBadge" style="display:none;">🏅 Итоги недели</button>
+
+  </div>
+
+  <!-- итоги недели -->
+  <div class="visit-overlay" id="finaleOverlay">
+    <div class="visit-modal finale-modal">
+      <div class="finale-head">
+        <div class="finale-title">🌻 Твой сад расцвёл</div>
+        <p class="finale-text">Неделя лагеря позади — а сад продолжает расти. Забери открытку на память!</p>
+        <div class="stat-row" id="statRow"></div>
+        <button class="primary-btn" id="postcardBtn">🖼️ Скачать открытку сада</button>
+        <button class="primary-btn" id="shareBtn" style="margin-top:8px;">Поделиться результатом</button>
+        <button class="visit-close" id="finaleCloseBtn" style="margin-top:8px; width:100%;">Вернуться в сад</button>
+      </div>
       <canvas id="postcardCanvas" class="postcard-canvas" width="1080" height="1350"></canvas>
     </div>
-
   </div>
 
   <!-- визит в чужой сад -->
@@ -623,7 +642,11 @@ const DAILY_QUESTS = [
   function addDays(dStr,n){ const [y,m,d]=dStr.split('-').map(Number); return dateStr(new Date(y,m-1,d+n)); }
   function diffDays(a,b){ const [y1,m1,d1]=a.split('-').map(Number),[y2,m2,d2]=b.split('-').map(Number); return Math.round((new Date(y2,m2-1,d2)-new Date(y1,m1-1,d1))/86400000); }
   function getDayNumber(){ return diffDays(state.campStartDate, todayStr())+1; }
-  function dayCfg(){ const n=Math.min(Math.max(getDayNumber(),1),7); return DAY_CONFIG[n-1]; }
+  function dayCfg(){
+    const n=Math.max(getDayNumber(),1);
+    // после 7-го дня темы идут по кругу — игра продолжается бесконечно
+    return DAY_CONFIG[(n-1) % DAY_CONFIG.length];
+  }
   function clamp01(x){ return Math.max(0, Math.min(1,x)); }
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function normalizeEmail(e){ return e.trim().toLowerCase(); }
@@ -983,10 +1006,11 @@ const DAILY_QUESTS = [
     return count;
   }
   function computeWeeds(){
-    let count=0; const today=todayStr();
-    for(let i=0;i<7;i++){
-      const d=addDays(state.campStartDate,i);
-      if(d>=today) break;
+    // считаем пропуски за последние 7 дней (скользящее окно)
+    let count=0;
+    for(let i=1;i<=7;i++){
+      const d=addDays(todayStr(),-i);
+      if(diffDays(state.campStartDate,d)<0) break;
       if(!dayHasActivity(state.log[d])) count++;
     }
     return Math.min(count,3);
@@ -1002,10 +1026,10 @@ const DAILY_QUESTS = [
     $('coinsBadge').textContent='🪙 '+state.coins;
     $('bonusBadge').textContent='🌟 '+state.bonusSeeds;
     $('streakBadge').textContent='🔥 '+computeStreak();
-    const n=Math.min(Math.max(getDayNumber(),1),7);
-    const cfg=DAY_CONFIG[n-1];
+    const n=Math.max(getDayNumber(),1);
+    const cfg=dayCfg();
     const chip=$('dayChip');
-    chip.textContent=`День ${n} / 7 · ${cfg.title}`;
+    chip.textContent = n<=7 ? `День ${n} / 7 · ${cfg.title}` : `День ${n} · ${cfg.title}`;
     chip.onclick=()=>showToast(cfg.desc);
   }
   function renderLevelAndDecor(){
@@ -1169,19 +1193,21 @@ const DAILY_QUESTS = [
 
   /* ---------- финал ---------- */
   function checkFinale(){
-    const finished=getDayNumber()>7;
-    $('gardenScene').style.display=finished?'none':'block';
-    document.querySelectorAll('.card')[0].style.display=finished?'none':'block';
-    $('extraZone').style.display=finished?'none':'block';
-    $('finalePanel').style.display=finished?'block':'none';
-    if(finished){
-      const total=PLOT_KEYS.reduce((s,k)=>s+state.plots[k].level,0);
-      $('statRow').innerHTML=`
-        <div class="stat"><b>${total.toFixed(1)}</b><span>уровней роста</span></div>
-        <div class="stat"><b>${state.bonusSeeds}</b><span>бонусных семян</span></div>
-        <div class="stat"><b>${farmLevel(farmXP())}</b><span>уровень сада</span></div>`;
-    }
-    return finished;
+    const day = getDayNumber();
+    const finished = day > 7;
+    // игра продолжается бесконечно — просто показываем значок с итогами
+    const badge = $('finaleBadge');
+    if(badge) badge.style.display = finished ? 'flex' : 'none';
+    if(finished) fillFinaleStats();
+    return false;
+  }
+  function fillFinaleStats(){
+    const total=PLOT_KEYS.reduce((s,k)=>s+state.plots[k].level,0);
+    $('statRow').innerHTML=`
+      <div class="stat"><b>${total.toFixed(1)}</b><span>уровней роста</span></div>
+      <div class="stat"><b>${state.bonusSeeds}</b><span>бонусных семян</span></div>
+      <div class="stat"><b>${farmLevel(farmXP())}</b><span>уровень сада</span></div>
+      <div class="stat"><b>${state.collection.length}</b><span>цветов в гербарии</span></div>`;
   }
 
   function renderSkyTime(){
@@ -1500,6 +1526,13 @@ const DAILY_QUESTS = [
       URL.revokeObjectURL(a.href);
     }, 'image/png');
   }
+  $('finaleBadge').addEventListener('click',()=>{
+    fillFinaleStats();
+    $('finaleOverlay').classList.add('open');
+  });
+  $('finaleCloseBtn').addEventListener('click',()=>$('finaleOverlay').classList.remove('open'));
+  $('finaleOverlay').addEventListener('click',(e)=>{ if(e.target.id==='finaleOverlay') $('finaleOverlay').classList.remove('open'); });
+
   $('postcardBtn').addEventListener('click', downloadPostcard);
 
   /* ---------- share ---------- */
