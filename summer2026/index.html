@@ -107,8 +107,12 @@
     background:rgba(255,251,240,0.95); color:var(--soil-dark); font-size:11px; font-weight:800;
     padding:6px 12px; border-radius:14px; box-shadow:0 3px 10px rgba(20,30,15,0.3); z-index:20;
   }
-  .field-hud{ position:absolute; top:8px; left:0; right:0; display:flex; justify-content:space-between; padding:0 10px; z-index:6; pointer-events:none; }
+  .field-hud{ position:absolute; top:8px; left:0; right:0; display:flex; justify-content:space-between; padding:0 10px; z-index:12; pointer-events:none; }
   .hud-pill{ display:flex; align-items:center; gap:5px; background:rgba(255,251,240,0.92); border-radius:14px; padding:4px 10px; font-size:12px; font-weight:800; color:var(--soil-dark); box-shadow:0 2px 6px rgba(20,30,15,0.25); }
+  .hud-btn{ border:2px solid transparent; font-family:'Nunito Sans',sans-serif; cursor:pointer; pointer-events:auto; touch-action:none; }
+  .hud-btn:disabled{ opacity:.5; cursor:default; }
+  .hud-btn.armed{ border-color:var(--sun); box-shadow:0 0 0 4px rgba(232,184,75,0.35), 0 2px 6px rgba(20,30,15,0.25); animation:seedHalo 1.6s ease-in-out infinite; }
+  .seed-ghost{ position:fixed; z-index:200; width:60px; margin:-30px 0 0 -30px; pointer-events:none; opacity:.92; filter:drop-shadow(0 4px 8px rgba(20,30,15,0.5)); }
   .rain-layer{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:8; display:none; }
   .rain-layer.on{ display:block; }
   .rain-drop{ position:absolute; top:-14px; width:2px; height:11px; border-radius:2px; background:rgba(120,170,200,0.55); animation:rainfall linear infinite; }
@@ -117,10 +121,10 @@
   .heat-layer.on{ display:block; }
 
   .plant{ position:absolute; transform:translate(-50%,-100%); z-index:3; cursor:pointer; animation:popIn .45s cubic-bezier(.34,1.56,.64,1); }
-  .plant img{ display:block; width:100%; height:auto; filter:drop-shadow(0 2px 3px rgba(20,30,15,0.45)); pointer-events:none; transition:transform .25s cubic-bezier(.34,1.56,.64,1); }
+  .plant img{ display:block; width:100%; height:auto; filter:drop-shadow(0 0 4px rgba(255,255,255,0.75)) drop-shadow(0 2px 3px rgba(20,30,15,0.45)); pointer-events:none; transition:transform .25s cubic-bezier(.34,1.56,.64,1); }
   .plant-shadow{ position:absolute; left:50%; bottom:-4px; transform:translateX(-50%); width:56%; height:11px; border-radius:50%; z-index:-1; background:radial-gradient(ellipse at 50% 50%, rgba(28,40,20,0.4), rgba(28,40,20,0) 75%); }
   .plant.ready img{ animation:readyBob 1.5s ease-in-out infinite; }
-  .plant.seedling img{ filter:drop-shadow(0 0 7px rgba(232,184,75,0.95)) drop-shadow(0 2px 4px rgba(20,30,15,0.5)); animation:seedGlow 2s ease-in-out infinite; }
+  .plant.seedling img{ filter:drop-shadow(0 0 7px rgba(232,184,75,0.95)) drop-shadow(0 0 4px rgba(255,255,255,0.8)) drop-shadow(0 2px 4px rgba(20,30,15,0.5)); animation:seedGlow 2s ease-in-out infinite; }
   @keyframes seedGlow{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.08); } }
   .plant.seedling::before{
     content:''; position:absolute; left:50%; bottom:-6px; transform:translateX(-50%);
@@ -313,7 +317,7 @@
       </div>
       <div class="field" id="field">
         <div class="field-hud">
-          <span class="hud-pill" id="seedPill"></span>
+          <button class="hud-pill hud-btn" id="seedPill" type="button"></button>
           <span class="hud-pill" id="waterPill"></span>
         </div>
         <div class="rain-layer" id="rainLayer"></div>
@@ -324,7 +328,6 @@
     </div>
 
     <div class="field-actions">
-      <button class="field-btn" id="plantModeBtn">Посадить</button>
       <button class="field-btn" id="helpBtn">Как играть</button>
     </div>
 
@@ -803,18 +806,65 @@ const ICON={
     });
   }
 
-  function setPlantMode(on){
-    plantMode=on;
-    field.classList.toggle('planting',on);
-    $('plantModeBtn').classList.toggle('active',on);
-    $('plantModeBtn').innerHTML = on ? 'Отменить' : `Посадить ${ICON.seed}`;
+  function canPlant(){ return state.seeds>0 && state.plants.length<state.plantLimit; }
+  function plantBlockReason(){
+    if(state.plants.length>=state.plantLimit) return `Все ${state.plantLimit} места заняты — собери цветок или купи место в лавке.`;
+    if(state.seeds<=0) return 'Нет семян — их дают задания дня.';
+    return '';
   }
-  $('plantModeBtn').addEventListener('click',()=>{
-    if(plantMode){ setPlantMode(false); return; }
-    if(state.seeds<=0){ showToast('Нет семян — выполни тренировку или загляни к соседке.'); return; }
-    if(state.plants.length>=state.plantLimit){ showToast(`Максимум ${state.plantLimit} растения. Собери урожай или купи место.`); return; }
-    setPlantMode(true);
-  });
+  function setPlantMode(on){
+    plantMode = on && canPlant();
+    field.classList.toggle('planting',plantMode);
+    $('seedPill').classList.toggle('armed',plantMode);
+  }
+  function bindSeedPill(){
+    const pill=$('seedPill');
+    let ghost=null, dragging=false, moved=false;
+    const removeGhost=()=>{ if(ghost){ ghost.remove(); ghost=null; } };
+    const dropAt=(clientX,clientY)=>{
+      const r=field.getBoundingClientRect();
+      if(clientX<r.left||clientX>r.right||clientY<r.top||clientY>r.bottom){ showToast('Перетащи семечко на поле сада.'); return; }
+      plantSeedAt(
+        Math.max(6,Math.min(94,((clientX-r.left)/r.width)*100)),
+        Math.max(32,Math.min(97,((clientY-r.top)/r.height)*100))
+      );
+    };
+    pill.addEventListener('pointerdown',e=>{
+      if(!canPlant()){ showToast(plantBlockReason()); return; }
+      e.preventDefault();
+      dragging=true; moved=false;
+      pill.setPointerCapture(e.pointerId);
+    });
+    pill.addEventListener('pointermove',e=>{
+      if(!dragging) return;
+      if(!moved && Math.abs(e.movementX)+Math.abs(e.movementY)<2) return;
+      moved=true;
+      if(!ghost){
+        ghost=document.createElement('img');
+        ghost.className='seed-ghost';
+        ghost.src=ASSET_PATH+SEED_IMG;
+        document.body.appendChild(ghost);
+        setPlantMode(true);
+      }
+      ghost.style.left=e.clientX+'px';
+      ghost.style.top=e.clientY+'px';
+    });
+    const finish=e=>{
+      if(!dragging) return;
+      dragging=false;
+      if(moved){
+        removeGhost();
+        setPlantMode(false);
+        dropAt(e.clientX,e.clientY);
+      } else {
+        setPlantMode(!plantMode);
+        if(plantMode) showToast('Коснись места на поле, где посадить семечко.');
+      }
+    };
+    pill.addEventListener('pointerup',finish);
+    pill.addEventListener('pointercancel',()=>{ dragging=false; removeGhost(); });
+  }
+  bindSeedPill();
   field.addEventListener('click',e=>{
     if(!plantMode) return;
     if(e.target.closest('[data-decor]')) return;
@@ -1012,7 +1062,10 @@ const ICON={
 
   function renderHeader(){
     $('greetingLine').textContent=`Привет, ${state.name}!`;
-    $('seedPill').innerHTML=`${ICON.seed} ${state.seeds}`;
+    const pill=$('seedPill');
+    pill.innerHTML=`${ICON.seed} ${state.seeds}`;
+    pill.disabled=!canPlant();
+    pill.title=canPlant()?'Нажми или перетащи на поле, чтобы посадить':plantBlockReason();
     $('waterPill').innerHTML=`${ICON.water} ${state.water}`;
     $('coinsBadge').innerHTML=`${ICON.coin} ${state.coins}`;
     $('streakBadge').textContent=`${computeStreak()} дн. подряд`;
