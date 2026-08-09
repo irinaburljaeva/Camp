@@ -190,7 +190,8 @@
     .sky{ height:88px; }
     .sun{ width:40px; height:40px; top:16px; right:32px; }
     .ground{ min-height:340px; padding:20px 20px 34px; }
-    .plant-wrap{ max-width:150px; height:190px; }
+    .plant-wrap{ max-width:150px; height:170px; }
+    .farm-plot::before{ bottom:60px; height:120px; }
     .plant-fallback{ font-size:72px; }
     .farm-progress{ height:6px; }
     .level-bar-wrap{ padding:10px 20px; }
@@ -212,15 +213,24 @@
     background-color:#E5D0A8;
     background-image:linear-gradient(180deg,#EFE1C5,#E5D0A8);
     background-position:center 60%; background-size:cover; background-repeat:no-repeat;
-    padding:12px 10px 26px; position:relative; min-height:210px;
+    padding:12px 10px 26px; position:relative; min-height:230px;
+    display:flex; flex-direction:column; justify-content:flex-end;
   }
+  .farm-row{ display:flex; justify-content:space-between; align-items:flex-end; gap:6px; position:relative; z-index:2; }
+  .farm-plot{ flex:1; text-align:center; min-width:0; position:relative; cursor:default; padding-bottom:2px; }
+  .farm-plot.actionable{ cursor:pointer; }
+  /* мягкая подложка-грядка: делает растение читаемым на фото газона */
+  .farm-plot::before{
+    content:''; position:absolute; left:50%; bottom:44px; transform:translateX(-50%);
+    width:88%; height:74px; border-radius:50%; pointer-events:none; z-index:0;
+    background:radial-gradient(ellipse at 50% 65%, rgba(255,252,240,0.72), rgba(255,252,240,0.32) 55%, rgba(255,252,240,0) 75%);
+  }
+  .plant-wrap{ position:relative; z-index:1; width:100%; max-width:90px; height:96px; margin:0 auto; display:flex; align-items:flex-end; justify-content:center; }
   .ground::before{
     content:''; position:absolute; inset:0;
     background:linear-gradient(180deg, rgba(246,241,228,0.12), rgba(246,241,228,0) 40%);
     pointer-events:none;
   }
-  .farm-plot{ flex:1; text-align:center; min-width:0; position:relative; cursor:default; }
-  .farm-plot.actionable{ cursor:pointer; }
   .plot-badge{
     display:none; position:absolute; top:-2px; left:50%; transform:translateX(-50%);
     font-size:19px; z-index:4; animation:badgeBob 1.4s ease-in-out infinite; pointer-events:none;
@@ -236,21 +246,20 @@
   .plot-bar-fill.training{ background:var(--sun); }
   .plot-bar-fill.meal{ background:var(--bloom); }
   .plot-hint{
-    font-size:10px; font-weight:800; color:#3B2E22; margin-top:3px; min-height:13px;
-    text-shadow:0 1px 4px rgba(255,255,255,0.95), 0 0 8px rgba(255,255,255,0.9);
+    display:inline-block; font-size:10px; font-weight:800; color:#3B2E22; margin-top:4px; min-height:15px;
+    background:rgba(255,251,240,0.88); border-radius:9px; padding:2px 8px;
+    box-shadow:0 1px 4px rgba(20,30,15,0.25);
   }
+  .plot-hint:empty{ background:none; box-shadow:none; padding:0; }
   .fert-mini{
     position:absolute; right:14%; bottom:34px; width:26px; height:26px; border-radius:50%;
     border:none; background:rgba(255,251,240,0.96); box-shadow:0 2px 6px rgba(40,50,30,0.35);
     font-size:13px; cursor:pointer; display:none; align-items:center; justify-content:center; z-index:5;
   }
   .fert-mini:active{ transform:scale(0.9); }
-  .plant-img{ filter:drop-shadow(0 3px 5px rgba(40,50,30,0.45)); }
+  .plant-img{ filter:drop-shadow(0 4px 6px rgba(20,30,15,0.55)) drop-shadow(0 0 3px rgba(255,255,255,0.55)); }
 
-  .farm-row{ display:flex; justify-content:space-between; align-items:flex-end; gap:6px; position:relative; z-index:2; }
-  .farm-plot{ flex:1; text-align:center; min-width:0; }
   .farm-plot.bonus-ready .plant-img{ filter:drop-shadow(0 0 8px rgba(232,184,75,0.85)); }
-  .plant-wrap{ position:relative; width:100%; max-width:90px; height:110px; margin:0 auto; display:flex; align-items:flex-end; justify-content:center; }
   .plant-img{ max-width:100%; max-height:100%; display:block; transition:transform .3s cubic-bezier(.34,1.56,.64,1), filter .3s ease; transform-origin:50% 95%; }
   .plant-fallback{ display:none; font-size:44px; }
   .plant-wrap.img-failed .plant-img{ display:none; }
@@ -289,12 +298,17 @@
 
   /* ===== РЕЙТИНГ + ВИЗИТЫ ===== */
   .lb-title{ font-size:13.5px; font-weight:800; color:var(--soil-dark); margin-bottom:8px; }
-  .lb-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid #EFE6D2; cursor:pointer; }
+  .lb-row{ display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid #EFE6D2; cursor:pointer; }
+  .lb-gap{ text-align:center; color:#C4B79C; font-size:12px; font-weight:800; letter-spacing:2px; padding:2px 0; }
+  .lb-more{
+    width:100%; margin-top:8px; border:none; background:none; padding:6px;
+    font-family:'Nunito Sans',sans-serif; font-size:11.5px; font-weight:800;
+    color:var(--plum); text-decoration:underline; cursor:pointer;
+  }
   .lb-row:last-child{ border-bottom:none; }
   .lb-row.me{ background:#FBF3E4; border-radius:10px; padding-left:8px; cursor:default; }
   .lb-rank{ width:18px; font-weight:800; color:var(--plum); font-size:12.5px; }
   .lb-name{ flex:1; min-width:0; font-weight:700; font-size:12.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .lb-mini-garden{ display:flex; gap:2px; font-size:15px; }
   .lb-score{ font-weight:800; color:var(--bloom); font-size:12.5px; width:34px; text-align:right; }
   .lb-hint{ font-size:10px; color:var(--ink-soft); text-align:center; margin-top:6px; }
 
@@ -1135,11 +1149,8 @@ const DAILY_QUESTS = [
   }
 
   /* ---------- рейтинг + визиты ---------- */
-  function stageIcon(level){
-    if(level<1) return '🌰'; if(level<2.5) return '🌱'; if(level<4) return '🌿';
-    if(level<5.5) return '🌷'; if(level<6.5) return '🌸'; return '🌻';
-  }
   let lbCache=[];
+  let lbExpanded=false;
   async function loadLeaderboard(){
     try{
       const q=query(collection(db,LEADERBOARD_COLLECTION), orderBy('score','desc'), limit(10));
@@ -1151,16 +1162,24 @@ const DAILY_QUESTS = [
   }
   function renderLeaderboard(){
     if(!lbCache.length){ $('leaderboardList').textContent='Пока пусто — будь первой!'; return; }
-    $('leaderboardList').innerHTML = lbCache.map((r,i)=>{
-      const isMe=r.id===state.docId;
-      const icons=r.plotLevels ? PLOT_KEYS.map(k=>stageIcon(r.plotLevels[k]||0)).join('') : '🌰🌰🌰';
-      return `<div class="lb-row ${isMe?'me':''}" data-idx="${i}">
+    const myIdx = lbCache.findIndex(r=>r.id===state.docId);
+    const rowHtml = (r,i)=>`<div class="lb-row ${r.id===state.docId?'me':''}" data-idx="${i}">
         <span class="lb-rank">${i+1}</span>
         <span class="lb-name">${escapeHtml(r.name||'')}</span>
-        <span class="lb-mini-garden">${icons}</span>
         <span class="lb-score">${r.score||0}</span>
       </div>`;
-    }).join('');
+    let html;
+    if(lbExpanded || lbCache.length<=4){
+      html = lbCache.map(rowHtml).join('');
+    } else {
+      // компактно: топ-3 + своя строка, если она ниже
+      html = lbCache.slice(0,3).map(rowHtml).join('');
+      if(myIdx>2) html += `<div class="lb-gap">···</div>` + rowHtml(lbCache[myIdx], myIdx);
+      html += `<button class="lb-more" id="lbMore">Показать всех (${lbCache.length})</button>`;
+    }
+    $('leaderboardList').innerHTML = html;
+    const more=$('lbMore');
+    if(more) more.addEventListener('click',()=>{ lbExpanded=true; renderLeaderboard(); });
     document.querySelectorAll('.lb-row:not(.me)').forEach(row=>{
       row.addEventListener('click',()=>openVisit(lbCache[Number(row.dataset.idx)]));
     });
