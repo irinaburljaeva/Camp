@@ -462,8 +462,9 @@ const FINAL_FLOWERS=[
 ];
 
 const BASE_PLANT_LIMIT=3, EXTRA_SLOT_PRICE=300, MAX_LEVEL=7;
-const DRIP_INTERVAL_MS=180*60000, DRIP_CAP=2, DAILY_MIN_WATER=1;
-const WEED_CHANCE_PER_MIN=0.010, WEED_COST=2;
+const DRIP_INTERVAL_MS=180*60000, DRIP_CAP=10, DAILY_MIN_WATER=1;
+const WEED_COST=2;
+const ABSENCE_TIERS=[{h:12,weeds:1},{h:24,weeds:2},{h:48,weeds:99}];
 
 const WEATHERS=[
   { id:'clear', name:'Ясно',        desc:'Обычный день — сад растёт как всегда.',        growMul:1,    weight:34 },
@@ -559,7 +560,7 @@ const ICON={
     water:0, seeds:1, coins:0,
     plantLimit:BASE_PLANT_LIMIT,
     ownedDecor:[], decorPos:{},
-    collection:{}, lastSeenCheersAt:0, seenIntro:false, lastGiftDate:null, lastDripAt:Date.now()
+    collection:{}, lastSeenCheersAt:0, seenIntro:false, lastGiftDate:null, lastDripAt:Date.now(), lastVisitAt:Date.now()
   };
   let plantMode=false, lbCache=[], lbExpanded=false, plantsKey='', decorKey='';
 
@@ -683,6 +684,7 @@ const ICON={
     state.seenIntro=!!data.seenIntro;
     state.lastGiftDate=data.lastGiftDate||null;
     state.lastDripAt=data.lastDripAt||Date.now();
+    state.lastVisitAt=data.lastVisitAt||Date.now();
   }
   async function loadOrCreateParticipant(rawName,rawEmail,authUid){
     const email=rawEmail.trim().toLowerCase(), name=rawName.trim();
@@ -696,11 +698,11 @@ const ICON={
       await setDoc(ref,{ownerUid:authUid,updatedAt:serverTimestamp()},{merge:true});
     } else {
       state.docId=email; state.name=name; state.email=email; state.campStartDate=todayStr();
-      state.plants=[]; state.seeds=1; state.water=2; state.coins=3; state.collection={};
+      state.plants=[]; state.seeds=1; state.water=3; state.coins=3; state.collection={};
       await setDoc(ref,{
         name,email,campStartDate:state.campStartDate,log:{},plants:[],
-        water:2,seeds:1,coins:3,plantLimit:BASE_PLANT_LIMIT,ownedDecor:[],decorPos:{},
-        collection:{},seenIntro:false,lastDripAt:Date.now(),ownerUid:authUid,
+        water:3,seeds:1,coins:3,plantLimit:BASE_PLANT_LIMIT,ownedDecor:[],decorPos:{},
+        collection:{},seenIntro:false,lastDripAt:Date.now(),lastVisitAt:Date.now(),ownerUid:authUid,
         createdAt:serverTimestamp(),updatedAt:serverTimestamp()
       });
     }
@@ -725,7 +727,7 @@ const ICON={
         log:state.log,plants:state.plants,water:state.water,seeds:state.seeds,coins:state.coins,
         plantLimit:state.plantLimit,ownedDecor:state.ownedDecor,decorPos:state.decorPos,
         collection:state.collection,lastSeenCheersAt:state.lastSeenCheersAt,
-        seenIntro:state.seenIntro,lastGiftDate:state.lastGiftDate,lastDripAt:state.lastDripAt,
+        seenIntro:state.seenIntro,lastGiftDate:state.lastGiftDate,lastDripAt:state.lastDripAt,lastVisitAt:state.lastVisitAt,
         score,updatedAt:serverTimestamp()
       },{merge:true});
       await setDoc(doc(db,LEADERBOARD_COLLECTION,state.docId),{
@@ -761,21 +763,32 @@ const ICON={
     saveProgress();
   }
 
-  function tickPlants(){
-    const now=Date.now(); let changed=false;
-    const heat=todayWeather().id==='heat';
-    state.plants.forEach(p=>{
-      const mins=(now-(p.lastTick||now))/60000;
-      if(mins>=1){
-        p.lastTick=now;
-        if(!p.weeds && p.level<MAX_LEVEL){
-          const rate=WEED_CHANCE_PER_MIN*(heat?1.8:1);
-          if(Math.random() < 1-Math.pow(1-rate,Math.min(mins,180))){ p.weeds=true; changed=true; }
-        }
-      }
-    });
-    if(changed){ plantsKey=''; saveProgress(); }
+  function applyAbsenceWeeds(){
+    if(!state.plants.length){ state.lastVisitAt=Date.now(); return; }
+    const away=Date.now()-(state.lastVisitAt||Date.now());
+    const hours=away/3600000;
+    let target=0;
+    ABSENCE_TIERS.forEach(t=>{ if(hours>=t.h) target=Math.max(target,t.weeds); });
+    if(target<=0){ state.lastVisitAt=Date.now(); return; }
+    const need=Math.min(target,state.plants.length);
+    const clean=state.plants.filter(p=>!p.weeds && p.level<MAX_LEVEL);
+    const already=state.plants.filter(p=>p.weeds).length;
+    const toWeed=Math.max(0,need-already);
+    if(toWeed>0 && clean.length){
+      for(let i=clean.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [clean[i],clean[j]]=[clean[j],clean[i]]; }
+      clean.slice(0,toWeed).forEach(p=>p.weeds=true);
+      plantsKey='';
+      const h=Math.floor(hours);
+      setTimeout(()=>showToast(
+        toWeed>=state.plants.length
+          ? `Тебя не было ${h} ч — сорняки захватили весь сад. Прополи, чтобы растения снова росли.`
+          : `Тебя не было ${h} ч — на растении появились сорняки.`
+      ),1200);
+    }
+    state.lastVisitAt=Date.now();
+    saveProgress();
   }
+  function touchVisit(){ state.lastVisitAt=Date.now(); }
 
   function plantSeedAt(x,y){
     if(state.seeds<=0){ showToast('Нет семян — выполни тренировку или загляни к соседке.'); return; }
@@ -1394,7 +1407,7 @@ const ICON={
   $('helpBtn').addEventListener('click',()=>$('introOverlay').classList.add('open'));
 
   function renderAll(){
-    dripWater(); tickPlants();
+    dripWater(); touchVisit();
     renderHeader(); renderSkyTime(); renderWeather(); renderLevel();
     renderDecor(); renderPlants(); renderQuests(); renderShop(); renderCollection();
     $('finaleBadge').style.display = getDayNumber()>7 ? 'flex' : 'none';
@@ -1414,6 +1427,7 @@ const ICON={
       const cred=await signInAnonymously(auth);
       await loadOrCreateParticipant(rawName,rawEmail,cred.user.uid);
       loginScreen.style.display='none'; gameContent.style.display='block';
+      applyAbsenceWeeds();
       renderAll(); loadLeaderboard(); checkCheers();
       ensureDailyWater();
       if(!state.seenIntro) $('introOverlay').classList.add('open');
@@ -1440,6 +1454,7 @@ const ICON={
         loadingScreen.style.display='none';
         if(resumed){
           gameContent.style.display='block';
+          applyAbsenceWeeds();
           renderAll(); loadLeaderboard(); checkCheers();
           ensureDailyWater();
           if(!state.seenIntro) $('introOverlay').classList.add('open');
