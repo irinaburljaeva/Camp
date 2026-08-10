@@ -112,7 +112,7 @@
   .hud-btn{ border:2px solid transparent; font-family:'Nunito Sans',sans-serif; cursor:pointer; pointer-events:auto; touch-action:none; }
   .hud-btn:disabled{ opacity:.5; cursor:default; }
   .hud-btn.armed{ border-color:var(--sun); box-shadow:0 0 0 4px rgba(232,184,75,0.35), 0 2px 6px rgba(20,30,15,0.25); animation:seedHalo 1.6s ease-in-out infinite; }
-  .seed-ghost{ position:fixed; z-index:200; width:60px; margin:-30px 0 0 -30px; pointer-events:none; opacity:.92; filter:drop-shadow(0 4px 8px rgba(20,30,15,0.5)); }
+  .seed-ghost{ position:fixed; z-index:200; width:64px; margin:-32px 0 0 -32px; pointer-events:none; opacity:.95; filter:drop-shadow(0 6px 10px rgba(20,30,15,0.55)); }
   .rain-layer{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:8; display:none; }
   .rain-layer.on{ display:block; }
   .rain-drop{ position:absolute; top:-14px; width:2px; height:11px; border-radius:2px; background:rgba(120,170,200,0.55); animation:rainfall linear infinite; }
@@ -120,7 +120,8 @@
   .heat-layer{ position:absolute; inset:0; pointer-events:none; z-index:7; display:none; background:linear-gradient(180deg, rgba(255,214,120,0.22), rgba(255,180,80,0.1)); }
   .heat-layer.on{ display:block; }
 
-  .plant{ position:absolute; transform:translate(-50%,-100%); z-index:3; cursor:pointer; animation:popIn .45s cubic-bezier(.34,1.56,.64,1); }
+  .plant{ position:absolute; transform:translate(-50%,-100%); z-index:3; cursor:pointer; }
+  .plant.fresh{ animation:popIn .45s cubic-bezier(.34,1.56,.64,1); }
   .plant img{ display:block; width:100%; height:auto; filter:drop-shadow(0 0 4px rgba(255,255,255,0.75)) drop-shadow(0 2px 3px rgba(20,30,15,0.45)); pointer-events:none; transition:transform .25s cubic-bezier(.34,1.56,.64,1); }
   .plant-shadow{ position:absolute; left:50%; bottom:-4px; transform:translateX(-50%); width:56%; height:11px; border-radius:50%; z-index:-1; background:radial-gradient(ellipse at 50% 50%, rgba(28,40,20,0.4), rgba(28,40,20,0) 75%); }
   .plant.ready img{ animation:readyBob 1.5s ease-in-out infinite; }
@@ -447,7 +448,7 @@ const app=initializeApp(firebaseConfig), db=getFirestore(app), auth=getAuth(app)
 const PROGRESS_COLLECTION='garden_progress', LEADERBOARD_COLLECTION='garden_leaderboard';
 
 const ASSET_PATH='';
-const SEED_IMG='seed.png';
+let SEED_IMG='seed.png';
 const STAGE_VARIANTS=[
   ['seed1.png','seed11.png','seed21.png','seed31.png'],
   ['seed2.png','seed12.png','seed22.png','seed32.png'],
@@ -553,7 +554,28 @@ const ICON={
   seed:`<img class="ic ic-seed" src="${ASSET_PATH+SEED_IMG}" alt="семя" title="семечко">`
 };
 
+function fileExists(src){
+  return new Promise(res=>{ const im=new Image(); im.onload=()=>res(true); im.onerror=()=>res(false); im.src=src; });
+}
+async function verifySprites(){
+  for(let s=0;s<STAGE_VARIANTS.length;s++){
+    const checks=await Promise.all(STAGE_VARIANTS[s].map(f=>fileExists(ASSET_PATH+f)));
+    const ok=STAGE_VARIANTS[s].filter((f,i)=>checks[i]);
+    if(ok.length) STAGE_VARIANTS[s]=ok;
+    else console.warn('Нет картинок для стадии',s+1);
+  }
+  const seedOk=await fileExists(ASSET_PATH+SEED_IMG);
+  if(!seedOk){
+    for(const alt of ['seed0.png','seed.PNG','seed-1.png']){
+      if(await fileExists(ASSET_PATH+alt)){ SEED_IMG=alt; break; }
+    }
+    if(!(await fileExists(ASSET_PATH+SEED_IMG))) SEED_IMG=STAGE_VARIANTS[0][0];
+    ICON.seed=`<img class="ic ic-seed" src="${ASSET_PATH+SEED_IMG}" alt="семя">`;
+  }
+}
+
 (async function(){
+  await verifySprites();
   const state={
     docId:null, name:'', email:'', campStartDate:null,
     log:{}, plants:[],
@@ -563,6 +585,7 @@ const ICON={
     collection:{}, lastSeenCheersAt:0, seenIntro:false, lastGiftDate:null, lastDripAt:Date.now(), lastVisitAt:Date.now()
   };
   let plantMode=false, lbCache=[], lbExpanded=false, plantsKey='', decorKey='';
+  const seenPlantIds=new Set();
 
   const $=id=>document.getElementById(id);
   const loadingScreen=$('loadingScreen'), loginScreen=$('loginScreen'), gameContent=$('gameContent');
@@ -890,13 +913,17 @@ const ICON={
     field.classList.toggle('planting',plantMode);
     $('seedPill').classList.toggle('armed',plantMode);
   }
+  let ignoreFieldClickUntil=0;
   function bindSeedPill(){
     const pill=$('seedPill');
-    let ghost=null, dragging=false, moved=false;
+    let ghost=null, dragging=false, moved=false, startX=0, startY=0;
     const removeGhost=()=>{ if(ghost){ ghost.remove(); ghost=null; } };
     const dropAt=(clientX,clientY)=>{
       const r=field.getBoundingClientRect();
-      if(clientX<r.left||clientX>r.right||clientY<r.top||clientY>r.bottom){ showToast('Перетащи семечко на поле сада.'); return; }
+      if(clientX<r.left||clientX>r.right||clientY<r.top||clientY>r.bottom){
+        showToast('Отпусти семечко над полем сада.');
+        return;
+      }
       plantSeedAt(
         Math.max(6,Math.min(94,((clientX-r.left)/r.width)*100)),
         Math.max(32,Math.min(97,((clientY-r.top)/r.height)*100))
@@ -904,13 +931,15 @@ const ICON={
     };
     pill.addEventListener('pointerdown',e=>{
       if(!canPlant()){ showToast(plantBlockReason()); return; }
-      e.preventDefault();
+      e.preventDefault(); e.stopPropagation();
       dragging=true; moved=false;
+      startX=e.clientX; startY=e.clientY;
       pill.setPointerCapture(e.pointerId);
     });
     pill.addEventListener('pointermove',e=>{
       if(!dragging) return;
-      if(!moved && Math.abs(e.movementX)+Math.abs(e.movementY)<2) return;
+      const dx=e.clientX-startX, dy=e.clientY-startY;
+      if(!moved && Math.hypot(dx,dy)<8) return;
       moved=true;
       if(!ghost){
         ghost=document.createElement('img');
@@ -925,24 +954,30 @@ const ICON={
     const finish=e=>{
       if(!dragging) return;
       dragging=false;
+      ignoreFieldClickUntil=Date.now()+400;
       if(moved){
         removeGhost();
         setPlantMode(false);
         dropAt(e.clientX,e.clientY);
       } else {
         setPlantMode(!plantMode);
-        if(plantMode) showToast('Коснись места на поле, где посадить семечко.');
+        if(plantMode) showToast('Теперь коснись места на поле, где посадить семечко.');
       }
     };
     pill.addEventListener('pointerup',finish);
     pill.addEventListener('pointercancel',()=>{ dragging=false; removeGhost(); });
+    pill.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); });
   }
   bindSeedPill();
   field.addEventListener('click',e=>{
     if(!plantMode) return;
-    if(e.target.closest('[data-decor]')) return;
+    if(Date.now()<ignoreFieldClickUntil) return;
+    if(e.target.closest('.field-hud')||e.target.closest('[data-decor]')||e.target.closest('[data-plant]')) return;
     const r=field.getBoundingClientRect();
-    plantSeedAt(Math.max(6,Math.min(94,((e.clientX-r.left)/r.width)*100)), Math.max(32,Math.min(97,((e.clientY-r.top)/r.height)*100)));
+    plantSeedAt(
+      Math.max(6,Math.min(94,((e.clientX-r.left)/r.width)*100)),
+      Math.max(32,Math.min(97,((e.clientY-r.top)/r.height)*100))
+    );
   });
 
   function rewardText(rw){
@@ -1136,11 +1171,13 @@ const ICON={
       const full=p.level>=MAX_LEVEL;
       const mark = p.weeds?'<span class="plant-mark weed">!</span>' : full?'<span class="plant-mark done">✓</span>' : '';
       const w=plantWidth(p.level);
-      return `<div class="plant ${full?'ready':''} ${p.level<1?'seedling':''}" data-plant="${p.id}" style="left:${p.x}%; top:${p.y}%; width:${w}%;">
-        ${mark}<img src="${plantImgSrc(p.level,p.vars)}" alt=""><span class="plant-shadow"></span>
+      const fresh = seenPlantIds.has(p.id) ? '' : ' fresh';
+      return `<div class="plant ${full?'ready':''} ${p.level<1?'seedling':''}${fresh}" data-plant="${p.id}" style="left:${p.x}%; top:${p.y}%; width:${w}%;">
+        ${mark}<img src="${plantImgSrc(p.level,p.vars)}" alt="" onerror="this.onerror=null;this.src='${ASSET_PATH+SEED_IMG}'"><span class="plant-shadow"></span>
         ${p.weeds?'<span class="weed-tuft"></span>':''}
       </div>`;
     }).join('');
+    state.plants.forEach(p=>seenPlantIds.add(p.id));
     $('plantLayer').querySelectorAll('[data-plant]').forEach(el=>{
       const p=state.plants.find(x=>x.id===el.dataset.plant);
       el.addEventListener('click',e=>{ if(plantMode) return; e.stopPropagation(); plantAction(p); });
