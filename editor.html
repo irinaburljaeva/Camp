@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Редактор кликабельных зон — карта лагеря</title>
+<style>
+  * { box-sizing:border-box; }
+  html,body{ margin:0; background:#f3f3f3; font-family:system-ui, Arial, sans-serif; color:#222; }
+  h1{ font-size:18px; margin:16px; }
+  .hint{ margin:0 16px 12px; font-size:14px; color:#555; line-height:1.4; }
+  .wrap{ max-width:1200px; margin:0 auto; padding-bottom:40px; }
+  .map-box{ position:relative; background:#fff; border:1px solid #ddd; margin:0 16px; }
+  svg{ display:block; width:100%; height:auto; touch-action:none; }
+  image{ pointer-events:none; }
+
+  .zone-rect{
+    fill: rgba(207,44,2,0.18);
+    stroke: #CF2C02;
+    stroke-width: 3;
+    vector-effect:non-scaling-stroke;
+    cursor: move;
+  }
+  .zone-rect.active{ fill: rgba(255,186,8,0.30); stroke:#FFBA08; }
+  .zone-label{
+    font-size: 26px; font-weight:700; fill:#CF2C02; pointer-events:none;
+    paint-order: stroke; stroke: #fff; stroke-width: 5px;
+  }
+  .handle{
+    fill:#CF2C02; stroke:#fff; stroke-width:2; cursor: nwse-resize;
+  }
+
+  .panel{ margin:16px; }
+  .zone-card{
+    background:#fff; border:1px solid #ddd; border-radius:10px;
+    padding:10px 14px; margin-bottom:10px;
+  }
+  .zone-card.active{ border-color:#FFBA08; box-shadow:0 0 0 2px #FFBA0855; }
+  .zone-card h3{ margin:4px 0 8px; font-size:15px; }
+  .fields{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .fields label{ font-size:11px; color:#666; display:block; }
+  .fields input{ width:100%; padding:6px; font-size:14px; border:1px solid #ccc; border-radius:6px; }
+
+  .exportBox{ margin:16px; }
+  .exportBox textarea{
+    width:100%; height:260px; font-family:ui-monospace,Consolas,monospace; font-size:12px;
+    padding:10px; border:1px solid #ccc; border-radius:8px; background:#111; color:#8f8;
+  }
+  button{
+    background:#CF2C02; color:#fff; border:none; padding:10px 16px; border-radius:8px;
+    font-size:14px; cursor:pointer; margin:6px 16px 0 0;
+  }
+  button.secondary{ background:#555; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Редактор зон карты лагеря</h1>
+  <p class="hint">
+    Положите файл <b>map.jpg</b> в ту же папку, что и этот файл, и откройте его в браузере.<br/>
+    Перетаскивайте прямоугольник за середину, чтобы двигать зону. Тащите за жёлтый уголок
+    внизу справа, чтобы менять размер. Можно также вписывать числа вручную ниже.
+    Когда всё встанет на место — нажмите «Сформировать код» и скопируйте результат мне.
+  </p>
+
+  <div class="map-box">
+    <svg id="camp" viewBox="0 0 1536 1156" preserveAspectRatio="xMidYMid meet">
+      <image href="map.jpg" width="1536" height="1156" />
+      <g id="zones"></g>
+    </svg>
+  </div>
+
+  <div class="panel" id="panel"></div>
+
+  <button id="exportBtn">Сформировать код</button>
+  <button id="copyBtn" class="secondary">Скопировать код</button>
+
+  <div class="exportBox">
+    <textarea id="output" readonly placeholder="Здесь появится готовый код после нажатия «Сформировать код»"></textarea>
+  </div>
+</div>
+
+<script>
+const svg = document.getElementById('camp');
+const zonesG = document.getElementById('zones');
+const panel = document.getElementById('panel');
+const output = document.getElementById('output');
+
+// Текущие зоны — стартовые координаты взяты из последней версии карты
+const zones = [
+  { id:'kitchen', label:'Столовая',        href:'https://my.walk-walk.ru/teach/control/stream/view/id/935735894', sound:'kitchen', x:220,  y:360, w:330, h:240 },
+  { id:'sport',   label:'Спортивный зал',  href:'https://my.walk-walk.ru/teach/control/stream/view/id/935735897', sound:'sport',   x:580,  y:520, w:330, h:240 },
+  { id:'disco',   label:'Дискотека',       href:'https://my.walk-walk.ru/teach/control/stream/view/id/935735898', sound:'disco',   x:1060, y:300, w:330, h:240 },
+  { id:'rooms',   label:'Палаты',          href:'https://my.walk-walk.ru/teach/control/stream/view/id/935735888', sound:'rooms',   x:140,  y:600, w:330, h:240 },
+  { id:'cinema',  label:'Кинозал',         href:'https://my.walk-walk.ru/teach/control/stream/view/id/935735896', sound:'cinema',  x:1080, y:590, w:330, h:240 },
+  { id:'garden',  label:'Сад',             href:'https://my.walk-walk.ru/teach/control/stream/view/id/935743215', sound:'birds',   x:150,  y:970, w:330, h:240 },
+  { id:'library', label:'Библиотека',      href:'https://my.walk-walk.ru/teach/control/stream/view/id/935735892', sound:'library', x:960,  y:950, w:330, h:240 },
+  { id:'ducks',   label:'Утки',            href:null,                                                              sound:'ducks',   x:1330, y:1020, w:220, h:140 },
+];
+
+let activeId = null;
+
+function svgPoint(evt){
+  const pt = svg.createSVGPoint();
+  const e = evt.touches ? evt.touches[0] : evt;
+  pt.x = e.clientX; pt.y = e.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+
+function render(){
+  zonesG.innerHTML = '';
+  zones.forEach(z=>{
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.dataset.id = z.id;
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('class','zone-rect' + (z.id===activeId ? ' active' : ''));
+    rect.setAttribute('x', z.x);
+    rect.setAttribute('y', z.y);
+    rect.setAttribute('width', z.w);
+    rect.setAttribute('height', z.h);
+    rect.setAttribute('rx', 14);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('class','zone-label');
+    text.setAttribute('x', z.x + z.w/2);
+    text.setAttribute('y', z.y - 10);
+    text.setAttribute('text-anchor','middle');
+    text.textContent = z.label;
+
+    const handle = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    handle.setAttribute('class','handle');
+    handle.setAttribute('width', 26);
+    handle.setAttribute('height', 26);
+    handle.setAttribute('x', z.x + z.w - 13);
+    handle.setAttribute('y', z.y + z.h - 13);
+    handle.dataset.role = 'resize';
+
+    g.appendChild(rect);
+    g.appendChild(text);
+    g.appendChild(handle);
+    zonesG.appendChild(g);
+  });
+  renderPanel();
+}
+
+function renderPanel(){
+  panel.innerHTML = '';
+  zones.forEach(z=>{
+    const card = document.createElement('div');
+    card.className = 'zone-card' + (z.id===activeId ? ' active':'');
+    card.innerHTML = `
+      <h3>${z.label}</h3>
+      <div class="fields">
+        <div><label>X</label><input type="number" data-field="x" value="${Math.round(z.x)}"></div>
+        <div><label>Y</label><input type="number" data-field="y" value="${Math.round(z.y)}"></div>
+        <div><label>Ширина</label><input type="number" data-field="w" value="${Math.round(z.w)}"></div>
+        <div><label>Высота</label><input type="number" data-field="h" value="${Math.round(z.h)}"></div>
+      </div>
+    `;
+    card.querySelectorAll('input').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        z[inp.dataset.field] = parseFloat(inp.value) || 0;
+        render();
+      });
+    });
+    panel.appendChild(card);
+  });
+}
+
+// Drag & resize
+let mode = null; // 'move' | 'resize'
+let startPt = null;
+let startZone = null;
+
+zonesG.addEventListener('pointerdown', (e)=>{
+  const g = e.target.closest('g[data-id]');
+  if(!g) return;
+  activeId = g.dataset.id;
+  const z = zones.find(zz=>zz.id===activeId);
+  startPt = svgPoint(e);
+  startZone = { ...z };
+  mode = e.target.dataset.role === 'resize' ? 'resize' : 'move';
+  svg.setPointerCapture(e.pointerId);
+  render();
+});
+
+svg.addEventListener('pointermove', (e)=>{
+  if(!mode || !activeId) return;
+  const p = svgPoint(e);
+  const dx = p.x - startPt.x;
+  const dy = p.y - startPt.y;
+  const z = zones.find(zz=>zz.id===activeId);
+  if(mode==='move'){
+    z.x = startZone.x + dx;
+    z.y = startZone.y + dy;
+  } else if(mode==='resize'){
+    z.w = Math.max(30, startZone.w + dx);
+    z.h = Math.max(30, startZone.h + dy);
+  }
+  render();
+});
+
+function endDrag(){ mode = null; }
+svg.addEventListener('pointerup', endDrag);
+svg.addEventListener('pointercancel', endDrag);
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  let code = '';
+  zones.forEach(z=>{
+    const hrefLine = z.href
+      ? `<a href="${z.href}"\n   target="_blank" rel="noopener" aria-label="${z.label}" data-sound="${z.sound}">`
+      : `<a href="#" aria-label="${z.label}" data-sound="${z.sound}">`;
+    code += `<!-- ${z.label.toUpperCase()} -->\n`;
+    code += `${hrefLine}\n`;
+    code += `  <title>${z.label}</title>\n`;
+    code += `  <rect class="hotspot" data-type="label" x="${Math.round(z.x)}" y="${Math.round(z.y)}" width="${Math.round(z.w)}" height="${Math.round(z.h)}" rx="16"/>\n`;
+    code += `</a>\n\n`;
+  });
+  output.value = code.trim();
+});
+
+document.getElementById('copyBtn').addEventListener('click', ()=>{
+  output.select();
+  document.execCommand('copy');
+});
+
+render();
+</script>
+</body>
+</html>
