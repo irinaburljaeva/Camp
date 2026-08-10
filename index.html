@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Карта лагеря — кликабельные зоны</title>
+  <title>Карта лагеря</title>
   <style>
     :root { --brand:#CF2C02; --brand2:#FFBA08; --brand3:#E85D04; }
     * { box-sizing:border-box }
     html,body{ margin:0; background:#fff; font-family:system-ui, Arial, sans-serif; }
     .map{ max-width:1200px; margin:0 auto; }
     svg{ display:block; width:100%; height:auto; }
-    image{ pointer-events:none; } /* клики проходят сквозь */
+    image{ pointer-events:none; }
 
    
     .hotspot{
@@ -38,14 +38,14 @@
       to  { transform: translate(var(--dx),var(--dy)) scale(.4); opacity:0 }
     }
 
-    /* Убираем синий хайлайт на мобилках */
+   
     a, svg, image, .hotspot{ -webkit-tap-highlight-color: transparent; outline: none; }
   </style>
 </head>
 <body>
   <div class="map">
     <svg id="camp" viewBox="0 0 1536 1156" preserveAspectRatio="xMidYMid meet" aria-label="Интерактивная карта лагеря">
-      <image href="camp-map.jpg" width="1536" height="1156" />
+      <image href="map.jpg" width="1536" height="1156" />
 
       <!-- СТОЛОВАЯ (звук: kitchen.mp3, 3 сек) -->
       <a href="https://my.walk-walk.ru/teach/control/stream/view/id/935151323"
