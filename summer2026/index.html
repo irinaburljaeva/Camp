@@ -189,6 +189,8 @@
   .shop-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
   .shop-item{ text-align:center; background:#fff; border:2px solid #E4D9C4; border-radius:12px; padding:8px 4px; }
   .shop-item.owned{ border-color:var(--leaf); background:#F1F6EA; }
+  .shop-item.seed-card{ border-color:var(--sun); background:#FBF3E4; }
+  .shop-item.seed-card .shop-img{ padding:4px 0; }
   .shop-img{ width:100%; height:46px; object-fit:contain; display:block; }
   .shop-name{ font-size:9.5px; font-weight:800; color:var(--ink-soft); margin-top:3px; }
   .shop-buy{ margin-top:5px; width:100%; display:flex; align-items:center; justify-content:center; gap:3px; border:none; border-radius:8px; padding:5px 2px; font-size:9.5px; font-weight:800; background:var(--sun); color:#5C4715; cursor:pointer; }
@@ -206,8 +208,11 @@
   .lb-rank{ width:18px; font-weight:800; color:var(--plum); font-size:12.5px; }
   .lb-name{ flex:1; min-width:0; font-weight:700; font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .lb-score{ font-weight:800; color:var(--bloom); font-size:12.5px; }
-  .lb-gap{ text-align:center; color:#C4B79C; font-size:12px; font-weight:800; letter-spacing:2px; }
-  .lb-more{ width:100%; margin-top:8px; border:none; background:none; padding:6px; font-family:'Nunito Sans',sans-serif; font-size:11.5px; font-weight:800; color:var(--plum); text-decoration:underline; cursor:pointer; }
+  .lb-scroll{ max-height:196px; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-right:4px; }
+  .lb-scroll::-webkit-scrollbar{ width:5px; }
+  .lb-scroll::-webkit-scrollbar-thumb{ background:#E0D3B8; border-radius:4px; }
+  .lb-tag{ font-size:9.5px; font-weight:800; color:#5F6B3C; background:#EAF0DC; border-radius:8px; padding:2px 6px; white-space:nowrap; }
+  .lb-mine{ margin-top:8px; padding-top:8px; border-top:1px solid #EFE6D2; text-align:center; font-size:11.5px; font-weight:800; color:var(--ink-soft); }
 
   .collection-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
   .coll-slot{ position:relative; aspect-ratio:1; border-radius:12px; background:#fff; border:2px dashed #E4D9C4; display:flex; flex-direction:column; align-items:center; justify-content:center; }
@@ -220,6 +225,24 @@
 
   .finale-badge{ display:flex; align-items:center; justify-content:center; gap:6px; width:fit-content; margin:0 auto 12px; padding:8px 16px; border-radius:20px; border:2px solid var(--sun); background:#FBF3E4; color:#8A6220; font-family:'Nunito Sans',sans-serif; font-size:12.5px; font-weight:800; cursor:pointer; }
 
+  .coach-veil{ position:fixed; inset:0; background:rgba(28,22,16,0.62); z-index:150; display:none; }
+  .coach-veil.open{ display:block; }
+  .coach-hole{ position:fixed; border-radius:16px; box-shadow:0 0 0 9999px rgba(28,22,16,0.62), 0 0 0 3px var(--sun); z-index:151; pointer-events:none; transition:all .35s cubic-bezier(.34,1.3,.64,1); }
+  .coach-card{
+    position:fixed; z-index:152; width:min(320px, calc(100vw - 32px));
+    background:var(--card); border-radius:18px; padding:16px 16px 14px;
+    box-shadow:0 16px 40px -10px rgba(0,0,0,0.5); animation:coachIn .3s ease;
+  }
+  @keyframes coachIn{ from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:translateY(0);} }
+  .coach-step{ font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--plum); }
+  .coach-title{ font-family:'Fraunces',serif; font-size:17px; font-weight:700; color:var(--soil-dark); margin-top:4px; }
+  .coach-text{ font-size:13px; color:var(--ink-soft); line-height:1.45; margin-top:6px; }
+  .coach-actions{ display:flex; align-items:center; gap:8px; margin-top:12px; }
+  .coach-next{ flex:1; border:none; border-radius:11px; padding:11px; background:var(--bloom); color:#fff; font-family:'Nunito Sans',sans-serif; font-size:13px; font-weight:800; cursor:pointer; }
+  .coach-skip{ border:none; background:none; font-family:'Nunito Sans',sans-serif; font-size:12px; font-weight:700; color:var(--ink-soft); text-decoration:underline; cursor:pointer; }
+  .coach-dots{ display:flex; gap:5px; justify-content:center; margin-top:10px; }
+  .coach-dot{ width:6px; height:6px; border-radius:50%; background:#E4D9C4; }
+  .coach-dot.on{ background:var(--bloom); }
   .overlay{ position:fixed; inset:0; background:rgba(59,46,34,0.55); display:none; align-items:center; justify-content:center; z-index:60; padding:18px; }
   .overlay.open{ display:flex; }
   .modal{ background:var(--card); border-radius:22px; max-width:400px; width:100%; overflow:hidden; box-shadow:0 20px 50px -12px rgba(0,0,0,0.4); animation:fadeUp .3s ease; max-height:90vh; overflow-y:auto; }
@@ -233,6 +256,22 @@
   .intro-num{ width:22px; height:22px; border-radius:50%; background:var(--plum); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .intro-body b{ display:block; font-size:12.5px; color:var(--soil-dark); }
   .intro-body span{ font-size:11.5px; color:var(--ink-soft); line-height:1.4; }
+  .weed-scene{ position:relative; width:150px; height:130px; margin:14px auto 10px; display:flex; align-items:flex-end; justify-content:center; }
+  .weed-scene.shaking{ animation:weedShake .25s ease-in-out infinite; }
+  @keyframes weedShake{ 0%,100%{ transform:translateX(0);} 25%{ transform:translateX(-3px);} 75%{ transform:translateX(3px);} }
+  .weed-plant{ max-width:78%; max-height:100%; object-fit:contain; filter:drop-shadow(0 2px 4px rgba(20,30,15,0.4)); }
+  .weed-grass{ position:absolute; bottom:2px; width:26px; height:34px; transition:opacity .45s ease, transform .45s ease;
+    background:radial-gradient(ellipse at 40% 100%, #7C8F52 0 44%, transparent 46%),
+               radial-gradient(ellipse at 70% 100%, #66803F 0 40%, transparent 42%); }
+  .weed-grass.g1{ left:16px; } .weed-grass.g2{ right:18px; height:28px; } .weed-grass.g3{ left:52px; height:22px; opacity:.85; }
+  .weed-scene.clearing .weed-grass{ opacity:0; transform:translateY(10px) scale(.7); }
+  .weed-hold{
+    position:relative; width:100%; height:52px; border-radius:14px; margin:6px 0 4px; cursor:pointer;
+    user-select:none; touch-action:none; overflow:hidden;
+    background:linear-gradient(90deg, var(--leaf) calc(var(--p,0)*1%), #E4D9C4 calc(var(--p,0)*1%));
+  }
+  .weed-hold-label{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:800; color:#fff; text-shadow:0 1px 3px rgba(20,30,15,0.45); }
   .num-row{ display:flex; align-items:center; justify-content:center; gap:10px; margin:16px 0 6px; }
   .num-input{ width:130px; padding:14px 12px; border-radius:12px; border:2px solid #E4D9C4; background:#fff;
     font-family:'Fraunces',serif; font-size:26px; font-weight:700; text-align:center; color:var(--soil-dark); outline:none; }
@@ -425,43 +464,17 @@
     <button class="finale-badge" id="finaleBadge" style="display:none;">Итоги недели</button>
   </div>
 
+  <div class="coach-veil" id="coachVeil"></div>
+  <div class="coach-hole" id="coachHole" style="display:none;"></div>
+  <div class="coach-card" id="coachCard" style="display:none;"></div>
+
   <div class="overlay" id="introOverlay">
     <div class="modal"><div class="modal-pad">
-      <div class="modal-title">Как играть</div>
-      <p class="modal-text">Вы двигаетесь и заботитесь о себе в жизни — в игре за это растёт ваш сад.</p>
-
-      <div class="intro-step"><div class="intro-num">1</div><div class="intro-body">
-        <b>Отмечайте задания дня</b>
-        <span>Каждый день появляется 5 заданий: прогулка, тренировка, еда по меню и уход за садом. Выполнили в жизни — нажмите «Отметить» и ответьте на короткий вопрос. За это дают воду, монеты и семена.</span>
-      </div></div>
-
-      <div class="intro-step"><div class="intro-num">2</div><div class="intro-body">
-        <b>Сажайте семена</b>
-        <span>Нажмите на семечко в углу поля, потом на место, где хотите его посадить. Можно и просто перетащить его пальцем. В саду помещается 3 растения.</span>
-      </div></div>
-
-      <div class="intro-step"><div class="intro-num">3</div><div class="intro-body">
-        <b>Поливайте, чтобы росли</b>
-        <span>Нажмите на растение — потратится одна вода, и оно немного подрастёт. Чем чаще поливаете, тем быстрее вырастает цветок.</span>
-      </div></div>
-
-      <div class="intro-step"><div class="intro-num">4</div><div class="intro-body">
-        <b>Полите сорняки</b>
-        <span>Если не заходить дольше 12 часов, у растений появляются сорняки — тогда они перестают расти. Нажмите на растение и заплатите 2 монеты, чтобы прополоть.</span>
-      </div></div>
-
-      <div class="intro-step"><div class="intro-num">5</div><div class="intro-body">
-        <b>Собирайте цветы</b>
-        <span>Когда растение зацвело, нажмите на него — цветок отправится в гербарий, а место освободится для нового семечка.</span>
-      </div></div>
-
-      <div class="intro-step"><div class="intro-num">6</div><div class="intro-body">
-        <b>Тратьте монеты</b>
-        <span>В лавке продаются семена по 1 монете и украшения для сада — их можно двигать по полю и менять размер. Ещё за монеты открывается место под четвёртое растение.</span>
-      </div></div>
-
-      <p class="modal-text" style="font-size:12px; margin-top:12px;">Вода понемногу набирается сама, но её мало — основной запас дают задания. Заходите в гости к другим участницам: там можно прополоть или полить чужое растение за 1 монету — это засчитывается в ваши задания, а хозяйка сада увидит, кто ей помог.</p>
-      <button class="primary-btn" id="introCloseBtn">Понятно, в сад!</button>
+      <div class="modal-title">Добро пожаловать в сад!</div>
+      <p class="modal-text">Вы двигаетесь и заботитесь о себе в жизни — за это растёт ваш сад.</p>
+      <p class="modal-text" style="font-size:12.5px;">Покажу за минуту, что где находится.</p>
+      <button class="primary-btn" id="introCloseBtn">Показать</button>
+      <button class="ghost-btn" id="introSkipBtn">Разберусь сама</button>
     </div></div>
   </div>
 
@@ -530,7 +543,7 @@ const FINAL_FLOWERS=[
 
 const BASE_PLANT_LIMIT=3, EXTRA_SLOT_PRICE=300, MAX_LEVEL=7;
 const DRIP_INTERVAL_MS=180*60000, DRIP_CAP=10, DAILY_MIN_WATER=1;
-const WEED_COST=2, NEIGHBOR_WEED_COST=1, NEIGHBOR_WATER_COST=1, SEED_PRICE=1;
+const WEED_COST=2, NEIGHBOR_WEED_COST=1, NEIGHBOR_WATER_WATER=1, SEED_PRICE=1;
 const ABSENCE_TIERS=[{h:12,weeds:1},{h:24,weeds:2},{h:48,weeds:99}];
 
 const WEATHERS=[
@@ -650,7 +663,7 @@ async function verifySprites(){
     ownedDecor:[], decorPos:{},
     collection:{}, lastSeenCheersAt:0, seenIntro:false, lastGiftDate:null, lastDripAt:Date.now(), lastVisitAt:Date.now()
   };
-  let plantMode=false, lbCache=[], lbExpanded=false, plantsKey='', decorKey='';
+  let plantMode=false, lbCache=[], plantsKey='', decorKey='';
   const seenPlantIds=new Set();
 
   const $=id=>document.getElementById(id);
@@ -897,13 +910,65 @@ async function verifySprites(){
     showNoWaterModal();
   }
   function weedPlant(p){
-    if(state.coins<WEED_COST){ showToast('Нужна 1 монета, чтобы прополоть.'); return; }
+    const enough=state.coins>=WEED_COST;
+    $('taskModalBody').innerHTML=`
+      <div class="modal-title">На вашем цветке появились сорняки!</div>
+      <p class="modal-text">Пока они здесь, растение не растёт. Прополка стоит ${WEED_COST} ${ICON.coin}</p>
+      <div class="weed-scene" id="weedScene">
+        <img class="weed-plant" src="${plantImgSrc(p.level,p.vars)}" alt="">
+        <span class="weed-grass g1"></span><span class="weed-grass g2"></span><span class="weed-grass g3"></span>
+      </div>
+      ${enough?`
+        <div class="weed-hold" id="weedHold" style="--p:0">
+          <span class="weed-hold-label" id="weedHoldLabel">Зажмите и держите</span>
+        </div>
+        <p class="modal-text" style="font-size:11.5px;">Держите кнопку, пока полоска не заполнится</p>`
+      :`<p class="modal-text" style="color:var(--bloom); font-weight:800;">Не хватает монет — выполните задания дня.</p>`}
+      <button class="ghost-btn" id="weedCancelBtn">${enough?'Позже':'Закрыть'}</button>`;
+    $('taskOverlay').classList.add('open');
+    $('weedCancelBtn').addEventListener('click',()=>$('taskOverlay').classList.remove('open'));
+    if(!enough) return;
+
+    const btn=$('weedHold'), label=$('weedHoldLabel'), scene=$('weedScene');
+    const HOLD_MS=1500;
+    let timer=null, done=false;
+    const start=()=>{
+      if(done) return;
+      const t0=Date.now();
+      label.textContent='Полем…';
+      scene.classList.add('shaking');
+      timer=setInterval(()=>{
+        const pct=Math.min(100,((Date.now()-t0)/HOLD_MS)*100);
+        btn.style.setProperty('--p',pct);
+        if(pct>65) scene.classList.add('clearing');
+        if(pct>=100){
+          clearInterval(timer); timer=null; done=true;
+          label.textContent='Готово!';
+          finishWeeding(p);
+        }
+      },30);
+    };
+    const stop=()=>{
+      if(timer){ clearInterval(timer); timer=null; }
+      if(!done){
+        btn.style.setProperty('--p',0);
+        label.textContent='Не дотерпели — держите дольше';
+        scene.classList.remove('shaking','clearing');
+      }
+    };
+    btn.addEventListener('pointerdown',e=>{ e.preventDefault(); btn.setPointerCapture(e.pointerId); start(); });
+    ['pointerup','pointercancel','pointerleave'].forEach(ev=>btn.addEventListener(ev,stop));
+  }
+  function finishWeeding(p){
     state.coins-=WEED_COST; p.weeds=false;
     todayLog().weed++;
-    chime(380); buzz([15,25,15]);
-    burstAt(document.querySelector(`[data-plant="${p.id}"]`),5,'#7C8F52');
-    plantsKey=''; saveProgress(); renderAll();
-    showToast('Прополото! Растение снова растёт.');
+    chime(620); buzz([20,30,20]);
+    setTimeout(()=>{
+      $('taskOverlay').classList.remove('open');
+      burstAt(document.querySelector(`[data-plant="${p.id}"]`),7,'#7C8F52');
+      plantsKey=''; saveProgress(); renderAll();
+      showToast('Прополото! Растение снова растёт.');
+    },450);
   }
   function waterPlant(p){
     if(state.water<=0) return;
@@ -1362,7 +1427,12 @@ async function verifySprites(){
     $('questsZone').querySelectorAll('[data-claim]').forEach(b=>b.addEventListener('click',()=>claimQuest(b.dataset.claim)));
   }
   function renderShop(){
-    $('shopZone').innerHTML=SHOP_ITEMS.map(item=>{
+    const seedCard=`<div class="shop-item seed-card">
+        <img class="shop-img" src="${ASSET_PATH+SEED_IMG}" alt="">
+        <div class="shop-name">Семечко · ${state.seeds} шт.</div>
+        <button class="shop-buy" id="seedBuyBtn" ${state.coins<SEED_PRICE?'disabled':''}>${SEED_PRICE} ${ICON.coin}</button>
+      </div>`;
+    $('shopZone').innerHTML=seedCard+SHOP_ITEMS.map(item=>{
       const owned=state.ownedDecor.includes(item.id);
       return `<div class="shop-item ${owned?'owned':''}">
         <img class="shop-img" src="${ASSET_PATH+item.img}" alt="">
@@ -1371,16 +1441,11 @@ async function verifySprites(){
           :`<button class="shop-buy" data-shop="${item.id}" ${state.coins<item.price?'disabled':''}>${item.price} ${ICON.coin}</button>`}
       </div>`;
     }).join('');
+    const seedBtn=$('seedBuyBtn');
+    if(seedBtn) seedBtn.addEventListener('click',buySeed);
     $('shopZone').querySelectorAll('[data-shop]').forEach(b=>b.addEventListener('click',()=>buyDecor(b.dataset.shop)));
     const bought=state.plantLimit>BASE_PLANT_LIMIT;
     $('upgradeRow').innerHTML=`
-      <div class="upgrade-line">
-        <div class="upgrade-info">
-          <div class="upgrade-name">Семечко</div>
-          <div class="upgrade-desc">Сейчас в запасе: ${state.seeds}</div>
-        </div>
-        <button class="task-btn" id="seedBuyBtn" ${state.coins<SEED_PRICE?'disabled':''}>${SEED_PRICE} ${ICON.coin}</button>
-      </div>
       <div class="upgrade-line">
         <div class="upgrade-info">
           <div class="upgrade-name">Место под 4-е растение</div>
@@ -1389,8 +1454,6 @@ async function verifySprites(){
         ${bought?`<button class="task-btn" disabled>Куплено ✓</button>`
           :`<button class="task-btn" id="slotBuyBtn" ${state.coins<EXTRA_SLOT_PRICE?'disabled':''}>${EXTRA_SLOT_PRICE} ${ICON.coin}</button>`}
       </div>`;
-    const seedBtn=$('seedBuyBtn');
-    if(seedBtn) seedBtn.addEventListener('click',buySeed);
     const sb=$('slotBuyBtn');
     if(sb) sb.addEventListener('click',buyExtraSlot);
   }
@@ -1418,24 +1481,31 @@ async function verifySprites(){
   function renderLeaderboard(){
     if(!lbCache.length){ $('leaderboardList').textContent='Пока пусто — будь первой!'; return; }
     const myIdx=lbCache.findIndex(r=>r.id===state.docId);
-    const row=(r,i)=>`<div class="lb-row ${r.id===state.docId?'me':''}" data-idx="${i}">
-      <span class="lb-rank">${i+1}</span><span class="lb-name">${escapeHtml(r.name||'')}</span>
-      <span class="lb-score">${r.score||0}</span></div>`;
-    let html;
-    if(lbExpanded||lbCache.length<=4) html=lbCache.map(row).join('');
-    else{
-      html=lbCache.slice(0,3).map(row).join('');
-      if(myIdx>2) html+=`<div class="lb-gap">···</div>`+row(lbCache[myIdx],myIdx);
-      html+=`<button class="lb-more" id="lbMore">Показать всех (${lbCache.length})</button>`;
+    const rows=lbCache.map((r,i)=>{
+      const me=r.id===state.docId;
+      const weedy=(Array.isArray(r.plants)?r.plants:[]).some(p=>p.weeds);
+      return `<div class="lb-row ${me?'me':''}" data-idx="${i}">
+        <span class="lb-rank">${i+1}</span>
+        <span class="lb-name">${escapeHtml(r.name||'')}</span>
+        ${weedy&&!me?'<span class="lb-tag">сорняки</span>':''}
+        <span class="lb-score">${r.score||0}</span>
+      </div>`;
+    }).join('');
+    $('leaderboardList').innerHTML=`<div class="lb-scroll" id="lbScroll">${rows}</div>`+
+      (myIdx>=0?`<div class="lb-mine">Твоё место: ${myIdx+1} из ${lbCache.length}</div>`:'');
+    const box=$('lbScroll');
+    box.querySelectorAll('.lb-row:not(.me)').forEach(r=>r.addEventListener('click',()=>openVisit(lbCache[Number(r.dataset.idx)])));
+    if(myIdx>4){
+      const mine=box.querySelector('.lb-row.me');
+      if(mine) box.scrollTop=Math.max(0, mine.offsetTop-box.clientHeight/2);
     }
-    $('leaderboardList').innerHTML=html;
-    const m=$('lbMore');
-    if(m) m.addEventListener('click',()=>{ lbExpanded=true; renderLeaderboard(); });
-    document.querySelectorAll('.lb-row:not(.me)').forEach(r=>r.addEventListener('click',()=>openVisit(lbCache[Number(r.dataset.idx)])));
   }
   async function helpNeighbor(entry, plantId, el, act){
-    const cost = act==='weed' ? NEIGHBOR_WEED_COST : NEIGHBOR_WATER_COST;
-    if(state.coins<cost){ showToast(`Нужна ${cost} монета, чтобы помочь.`); return; }
+    if(act==='weed'){
+      if(state.coins<NEIGHBOR_WEED_COST){ showToast(`Нужна ${NEIGHBOR_WEED_COST} монета, чтобы прополоть.`); return; }
+    } else {
+      if(state.water<NEIGHBOR_WATER_WATER){ showToast('Нет воды, чтобы полить чужое растение.'); return; }
+    }
     if(el.dataset.busy) return;
     el.dataset.busy='1';
     try{
@@ -1473,7 +1543,7 @@ async function verifySprites(){
         });
       }catch(e){}
 
-      state.coins-=cost;
+      if(act==='weed') state.coins-=NEIGHBOR_WEED_COST; else state.water-=NEIGHBOR_WATER_WATER;
       const local=entry.plants&&entry.plants.find(p=>p.id===plantId);
       if(local){ local.weeds=target.weeds; local.level=target.level; }
       el.classList.remove('helpable');
@@ -1521,7 +1591,7 @@ async function verifySprites(){
     vf.innerHTML=decorHtml+plantsHtml+(plants.length?'':'<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:12px;font-weight:800;color:#6B5D4E;background:rgba(255,251,240,.9);padding:6px 12px;border-radius:12px;">Сад ещё пустой</div>');
     $('visitSub').innerHTML = weedy
       ? `${entry.score||0} очков · есть сорняки — прополи за ${NEIGHBOR_WEED_COST} ${ICON.coin}`
-      : `${entry.score||0} очков · полей чужое растение за ${NEIGHBOR_WATER_COST} ${ICON.coin}`;
+      : `${entry.score||0} очков · полей чужое растение за ${NEIGHBOR_WATER_WATER} ${ICON.water}`;
     vf.querySelectorAll('[data-help]').forEach(el=>{
       el.addEventListener('click',()=>helpNeighbor(entry, el.dataset.help, el, el.dataset.act));
     });
@@ -1602,11 +1672,80 @@ async function verifySprites(){
     try{ if(navigator.share) await navigator.share({text}); else { await navigator.clipboard.writeText(text); alert('Текст скопирован!'); } }catch(e){}
   });
 
-  $('introCloseBtn').addEventListener('click',()=>{
+  const COACH_STEPS=[
+    { el:()=>$('seedPill'), title:'Здесь ваши семена',
+      text:'Нажмите на семечко, а потом на любое место поля — там вырастет росток. Можно и просто перетащить его пальцем.' },
+    { el:()=>$('waterPill'), title:'Это вода для полива',
+      text:'Нажмите на растение в саду — потратится одна капля, и оно подрастёт. Нажмите на каплю, чтобы узнать, когда появится следующая.' },
+    { el:()=>$('field'), title:'Ваш сад',
+      text:'Здесь растут цветы. Если долго не заходить, появятся сорняки — растение остановится в росте, пока вы его не прополете.' },
+    { el:()=>$('questsZone'), title:'Задания на сегодня',
+      text:'Пять заданий каждый день: прогулка, тренировка, еда и уход за садом. Выполнили в жизни — нажмите «Отметить». За это дают воду, монеты и семена.' },
+    { el:()=>$('shopZone'), title:'Лавка',
+      text:'Здесь покупают семена, украшения для сада и место под четвёртое растение. Украшения потом можно двигать и менять им размер.' },
+    { el:()=>$('leaderboardList'), title:'Сады соседок',
+      text:'Загляните в чужой сад: полить чужое растение стоит одну каплю воды, прополоть — одну монету. Это засчитывается в ваши задания, а хозяйка увидит, кто помог.' },
+    { el:()=>$('collectionZone'), title:'Гербарий',
+      text:'Когда цветок распустится, нажмите на него — он попадёт сюда, а место в саду освободится под новое семечко.' }
+  ];
+  let coachIdx=-1;
+  function endCoach(){
+    coachIdx=-1;
+    $('coachVeil').classList.remove('open');
+    $('coachHole').style.display='none';
+    $('coachCard').style.display='none';
+    if(!state.seenIntro){ state.seenIntro=true; saveProgress(); }
+  }
+  function showCoachStep(i){
+    if(i>=COACH_STEPS.length){ endCoach(); return; }
+    coachIdx=i;
+    const step=COACH_STEPS[i], el=step.el();
+    if(!el){ showCoachStep(i+1); return; }
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+    setTimeout(()=>{
+      const r=el.getBoundingClientRect();
+      const pad=8;
+      const hole=$('coachHole');
+      hole.style.display='block';
+      hole.style.left=(r.left-pad)+'px';
+      hole.style.top=(r.top-pad)+'px';
+      hole.style.width=(r.width+pad*2)+'px';
+      hole.style.height=(r.height+pad*2)+'px';
+
+      const card=$('coachCard');
+      card.style.display='block';
+      card.innerHTML=`
+        <div class="coach-step">Шаг ${i+1} из ${COACH_STEPS.length}</div>
+        <div class="coach-title">${step.title}</div>
+        <div class="coach-text">${step.text}</div>
+        <div class="coach-actions">
+          <button class="coach-next" id="coachNextBtn">${i===COACH_STEPS.length-1?'Готово':'Дальше'}</button>
+          <button class="coach-skip" id="coachSkipBtn">Пропустить</button>
+        </div>
+        <div class="coach-dots">${COACH_STEPS.map((_,k)=>`<span class="coach-dot ${k===i?'on':''}"></span>`).join('')}</div>`;
+
+      const cw=card.offsetWidth, ch=card.offsetHeight;
+      const below=r.bottom+14;
+      const fitsBelow = below+ch < window.innerHeight-10;
+      card.style.top = (fitsBelow ? below : Math.max(10, r.top-ch-14))+'px';
+      card.style.left = Math.max(12, Math.min(window.innerWidth-cw-12, r.left+r.width/2-cw/2))+'px';
+
+      $('coachNextBtn').addEventListener('click',()=>showCoachStep(i+1));
+      $('coachSkipBtn').addEventListener('click',endCoach);
+    },380);
+  }
+  function startCoach(){
+    $('introOverlay').classList.remove('open');
+    $('coachVeil').classList.add('open');
+    showCoachStep(0);
+  }
+  $('introCloseBtn').addEventListener('click',startCoach);
+  $('introSkipBtn').addEventListener('click',()=>{
     $('introOverlay').classList.remove('open');
     if(!state.seenIntro){ state.seenIntro=true; saveProgress(); }
   });
-  $('helpBtn').addEventListener('click',()=>$('introOverlay').classList.add('open'));
+  $('helpBtn').addEventListener('click',startCoach);
+  window.addEventListener('resize',()=>{ if(coachIdx>=0) showCoachStep(coachIdx); });
 
   function renderAll(){
     dripWater(); touchVisit();
