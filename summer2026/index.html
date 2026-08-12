@@ -68,6 +68,7 @@
   .primary-btn:disabled{ background:#D8CBB2; box-shadow:none; cursor:not-allowed; color:#A99A80; }
 
   .top-row{ display:flex; align-items:center; justify-content:center; gap:8px; margin:6px 0 10px; }
+  .top-row .day-chip{ margin:0; }
   .bell-btn{
     position:relative; display:flex; align-items:center; justify-content:center; flex-shrink:0;
     width:34px; height:34px; padding:0; border-radius:50%; border:1px solid #EAD9B8;
@@ -279,6 +280,9 @@
   .intro-num{ width:22px; height:22px; border-radius:50%; background:var(--plum); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .intro-body b{ display:block; font-size:12.5px; color:var(--soil-dark); }
   .intro-body span{ font-size:11.5px; color:var(--ink-soft); line-height:1.4; }
+  .confirm-cost{ display:flex; align-items:center; justify-content:center; gap:6px; margin:14px 0 10px;
+    font-size:14px; font-weight:800; color:var(--soil-dark); background:#FBF3E4; border:1px solid #EAD9B8;
+    border-radius:14px; padding:10px 14px; }
   .weed-scene{ position:relative; width:150px; height:130px; margin:14px auto 10px; display:flex; align-items:flex-end; justify-content:center; }
   .weed-scene.shaking{ animation:weedShake .25s ease-in-out infinite; }
   @keyframes weedShake{ 0%,100%{ transform:translateX(0);} 25%{ transform:translateX(-3px);} 75%{ transform:translateX(3px);} }
@@ -512,6 +516,10 @@
 
   <div class="overlay" id="taskOverlay"><div class="modal"><div class="modal-pad" id="taskModalBody"></div></div></div>
   <div class="overlay" id="giftOverlay"><div class="modal"><div class="modal-pad" id="giftBody"></div></div></div>
+
+  <div class="overlay" id="confirmOverlay" style="z-index:70;">
+    <div class="modal"><div class="modal-pad" id="confirmBody"></div></div>
+  </div>
 
   <div class="overlay" id="visitOverlay">
     <div class="modal">
@@ -1581,7 +1589,29 @@ async function verifySprites(){
       if(mine) box.scrollTop=Math.max(0, mine.offsetTop-box.clientHeight/2);
     }
   }
-  async function helpNeighbor(entry, plantId, el, act){
+  function confirmHelp(entry, plantRef, el, act){
+    const water = act==='water';
+    const enough = water ? state.water>=NEIGHBOR_WATER_WATER : state.coins>=NEIGHBOR_WEED_COST;
+    const costHtml = water ? `${NEIGHBOR_WATER_WATER} ${ICON.water}` : `${NEIGHBOR_WEED_COST} ${ICON.coin}`;
+    $('confirmBody').innerHTML=`
+      <div class="modal-title">${water?'Полить этот цветок?':'Прополоть этот цветок?'}</div>
+      <p class="modal-text">${water
+        ? `Вы поможете саду ${escapeHtml(entry.name||'соседки')} — растение немного подрастёт.`
+        : `Вы уберёте сорняки в саду ${escapeHtml(entry.name||'соседки')} — растение снова начнёт расти.`}</p>
+      <div class="confirm-cost">Это действие стоит ${costHtml}</div>
+      ${enough
+        ? `<button class="primary-btn" id="helpYesBtn">Да, помочь</button>`
+        : `<p class="modal-text" style="color:var(--bloom); font-weight:800;">${water?'Не хватает воды — выполните задания дня.':'Не хватает монет — выполните задания дня.'}</p>`}
+      <button class="ghost-btn" id="helpNoBtn">${enough?'Нет, не сейчас':'Закрыть'}</button>`;
+    $('confirmOverlay').classList.add('open');
+    $('helpNoBtn').addEventListener('click',()=>$('confirmOverlay').classList.remove('open'));
+    const yes=$('helpYesBtn');
+    if(yes) yes.addEventListener('click',()=>{
+      $('confirmOverlay').classList.remove('open');
+      helpNeighbor(entry, plantRef, el, act);
+    });
+  }
+  async function helpNeighbor(entry, plantRef, el, act){
     if(act==='weed'){
       if(state.coins<NEIGHBOR_WEED_COST){ showToast(`Нужна ${NEIGHBOR_WEED_COST} монета, чтобы прополоть.`); return; }
     } else {
@@ -1595,7 +1625,12 @@ async function verifySprites(){
       if(!snap.exists()){ showToast('Не удалось открыть этот сад.'); el.dataset.busy=''; return; }
       const data=snap.data();
       const plants=Array.isArray(data.plants)?data.plants:[];
-      const target=plants.find(p=>p.id===plantId);
+      let target=null;
+      if(String(plantRef).startsWith('idx:')){
+        target=plants[Number(String(plantRef).slice(4))]||null;
+      } else {
+        target=plants.find(p=>p.id===plantRef)||null;
+      }
       if(!target){ showToast('Это растение уже убрали.'); el.dataset.busy=''; return; }
 
       let msg;
@@ -1625,7 +1660,9 @@ async function verifySprites(){
       }catch(e){}
 
       if(act==='weed') state.coins-=NEIGHBOR_WEED_COST; else state.water-=NEIGHBOR_WATER_WATER;
-      const local=entry.plants&&entry.plants.find(p=>p.id===plantId);
+      const local=entry.plants&&(String(plantRef).startsWith('idx:')
+        ? entry.plants[Number(String(plantRef).slice(4))]
+        : entry.plants.find(p=>p.id===plantRef));
       if(local){ local.weeds=target.weeds; local.level=target.level; }
       el.classList.remove('helpable');
       el.removeAttribute('data-help');
@@ -1659,10 +1696,11 @@ async function verifySprites(){
     const plantsHtml=plants.map((p,i)=>{
       const vars=Array.isArray(p.vars)?p.vars:hashVariants(String(entry.id||'')+i);
       const w=plantWidth(p.level||0);
-      const canWeed=!!p.weeds && !!p.id;
-      const canWater=!p.weeds && !!p.id && (p.level||0)<MAX_LEVEL;
+      const ref=p.id||('idx:'+i);
+      const canWeed=!!p.weeds;
+      const canWater=!p.weeds && (p.level||0)<MAX_LEVEL;
       const act=canWeed?'weed':canWater?'water':'';
-      return `<div class="plant${act?' helpable':''}" ${act?`data-help="${p.id}" data-act="${act}"`:''}
+      return `<div class="plant${act?' helpable':''}" ${act?`data-help="${ref}" data-act="${act}"`:''}
         style="left:${p.x||50}%; top:${p.y||80}%; width:${w}%; cursor:${act?'pointer':'default'};">
         ${p.weeds?'<span class="plant-mark weed">!</span>':''}
         <img src="${plantImgSrc(p.level||0,vars)}" alt=""><span class="plant-shadow"></span>
@@ -1674,7 +1712,7 @@ async function verifySprites(){
       ? `${entry.score||0} очков · есть сорняки — прополи за ${NEIGHBOR_WEED_COST} ${ICON.coin}`
       : `${entry.score||0} очков · полей чужое растение за ${NEIGHBOR_WATER_WATER} ${ICON.water}`;
     vf.querySelectorAll('[data-help]').forEach(el=>{
-      el.addEventListener('click',()=>helpNeighbor(entry, el.dataset.help, el, el.dataset.act));
+      el.addEventListener('click',()=>confirmHelp(entry, el.dataset.help, el, el.dataset.act));
     });
     $('visitCheerBtn').onclick=async()=>{
       chime(600); todayLog().cheer++; showToast(`Помахала ${entry.name}`);
@@ -1684,6 +1722,7 @@ async function verifySprites(){
     };
     $('visitOverlay').classList.add('open');
   }
+  $('confirmOverlay').addEventListener('click',e=>{ if(e.target.id==='confirmOverlay') $('confirmOverlay').classList.remove('open'); });
   $('bellBtn').addEventListener('click',()=>openNotifications(false));
   $('notifOverlay').addEventListener('click',e=>{
     if(e.target.id==='notifOverlay'){
