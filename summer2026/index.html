@@ -1510,7 +1510,7 @@ async function verifySprites(){
   function renderShop(){
     const seedCard=`<div class="shop-item seed-card">
         <img class="shop-img" src="${ASSET_PATH+SEED_IMG}" alt="">
-        <div class="shop-name">Семечко · ${state.seeds} шт.</div>
+        <div class="shop-name">Семечко · 1 шт.</div>
         <button class="shop-buy" id="seedBuyBtn" ${state.coins<SEED_PRICE?'disabled':''}>${SEED_PRICE} ${ICON.coin}</button>
       </div>`;
     $('shopZone').innerHTML=seedCard+SHOP_ITEMS.map(item=>{
