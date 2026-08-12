@@ -34,7 +34,7 @@
   .ic-water{ width:11px; height:14px; background:var(--water); border-radius:50% 50% 50% 50% / 62% 62% 38% 38%; transform:rotate(0deg); position:relative; }
   .ic-water::before{ content:''; position:absolute; top:0; left:50%; width:0; height:0; margin-left:-4px; border-left:4px solid transparent; border-right:4px solid transparent; border-bottom:6px solid var(--water); transform:translateY(-4px); }
   .ic-coin{ width:14px; height:14px; border-radius:50%; background:radial-gradient(circle at 35% 32%, #F7D97A, var(--sun)); border:1.5px solid #C9971F; }
-  .ic-seed{ width:28px; height:28px; object-fit:contain; vertical-align:-9px; margin:-6px -2px -6px 0; }
+  .ic-seed{ width:36px; height:36px; object-fit:contain; vertical-align:-12px; margin:-10px -3px -10px -3px; }
   .ic-lg{ transform:scale(1.7); margin:0 5px; }
 
   .loading-screen, .login-screen{ position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; }
@@ -193,7 +193,9 @@
   .shop-name{ font-size:9.5px; font-weight:800; color:var(--ink-soft); margin-top:3px; }
   .shop-buy{ margin-top:5px; width:100%; display:flex; align-items:center; justify-content:center; gap:3px; border:none; border-radius:8px; padding:5px 2px; font-size:9.5px; font-weight:800; background:var(--sun); color:#5C4715; cursor:pointer; }
   .shop-buy:disabled{ background:#E4D9C4; color:#A99A80; }
-  .upgrade-row{ margin-top:10px; padding-top:10px; border-top:1px solid #EFE6D2; display:flex; align-items:center; gap:10px; }
+  .upgrade-row{ margin-top:10px; padding-top:6px; border-top:1px solid #EFE6D2; }
+  .upgrade-line{ display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #EFE6D2; }
+  .upgrade-line:last-child{ border-bottom:none; }
   .upgrade-info{ flex:1; }
   .upgrade-name{ font-size:12px; font-weight:800; color:var(--soil-dark); }
   .upgrade-desc{ font-size:10.5px; color:var(--ink-soft); margin-top:2px; }
@@ -265,12 +267,12 @@
 
     .garden-col{
       grid-column:1; grid-row:4 / span 30;
-      position:sticky; top:24px;
+      position:sticky; top:24px; z-index:0;
       align-self:start;
       max-height:calc(100vh - 48px);
       display:flex; flex-direction:column;
     }
-    .side-col{ grid-column:2; grid-row:4 / span 30; min-width:0; }
+    .side-col{ grid-column:2; grid-row:4 / span 30; min-width:0; position:relative; z-index:2; }
     .game-content > .finale-badge{ grid-column:1 / -1; }
 
     .field{ height:min(430px, 46vh); }
@@ -445,7 +447,7 @@
 
       <div class="intro-step"><div class="intro-num">4</div><div class="intro-body">
         <b>Полите сорняки</b>
-        <span>Если не заходить дольше 12 часов, у растений появляются сорняки — тогда они перестают расти. Нажмите на растение и заплатите 2 монеты, чтобы прополоть. В чужом саду прополка стоит всего 1 монету — и тоже засчитывается в задание.</span>
+        <span>Если не заходить дольше 12 часов, у растений появляются сорняки — тогда они перестают расти. Нажмите на растение и заплатите 2 монеты, чтобы прополоть.</span>
       </div></div>
 
       <div class="intro-step"><div class="intro-num">5</div><div class="intro-body">
@@ -455,10 +457,10 @@
 
       <div class="intro-step"><div class="intro-num">6</div><div class="intro-body">
         <b>Тратьте монеты</b>
-        <span>В лавке продаются украшения для сада — их можно двигать по полю и менять размер. Ещё за монеты открывается место под четвёртое растение.</span>
+        <span>В лавке продаются семена по 1 монете и украшения для сада — их можно двигать по полю и менять размер. Ещё за монеты открывается место под четвёртое растение.</span>
       </div></div>
 
-      <p class="modal-text" style="font-size:12px; margin-top:12px;">Вода понемногу набирается сама, но её мало — основной запас дают задания. Заходите в гости к другим участницам: за визит дают монеты, а если поможете убрать их сорняки — они об этом узнают.</p>
+      <p class="modal-text" style="font-size:12px; margin-top:12px;">Вода понемногу набирается сама, но её мало — основной запас дают задания. Заходите в гости к другим участницам: там можно прополоть или полить чужое растение за 1 монету — это засчитывается в ваши задания, а хозяйка сада увидит, кто ей помог.</p>
       <button class="primary-btn" id="introCloseBtn">Понятно, в сад!</button>
     </div></div>
   </div>
@@ -528,7 +530,7 @@ const FINAL_FLOWERS=[
 
 const BASE_PLANT_LIMIT=3, EXTRA_SLOT_PRICE=300, MAX_LEVEL=7;
 const DRIP_INTERVAL_MS=180*60000, DRIP_CAP=10, DAILY_MIN_WATER=1;
-const WEED_COST=2, NEIGHBOR_WEED_COST=1;
+const WEED_COST=2, NEIGHBOR_WEED_COST=1, NEIGHBOR_WATER_COST=1, SEED_PRICE=1;
 const ABSENCE_TIERS=[{h:12,weeds:1},{h:24,weeds:2},{h:48,weeds:99}];
 
 const WEATHERS=[
@@ -575,7 +577,7 @@ const QUEST_POOL=[
   { id:'meal',      group:'food', name:'Блюдо по меню', target:3, reward:{water:1, coins:1},
     modal:{type:'choice', title:'Приготовила по меню — отлично!', text:'Что это было за блюдо?', options:FOOD_CHOICES} },
   { id:'drinkWater',group:'food', name:'Стакан воды', target:6, reward:{water:1},
-    modal:{type:'number', title:'Вода — лучшее для тела!', text:'Сколько стаканов воды выпила с прошлой отметки?', unit:'стаканов', min:1, placeholder:'1'} },
+    modal:{type:'number', title:'Вода — лучшее для тела!', text:'Сколько стаканов воды выпила с прошлой отметки?', unit:'стаканов', min:1, placeholder:'1', countsUnits:true} },
   { id:'veggies',   group:'food', name:'Порция овощей', target:2, reward:{water:1},
     modal:{type:'choice', title:'Овощи в тарелке — это победа!', text:'Какие овощи были?', options:VEG_CHOICES} },
   { id:'noSugar',   group:'food', name:'День без сладкого', target:1, reward:{coins:5, seed:1},
@@ -760,6 +762,7 @@ async function verifySprites(){
       p.level=Number(p.level)||0;
       if(!Array.isArray(p.vars)) p.vars=randVariants();
       if(p.weeds===undefined) p.weeds=false;
+      if(typeof p.giftedLevel!=='number') p.giftedLevel=0;
       if(!p.lastTick) p.lastTick=Date.now();
     });
     state.water=data.water??0; state.seeds=data.seeds??1; state.coins=data.coins??0;
@@ -803,7 +806,8 @@ async function verifySprites(){
   }
   function collectionTotal(){ return Object.values(state.collection).reduce((s,n)=>s+n,0); }
   function computeScore(){
-    return Math.round(state.plants.reduce((s,p)=>s+(p.level||0),0)*10 + collectionTotal()*25 + state.coins*0.5);
+    const own=state.plants.reduce((s,p)=>s+Math.max(0,(p.level||0)-(p.giftedLevel||0)),0);
+    return Math.round(own*10 + collectionTotal()*25 + state.coins*0.5);
   }
   async function saveProgress(){
     if(!state.docId) return;
@@ -819,7 +823,7 @@ async function verifySprites(){
       },{merge:true});
       await setDoc(doc(db,LEADERBOARD_COLLECTION,state.docId),{
         name:state.name,score,
-        plants:state.plants.map(p=>({id:p.id,level:p.level,x:p.x,y:p.y,vars:p.vars,weeds:!!p.weeds})),
+        plants:state.plants.map(p=>({id:p.id,level:p.level,x:p.x,y:p.y,vars:p.vars,weeds:!!p.weeds,giftedLevel:p.giftedLevel||0})),
         ownedDecor:state.ownedDecor,decorPos:state.decorPos,updatedAt:serverTimestamp()
       },{merge:true});
     }catch(e){ console.error(e); }
@@ -881,7 +885,7 @@ async function verifySprites(){
     if(state.seeds<=0){ showToast('Нет семян — выполни тренировку или загляни к соседке.'); return; }
     if(state.plants.length>=state.plantLimit){ showToast(`Максимум ${state.plantLimit} растения. Собери урожай или купи место в лавке.`); return; }
     state.seeds--; todayLog().plant++;
-    state.plants.push({ id:uid(), level:0.2, x:Math.round(x*10)/10, y:Math.round(y*10)/10, vars:randVariants(), weeds:false, bonusReadyAt:null, lastTick:Date.now() });
+    state.plants.push({ id:uid(), level:0.2, x:Math.round(x*10)/10, y:Math.round(y*10)/10, vars:randVariants(), weeds:false, giftedLevel:0, bonusReadyAt:null, lastTick:Date.now() });
     chime(560); buzz(25); setPlantMode(false); plantsKey='';
     saveProgress(); renderAll();
     showToast('Семечко посажено! Теперь полей его.');
@@ -1078,7 +1082,8 @@ async function verifySprites(){
         const v=Number(inp.value);
         if(!v||v<(m.min||1)){ $('numNote').textContent=`Впиши число не меньше ${m.min||1}`; return; }
         chime(700); buzz([20,30,20]);
-        completeQuest(qid,`${v} ${m.unit||''}`.trim());
+        const steps = m.countsUnits ? Math.floor(v) : 1;
+        completeQuest(qid,`${v} ${m.unit||''}`.trim(), steps);
       };
       $('numOkBtn').addEventListener('click',submit);
       inp.addEventListener('keydown',e=>{ if(e.key==='Enter') submit(); });
@@ -1104,14 +1109,16 @@ async function verifySprites(){
     $('taskCancelBtn').addEventListener('click',()=>$('taskOverlay').classList.remove('open'));
     $('taskOverlay').classList.add('open');
   }
-  function completeQuest(qid,label){
+  function completeQuest(qid,label,count){
     const q=QUEST_POOL.find(x=>x.id===qid), L=todayLog();
     if(!q||L[qid]>=q.target) return;
-    L[qid]++;
-    grantReward(q.reward);
+    const steps=Math.max(1,Math.min(count||1,q.target-L[qid]));
+    L[qid]+=steps;
+    for(let i=0;i<steps;i++) grantReward(q.reward);
     $('taskOverlay').classList.remove('open');
     saveProgress(); renderAll();
-    showToast(`${label?label+': ':''}записано! ${rewardText(q.reward).replace(/<[^>]+>/g,'')}`.replace(/\s+/g,' '));
+    const rw=rewardText(q.reward).replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+    showToast(`${label?label+': ':''}записано${steps>1?` (${steps})`:''}!`);
   }
   function claimQuest(qid){
     const q=QUEST_POOL.find(x=>x.id===qid), L=todayLog();
@@ -1127,6 +1134,13 @@ async function verifySprites(){
     state.coins-=item.price; state.ownedDecor.push(id); decorKey='';
     chime(820); saveProgress(); renderAll();
     showToast(`${item.name} теперь украшает твой сад!`);
+  }
+  function buySeed(){
+    if(state.coins<SEED_PRICE) return;
+    state.coins-=SEED_PRICE; state.seeds++;
+    chime(700); buzz(20);
+    saveProgress(); renderAll();
+    showToast('Семечко куплено — можно сажать!');
   }
   function buyExtraSlot(){
     if(state.coins<EXTRA_SLOT_PRICE||state.plantLimit>BASE_PLANT_LIMIT) return;
@@ -1173,10 +1187,11 @@ async function verifySprites(){
       const snap=await getDocs(q); const fresh=[];
       snap.forEach(d=>{ const c=d.data(); if((c.ts||0)>state.lastSeenCheersAt) fresh.push(c); });
       if(fresh.length){
-        const helpers=[...new Set(fresh.filter(c=>c.type==='weed').map(c=>c.fromName).filter(Boolean))].slice(0,3);
-        const wavers=[...new Set(fresh.filter(c=>c.type!=='weed').map(c=>c.fromName).filter(Boolean))].slice(0,3);
-        const msg = helpers.length
-          ? `Тебе помогли с сорняками: ${helpers.join(', ')}`
+        const weeders=[...new Set(fresh.filter(c=>c.type==='weed').map(c=>c.fromName).filter(Boolean))].slice(0,3);
+        const waterers=[...new Set(fresh.filter(c=>c.type==='water').map(c=>c.fromName).filter(Boolean))].slice(0,3);
+        const wavers=[...new Set(fresh.filter(c=>!c.type).map(c=>c.fromName).filter(Boolean))].slice(0,3);
+        const msg = weeders.length ? `Тебе помогли с сорняками: ${weeders.join(', ')}`
+          : waterers.length ? `Твой сад полили: ${waterers.join(', ')}`
           : `Твоему саду помахали: ${wavers.join(', ')}`;
         setTimeout(()=>{ showToast(msg); chime(680); },1800);
         state.lastSeenCheersAt=Date.now(); saveProgress();
@@ -1359,12 +1374,23 @@ async function verifySprites(){
     $('shopZone').querySelectorAll('[data-shop]').forEach(b=>b.addEventListener('click',()=>buyDecor(b.dataset.shop)));
     const bought=state.plantLimit>BASE_PLANT_LIMIT;
     $('upgradeRow').innerHTML=`
-      <div class="upgrade-info">
-        <div class="upgrade-name">Место под 4-е растение</div>
-        <div class="upgrade-desc">${bought?'Куплено — теперь в саду 4 места':`Сейчас в саду ${state.plantLimit} места`}</div>
+      <div class="upgrade-line">
+        <div class="upgrade-info">
+          <div class="upgrade-name">Семечко</div>
+          <div class="upgrade-desc">Сейчас в запасе: ${state.seeds}</div>
+        </div>
+        <button class="task-btn" id="seedBuyBtn" ${state.coins<SEED_PRICE?'disabled':''}>${SEED_PRICE} ${ICON.coin}</button>
       </div>
-      ${bought?`<button class="task-btn" disabled>Куплено ✓</button>`
-        :`<button class="task-btn" id="slotBuyBtn" ${state.coins<EXTRA_SLOT_PRICE?'disabled':''}>${EXTRA_SLOT_PRICE} ${ICON.coin}</button>`}`;
+      <div class="upgrade-line">
+        <div class="upgrade-info">
+          <div class="upgrade-name">Место под 4-е растение</div>
+          <div class="upgrade-desc">${bought?'Куплено — теперь в саду 4 места':`Сейчас в саду ${state.plantLimit} места`}</div>
+        </div>
+        ${bought?`<button class="task-btn" disabled>Куплено ✓</button>`
+          :`<button class="task-btn" id="slotBuyBtn" ${state.coins<EXTRA_SLOT_PRICE?'disabled':''}>${EXTRA_SLOT_PRICE} ${ICON.coin}</button>`}
+      </div>`;
+    const seedBtn=$('seedBuyBtn');
+    if(seedBtn) seedBtn.addEventListener('click',buySeed);
     const sb=$('slotBuyBtn');
     if(sb) sb.addEventListener('click',buyExtraSlot);
   }
@@ -1407,8 +1433,9 @@ async function verifySprites(){
     if(m) m.addEventListener('click',()=>{ lbExpanded=true; renderLeaderboard(); });
     document.querySelectorAll('.lb-row:not(.me)').forEach(r=>r.addEventListener('click',()=>openVisit(lbCache[Number(r.dataset.idx)])));
   }
-  async function helpWeed(entry, plantId, el){
-    if(state.coins<NEIGHBOR_WEED_COST){ showToast(`Нужна ${NEIGHBOR_WEED_COST} монета, чтобы помочь.`); return; }
+  async function helpNeighbor(entry, plantId, el, act){
+    const cost = act==='weed' ? NEIGHBOR_WEED_COST : NEIGHBOR_WATER_COST;
+    if(state.coins<cost){ showToast(`Нужна ${cost} монета, чтобы помочь.`); return; }
     if(el.dataset.busy) return;
     el.dataset.busy='1';
     try{
@@ -1418,34 +1445,49 @@ async function verifySprites(){
       const data=snap.data();
       const plants=Array.isArray(data.plants)?data.plants:[];
       const target=plants.find(p=>p.id===plantId);
-      if(!target||!target.weeds){ showToast('Здесь уже прополото.'); el.dataset.busy=''; return; }
-      target.weeds=false;
+      if(!target){ showToast('Это растение уже убрали.'); el.dataset.busy=''; return; }
+
+      let msg;
+      if(act==='weed'){
+        if(!target.weeds){ showToast('Здесь уже прополото.'); el.dataset.busy=''; return; }
+        target.weeds=false;
+        todayLog().weed++;
+        msg=`Ты помогла ${entry.name} — сорняки убраны!`;
+      } else {
+        if(target.weeds){ showToast('Сначала нужно прополоть.'); el.dataset.busy=''; return; }
+        if((target.level||0)>=MAX_LEVEL){ showToast('Этот цветок уже расцвёл.'); el.dataset.busy=''; return; }
+        const before=target.level||0;
+        target.level=Math.min(MAX_LEVEL,before+0.30);
+        target.giftedLevel=(target.giftedLevel||0)+(target.level-before);
+        todayLog().water++;
+        msg=`Ты полила растение в саду ${entry.name}!`;
+      }
+
       await setDoc(ref,{ plants, updatedAt:serverTimestamp() },{merge:true});
       await setDoc(doc(db,LEADERBOARD_COLLECTION,entry.id),{
-        plants:plants.map(p=>({id:p.id,level:p.level,x:p.x,y:p.y,vars:p.vars,weeds:!!p.weeds}))
+        plants:plants.map(p=>({id:p.id,level:p.level,x:p.x,y:p.y,vars:p.vars,weeds:!!p.weeds,giftedLevel:p.giftedLevel||0}))
       },{merge:true});
       try{
         await setDoc(doc(collection(db,'garden_cheers')),{
-          to:entry.id, fromName:state.name, type:'weed', ts:Date.now(), createdAt:serverTimestamp()
+          to:entry.id, fromName:state.name, type:act, ts:Date.now(), createdAt:serverTimestamp()
         });
       }catch(e){}
 
-      state.coins-=NEIGHBOR_WEED_COST;
-      todayLog().weed++;
+      state.coins-=cost;
       const local=entry.plants&&entry.plants.find(p=>p.id===plantId);
-      if(local) local.weeds=false;
+      if(local){ local.weeds=target.weeds; local.level=target.level; }
       el.classList.remove('helpable');
       el.removeAttribute('data-help');
       el.style.cursor='default';
       const mark=el.querySelector('.plant-mark'); if(mark) mark.remove();
       const tuft=el.querySelector('.weed-tuft'); if(tuft) tuft.remove();
-      burstAt(el,6,'#7C8F52');
+      burstAt(el,6, act==='weed'?'#7C8F52':'#8FC6B4');
       chime(620); buzz([15,25,15]);
       saveProgress(); renderAll();
-      showToast(`Ты помогла ${entry.name} — сорняки убраны!`);
+      showToast(msg);
     }catch(e){
       console.error(e);
-      showToast('Не получилось прополоть. Попробуй ещё раз.');
+      showToast('Не получилось помочь. Попробуй ещё раз.');
     }finally{ el.dataset.busy=''; }
   }
   function openVisit(entry){
@@ -1466,9 +1508,11 @@ async function verifySprites(){
     const plantsHtml=plants.map((p,i)=>{
       const vars=Array.isArray(p.vars)?p.vars:hashVariants(String(entry.id||'')+i);
       const w=plantWidth(p.level||0);
-      const canHelp=!!p.weeds && !!p.id;
-      return `<div class="plant${canHelp?' helpable':''}" ${canHelp?`data-help="${p.id}"`:''}
-        style="left:${p.x||50}%; top:${p.y||80}%; width:${w}%; cursor:${canHelp?'pointer':'default'};">
+      const canWeed=!!p.weeds && !!p.id;
+      const canWater=!p.weeds && !!p.id && (p.level||0)<MAX_LEVEL;
+      const act=canWeed?'weed':canWater?'water':'';
+      return `<div class="plant${act?' helpable':''}" ${act?`data-help="${p.id}" data-act="${act}"`:''}
+        style="left:${p.x||50}%; top:${p.y||80}%; width:${w}%; cursor:${act?'pointer':'default'};">
         ${p.weeds?'<span class="plant-mark weed">!</span>':''}
         <img src="${plantImgSrc(p.level||0,vars)}" alt=""><span class="plant-shadow"></span>
         ${p.weeds?'<span class="weed-tuft"></span>':''}
@@ -1476,10 +1520,10 @@ async function verifySprites(){
     }).join('');
     vf.innerHTML=decorHtml+plantsHtml+(plants.length?'':'<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:12px;font-weight:800;color:#6B5D4E;background:rgba(255,251,240,.9);padding:6px 12px;border-radius:12px;">Сад ещё пустой</div>');
     $('visitSub').innerHTML = weedy
-      ? `${entry.score||0} очков · в саду сорняки — можно помочь за ${NEIGHBOR_WEED_COST} ${ICON.coin}`
-      : `${entry.score||0} очков`;
+      ? `${entry.score||0} очков · есть сорняки — прополи за ${NEIGHBOR_WEED_COST} ${ICON.coin}`
+      : `${entry.score||0} очков · полей чужое растение за ${NEIGHBOR_WATER_COST} ${ICON.coin}`;
     vf.querySelectorAll('[data-help]').forEach(el=>{
-      el.addEventListener('click',()=>helpWeed(entry, el.dataset.help, el));
+      el.addEventListener('click',()=>helpNeighbor(entry, el.dataset.help, el, el.dataset.act));
     });
     $('visitCheerBtn').onclick=async()=>{
       chime(600); todayLog().cheer++; showToast(`Помахала ${entry.name}`);
