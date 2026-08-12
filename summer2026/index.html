@@ -67,6 +67,28 @@
   .primary-btn{ width:100%; margin-top:10px; padding:15px; border:none; border-radius:14px; background:var(--bloom); color:#fff; font-family:'Nunito Sans', sans-serif; font-size:15.5px; font-weight:800; cursor:pointer; box-shadow:0 8px 18px -8px rgba(193,80,46,0.55); }
   .primary-btn:disabled{ background:#D8CBB2; box-shadow:none; cursor:not-allowed; color:#A99A80; }
 
+  .bell-btn{
+    position:relative; display:flex; align-items:center; justify-content:center; gap:4px;
+    margin:8px auto 0; padding:6px 14px; border-radius:20px; border:1px solid #EAD9B8;
+    background:#fff; font-family:'Nunito Sans',sans-serif; font-size:12px; font-weight:800;
+    color:var(--plum); cursor:pointer;
+  }
+  .bell-btn.has-new{ border-color:var(--bloom); background:#FBF3E4; animation:bellPulse 2s ease-in-out infinite; }
+  @keyframes bellPulse{ 0%,100%{ box-shadow:0 0 0 rgba(193,80,46,0); } 50%{ box-shadow:0 0 0 5px rgba(193,80,46,0.16); } }
+  .bell-ic{ font-size:15px; }
+  .bell-dot{ background:var(--bloom); color:#fff; font-size:10px; font-weight:800; border-radius:10px; padding:1px 6px; }
+  .notif-list{ max-height:300px; overflow-y:auto; margin:12px 0 6px; text-align:left; }
+  .notif-list::-webkit-scrollbar{ width:5px; }
+  .notif-list::-webkit-scrollbar-thumb{ background:#E0D3B8; border-radius:4px; }
+  .notif-row{ position:relative; display:flex; align-items:flex-start; gap:10px; padding:10px 8px; border-bottom:1px solid #EFE6D2; }
+  .notif-row:last-child{ border-bottom:none; }
+  .notif-row.new{ background:#FBF3E4; border-radius:12px; }
+  .notif-ic{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+  .notif-ic.n-weed{ background:#EAF0DC; } .notif-ic.n-water{ background:#DCEBF3; } .notif-ic.n-wave{ background:#F6E7DC; }
+  .notif-text{ flex:1; font-size:12.5px; color:var(--ink-soft); line-height:1.35; }
+  .notif-text b{ color:var(--soil-dark); }
+  .notif-time{ display:block; font-size:10.5px; color:#B0A28A; margin-top:2px; font-weight:700; }
+  .notif-new{ width:7px; height:7px; border-radius:50%; background:var(--bloom); flex-shrink:0; margin-top:10px; }
   .day-chip{ display:block; width:fit-content; margin:6px auto 10px; background:#fff; border:1px solid #EAD9B8; border-radius:14px; padding:5px 12px; font-size:11px; font-weight:800; color:var(--plum); cursor:pointer; }
   .toast{ text-align:center; font-size:12px; font-weight:700; color:var(--soil-dark); min-height:16px; margin:2px 0 8px; }
 
@@ -390,6 +412,7 @@
     <header>
       <div class="eyebrow">Летний лагерь · Шагай Дома</div>
       <p class="greeting" id="greetingLine"></p>
+      <button class="bell-btn" id="bellBtn" style="display:none;"></button>
     </header>
 
     <div class="day-chip" id="dayChip">День 1</div>
@@ -476,6 +499,10 @@
       <button class="primary-btn" id="introCloseBtn">Показать</button>
       <button class="ghost-btn" id="introSkipBtn">Разберусь сама</button>
     </div></div>
+  </div>
+
+  <div class="overlay" id="notifOverlay">
+    <div class="modal"><div class="modal-pad" id="notifBody"></div></div>
   </div>
 
   <div class="overlay" id="taskOverlay"><div class="modal"><div class="modal-pad" id="taskModalBody"></div></div></div>
@@ -1246,22 +1273,71 @@ async function verifySprites(){
     $('giftCloseBtn').addEventListener('click',()=>{ $('giftOverlay').classList.remove('open'); renderAll(); });
     setTimeout(()=>{ $('giftOverlay').classList.add('open'); chime(660); },700);
   }
-  async function checkCheers(){
+  let cheersCache=[];
+  async function checkCheers(showPopup){
     try{
-      const q=query(collection(db,'garden_cheers'),where('to','==',state.docId),limit(30));
-      const snap=await getDocs(q); const fresh=[];
-      snap.forEach(d=>{ const c=d.data(); if((c.ts||0)>state.lastSeenCheersAt) fresh.push(c); });
-      if(fresh.length){
-        const weeders=[...new Set(fresh.filter(c=>c.type==='weed').map(c=>c.fromName).filter(Boolean))].slice(0,3);
-        const waterers=[...new Set(fresh.filter(c=>c.type==='water').map(c=>c.fromName).filter(Boolean))].slice(0,3);
-        const wavers=[...new Set(fresh.filter(c=>!c.type).map(c=>c.fromName).filter(Boolean))].slice(0,3);
-        const msg = weeders.length ? `Тебе помогли с сорняками: ${weeders.join(', ')}`
-          : waterers.length ? `Твой сад полили: ${waterers.join(', ')}`
-          : `Твоему саду помахали: ${wavers.join(', ')}`;
-        setTimeout(()=>{ showToast(msg); chime(680); },1800);
-        state.lastSeenCheersAt=Date.now(); saveProgress();
+      const q=query(collection(db,'garden_cheers'),where('to','==',state.docId),limit(60));
+      const snap=await getDocs(q);
+      cheersCache=[];
+      snap.forEach(d=>cheersCache.push(d.data()));
+      cheersCache.sort((a,b)=>(b.ts||0)-(a.ts||0));
+      const fresh=cheersCache.filter(x=>(x.ts||0)>state.lastSeenCheersAt);
+      renderBell(fresh.length);
+      if(fresh.length && showPopup){
+        setTimeout(()=>openNotifications(true),1400);
       }
     }catch(e){ console.error(e); }
+  }
+  function cheerLine(x){
+    const who=escapeHtml(x.fromName||'Кто-то');
+    if(x.type==='weed')  return { icon:'🌿', cls:'n-weed',  text:`<b>${who}</b> прополола сорняки в вашем саду` };
+    if(x.type==='water') return { icon:'💧', cls:'n-water', text:`<b>${who}</b> полила ваше растение` };
+    return { icon:'👋', cls:'n-wave', text:`<b>${who}</b> помахала вашему саду` };
+  }
+  function timeAgo(ts){
+    if(!ts) return '';
+    const m=Math.floor((Date.now()-ts)/60000);
+    if(m<1) return 'только что';
+    if(m<60) return `${m} мин назад`;
+    const h=Math.floor(m/60);
+    if(h<24) return `${h} ч назад`;
+    const d=Math.floor(h/24);
+    return d===1?'вчера':`${d} дн. назад`;
+  }
+  function renderBell(freshCount){
+    const bell=$('bellBtn');
+    if(!bell) return;
+    bell.style.display='flex';
+    bell.innerHTML=`<span class="bell-ic">🔔</span>${freshCount?`<span class="bell-dot">${freshCount>9?'9+':freshCount}</span>`:''}`;
+    bell.classList.toggle('has-new',!!freshCount);
+  }
+  function openNotifications(auto){
+    const fresh=cheersCache.filter(x=>(x.ts||0)>state.lastSeenCheersAt);
+    const list=cheersCache.slice(0,40);
+    const body=$('notifBody');
+    body.innerHTML=`
+      <div class="modal-title">${auto&&fresh.length?'Пока вас не было':'Уведомления'}</div>
+      ${fresh.length?`<p class="modal-text">В вашем саду побывали соседки — вот что они сделали.</p>`:''}
+      ${list.length?`
+        <div class="notif-list">
+          ${list.map(x=>{
+            const l=cheerLine(x);
+            const isNew=(x.ts||0)>state.lastSeenCheersAt;
+            return `<div class="notif-row ${isNew?'new':''}">
+              <span class="notif-ic ${l.cls}">${l.icon}</span>
+              <span class="notif-text">${l.text}<span class="notif-time">${timeAgo(x.ts)}</span></span>
+              ${isNew?'<span class="notif-new"></span>':''}
+            </div>`;
+          }).join('')}
+        </div>`
+      :`<p class="modal-text">Пока тишина. Загляните в чужие сады — соседки заметят и ответят тем же.</p>`}
+      <button class="primary-btn" id="notifCloseBtn">${fresh.length?'Спасибо!':'Закрыть'}</button>`;
+    $('notifOverlay').classList.add('open');
+    $('notifCloseBtn').addEventListener('click',()=>{
+      $('notifOverlay').classList.remove('open');
+      if(fresh.length){ state.lastSeenCheersAt=Date.now(); saveProgress(); renderBell(0); }
+    });
+    if(fresh.length) chime(680);
   }
 
   function farmLevel(xp){ return Math.floor(xp/50)+1; }
@@ -1603,6 +1679,13 @@ async function verifySprites(){
     };
     $('visitOverlay').classList.add('open');
   }
+  $('bellBtn').addEventListener('click',()=>openNotifications(false));
+  $('notifOverlay').addEventListener('click',e=>{
+    if(e.target.id==='notifOverlay'){
+      $('notifOverlay').classList.remove('open');
+      if(cheersCache.some(x=>(x.ts||0)>state.lastSeenCheersAt)){ state.lastSeenCheersAt=Date.now(); saveProgress(); renderBell(0); }
+    }
+  });
   $('visitCloseBtn').addEventListener('click',()=>$('visitOverlay').classList.remove('open'));
   $('visitOverlay').addEventListener('click',e=>{ if(e.target.id==='visitOverlay') $('visitOverlay').classList.remove('open'); });
 
@@ -1769,7 +1852,7 @@ async function verifySprites(){
       await loadOrCreateParticipant(rawName,rawEmail,cred.user.uid);
       loginScreen.style.display='none'; gameContent.style.display='block';
       applyAbsenceWeeds();
-      renderAll(); loadLeaderboard(); checkCheers();
+      renderAll(); loadLeaderboard(); checkCheers(true);
       ensureDailyWater();
       if(!state.seenIntro) $('introOverlay').classList.add('open');
       else maybeDailyGift();
@@ -1796,7 +1879,7 @@ async function verifySprites(){
         if(resumed){
           gameContent.style.display='block';
           applyAbsenceWeeds();
-          renderAll(); loadLeaderboard(); checkCheers();
+          renderAll(); loadLeaderboard(); checkCheers(true);
           ensureDailyWater();
           if(!state.seenIntro) $('introOverlay').classList.add('open');
           else maybeDailyGift();
