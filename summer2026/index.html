@@ -553,7 +553,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, orderBy, limit, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence, indexedDBLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyApSUQxealmL13siDzauRWO_J6-fSHkN-4",
@@ -564,6 +564,17 @@ const firebaseConfig = {
   appId: "1:1022340791272:web:228f98bc590a4f77dac25d"
 };
 const app=initializeApp(firebaseConfig), db=getFirestore(app), auth=getAuth(app);
+try{ await setPersistence(auth, indexedDBLocalPersistence); }
+catch(e){ try{ await setPersistence(auth, browserLocalPersistence); }catch(e2){ console.warn('Сессия не сохранится:', e2); } }
+
+const LS_KEY='sad_stroynosti_user';
+function rememberUser(name,email){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({name,email})); }catch(e){}
+}
+function recallUser(){
+  try{ const raw=localStorage.getItem(LS_KEY); return raw?JSON.parse(raw):null; }catch(e){ return null; }
+}
+function forgetUser(){ try{ localStorage.removeItem(LS_KEY); }catch(e){} }
 const PROGRESS_COLLECTION='garden_progress', LEADERBOARD_COLLECTION='garden_leaderboard';
 
 const ASSET_PATH='';
@@ -862,6 +873,7 @@ async function verifySprites(){
     const own=state.plants.reduce((s,p)=>s+Math.max(0,(p.level||0)-(p.giftedLevel||0)),0);
     return Math.round(own*10 + collectionTotal()*25 + state.coins*0.5);
   }
+  let saveFailed=false, saveRetryTimer=null;
   async function saveProgress(){
     if(!state.docId) return;
     const score=computeScore();
@@ -879,7 +891,18 @@ async function verifySprites(){
         plants:state.plants.map(p=>({id:p.id,level:p.level,x:p.x,y:p.y,vars:p.vars,weeds:!!p.weeds,giftedLevel:p.giftedLevel||0})),
         ownedDecor:state.ownedDecor,decorPos:state.decorPos,updatedAt:serverTimestamp()
       },{merge:true});
-    }catch(e){ console.error(e); }
+      saveFailed=false;
+      return true;
+    }catch(e){
+      console.error('Сохранение не удалось:',e);
+      if(!saveFailed){
+        saveFailed=true;
+        showToast('Не удалось сохранить — проверьте интернет. Повторяю…');
+      }
+      clearTimeout(saveRetryTimer);
+      saveRetryTimer=setTimeout(()=>saveProgress(),4000);
+      return false;
+    }
   }
 
   function dripWater(){
@@ -1233,24 +1256,45 @@ async function verifySprites(){
     showToast('Задание выполнено — награда получена!');
   }
 
-  function buyDecor(id){
+  async function buyDecor(id){
     const item=SHOP_ITEMS.find(x=>x.id===id);
     if(!item||state.ownedDecor.includes(id)||state.coins<item.price) return;
+    const prevCoins=state.coins, prevDecor=state.ownedDecor.slice();
     state.coins-=item.price; state.ownedDecor.push(id); decorKey='';
-    chime(820); saveProgress(); renderAll();
+    chime(820); renderAll();
+    const ok=await saveProgress();
+    if(!ok){
+      state.coins=prevCoins; state.ownedDecor=prevDecor; decorKey='';
+      renderAll();
+      showToast('Покупка не сохранилась — монеты возвращены. Проверьте интернет.');
+      return;
+    }
     showToast(`${item.name} теперь украшает твой сад!`);
   }
-  function buySeed(){
+  async function buySeed(){
     if(state.coins<SEED_PRICE) return;
+    const prevCoins=state.coins, prevSeeds=state.seeds;
     state.coins-=SEED_PRICE; state.seeds++;
-    chime(700); buzz(20);
-    saveProgress(); renderAll();
+    chime(700); buzz(20); renderAll();
+    const ok=await saveProgress();
+    if(!ok){
+      state.coins=prevCoins; state.seeds=prevSeeds; renderAll();
+      showToast('Покупка не сохранилась — монеты возвращены.');
+      return;
+    }
     showToast('Семечко куплено — можно сажать!');
   }
-  function buyExtraSlot(){
+  async function buyExtraSlot(){
     if(state.coins<EXTRA_SLOT_PRICE||state.plantLimit>BASE_PLANT_LIMIT) return;
+    const prevCoins=state.coins, prevLimit=state.plantLimit;
     state.coins-=EXTRA_SLOT_PRICE; state.plantLimit=BASE_PLANT_LIMIT+1;
-    chime(880); saveProgress(); renderAll();
+    chime(880); renderAll();
+    const ok=await saveProgress();
+    if(!ok){
+      state.coins=prevCoins; state.plantLimit=prevLimit; renderAll();
+      showToast('Покупка не сохранилась — монеты возвращены.');
+      return;
+    }
     showToast('Теперь в саду помещается 4 растения!');
   }
 
@@ -1894,6 +1938,7 @@ async function verifySprites(){
     try{
       const cred=await signInAnonymously(auth);
       await loadOrCreateParticipant(rawName,rawEmail,cred.user.uid);
+      rememberUser(state.name,state.email);
       loginScreen.style.display='none'; gameContent.style.display='block';
       applyAbsenceWeeds();
       renderAll(); loadLeaderboard(); checkCheers(true);
@@ -1908,6 +1953,7 @@ async function verifySprites(){
   }
   $('switchAccountBtn').addEventListener('click',async()=>{
     if(!confirm('Выйти и войти под другим именем?')) return;
+    forgetUser();
     try{ await auth.signOut(); }catch(e){}
     gameContent.style.display='none';
     nameInput.value=''; emailInput.value='';
@@ -1918,7 +1964,16 @@ async function verifySprites(){
   onAuthStateChanged(auth,async user=>{
     if(user){
       try{
-        const resumed=await tryAutoResume(user.uid);
+        let resumed=await tryAutoResume(user.uid);
+        if(!resumed){
+          const saved=recallUser();
+          if(saved&&saved.email){
+            try{
+              await loadOrCreateParticipant(saved.name,saved.email,user.uid);
+              resumed=true;
+            }catch(e){ console.warn('Не удалось восстановить по сохранённой почте:',e); }
+          }
+        }
         loadingScreen.style.display='none';
         if(resumed){
           gameContent.style.display='block';
