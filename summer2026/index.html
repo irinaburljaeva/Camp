@@ -550,6 +550,46 @@
 
 </div>
 
+<script>
+(function(){
+  var shown=false;
+  function fail(msg){
+    if(shown) return; shown=true;
+    var ls=document.getElementById('loadingScreen');
+    if(ls) ls.style.display='none';
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;padding:24px;background:#F6F1E4;font-family:-apple-system,Segoe UI,Roboto,sans-serif;';
+    d.innerHTML='<div style="max-width:340px;text-align:center;background:#FFFDF8;border-radius:20px;padding:24px;box-shadow:0 12px 30px -12px rgba(74,51,36,.35)">'+
+      '<div style="font-size:19px;font-weight:800;color:#4A3324;margin-bottom:8px">Не удалось загрузить сад</div>'+
+      '<div style="font-size:14px;color:#6B5D4E;line-height:1.5">'+msg+'</div>'+
+      '<button onclick="location.reload()" style="margin-top:16px;width:100%;padding:13px;border:none;border-radius:12px;background:#C1502E;color:#fff;font-size:15px;font-weight:800;cursor:pointer">Обновить страницу</button>'+
+      '</div>';
+    document.body.appendChild(d);
+  }
+  window.addEventListener('error',function(e){
+    if(e&&e.message&&/Unexpected|SyntaxError|import|await/i.test(e.message)){
+      fail('Похоже, у вашего браузера устаревшая версия. Обновите браузер или откройте игру в Chrome либо Safari последней версии.');
+    }
+  });
+  window.addEventListener('unhandledrejection',function(){
+    fail('Проверьте интернет-соединение и попробуйте снова.');
+  });
+  setTimeout(function(){
+    var gc=document.getElementById('gameContent'), lg=document.getElementById('loginScreen');
+    var visible=(gc&&gc.style.display!=='none')||(lg&&lg.style.display!=='none');
+    if(!visible) fail('Загрузка занимает слишком много времени. Проверьте интернет или обновите браузер.');
+  },12000);
+})();
+</script>
+
+<script nomodule>
+document.addEventListener('DOMContentLoaded',function(){
+  var ls=document.getElementById('loadingScreen');
+  if(ls) ls.style.display='none';
+  document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;padding:24px;background:#F6F1E4;font-family:sans-serif"><div style="max-width:340px;text-align:center;background:#FFFDF8;border-radius:20px;padding:24px"><div style="font-size:19px;font-weight:800;color:#4A3324;margin-bottom:8px">Браузер устарел</div><div style="font-size:14px;color:#6B5D4E;line-height:1.5">Игра не запустится в этой версии браузера. Откройте её в Chrome, Safari или Edge последней версии.</div></div></div>');
+});
+</script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, orderBy, limit, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -564,8 +604,9 @@ const firebaseConfig = {
   appId: "1:1022340791272:web:228f98bc590a4f77dac25d"
 };
 const app=initializeApp(firebaseConfig), db=getFirestore(app), auth=getAuth(app);
-try{ await setPersistence(auth, indexedDBLocalPersistence); }
-catch(e){ try{ await setPersistence(auth, browserLocalPersistence); }catch(e2){ console.warn('Сессия не сохранится:', e2); } }
+const persistenceReady = setPersistence(auth, indexedDBLocalPersistence)
+  .catch(()=>setPersistence(auth, browserLocalPersistence))
+  .catch(e=>{ console.warn('Сессия не сохранится:', e); });
 
 const LS_KEY='sad_stroynosti_user';
 function rememberUser(name,email){
@@ -712,7 +753,8 @@ async function verifySprites(){
 }
 
 (async function(){
-  await verifySprites();
+  try{ await persistenceReady; }catch(e){}
+  try{ await verifySprites(); }catch(e){ console.warn('Проверка картинок не удалась:',e); }
   const state={
     docId:null, name:'', email:'', campStartDate:null,
     log:{}, plants:[],
