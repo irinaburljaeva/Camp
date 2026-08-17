@@ -585,7 +585,7 @@ const STAGE_VARIANTS=[
   ['seed3.png','seed13.png','seed23.png','seed33.png'],
   ['seed4.png','seed14.png','seed24.png','seed34.png']
 ];
-const FINAL_FLOWERS=[
+let FINAL_FLOWERS=[
   { file:'seed4.png',  name:'Белый цветок' },
   { file:'seed14.png', name:'Кремовая роза' },
   { file:'seed24.png', name:'Алая роза' },
@@ -694,6 +694,13 @@ async function verifySprites(){
     if(ok.length) STAGE_VARIANTS[s]=ok;
     else console.warn('Нет картинок для стадии',s+1);
   }
+  const finalPool=STAGE_VARIANTS[STAGE_VARIANTS.length-1];
+  FINAL_FLOWERS.forEach(f=>{ if(!finalPool.includes(f.file)) f.missing=true; });
+  finalPool.forEach(file=>{
+    if(!FINAL_FLOWERS.some(f=>f.file===file)) FINAL_FLOWERS.push({ file, name:'Цветок' });
+  });
+  for(let i=FINAL_FLOWERS.length-1;i>=0;i--){ if(FINAL_FLOWERS[i].missing) FINAL_FLOWERS.splice(i,1); }
+
   const seedOk=await fileExists(ASSET_PATH+SEED_IMG);
   if(!seedOk){
     for(const alt of ['seed0.png','seed.PNG','seed-1.png']){
@@ -1046,14 +1053,26 @@ async function verifySprites(){
     showToast(p.level>=MAX_LEVEL?'Цветок распустился! Можно собрать в гербарий.':'Полито');
   }
   function harvestPlant(p){
-    const f=FINAL_FLOWERS[(p.vars[3]||0)%FINAL_FLOWERS.length];
+    const file=plantImgSrc(MAX_LEVEL,p.vars).replace(ASSET_PATH,'');
+    const f=FINAL_FLOWERS.find(x=>x.file===file)||{ file, name:'Цветок' };
     state.collection[f.file]=(state.collection[f.file]||0)+1;
     todayLog().harvest++;
     burstAt(document.querySelector(`[data-plant="${p.id}"]`),10,'#E0895F');
+    const prevPlants=state.plants.slice();
+    const prevCount=state.collection[f.file]-1;
     state.plants=state.plants.filter(x=>x.id!==p.id);
     chime(760); buzz([25,30,25]);
-    plantsKey=''; saveProgress(); renderAll();
-    showToast(`${f.name} — в гербарий! Всего таких: ${state.collection[f.file]}`);
+    plantsKey=''; renderAll();
+    saveProgress().then(ok=>{
+      if(!ok){
+        state.plants=prevPlants;
+        if(prevCount>0) state.collection[f.file]=prevCount; else delete state.collection[f.file];
+        plantsKey=''; renderAll();
+        showToast('Не удалось сохранить — цветок вернулся в сад, попробуйте ещё раз.');
+      } else {
+        showToast(`${f.name} — в гербарий! Всего таких: ${state.collection[f.file]}`);
+      }
+    });
   }
 
   function nextDripText(){
@@ -1590,18 +1609,29 @@ async function verifySprites(){
     const sb=$('slotBuyBtn');
     if(sb) sb.addEventListener('click',buyExtraSlot);
   }
+  function flowerName(file){
+    const f=FINAL_FLOWERS.find(x=>x.file===file);
+    return f?f.name:'Цветок';
+  }
   function renderCollection(){
     const zone=$('collectionZone');
     if(!collectionTotal()){
       zone.innerHTML='<div class="coll-empty-note">Вырасти цветок до конца и собери его — он попадёт сюда.</div>';
       return;
     }
-    zone.innerHTML='<div class="collection-grid">'+FINAL_FLOWERS.map(f=>{
-      const n=state.collection[f.file]||0;
-      return n>0
-        ? `<div class="coll-slot filled"><span class="coll-count">×${n}</span><img class="coll-img" src="${ASSET_PATH+f.file}" alt=""><span class="coll-name">${f.name}</span></div>`
-        : `<div class="coll-slot"><span class="coll-lock">?</span><span class="coll-name">не собран</span></div>`;
-    }).join('')+'</div>';
+    const collected=Object.keys(state.collection).filter(k=>(state.collection[k]||0)>0);
+    const known=FINAL_FLOWERS.map(f=>f.file);
+    const order=[...known.filter(f=>collected.includes(f)), ...collected.filter(f=>!known.includes(f))];
+    const missing=known.filter(f=>!collected.includes(f));
+    zone.innerHTML='<div class="collection-grid">'+
+      order.map(file=>{
+        const n=state.collection[file]||0;
+        return `<div class="coll-slot filled"><span class="coll-count">×${n}</span>
+          <img class="coll-img" src="${ASSET_PATH+file}" alt="" onerror="this.style.display='none'">
+          <span class="coll-name">${flowerName(file)}</span></div>`;
+      }).join('')+
+      missing.map(()=>`<div class="coll-slot"><span class="coll-lock">?</span><span class="coll-name">не собран</span></div>`).join('')+
+      '</div>';
   }
   async function loadLeaderboard(){
     try{
