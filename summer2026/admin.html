@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Админка — Сад стройности</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#3B2E22; --soft:#6B5D4E; --line:#E7DDC8; --card:#FFFDF8; --bg:#F6F1E4;
+         --green:#5E8F7C; --amber:#E8B84B; --red:#C1502E; --plum:#7C5568; }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Nunito Sans',sans-serif; padding:22px 16px 60px; }
+  .wrap{ max-width:1180px; margin:0 auto; }
+  h1{ font-size:22px; margin:0 0 4px; }
+  .sub{ font-size:13px; color:var(--soft); margin-bottom:18px; }
+
+  .gate{ max-width:360px; margin:60px auto; background:var(--card); border-radius:18px; padding:24px; box-shadow:0 10px 30px -14px rgba(74,51,36,.35); text-align:center; }
+  .gate input{ width:100%; margin-top:12px; padding:13px 14px; border-radius:11px; border:2px solid var(--line); font-size:15px; outline:none; }
+  .gate button{ width:100%; margin-top:12px; padding:13px; border:none; border-radius:11px; background:var(--red); color:#fff; font-size:15px; font-weight:800; cursor:pointer; }
+  .gate .err{ color:var(--red); font-size:12.5px; min-height:16px; margin-top:8px; font-weight:700; }
+
+  .stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:16px; }
+  .stat{ background:var(--card); border-radius:14px; padding:13px 15px; box-shadow:0 6px 16px -12px rgba(74,51,36,.4); }
+  .stat b{ display:block; font-size:24px; }
+  .stat span{ font-size:11.5px; color:var(--soft); font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+
+  .toolbar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; }
+  .toolbar input{ flex:1; min-width:200px; padding:11px 13px; border-radius:11px; border:2px solid var(--line); font-size:14px; outline:none; background:#fff; }
+  .toolbar select, .toolbar button{ padding:11px 13px; border-radius:11px; border:2px solid var(--line); background:#fff; font-family:inherit; font-size:13.5px; font-weight:700; color:var(--ink); cursor:pointer; }
+  .toolbar button.primary{ background:var(--red); color:#fff; border-color:var(--red); }
+
+  .tbl-wrap{ background:var(--card); border-radius:16px; overflow:auto; box-shadow:0 8px 22px -14px rgba(74,51,36,.4); }
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; min-width:900px; }
+  th{ text-align:left; padding:12px 14px; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--soft); border-bottom:2px solid var(--line); white-space:nowrap; cursor:pointer; user-select:none; }
+  th:hover{ color:var(--ink); }
+  td{ padding:12px 14px; border-bottom:1px solid #F0E9D8; vertical-align:middle; }
+  tr:last-child td{ border-bottom:none; }
+  tr:hover td{ background:#FBF7EC; }
+  .nm{ font-weight:800; }
+  .em{ font-size:11.5px; color:var(--soft); }
+  .pill{ display:inline-block; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:800; white-space:nowrap; }
+  .p-now{ background:#E4F0E7; color:#3E6B4F; }
+  .p-day{ background:#FBF3E4; color:#8A6220; }
+  .p-week{ background:#F6E7DC; color:#A0522D; }
+  .p-old{ background:#F2E3E0; color:#9B3B22; }
+  .p-never{ background:#EFEAE0; color:#8A8070; }
+  .muted{ color:var(--soft); }
+  .empty{ padding:40px; text-align:center; color:var(--soft); }
+  .note{ font-size:11.5px; color:var(--soft); margin-top:10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="gate" id="gate">
+    <h1>Админка сада</h1>
+    <div class="sub">Введите пароль для доступа</div>
+    <input type="password" id="pwd" placeholder="Пароль" autocomplete="off">
+    <button id="enterBtn">Войти</button>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div id="app" style="display:none;">
+    <h1>Сад стройности — участницы</h1>
+    <div class="sub" id="updatedLine">Загружаю…</div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="toolbar">
+      <input id="search" placeholder="Поиск по имени или почте">
+      <select id="filter">
+        <option value="all">Все участницы</option>
+        <option value="today">Заходили сегодня</option>
+        <option value="3d">Не заходили 3+ дня</option>
+        <option value="7d">Не заходили неделю+</option>
+      </select>
+      <button id="refreshBtn">Обновить</button>
+      <button id="csvBtn" class="primary">Скачать CSV</button>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-sort="name">Имя</th>
+            <th data-sort="lastSeen">Последний заход</th>
+            <th data-sort="days">Дней в игре</th>
+            <th data-sort="streak">Серия</th>
+            <th data-sort="score">Очки</th>
+            <th data-sort="plants">Растений</th>
+            <th data-sort="flowers">Гербарий</th>
+            <th data-sort="coins">Монеты</th>
+            <th data-sort="tasks">Заданий всего</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="empty" id="emptyBox" style="display:none;">Ничего не найдено</div>
+    </div>
+    <div class="note">«Последний заход» считается по времени последнего действия в игре. Данные обновляются при нажатии «Обновить».</div>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyApSUQxealmL13siDzauRWO_J6-fSHkN-4",
+  authDomain: "walk-walk-d8a14.firebaseapp.com",
+  projectId: "walk-walk-d8a14",
+  storageBucket: "walk-walk-d8a14.firebasestorage.app",
+  messagingSenderId: "1022340791272",
+  appId: "1:1022340791272:web:228f98bc590a4f77dac25d"
+};
+const app=initializeApp(firebaseConfig), db=getFirestore(app), auth=getAuth(app);
+
+const ADMIN_PASSWORD='sadadmin2026';
+const LS='sad_admin_ok';
+
+const $=id=>document.getElementById(id);
+let rows=[], sortKey='lastSeen', sortDir=-1;
+
+function tsOf(v){
+  if(!v) return 0;
+  if(typeof v==='number') return v;
+  if(v.seconds) return v.seconds*1000;
+  if(v.toMillis) try{ return v.toMillis(); }catch(e){}
+  return 0;
+}
+function dstr(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function daysBetween(a,b){
+  const [y1,m1,d1]=a.split('-').map(Number), [y2,m2,d2]=b.split('-').map(Number);
+  return Math.round((new Date(y2,m2-1,d2)-new Date(y1,m1-1,d1))/86400000);
+}
+function ago(ts){
+  if(!ts) return { label:'никогда', cls:'p-never', hours:1e9 };
+  const h=(Date.now()-ts)/3600000;
+  const fmt=new Date(ts).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  if(h<1) return { label:'только что', cls:'p-now', hours:h, exact:fmt };
+  if(h<24) return { label:`${Math.floor(h)} ч назад`, cls:'p-now', hours:h, exact:fmt };
+  const d=Math.floor(h/24);
+  if(d===1) return { label:'вчера', cls:'p-day', hours:h, exact:fmt };
+  if(d<7) return { label:`${d} дн. назад`, cls:'p-day', hours:h, exact:fmt };
+  if(d<14) return { label:`${d} дн. назад`, cls:'p-week', hours:h, exact:fmt };
+  return { label:`${d} дн. назад`, cls:'p-old', hours:h, exact:fmt };
+}
+function countTasks(log){
+  let n=0;
+  Object.values(log||{}).forEach(day=>{
+    Object.entries(day||{}).forEach(([k,v])=>{ if(typeof v==='number' && !['water','weed','harvest','plant','visit','cheer'].includes(k)) n+=v; });
+  });
+  return n;
+}
+function streakOf(log, startDate){
+  if(!log||!startDate) return 0;
+  let count=0, d=dstr(new Date()), guard=0;
+  const active=day=>day&&Object.values(day).some(v=>typeof v==='number'&&v>0);
+  while(guard++<120){
+    if(daysBetween(startDate,d)<0) break;
+    if(!active(log[d])){
+      if(d===dstr(new Date())){ const p=new Date(); p.setDate(p.getDate()-1); d=dstr(p); continue; }
+      break;
+    }
+    count++;
+    const [y,m,dd]=d.split('-').map(Number);
+    const prev=new Date(y,m-1,dd-1); d=dstr(prev);
+  }
+  return count;
+}
+
+async function load(){
+  $('updatedLine').textContent='Загружаю…';
+  try{
+    await signInAnonymously(auth);
+    const snap=await getDocs(collection(db,'garden_progress'));
+    rows=[];
+    snap.forEach(doc=>{
+      const d=doc.data();
+      const log=d.log||{};
+      const lastSeen=Math.max(tsOf(d.updatedAt), d.lastVisitAt||0, d.lastDripAt||0);
+      const flowers=Object.values(d.collection||{}).reduce((s,n)=>s+(Number(n)||0),0);
+      rows.push({
+        id:doc.id,
+        name:d.name||'—',
+        email:d.email||doc.id,
+        lastSeen,
+        days:d.campStartDate?daysBetween(d.campStartDate,dstr(new Date()))+1:0,
+        started:d.campStartDate||'',
+        streak:streakOf(log,d.campStartDate),
+        score:Math.round(d.score||0),
+        plants:(d.plants||[]).length,
+        flowers,
+        coins:d.coins||0,
+        water:d.water||0,
+        seeds:d.seeds||0,
+        tasks:countTasks(log),
+        decor:(d.ownedDecor||[]).length
+      });
+    });
+    render();
+    $('updatedLine').textContent=`Всего участниц: ${rows.length} · обновлено ${new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}`;
+  }catch(e){
+    console.error(e);
+    $('updatedLine').textContent='Не удалось загрузить данные. Проверьте правила Firestore для чтения garden_progress.';
+  }
+}
+
+function renderStats(list){
+  const today=list.filter(r=>ago(r.lastSeen).hours<24).length;
+  const week=list.filter(r=>ago(r.lastSeen).hours<24*7).length;
+  const stale=list.filter(r=>ago(r.lastSeen).hours>=24*3).length;
+  const flowers=list.reduce((s,r)=>s+r.flowers,0);
+  $('stats').innerHTML=`
+    <div class="stat"><b>${list.length}</b><span>Участниц</span></div>
+    <div class="stat"><b style="color:var(--green)">${today}</b><span>Заходили за сутки</span></div>
+    <div class="stat"><b>${week}</b><span>Заходили за неделю</span></div>
+    <div class="stat"><b style="color:var(--red)">${stale}</b><span>Молчат 3+ дня</span></div>
+    <div class="stat"><b>${flowers}</b><span>Цветов собрано</span></div>`;
+}
+
+function filtered(){
+  const q=$('search').value.trim().toLowerCase();
+  const f=$('filter').value;
+  return rows.filter(r=>{
+    if(q && !(r.name.toLowerCase().includes(q)||r.email.toLowerCase().includes(q))) return false;
+    const h=ago(r.lastSeen).hours;
+    if(f==='today') return h<24;
+    if(f==='3d') return h>=72;
+    if(f==='7d') return h>=168;
+    return true;
+  });
+}
+
+function render(){
+  const list=filtered().sort((a,b)=>{
+    const x=a[sortKey], y=b[sortKey];
+    if(typeof x==='string') return x.localeCompare(y)*sortDir;
+    return (x-y)*sortDir;
+  });
+  renderStats(rows);
+  $('emptyBox').style.display=list.length?'none':'block';
+  $('rows').innerHTML=list.map(r=>{
+    const a=ago(r.lastSeen);
+    return `<tr>
+      <td><div class="nm">${esc(r.name)}</div><div class="em">${esc(r.email)}</div></td>
+      <td><span class="pill ${a.cls}">${a.label}</span>${a.exact?`<div class="em">${a.exact}</div>`:''}</td>
+      <td>${r.days||'—'}${r.started?`<div class="em">с ${r.started}</div>`:''}</td>
+      <td>${r.streak}</td>
+      <td><b>${r.score}</b></td>
+      <td>${r.plants}</td>
+      <td>${r.flowers}</td>
+      <td>${r.coins}<div class="em">вода ${r.water} · семена ${r.seeds}</div></td>
+      <td>${r.tasks}</td>
+    </tr>`;
+  }).join('');
+}
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function downloadCSV(){
+  const list=filtered();
+  const head=['Имя','Почта','Последний заход','Дней в игре','Дата старта','Серия','Очки','Растений','Гербарий','Монеты','Вода','Семена','Заданий','Декора'];
+  const lines=[head.join(';')].concat(list.map(r=>[
+    r.name, r.email, r.lastSeen?new Date(r.lastSeen).toLocaleString('ru-RU'):'никогда',
+    r.days, r.started, r.streak, r.score, r.plants, r.flowers, r.coins, r.water, r.seeds, r.tasks, r.decor
+  ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')));
+  const blob=new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`sad-uchastnitsy-${dstr(new Date())}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+document.querySelectorAll('th[data-sort]').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const k=th.dataset.sort;
+    if(sortKey===k) sortDir*=-1; else { sortKey=k; sortDir=(k==='name')?1:-1; }
+    render();
+  });
+});
+$('search').addEventListener('input',render);
+$('filter').addEventListener('change',render);
+$('refreshBtn').addEventListener('click',load);
+$('csvBtn').addEventListener('click',downloadCSV);
+
+function openApp(){
+  $('gate').style.display='none';
+  $('app').style.display='block';
+  load();
+}
+$('enterBtn').addEventListener('click',()=>{
+  if($('pwd').value===ADMIN_PASSWORD){
+    try{ sessionStorage.setItem(LS,'1'); }catch(e){}
+    openApp();
+  } else $('err').textContent='Неверный пароль';
+});
+$('pwd').addEventListener('keydown',e=>{ if(e.key==='Enter') $('enterBtn').click(); });
+try{ if(sessionStorage.getItem(LS)==='1') openApp(); }catch(e){}
+</script>
+</body>
+</html>
