@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Строгий режим — Шагай Дома</title>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --concrete:#E4E5E0; --wall:#F3F3F0; --ink:#1F211D; --steel:#6B6E67;
+  --hazard:#F2C230; --release:#1F7A4D; --alarm:#C9352B; --line:#C9CBC4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--concrete);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.stencil{font-family:"Russo One",sans-serif;font-weight:400;letter-spacing:.01em;text-transform:uppercase}
+h1{font-size:clamp(1.9rem,6vw,3rem);line-height:1.05}
+h2{font-size:1.25rem;margin-bottom:12px}
+h3{font-size:.95rem;color:var(--steel);margin-bottom:8px}
+.wrap{max-width:720px;margin:0 auto;padding:20px 16px 80px}
+.stripe{height:14px;background:repeating-linear-gradient(135deg,var(--hazard) 0 18px,var(--ink) 18px 36px)}
+header{padding:20px 0 12px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:3px solid var(--ink)}
+header small{display:block;color:var(--steel);font-size:.8rem}
+.toggle{font-size:.8rem;color:var(--steel);background:none;border:1px solid var(--line);padding:6px 10px;border-radius:4px;cursor:pointer}
+section{background:var(--wall);border:1px solid var(--line);padding:20px;margin-top:20px;border-radius:4px}
+.hidden{display:none!important}
+label{display:block;font-size:.85rem;color:var(--steel);margin:14px 0 4px}
+input,select{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--ink)}
+input:focus,select:focus,button:focus-visible{outline:3px solid var(--hazard);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;margin-top:8px;color:var(--ink)}
+.check input{width:auto;margin-top:4px}
+.btn{font-family:"Russo One",sans-serif;text-transform:uppercase;font-size:.95rem;border:0;border-radius:4px;padding:14px 20px;cursor:pointer;width:100%;margin-top:18px;background:var(--ink);color:var(--hazard)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+.btn.green{background:var(--release);color:#fff}
+.btn.small{width:auto;padding:9px 14px;font-size:.8rem;margin-top:0}
+.verdict{padding:16px;border-left:6px solid;margin-top:16px;border-radius:0 4px 4px 0;font-size:.95rem}
+.verdict.ok{border-color:var(--release);background:#E8F3EC}
+.verdict.warn{border-color:var(--hazard);background:#FBF3D6}
+.verdict.stop{border-color:var(--alarm);background:#F7E0DD}
+.verdict p+p{margin-top:8px}
+.verdict b{font-weight:600}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.facts div{background:#fff;border:1px solid var(--line);padding:10px;border-radius:4px}
+.facts span{display:block;font-size:.72rem;color:var(--steel)}
+.facts strong{font-family:"Russo One";font-size:1.1rem;font-weight:400}
+
+/* release card — the one loud element */
+.release{background:var(--ink);color:var(--wall);padding:24px 20px;position:relative;overflow:hidden;border-radius:4px;margin-top:20px}
+.release::after{content:"";position:absolute;inset:auto -40px -40px auto;width:220px;height:220px;border:14px solid var(--hazard);border-radius:50%;opacity:.15}
+.release .lbl{color:var(--hazard);font-size:.8rem}
+.release .date{font-family:"Russo One";font-size:clamp(2.2rem,9vw,3.6rem);line-height:1;margin:6px 0 10px}
+.release .meta{display:flex;gap:18px;flex-wrap:wrap;font-size:.85rem;color:#C8CAC3}
+.release .meta b{color:#fff;font-weight:600}
+.stamp{position:absolute;right:14px;top:14px;border:3px solid var(--hazard);color:var(--hazard);font-family:"Russo One";font-size:.7rem;padding:4px 8px;transform:rotate(8deg);letter-spacing:.08em}
+.bar{height:14px;background:#3A3D37;border-radius:7px;overflow:hidden;margin-top:16px}
+.bar i{display:block;height:100%;background:var(--hazard);transition:width .5s}
+.shift{margin-top:12px;font-size:.8rem;color:#FFD766}
+
+.task{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line)}
+.task:last-child{border-bottom:0}
+.task .t{font-weight:500}
+.task .s{font-size:.8rem;color:var(--steel)}
+.tag{font-size:.72rem;padding:3px 8px;border-radius:3px;font-weight:600;white-space:nowrap}
+.tag.todo{background:#FBF3D6;color:#7A5B00}.tag.done{background:#E8F3EC;color:var(--release)}.tag.late{background:#F7E0DD;color:var(--alarm)}
+
+.menu{display:grid;gap:10px;margin-top:8px}
+.day{border:1px solid var(--line);background:#fff;padding:12px;border-radius:4px}
+.day h4{font-family:"Russo One";font-weight:400;font-size:.85rem;margin-bottom:6px}
+.day ul{list-style:none;font-size:.88rem}
+.day li{display:flex;justify-content:space-between;gap:8px;padding:3px 0}
+.day li span{color:var(--steel);font-size:.8rem}
+
+svg.chart{width:100%;height:120px;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--steel);font-size:.75rem}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.r{background:var(--alarm)}.g{background:var(--release)}.y{background:var(--hazard)}
+.note{font-size:.8rem;color:var(--steel);margin-top:10px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+@media (max-width:480px){.row{grid-template-columns:1fr}.facts{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="stripe"></div>
+<div class="wrap">
+<header>
+  <div><h1>Строгий режим</h1><small>интенсив-лагерь «Шагай Дома» · прототип</small></div>
+  <button class="toggle" id="modeBtn">Кабинет куратора</button>
+</header>
+
+<!-- ============ ШАГ 1. АНКЕТА ============ -->
+<section id="intake">
+  <h2>Поступление</h2>
+  <p style="font-size:.9rem;color:var(--steel)">Заполни данные — программа проверит, выполнима ли цель и безопасна ли она, и назначит дату выхода.</p>
+  <div class="row">
+    <div><label for="sex">Пол</label><select id="sex"><option value="f">Женский</option><option value="m">Мужской</option></select></div>
+    <div><label for="age">Возраст</label><input id="age" type="number" value="38" min="14" max="90"></div>
+    <div><label for="height">Рост, см</label><input id="height" type="number" value="165"></div>
+    <div><label for="weight">Вес, кг</label><input id="weight" type="number" step="0.1" value="50"></div>
+    <div><label for="loss">Хочу сбросить, кг</label><input id="loss" type="number" step="0.5" value="10"></div>
+    <div><label for="act">Активность</label><select id="act"><option value="1.2">Сидячая</option><option value="1.375" selected>Лёгкая</option><option value="1.55">Средняя</option></select></div>
+  </div>
+  <label for="start">Дата начала</label><input id="start" type="date">
+  <label for="excl">Не ем / не люблю (через запятую)</label><input id="excl" type="text" placeholder="рыба, гречка">
+  <label>Отметь, если есть</label>
+  <div class="check"><input type="checkbox" class="stop" id="s1"><span>Беременность или кормление грудью</span></div>
+  <div class="check"><input type="checkbox" class="stop" id="s2"><span>Диабет на инсулине, заболевания сердца, почек</span></div>
+  <div class="check"><input type="checkbox" class="stop" id="s3"><span>Расстройство пищевого поведения в прошлом</span></div>
+  <div class="check"><input type="checkbox" class="stop" id="s4"><span>Операция в последние 3 месяца</span></div>
+  <button class="btn" id="checkBtn">Проверить цель</button>
+  <div id="verdict"></div>
+</section>
+
+<!-- ============ ШАГ 2. КАБИНЕТ УЧАСТНИКА ============ -->
+<div id="cabinet" class="hidden">
+  <div class="release">
+    <span class="stamp">Режим: строгий</span>
+    <span class="lbl">Дата выхода</span>
+    <div class="date" id="relDate">—</div>
+    <div class="meta"><span>день <b id="dayNow">1</b> из <b id="dayTotal">—</b></span><span>цель <b id="goalW">—</b> кг</span><span>сейчас <b id="curW">—</b> кг</span><span>норма <b id="kcal">—</b> ккал</span></div>
+    <div class="bar"><i id="bar" style="width:0%"></i></div>
+    <div class="shift" id="shift"></div>
+  </div>
+
+  <section>
+    <h2>Сегодня</h2>
+    <div class="task"><div><div class="t">Тренировка: ходьба 35 мин, интервалы</div><div class="s">Открытие ссылки фиксируется. Отметка «выполнила» доступна через 30 мин после открытия.</div></div><div style="text-align:right"><span class="tag todo" id="wTag">не открыта</span><br><button class="btn small ghost" id="wBtn" style="margin-top:6px">Открыть</button></div></div>
+    <div class="task"><div><div class="t">Питание по меню</div><div class="s">Отметь, если сегодня ела по плану</div></div><div><button class="btn small ghost" id="eatBtn">Отметить</button></div></div>
+    <div class="task" id="measTask"><div><div class="t">Замеры и вес</div><div class="s">Раз в 3 дня. Следующие: <span id="nextMeas">—</span></div></div><div><span class="tag todo">ждём</span></div></div>
+    <div class="actions"><button class="btn small ghost" id="skipBtn">Симуляция: пропустить день</button><button class="btn small ghost" id="nextBtn">Симуляция: +1 день по плану</button></div>
+    <p class="note">Кнопки симуляции — только для прототипа: показывают, как сдвигается дата выхода.</p>
+  </section>
+
+  <section>
+    <h2>Вес и замеры</h2>
+    <div class="row">
+      <div><label for="mW">Вес, кг</label><input id="mW" type="number" step="0.1"></div>
+      <div><label for="mWaist">Талия, см</label><input id="mWaist" type="number" placeholder="78"></div>
+      <div><label for="mHip">Бёдра, см</label><input id="mHip" type="number" placeholder="102"></div>
+      <div><label for="mChest">Грудь, см</label><input id="mChest" type="number" placeholder="94"></div>
+    </div>
+    <button class="btn green" id="measBtn">Сохранить замеры</button>
+    <svg class="chart" id="chart" viewBox="0 0 600 120" preserveAspectRatio="none"></svg>
+    <p class="note">Плато и колебания ±1–2 кг по циклу — норма. Дата сдвигается по среднему за 7 дней, а не по одному взвешиванию.</p>
+  </section>
+
+  <section>
+    <h2>Меню на 3 дня</h2>
+    <p class="note" id="menuNote"></p>
+    <div class="menu" id="menu"></div>
+    <button class="btn ghost" id="regenBtn">Собрать заново</button>
+  </section>
+</div>
+
+<!-- ============ КУРАТОР ============ -->
+<div id="curator" class="hidden">
+  <section>
+    <h2><span class="dot r"></span>Красная зона</h2>
+    <table><tr><th>Участница</th><th>Проблема</th><th>Дней</th><th></th></tr>
+      <tr><td>Оксана П.</td><td>не открывала тренировки</td><td>3</td><td><button class="btn small ghost">Напомнить</button></td></tr>
+      <tr><td>Марина Л.</td><td>нет замеров, дата +2 дня</td><td>4</td><td><button class="btn small ghost">Напомнить</button></td></tr>
+      <tr><td>Анна В.</td><td>не отмечала питание</td><td>2</td><td><button class="btn small ghost">Напомнить</button></td></tr>
+    </table>
+    <p class="note">Шаблон напоминания: «Надзиратель заметил, что вас не было 3 дня. Правила есть правила — сегодня тренировка 35 минут, ссылка внутри. Мы на вашей стороне.»</p>
+  </section>
+  <section>
+    <h2><span class="dot g"></span>Кейсы для соцсетей</h2>
+    <table><tr><th>Участница</th><th>Результат</th><th>Материалы</th><th></th></tr>
+      <tr><td>Светлана К.</td><td>−6,4 кг за 6 нед, −9 см талия</td><td>фото до/после, отзыв</td><td><button class="btn small">Черновик поста</button></td></tr>
+      <tr><td>Юлия Р.</td><td>−4,1 кг, идёт с опережением на 5 дней</td><td>график, цитата</td><td><button class="btn small">Черновик поста</button></td></tr>
+    </table>
+  </section>
+  <section>
+    <h2><span class="dot y"></span>Все участницы</h2>
+    <table><tr><th>Имя</th><th>Старт → цель</th><th>Прогресс</th><th>Выход</th></tr>
+      <tr><td>Светлана К.</td><td>78 → 70</td><td>80%</td><td>12 окт</td></tr>
+      <tr><td>Юлия Р.</td><td>66 → 61</td><td>82%</td><td>18 сен</td></tr>
+      <tr><td>Оксана П.</td><td>91 → 82</td><td>22%</td><td>3 дек</td></tr>
+      <tr><td>Марина Л.</td><td>72 → 66</td><td>35%</td><td>29 окт</td></tr>
+    </table>
+  </section>
+</div>
+</div>
+
+<script>
+// ---------- состояние (в проде — Firestore) ----------
+const S={start:null,days:0,goal:0,startW:0,cur:0,kcal:0,day:1,shift:0,weights:[],opened:false,done:false,excl:[]};
+const $=id=>document.getElementById(id);
+$('start').valueAsDate=new Date();
+
+// ---------- проверка цели ----------
+function bmi(w,h){return w/((h/100)**2)}
+function fmt(d){return d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+
+function check(){
+  const sex=$('sex').value,age=+$('age').value,h=+$('height').value,w=+$('weight').value,loss=+$('loss').value,act=+$('act').value;
+  const stops=[...document.querySelectorAll('.stop')].some(c=>c.checked);
+  const b=bmi(w,h), hm=(h/100)**2;
+  const bmr=sex==='m'?10*w+6.25*h-5*age+5:10*w+6.25*h-5*age-161;
+  const tdee=bmr*act, floor=sex==='m'?1500:1200;
+  const kcal=Math.max(floor,Math.round(tdee*0.8));
+  const v=$('verdict');
+
+  if(stops){v.innerHTML=`<div class="verdict stop"><p><b>Строгий режим недоступен.</b></p><p>По отмеченным пунктам жёсткий дефицит калорий может навредить. Мы не отправляем в этот формат без разрешения врача — предлагаем мягкую программу «Санаторий» и консультацию.</p></div>`;return}
+  if(b<18.5){v.innerHTML=`<div class="verdict stop"><p><b>ИМТ ${b.toFixed(1)} — уже ниже нормы.</b></p><p>Снижать вес дальше небезопасно. Можно поработать над тонусом и выносливостью без дефицита калорий.</p></div>`;return}
+
+  const targetW=w-loss, tb=bmi(targetW,h);
+  let safeGoal=targetW, msg='', cls='ok';
+  const minW=Math.round(19.5*hm*10)/10; // нижняя граница цели — ИМТ 19.5
+  if(tb<18.5){cls='warn';safeGoal=Math.max(minW,w-Math.max(0,w-minW));safeGoal=Math.min(safeGoal,w);
+    msg=`<p><b>Так нельзя: цель ${targetW} кг — это ИМТ ${tb.toFixed(1)}, ниже безопасной нормы 18,5.</b></p><p>При росте ${h} см здоровый нижний предел примерно ${minW} кг. Предлагаем цель <b>${safeGoal} кг</b> (−${(w-safeGoal).toFixed(1)} кг). Если хочется «подтянуться» — это про мышцы и замеры, а не про килограммы.</p>`;
+  } else if(loss<=0){v.innerHTML=`<div class="verdict warn"><p>Укажи, сколько килограмм хочешь сбросить.</p></div>`;return}
+  else msg=`<p><b>Цель реалистична и безопасна.</b></p><p>ИМТ сейчас ${b.toFixed(1)}, в цели — ${tb.toFixed(1)}. Темп не быстрее ${Math.min(1,Math.round(w*0.01*10)/10)} кг в неделю.</p>`;
+
+  const realLoss=w-safeGoal;
+  const weekly=Math.min(1,w*0.01);
+  const days=Math.max(7,Math.ceil(realLoss/weekly*7));
+  const start=$('start').valueAsDate||new Date();
+  const rel=addDays(start,days);
+  if(realLoss<=0){v.innerHTML=`<div class="verdict warn"><p>Вес уже в безопасной нижней зоне — цель на снижение не назначаем.</p></div>`;return}
+  v.innerHTML=`<div class="verdict ${cls}">${msg}
+    <div class="facts"><div><span>цель</span><strong>${safeGoal} кг</strong></div><div><span>срок</span><strong>${days} дн.</strong></div><div><span>дата выхода</span><strong>${fmt(rel)}</strong></div><div><span>ИМТ сейчас</span><strong>${b.toFixed(1)}</strong></div><div><span>норма в день</span><strong>${kcal} ккал</strong></div><div><span>темп</span><strong>${weekly.toFixed(1)} кг/нед</strong></div></div>
+    <button class="btn" id="enterBtn">${cls==='warn'?'Принять безопасную цель и войти':'Войти в режим'}</button></div>`;
+  $('enterBtn').onclick=()=>enter({start,days,goal:safeGoal,w,kcal});
+}
+$('checkBtn').onclick=check;
+
+// ---------- кабинет ----------
+function enter(o){
+  Object.assign(S,{start:o.start,days:o.days,goal:o.goal,startW:o.w,cur:o.w,kcal:o.kcal,day:1,shift:0,weights:[o.w],opened:false,done:false});
+  S.excl=$('excl').value.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+  $('intake').classList.add('hidden');$('cabinet').classList.remove('hidden');
+  $('mW').value=o.w;render();buildMenu();window.scrollTo({top:0,behavior:'smooth'});
+}
+function render(){
+  const total=S.days+S.shift;
+  $('relDate').textContent=fmt(addDays(S.start,total));
+  $('dayNow').textContent=S.day;$('dayTotal').textContent=total;
+  $('goalW').textContent=S.goal;$('curW').textContent=S.cur;$('kcal').textContent=S.kcal;
+  const p=Math.min(100,Math.round((S.startW-S.cur)/(S.startW-S.goal)*100));
+  $('bar').style.width=Math.max(2,p)+'%';
+  $('shift').textContent=S.shift>0?`Срок увеличен на ${S.shift} дн. — пропуски тренировок и питания`:S.shift<0?`Идёшь с опережением на ${-S.shift} дн.`:'Идёшь точно по плану';
+  $('nextMeas').textContent=fmt(addDays(S.start,Math.ceil(S.day/3)*3));
+  drawChart();
+}
+$('wBtn').onclick=()=>{
+  if(!S.opened){S.opened=true;$('wTag').textContent='открыта';$('wBtn').textContent='Выполнила';window.open('https://vk.com','_blank');}
+  else{S.done=true;$('wTag').className='tag done';$('wTag').textContent='выполнена';$('wBtn').classList.add('hidden');}
+};
+let ate=false;$('eatBtn').onclick=e=>{ate=true;e.target.textContent='Отмечено ✓';e.target.disabled=true};
+$('skipBtn').onclick=()=>{S.shift+=1;S.day+=1;resetDay();render()};
+$('nextBtn').onclick=()=>{S.day+=1;resetDay();render()};
+function resetDay(){S.opened=false;S.done=false;ate=false;$('wTag').className='tag todo';$('wTag').textContent='не открыта';$('wBtn').textContent='Открыть';$('wBtn').classList.remove('hidden');$('eatBtn').textContent='Отметить';$('eatBtn').disabled=false}
+
+$('measBtn').onclick=()=>{
+  const w=+$('mW').value;if(!w)return;S.weights.push(w);S.cur=w;
+  // пересчёт по фактическому темпу (среднее)
+  const lost=S.startW-w,daysPassed=Math.max(1,S.day);
+  const expected=lost>0?Math.ceil((S.startW-S.goal)/lost*daysPassed):S.days;
+  S.shift=Math.max(S.shift,0)+Math.max(0,Math.min(14,expected-S.days-Math.max(S.shift,0)));
+  if(expected<S.days)S.shift=expected-S.days;
+  render();$('measTask').querySelector('.tag').className='tag done';$('measTask').querySelector('.tag').textContent='есть';
+};
+function drawChart(){
+  const svg=$('chart'),ws=S.weights;if(ws.length<1)return;
+  const min=Math.min(S.goal,...ws)-1,max=Math.max(...ws)+1;
+  const x=i=>ws.length>1?20+i*(560/(ws.length-1)):300,y=v=>110-(v-min)/(max-min)*100;
+  let d=ws.map((v,i)=>(i?'L':'M')+x(i)+' '+y(v)).join(' ');
+  svg.innerHTML=`<line x1="20" x2="580" y1="${y(S.goal)}" y2="${y(S.goal)}" stroke="#1F7A4D" stroke-dasharray="6 4"/><text x="582" y="${y(S.goal)+4}" font-size="11" fill="#1F7A4D">цель</text>
+  <path d="${d}" fill="none" stroke="#1F211D" stroke-width="2.5"/>${ws.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#F2C230" stroke="#1F211D"/>`).join('')}`;
+}
+
+// ---------- меню (в проде — база рецептов) ----------
+const DB={
+  breakfast:[['Овсянка с яблоком и корицей',320],['Творог с ягодами',280],['Омлет с овощами',300],['Гречка с яйцом',340]],
+  lunch:[['Куриная грудка с гречкой и салатом',450],['Запечённая рыба с овощами',420],['Суп из чечевицы + хлеб',400],['Индейка с булгуром',460]],
+  dinner:[['Рыба на пару с брокколи',300],['Салат с тунцом',320],['Тушёные овощи с курицей',330],['Творожная запеканка',290]],
+  snack:[['Яблоко + миндаль 15 г',150],['Кефир 1%',110],['Морковь и хумус',140]]
+};
+function ok(name){return !S.excl.some(e=>name.toLowerCase().includes(e))}
+function pick(list,n){const a=list.filter(([nm])=>ok(nm));return a.length?a[(n+Math.floor(Math.random()*a.length))%a.length]:['Заменить: нет подходящих блюд',0]}
+function buildMenu(){
+  const days=['День 1','День 2','День 3'];
+  $('menuNote').textContent=`Норма ${S.kcal} ккал в день`+(S.excl.length?`, исключено: ${S.excl.join(', ')}`:'');
+  $('menu').innerHTML=days.map((d,i)=>{
+    const items=[pick(DB.breakfast,i),pick(DB.snack,i),pick(DB.lunch,i),pick(DB.dinner,i)];
+    const sum=items.reduce((s,[,k])=>s+k,0);
+    return `<div class="day"><h4>${d} · ${sum} ккал</h4><ul>${items.map(([n,k])=>`<li>${n}<span>${k}</span></li>`).join('')}</ul></div>`;
+  }).join('');
+}
+$('regenBtn').onclick=buildMenu;
+
+// ---------- переключение режимов ----------
+let cur=false;
+$('modeBtn').onclick=()=>{cur=!cur;$('curator').classList.toggle('hidden',!cur);
+  $('intake').classList.toggle('hidden',cur||S.start);$('cabinet').classList.toggle('hidden',cur||!S.start);
+  $('modeBtn').textContent=cur?'Кабинет участницы':'Кабинет куратора'};
+</script>
+</body>
+</html>
