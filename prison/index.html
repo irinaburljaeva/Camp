@@ -474,6 +474,13 @@ const DANCE=['Раскрываем женственность','Учимся т�
 const HIGH=['Шагательная табата','Зумбавидные тренировки','В стиле Тай-Бо','Шагай дома. Активно'];
 const SOFT=['Мягкий фитнес','Плавный старт','Лимфодренажные тренировки','Тренировки для 100 кг+','Тренировки для 50+','Шагай дома. БАЗА'];
 const LV={1:'Новичок',2:'База',3:'Продвинутый'};
+// Как программы называются у участницы. Слева — название в школе (его видит только куратор), справа — для кабинета.
+// Программы, которых нет в списке, показываются как есть.
+const PROGRAM_TITLES={
+  'Тренировки для 100 кг+':'Бережная ходьба',
+  'Тренировки для 50+':'Мягкий тонус'
+};
+const pn=p=>PROGRAM_TITLES[p]||p;
 const SEED=window.WORKOUTS||[];
 if(!SEED.length)console.warn('workouts.js не подключён — лежит ли он рядом с index.html?');
 
@@ -651,7 +658,7 @@ const STEPS={
   train:{title:()=>D.mode==='new'?'Райдер тренировок':'Изменить райдер',sub:()=>'Уберём всё, что тебе не подходит. Ниже можно включить или выключить любую программу.',
     html:()=>{const r=D.rider,L=levelsFor(effLevel(r)),pool=poolFor(r,effLevel(r));
       return Q.map(q=>`<div class="q"><p>${q.t}</p><div class="opts">${q.o.map(([v,l])=>`<button class="opt" data-rk="${q.k}" data-v="${v}" aria-pressed="${String(r[q.k])===String(v)}">${l}</button>`).join('')}</div></div>`).join('')
-      +`<div class="q"><p>Программы в твоём плане</p><div class="opts">${programs().map(p=>{const n=Object.values(W).filter(w=>w.program===p&&w.active!==false&&L.includes(w.level)).length;return n?`<button class="chip" data-p="${esc(p)}" aria-pressed="${!r.excluded.includes(p)}">${esc(p)}<small>${n}</small></button>`:''}).join('')}</div></div>
+      +`<div class="q"><p>Программы в твоём плане</p><div class="opts">${programs().map(p=>{const n=Object.values(W).filter(w=>w.program===p&&w.active!==false&&L.includes(w.level)).length;return n?`<button class="chip" data-p="${esc(p)}" aria-pressed="${!r.excluded.includes(p)}">${esc(pn(p))}<small>${n}</small></button>`:''}).join('')}</div></div>
       <div class="pool">${pool.length<10?`<b style="color:var(--alarm)">В плане всего ${pool.length} тренировок.</b> Этого мало — включи ещё пару программ.`:`<b>${pool.length} тренировок</b> уровня «${L.map(l=>LV[l]).join('» и «')}» — примерно ${Math.floor(pool.length/r.perWeek)} нед. без единого повтора.`}</div>`},
     valid:()=>poolFor(D.rider,effLevel(D.rider)).length>=10?true:'Включи ещё программы — нужно хотя бы 10 тренировок'},
   food:{title:()=>D.mode==='new'?'Что ты не ешь?':'Меню под тебя',sub:()=>'Эти блюда никогда не попадут в твоё меню.',
@@ -745,7 +752,7 @@ function reveal(){
   show('reveal');
   const r=P.rider,pool=poolFor(r,P.level),food=foodOf(P);
   const cut=[];if(r.dance==='no')cut.push('танцевальные программы');if(r.box==='no')cut.push('Тай-Бо');if(r.tabata==='no')cut.push('табату');if(r.joints==='yes')cut.push('прыжки и удары — бережём суставы');
-  const add=[];if(!r.excluded.includes('Тренировки для 50+'))add.push('программу для 50+');if(!r.excluded.includes('Тренировки для 100 кг+'))add.push('программу для 100 кг+');
+  const add=[];if(!r.excluded.includes('Тренировки для 50+'))add.push('«'+pn('Тренировки для 50+')+'»');if(!r.excluded.includes('Тренировки для 100 кг+'))add.push('«'+pn('Тренировки для 100 кг+')+'»');
   const meals=['breakfast','snack','lunch','dinner'].reduce((s,k)=>s+mealPool(P,k).length,0);
   const allMeals=Object.values(RX).filter(x=>!x.side).length;
   const noFood=[...food.noTags.map(x=>(FOODTAGS.find(f=>f[0]===x)||[,x])[1].toLowerCase()),...food.noWords];
@@ -927,7 +934,7 @@ function renderToday(c){
     else{let right='';
       if(!l.done){if(!l.opened)right=`<a class="btn small" href="${esc(w.url)}" target="_blank" rel="noopener" data-act="open">Начать</a>`;
         else{const lf=Math.ceil(MIN_OPEN-(Date.now()-l.opened)/6e4);right=lf>0?`<button class="btn small" disabled>${lf} мин</button>`:`<button class="btn small green" data-act="done">Готово</button>`}}
-      Q.push({icon:'train',done:!!l.done,pts:PTS.train,title:esc(w.program),sub:`${LV[w.level]}${l.opened&&!l.done?` · <a href="${esc(w.url)}" target="_blank" rel="noopener" style="color:inherit">открыть снова</a>`:''}`,right})}}
+      Q.push({icon:'train',done:!!l.done,pts:PTS.train,title:esc(pn(w.program)),sub:`${LV[w.level]}${l.opened&&!l.done?` · <a href="${esc(w.url)}" target="_blank" rel="noopener" style="color:inherit">открыть снова</a>`:''}`,right})}}
   const md=P.menu&&P.menu['d'+t];
   Q.push({icon:'food',done:!!l.food,pts:PTS.food,title:'Питание по меню',sub:`${md?Math.round(MEALS.reduce((s,[k])=>s+kcalOf(md[k],P),0)*md.f)+' ккал · ':''}<a href="#" data-go="menu" style="color:inherit">меню</a>`,right:'<button class="btn small ghost" data-act="food">Ела</button>'});
   const bq=bonusOf(t);
@@ -977,7 +984,7 @@ function renderWeek(){
   const t=Math.max(1,dayIdx(P.start));let h='';
   for(let d=t;d<t+7&&d<=P.plan.length;d++){
     const e=P.plan[d-1],l=P.log['d'+d]||{},date=addDays(pd(P.start),d-1),w=W[e.w];
-    const name=e.rest?'Отдых, прогулка':w?`${esc(w.program)} <span class="d">· ${LV[w.level]}</span>`:'—';
+    const name=e.rest?'Отдых, прогулка':w?`${esc(pn(w.program))} <span class="d">· ${LV[w.level]}</span>`:'—';
     const tag=e.rest?'<span class="tag rest">отдых</span>':l.done?'<span class="tag done">готово</span>':d===dayIdx(P.start)?'<span class="tag todo">сегодня</span>':'';
     h+=`<li><span class="d ${d===dayIdx(P.start)?'now':''}">${fmtS(date)}</span><span>${name}</span>${tag}</li>`;
   }
