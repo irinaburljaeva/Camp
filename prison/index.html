@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Строгий режим — Шагай Дома</title>
-<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Golos+Text:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="workouts.js"></script>
@@ -178,6 +178,139 @@ details.pg summary{cursor:pointer;font-weight:500}
 .wl a{color:var(--ink)}
 .wl li.off a,.wl li.off>span{color:var(--steel);text-decoration:line-through}
 .note{font-size:.8rem;color:var(--steel);margin-top:10px}
+
+/* ---------- полировка ---------- */
+.btn{border-radius:6px;transition:transform .08s,filter .15s}
+.btn:hover:not(:disabled){filter:brightness(1.12)}
+.btn:active:not(:disabled){transform:scale(.98)}
+.opt,.chip{border-radius:6px;transition:background .12s,color .12s}
+.opt:hover{border-color:var(--ink)}
+.qbox,section{border-radius:8px}
+input,select,textarea{border-radius:6px}
+
+/* ---------- стена камеры ---------- */
+.wall{position:relative;margin-top:18px;border-radius:10px;padding:22px 20px 20px;color:#ECEAE2;overflow:hidden;
+  background:radial-gradient(120% 80% at 15% 0%,#34362F 0%,#22231F 45%,#1A1B18 100%);box-shadow:inset 0 0 0 1px #2E302B,0 14px 30px rgba(31,33,29,.25)}
+.wall::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.35;
+  background-image:linear-gradient(#2B2D28 1px,transparent 1px),linear-gradient(90deg,#2B2D28 1px,transparent 1px);background-size:100% 34px,68px 34px}
+.wall>*{position:relative}
+.wall-top{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.78rem}
+.cellno{white-space:nowrap;border:2px solid var(--hazard);color:var(--hazard);font-family:"Russo One";padding:3px 8px;border-radius:3px;letter-spacing:.05em;transform:rotate(-2deg)}
+.rankchip{color:#BDBFB6}.rankchip b{color:#fff;font-weight:600}
+.wall .hi{margin-top:16px;font-size:.9rem;color:#A9ABA3}
+.wall h1{font-size:clamp(2.3rem,11vw,3.8rem);line-height:1;margin:2px 0 10px;color:#fff}
+.wall .line{font-size:1.06rem;line-height:1.45;max-width:38ch;color:#E7E5DC}
+.wall .why{font-size:.84rem;color:#9FA29A;margin-top:8px}
+svg.tally{display:block;width:100%;height:auto;margin-top:20px;overflow:visible}
+.tl{fill:none;stroke:#EDEAE0;stroke-width:2.7;stroke-linecap:round;filter:url(#chalk)}
+.tl.half{opacity:.45}.tl.miss{stroke:#E0584C}.tl.fut{opacity:.11}
+.tl.now{stroke:var(--hazard);animation:blink 1.4s ease-in-out infinite}
+.tl.ok.now{stroke:#EDEAE0;animation:none}
+.tl.draw{stroke-dasharray:44;stroke-dashoffset:44;animation:draw .9s .25s forwards}
+@keyframes blink{50%{opacity:.25}}
+@keyframes draw{to{stroke-dashoffset:0}}
+.tlegend{font-family:"Caveat",cursive;font-size:1.1rem;color:#A9ABA3;margin-top:6px}
+.tlegend .c-ok{color:#EDEAE0}.tlegend .c-miss{color:#E0584C}.tlegend .c-now{color:var(--hazard)}
+.relrow{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-top:18px;padding-top:16px;border-top:1px dashed #44463F}
+.relrow .lbl{color:var(--hazard);font-size:.8rem}
+.relrow .date{font-family:"Russo One";font-size:clamp(2rem,9vw,3.2rem);line-height:1;margin-top:4px;color:#fff}
+.relrow .date.flip{animation:flip .7s ease}
+@keyframes flip{0%{transform:rotateX(0)}45%{transform:rotateX(90deg);opacity:.2}55%{transform:rotateX(-90deg);opacity:.2}100%{transform:rotateX(0)}}
+.relrow .left{text-align:right;font-family:"Caveat",cursive;color:#DAD8CE;line-height:1}
+.relrow .left b{display:block;font-size:2.6rem;font-weight:700;color:#fff}
+.relrow .left span{font-size:1.15rem}
+.wall .meta{display:flex;gap:16px;flex-wrap:wrap;font-size:.84rem;color:#B9BBB3;margin-top:14px}
+.wall .meta b{color:#fff;font-weight:600}
+.wall.free .cellno{border-color:#7BE0A8;color:#7BE0A8}
+
+/* ---------- задания ---------- */
+section.quests{position:relative}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.qhead h2{margin:0}
+.ring{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--steel);white-space:nowrap;flex-shrink:0}
+.ring svg{width:44px;height:44px}
+.quest{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:14px;border:1.5px solid var(--line);border-radius:8px;background:#fff;margin-top:10px;transition:background .3s,border-color .3s}
+.quest.done{background:#EEF6F0;border-color:#BFDCC9}
+.quest .qi{width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--hazard);display:grid;place-items:center}
+.quest .qi svg{width:22px;height:22px}
+.quest.done .qi{background:var(--release);color:#fff}
+.quest .qt b{display:block;font-weight:600;line-height:1.3}
+.quest .qt span{display:block;font-size:.8rem;color:var(--steel);margin-top:2px}
+.quest .qr{text-align:right}
+.quest .pts{font-family:"Russo One";color:var(--release);font-size:1rem}
+.quest.bonus .qi{background:var(--hazard);color:var(--ink)}
+.quest.bonus.done .qi{background:var(--release);color:#fff}
+.daystamp{position:absolute;right:96px;top:22px;z-index:2;border:3px solid var(--release);color:var(--release);font-family:"Russo One";text-transform:uppercase;padding:4px 10px;transform:rotate(-9deg);font-size:.82rem;letter-spacing:.05em;background:rgba(243,243,240,.85);border-radius:3px;pointer-events:none}
+.daystamp.slam{animation:slam .55s cubic-bezier(.2,1.6,.4,1)}
+@keyframes slam{from{transform:rotate(-9deg) scale(2.6);opacity:0}to{transform:rotate(-9deg) scale(1);opacity:1}}
+
+/* ---------- статус и нашивки ---------- */
+.rankbox{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center}
+.rk-name{font-family:"Russo One";font-size:1.6rem;line-height:1}
+.rk-pts{font-size:.85rem;color:var(--steel)}
+.rk-bar{grid-column:1/-1;height:10px;background:#DCDDD7;border-radius:5px;overflow:hidden;margin-top:10px}
+.rk-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--hazard),#E3A700);border-radius:5px;transition:width .6s}
+.rk-next{grid-column:1/-1;font-size:.8rem;color:var(--steel)}
+.rules{margin-top:10px;font-size:.85rem}.rules summary{cursor:pointer;color:var(--steel)}
+.rules ul{margin:8px 0 0 18px;color:var(--steel)}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px;margin-top:18px}
+.badge{text-align:center;font-size:.72rem;color:var(--steel)}
+.badge svg{width:58px;height:66px;display:block;margin:0 auto 4px}
+.badge b{display:block;font-size:.8rem;color:var(--ink);font-weight:600;line-height:1.2}
+.badge:not(.on){opacity:.75}.badge:not(.on) b{color:var(--steel)}
+.modal{position:fixed;inset:0;background:rgba(20,21,18,.72);display:grid;place-items:center;z-index:20;padding:16px}
+.mbox{background:var(--paper);border-radius:12px;padding:28px 22px 22px;max-width:360px;width:100%;text-align:center;animation:pop .45s cubic-bezier(.2,1.5,.4,1)}
+.mbox svg{width:110px;height:124px}
+.mbox .mk{font-size:.8rem;color:var(--steel);text-transform:uppercase;letter-spacing:.06em;margin-top:8px}
+.mbox h3{font-family:"Russo One";font-weight:400;font-size:1.6rem;margin:4px 0 6px}
+.mbox p{color:var(--steel)}
+@keyframes pop{from{transform:scale(.6) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+
+/* ---------- приложение: вкладки, подсказки, тур ---------- */
+body.app .wrap{padding-bottom:110px}
+body.app .toast{bottom:calc(84px + env(safe-area-inset-bottom))}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(251,250,245,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.tabbar button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.72rem;color:var(--steel);padding:6px 0;border-radius:8px;position:relative}
+.tabbar button svg{width:24px;height:24px}
+.tabbar button[aria-selected=true]{color:var(--ink);font-weight:600}
+.tabbar button[aria-selected=true]::before{content:"";position:absolute;top:-7px;left:30%;right:30%;height:3px;border-radius:2px;background:var(--hazard)}
+.tabbar button:focus-visible{outline:3px solid var(--hazard)}
+.tabbar .dot{position:absolute;top:4px;right:calc(50% - 18px);width:8px;height:8px;border-radius:50%;background:var(--alarm)}
+.hint{all:unset;cursor:pointer;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;font-size:.75rem;font-weight:700;opacity:.7;vertical-align:middle;flex-shrink:0;font-family:"Golos Text"}
+.hint:hover,.hint:focus-visible{opacity:1;outline:none;background:var(--hazard);color:var(--ink);border-color:var(--hazard)}
+.h2row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.h2row h2{margin:0;display:flex;align-items:center;gap:8px}
+.pop{position:absolute;z-index:25;background:var(--ink);color:#EDEBE3;border-radius:10px;padding:14px 38px 14px 14px;font-size:.88rem;line-height:1.45;box-shadow:0 12px 30px rgba(0,0,0,.3);animation:popin .18s ease-out}
+.pop b{color:#fff}.pop ul{list-style:none;margin-top:8px}.pop li{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #3A3D37}
+.pop .popx{all:unset;cursor:pointer;position:absolute;top:8px;right:10px;font-size:1.2rem;color:#9FA29A}
+@keyframes popin{from{opacity:0;transform:translateY(-4px)}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip2{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-size:.8rem;color:#DAD8CE;border:1px solid #44463F;border-radius:20px;padding:5px 12px;background:rgba(255,255,255,.04)}
+.chip2 b{color:#fff;font-weight:600}
+.chip2 .udo{margin:0}.chip2 .udo i{width:10px;height:6px}
+.wall h1{font-size:clamp(1.9rem,8.5vw,2.8rem)}
+.kgcard{display:grid;gap:8px}
+.kgrow{display:flex;justify-content:space-between;align-items:baseline;font-size:.9rem;color:var(--steel)}
+.kgrow b{font-family:"Russo One";font-weight:400;font-size:1.4rem;color:var(--ink)}
+.kgcard .bar{background:#DCDDD7;margin-top:0}
+.minirow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.minirow .btn{margin-top:0;height:50px}
+details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85rem;color:var(--steel)}
+.tip{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;background:#FBF3D6;border:1px solid #EBD58A;border-radius:8px;padding:12px;margin-bottom:10px;font-size:.88rem;animation:popin .25s ease-out}
+.tip .ti{width:24px;height:24px;border-radius:50%;background:var(--hazard);display:grid;place-items:center;font-weight:700;font-size:.8rem}
+.tip button{all:unset;cursor:pointer;font-weight:600;font-size:.82rem;margin-top:6px;text-decoration:underline}
+.badge{all:unset;cursor:pointer;text-align:center}
+.feel .opts{margin-top:8px}
+.tour-block{position:fixed;inset:0;z-index:30}
+.spot{position:relative;z-index:31!important;box-shadow:0 0 0 9999px rgba(18,19,16,.72)!important;border-radius:10px}
+.coach{position:fixed;z-index:32;left:16px;right:16px;max-width:420px;margin:0 auto;background:var(--paper);border-radius:12px;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,.35);animation:popin .2s ease-out}
+.coach p{font-size:.95rem;line-height:1.45}
+.coach .cfoot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px}
+.coach .cfoot span{font-size:.8rem;color:var(--steel)}
+.coach .cfoot .btn{margin:0;width:auto;padding:10px 16px}
+.coach .skip{all:unset;cursor:pointer;font-size:.82rem;color:var(--steel);text-decoration:underline}
+@media (prefers-reduced-motion:reduce){.pop,.tip,.coach{animation:none}}
+@media (prefers-reduced-motion:reduce){.tl.now,.tl.draw,.relrow .date.flip,.daystamp.slam,.mbox{animation:none}.tl.draw{stroke-dashoffset:0}}
 @media (prefers-reduced-motion:reduce){.bar i,.prog .track i,.rvl,.dossier,.bigstamp{transition:none}}
 @media (max-width:480px){.row{grid-template-columns:1fr}.week li{grid-template-columns:70px 1fr}.week li .tag{grid-column:2}.mhead{grid-template-columns:60px 1fr auto}.rb{padding-left:0}.shop ul{columns:1}}
 </style>
@@ -187,7 +320,7 @@ details.pg summary{cursor:pointer;font-weight:500}
 <div class="wrap">
 <header>
   <div class="brand">Строгий режим<small>интенсив-лагерь «Шагай Дома»</small></div>
-  <button class="toggle" id="modeBtn">Кабинет куратора</button>
+  <div style="display:flex;gap:8px"><button class="toggle hidden" id="tourBtn" aria-label="Как играть">?</button><button class="toggle" id="modeBtn">Кабинет куратора</button></div>
 </header>
 
 <div id="boot" class="loading">Загружаем…</div>
@@ -218,66 +351,82 @@ details.pg summary{cursor:pointer;font-weight:500}
   <div class="dossier" id="dossier"></div>
 </div></div>
 
-<!-- КАБИНЕТ -->
+<!-- КАБИНЕТ: 4 вкладки -->
 <div id="cabinet" class="hidden">
-  <div class="hero"><p class="hi" id="hi"></p><h1 id="hName"></h1><p class="line" id="hLine"></p><p class="why" id="hWhy"></p></div>
-
-  <div class="release" id="relCard">
-    <span class="stamp" id="stamp">Режим: строгий</span>
-    <span class="lbl" id="relLbl">Дата выхода</span>
-    <div class="date" id="relDate">—</div>
-    <div class="meta"><span>день <b id="dayNow">—</b> из <b id="dayTotal">—</b></span><span>цель <b id="goalW">—</b> кг</span><span>сейчас <b id="curW">—</b> кг</span><span>норма <b id="kcal">—</b> ккал</span></div>
-    <div class="bar"><i id="bar" style="width:0%"></i></div>
-    <div class="rel-extra" id="relExtra"></div>
-    <details class="why-date"><summary>Почему именно эта дата</summary><ul id="whyDate"></ul></details>
+ <div data-pane="today">
+  <div class="wall" id="relCard">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="chalk" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2"/></filter></defs></svg>
+    <div class="wall-top"><span class="cellno" id="stamp">Камера</span><span style="display:flex;gap:8px;align-items:center"><span class="rankchip" id="rankChip"></span><button class="hint" data-hint="wall" aria-label="Что значат черты на стене" style="color:#DAD8CE">?</button></span></div>
+    <h1 id="hName"></h1><p class="line" id="hLine"></p>
+    <div id="tallyBox"><svg class="tally" id="tally" role="img" aria-label="Дни срока"></svg></div>
+    <div class="relrow" id="relRow"><div><span class="lbl"><span id="relLbl">Дата выхода</span> <button class="hint" data-hint="date" aria-label="Почему эта дата" style="color:var(--hazard);width:18px;height:18px;font-size:.68rem">?</button></span><div class="date" id="relDate">—</div></div><div class="left"><b id="daysLeft">—</b><span id="daysLeftL"></span></div></div>
+    <div class="chips" id="relExtra"></div>
   </div>
-
   <section id="finishBox" class="hidden">
     <h2>Ты на свободе</h2>
-    <p class="lead" id="finishLead">Цель достигнута. Расскажи, как это было — нам важен каждый отзыв.</p>
-    <label for="finalReview">Твой отзыв</label><textarea id="finalReview" placeholder="Что было труднее всего, что помогло, как ты себя чувствуешь сейчас"></textarea>
-    <label style="display:flex;gap:10px;align-items:flex-start;color:var(--ink)"><input type="checkbox" id="consent" style="width:auto;margin-top:4px">Разрешаю опубликовать мой результат и отзыв в соцсетях «Шагай Дома»</label>
-    <button class="btn green" id="finishBtn">Отправить отзыв</button>
+    <p class="lead" id="finishLead">Расскажи, как это было.</p>
+    <label for="finalReview">Твой отзыв</label><textarea id="finalReview"></textarea>
+    <label style="display:flex;gap:10px;align-items:flex-start;color:var(--ink)"><input type="checkbox" id="consent" style="width:auto;margin-top:4px">Можно опубликовать в соцсетях «Шагай Дома»</label>
+    <button class="btn green" id="finishBtn">Отправить</button>
     <div class="msg" id="finishMsg" style="color:var(--release)"></div>
   </section>
-
-  <section>
-    <h2>Сегодня</h2>
+  <section class="quests" id="questSec">
+    <div class="qhead"><h2>Задания</h2><div class="ring" id="qRing"></div></div>
+    <div id="dayStamp"></div>
+    <div id="tipBox"></div>
     <div id="today"></div>
   </section>
+ </div>
 
-  <section>
-    <h2>Твоя неделя тренировок</h2>
-    <ul class="week" id="week"></ul>
-    <button class="btn ghost" id="editRider">Изменить райдер тренировок</button>
+ <div data-pane="menu" class="hidden">
+  <section id="menuSec">
+    <div class="h2row"><h2>Меню <button class="hint" data-hint="menu" aria-label="Как устроено меню">?</button></h2><div class="opts" id="menuDays"><button class="opt" data-days="3" aria-pressed="true">3 дня</button><button class="opt" data-days="7" aria-pressed="false">Неделя</button></div></div>
+    <div class="menu" id="menu"></div>
+    <details class="shop" id="shop"><summary id="shopSum">Список продуктов</summary><ul id="shopList"></ul></details>
+    <button class="btn ghost" id="editFood">Не ем / на сколько готовлю</button>
   </section>
+ </div>
 
-  <section>
-    <h2>Вес и замеры</h2>
-    <p class="lead" id="measDue"></p>
-    <div class="row">
-      <div><label for="mW">Вес, кг</label><input id="mW" type="number" step="0.1" inputmode="decimal"></div>
-      <div><label for="mWaist">Талия, см</label><input id="mWaist" type="number" step="0.5" inputmode="decimal"></div>
-      <div><label for="mHip">Бёдра, см</label><input id="mHip" type="number" step="0.5" inputmode="decimal"></div>
-      <div><label for="mChest">Грудь, см</label><input id="mChest" type="number" step="0.5" inputmode="decimal"></div>
-    </div>
-    <button class="btn green" id="measBtn">Сохранить замеры</button>
+ <div data-pane="progress" class="hidden">
+  <section id="measSec">
+    <div class="h2row"><h2>Вес <button class="hint" data-hint="meas" aria-label="Как взвешиваться">?</button></h2><span class="note" id="measDue" style="margin:0"></span></div>
+    <div class="kgcard"><div class="kgrow"><span>старт <b id="startW2">—</b></span><span>сейчас <b id="curW">—</b></span><span>цель <b id="goalW">—</b></span></div><div class="bar"><i id="bar" style="width:0%"></i></div></div>
+    <div class="minirow" style="margin-top:16px"><div><label for="mW" style="margin-top:0">Вес сегодня, кг</label><input id="mW" type="number" step="0.1" inputmode="decimal"></div><button class="btn green" id="measBtn">Сохранить</button></div>
+    <details class="more"><summary>Объёмы, см</summary><div class="row" style="grid-template-columns:1fr 1fr 1fr"><div><label for="mWaist">Талия</label><input id="mWaist" type="number" step="0.5" inputmode="decimal"></div><div><label for="mHip">Бёдра</label><input id="mHip" type="number" step="0.5" inputmode="decimal"></div><div><label for="mChest">Грудь</label><input id="mChest" type="number" step="0.5" inputmode="decimal"></div></div></details>
     <div class="msg" id="measMsg"></div>
     <svg class="chart" id="chart" viewBox="0 0 600 220" role="img" aria-label="График веса: план, факт и прогноз"></svg>
     <div class="legend"><span><i style="border-color:#9A9D95;border-top-style:dashed"></i>план</span><span><i style="border-color:#1F211D"></i>факт</span><span><i style="border-color:#D9A800;border-top-style:dashed"></i>прогноз</span></div>
-    <p class="note">Колебания ±1–2 кг — норма. Дата выхода считается по среднему весу за неделю, а не по одному взвешиванию.</p>
   </section>
+  <section id="statusSec">
+    <div class="h2row"><h2>Статус <button class="hint" data-hint="points" aria-label="Как начисляются баллы">?</button></h2></div>
+    <div id="status"></div>
+    <div class="badges" id="badges"></div>
+  </section>
+ </div>
 
-  <section id="menuSec">
-    <h2>Твоё меню</h2>
-    <div class="opts" id="menuDays"><button class="opt" data-days="3" aria-pressed="true">3 дня</button><button class="opt" data-days="7" aria-pressed="false">Неделя</button></div>
-    <p class="note" id="menuNote"></p>
-    <div class="menu" id="menu"></div>
-    <details class="shop" id="shop"><summary id="shopSum">Список продуктов на 3 дня</summary><ul id="shopList"></ul><p class="note">Количество — сумма по рецептам с учётом твоих порций. Соль, специи и то, что обычно есть дома, — в конце списка.</p></details>
-    <button class="btn ghost" id="editFood">Изменить: не ем, на сколько человек готовлю</button>
+ <div data-pane="plan" class="hidden">
+  <section>
+    <div class="h2row"><h2>Тренировки <button class="hint" data-hint="plan" aria-label="Как подбираются тренировки">?</button></h2></div>
+    <ul class="week" id="week"></ul>
+    <button class="btn ghost" id="editRider">Изменить райдер</button>
+  </section>
+  <section>
+    <div class="h2row"><h2>Норма</h2></div>
+    <p class="lead"><b id="kcal">—</b> ккал в день · день <b id="dayNow">—</b> из <b id="dayTotal">—</b></p>
+    <button class="btn ghost" id="tourBtn2">Как играть — пройти обучение</button>
   </section>
   <button class="toggle" id="logoutBtn" style="margin-top:20px">Выйти</button>
+ </div>
 </div>
+<nav class="tabbar hidden" id="tabbar" role="tablist" aria-label="Разделы">
+  <button role="tab" data-go="today" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5v14M9 5v14M13 5v14M17 5v14M3 15 20 8"/></svg>Сегодня</button>
+  <button role="tab" data-go="menu" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="7"/><path d="M12 9v4l2.5 1.5"/></svg>Меню</button>
+  <button role="tab" data-go="progress" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 9 12l4 3 7-8"/><path d="M15 7h5v5"/></svg>Прогресс</button>
+  <button role="tab" data-go="plan" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>План</button>
+</nav>
+<div class="pop hidden" id="pop" role="dialog"></div>
+
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="mbox"><div id="mIcon"></div><p class="mk" id="mKicker">Новая нашивка</p><h3 id="mTitle"></h3><p id="mText"></p><button class="btn" id="mClose">Забрать</button></div></div>
 
 <!-- КУРАТОР -->
 <div id="curator" class="hidden">
@@ -352,7 +501,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function store(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
 function recall(k){try{return localStorage.getItem(k)}catch(e){return null}}
 const SCREENS=['boot','login','onb','reveal','cabinet','curator'];
-function show(id){SCREENS.forEach(s=>$(s).classList.toggle('hidden',s!==id));document.querySelector('header').classList.toggle('hidden',id==='reveal');window.scrollTo(0,0)}
+function show(id){SCREENS.forEach(s=>$(s).classList.toggle('hidden',s!==id));$('tabbar').classList.toggle('hidden',id!=='cabinet');$('tourBtn').classList.toggle('hidden',id!=='cabinet');document.body.classList.toggle('app',id==='cabinet');document.querySelector('header').classList.toggle('hidden',id==='reveal');window.scrollTo(0,0)}
 let toastT;function toast(t){let el=$('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';el.setAttribute('role','status');document.body.appendChild(el)}el.textContent=t;el.classList.remove('hidden');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.add('hidden'),3800)}
 const dossierNo=email=>{let h=7;for(const c of email)h=(h*31+c.charCodeAt(0))%9000;return String(1000+h)};
 
@@ -627,7 +776,8 @@ function openCabinet(){
   const c=calc(P);
   if(extendPlan(P,Math.max(c.total,c.t)+14))ref.update({plan:P.plan,queue:P.queue,cycle:P.cycle,level:P.level}).catch(console.warn);
   ref.update({lastSeen:Date.now()}).catch(console.warn);
-  renderCabinet();renderMenu();
+  go('today');renderCabinet();renderMenu();
+  if(!P.tourDone&&!recall('sr_tour_'+P.email))setTimeout(startTour,500);
 }
 const whyText=p=>p.why.list.map(w=>w==='К событию'&&p.why.eventName?'к событию «'+p.why.eventName+'»':w.toLowerCase()).join(', ');
 function greeting(){const h=new Date().getHours();return h<5?'Доброй ночи':h<12?'Доброе утро':h<18?'Добрый день':'Добрый вечер'}
@@ -645,58 +795,156 @@ function personalLine(c){
   if(P.why.eventDate){const dd=Math.round((pd(P.why.eventDate)-pd(iso(new Date())))/DAY);if(dd>0&&dd<=60)return`До события «${esc(P.why.eventName||'твоё событие')}» ${dd} ${pl(dd,'день','дня','дней')}. Каждый день сейчас на счету.`}
   return`День ${t} из ${c.total}. Всё идёт по плану.`;
 }
+/* ---------- игра: баллы, статусы, нашивки ---------- */
+const BONUS=[['8 000 шагов','Лестница, прогулка, дорога пешком — всё считается'],['6–8 стаканов воды','Держи бутылку на виду весь день'],['День без сладкого','Вместо десерта — фрукт из меню'],['Сон до 23:00','Недосып разгоняет аппетит'],['10 минут растяжки','Перед сном или после тренировки'],['30 минут на улице','Свежий воздух и лишние шаги'],['Ужин за 3 часа до сна','Лёгкий вечер — лёгкое утро'],['Лестница вместо лифта','Каждый пролёт — в копилку']];
+const bonusOf=d=>BONUS[(d*5+2)%BONUS.length];
+const RANKS=[[0,'Новенькая'],[60,'Своя'],[180,'Бывалая'],[400,'Авторитет'],[700,'Легенда режима']];
+const PTS={train:10,food:5,bonus:3,feel:2,perfect:5,meas:5,udo:20};
+function stats(p){
+  const t=dayIdx(p.start),s={train:0,food:0,bonus:0,feel:0,perfect:0,early:0,meas:Math.max(0,(p.measurements||[]).length-1)};
+  Object.entries(p.log||{}).forEach(([k,l])=>{const d=+k.slice(1);if(!d||d>t)return;const e=p.plan[d-1]||{};
+    if(l.done){s.train++;if(new Date(l.done).getHours()<9)s.early++}if(l.food)s.food++;if(l.bonus)s.bonus++;if(l.feel)s.feel++;
+    if((e.rest||l.done)&&l.food)s.perfect++});
+  return s;
+}
+const points=(c,s)=>s.train*PTS.train+s.food*PTS.food+s.bonus*PTS.bonus+s.feel*PTS.feel+s.perfect*PTS.perfect+s.meas*PTS.meas+c.bonus*PTS.udo;
+function rankOf(pts){let i=0;RANKS.forEach((r,j)=>{if(pts>=r[0])i=j});return{i,name:RANKS[i][1],from:RANKS[i][0],next:RANKS[i+1]}}
+const BADGES=[
+  ['first','1','Первый шаг','Первая тренировка',(c,s)=>s.train>=1],
+  ['udo','7','Без нарушений','7 дней подряд без пропусков',(c,s)=>c.bonus>=1],
+  ['kg1','−1','Минус один','Первый килограмм позади',c=>P.startW-c.cur>=1],
+  ['kg3','−3','Минус три','Три килограмма позади',c=>P.startW-c.cur>=3],
+  ['kg5','−5','Минус пять','Пять килограммов позади',c=>P.startW-c.cur>=5],
+  ['half','½','Экватор','Половина пути к цели',c=>c.progress>=50],
+  ['t10','10','Десятка','10 тренировок',(c,s)=>s.train>=10],
+  ['t25','25','Четвертак','25 тренировок',(c,s)=>s.train>=25],
+  ['menu7','7','Строгий паёк','7 дней по меню',(c,s)=>s.food>=7],
+  ['bonus5','+5','Сверх нормы','5 бонус-заданий',(c,s)=>s.bonus>=5],
+  ['early','7:00','Ранняя пташка','Тренировка до 9 утра',(c,s)=>s.early>=1],
+  ['meas5','5','Под контролем','5 замеров',(c,s)=>s.meas>=5],
+  ['free','✓','На свободе','Цель достигнута',c=>c.finished]
+];
+const badgeSvg=(g,on)=>`<svg viewBox="0 0 64 72" aria-hidden="true"><path d="M32 3 59 13v25c0 16-13 26-27 31C18 64 5 54 5 38V13Z" fill="${on?'#1F211D':'#DCDDD7'}"/><path d="M32 9 53 17v21c0 13-10 21-21 25-11-4-21-12-21-25V17Z" fill="none" stroke="${on?'#F2C230':'#BFC1BA'}" stroke-width="1.6" stroke-dasharray="3 2.5"/><text x="32" y="${g.length>2?43:46}" text-anchor="middle" font-family="Russo One,sans-serif" font-size="${g.length>2?14:22}" fill="${on?'#F2C230':'#A9ACA4'}">${g}</text></svg>`;
+const ICON={
+  train:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/></svg>',
+  rest:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></svg>',
+  food:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="7"/><path d="M12 3v3"/></svg>',
+  bonus:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2.8 2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9Z"/></svg>',
+  meas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3.5" y="4" width="17" height="16" rx="3"/><path d="M8 9.5a5 5 0 0 1 8 0M12 12l1.5-2.5"/></svg>',
+  done:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>'
+};
+let justDone=false,modalQ=[];
+function showModal(){
+  if(!modalQ.length||!$('modal').classList.contains('hidden')||tourI>=0)return;
+  const m=modalQ.shift();$('mIcon').innerHTML=m.icon;$('mKicker').textContent=m.kicker;$('mTitle').textContent=m.title;$('mText').textContent=m.text;
+  $('modal').classList.remove('hidden');$('mClose').focus();
+}
+$('mClose').onclick=()=>{$('modal').classList.add('hidden');setTimeout(showModal,250)};
+function checkRewards(c,s,pts){
+  const earned=BADGES.filter(b=>b[4](c,s)).map(b=>b[0]);
+  const known=P.badges;const fresh=known?earned.filter(id=>!known.includes(id)):[];
+  fresh.forEach(id=>{const b=BADGES.find(x=>x[0]===id);modalQ.push({icon:badgeSvg(b[1],true),kicker:'Новая нашивка',title:b[2],text:b[3]})});
+  const rk=rankOf(pts).i;
+  if(P.rankI!=null&&rk>P.rankI)modalQ.push({icon:badgeSvg(String(rk+1),true),kicker:'Новый статус',title:RANKS[rk][1],text:`${pts} баллов поведения. Так держать.`});
+  if(!known||fresh.length||P.rankI!==rk){P.badges=earned;P.rankI=rk;ref.update({badges:earned,rankI:rk}).catch(console.warn)}
+  showModal();
+}
+function renderTally(c){
+  const total=Math.max(c.total,1),t=c.t,perRow=30,gw=46,rh=48,rows=Math.ceil(total/perRow);
+  const rnd=i=>{const x=Math.sin(i*12.9898)*43758.5453;return x-Math.floor(x)};
+  let s='';
+  for(let d=1;d<=total;d++){
+    const i=d-1,row=Math.floor(i/perRow),gi=Math.floor((i%perRow)/5),k=i%5,gx=gi*gw+6,top=row*rh+8,j=rnd(d)*3-1.5;
+    const e=P.plan[d-1]||{},l=P.log['d'+d]||{},ok=(e.rest||l.done)&&l.food;
+    const st=d<t?(ok?'ok':(l.done||l.food||e.rest)?'half':'miss'):d===t?(ok?'ok now':'now'):'fut';
+    const path=k<4?`M${gx+k*8+j/2} ${top+j} L${gx+k*8-j/2} ${top+32-j/2}`:`M${gx-5} ${top+25+j} L${gx+30} ${top+7-j}`;
+    s+=`<path class="tl ${st}${d===t&&justDone&&ok?' draw':''}" d="${path}"/>`;
+  }
+  $('tally').setAttribute('viewBox',`0 0 ${6*gw} ${rows*rh}`);
+  $('tally').setAttribute('aria-label',`Срок ${total} ${pl(total,'день','дня','дней')}, прошло ${Math.max(0,c.t-1)}`);
+  $('tally').innerHTML=s;
+}
+function renderStatus(c,s,pts){
+  const rk=rankOf(pts),pct=rk.next?Math.round((pts-rk.from)/(rk.next[0]-rk.from)*100):100;
+  $('status').innerHTML=`<div class="rankbox"><div class="rk-name">${rk.name}</div><div class="rk-pts">${pts} ${pl(pts,'балл','балла','баллов')}</div>
+    <div class="rk-bar"><i style="width:${pct}%"></i></div><div class="rk-next">${rk.next?`${rk.next[0]-pts} до «${rk.next[1]}»`:'Высший статус'}</div></div>`;
+  const got=BADGES.filter(b=>b[4](c,s));
+  $('badges').innerHTML=BADGES.map(b=>{const on=b[4](c,s);return`<button class="badge ${on?'on':''}" data-hint="badge:${b[0]}">${badgeSvg(b[1],on)}<b>${b[2]}</b></button>`}).join('');
+  $('rankChip').innerHTML=`<b>${rk.name}</b> · ${pts}`;
+}
 function renderCabinet(){
-  const c=calc(P),free=c.finished,rel=addDays(pd(P.start),c.total-1);
-  $('hi').textContent=`${greeting()},`;$('hName').textContent=P.name;$('hLine').textContent=personalLine(c);
-  $('hWhy').textContent=P.why.list&&P.why.list.length?`Ты здесь, чтобы: ${whyText(P)}.`:'';
+  const c=calc(P),s=stats(P),pts=points(c,s),free=c.finished,rel=addDays(pd(P.start),c.total-1);
+  $('hName').textContent=`${greeting()}, ${P.name}`;$('hLine').textContent=personalLine(c);
   $('relCard').classList.toggle('free',free);
-  $('stamp').textContent=free?'Освобождена':`Дело № ${P.num||dossierNo(P.email)}`;
+  $('stamp').textContent=free?'Освобождена':`Камера № ${P.num||dossierNo(P.email)}`;
   $('relLbl').textContent=free?'Вышла на свободу':c.t<1?'Заезд':'Дата выхода';
   $('relDate').textContent=free?fmt(new Date(P.finishedAt||Date.now())):c.t<1?fmt(pd(P.start)):fmt(rel);
-  $('dayNow').textContent=Math.max(0,c.t);$('dayTotal').textContent=c.total;$('goalW').textContent=P.goal;$('curW').textContent=c.cur;$('kcal').textContent=P.kcal;
+  const left=free?0:c.t<1?1-c.t:c.total-c.t;
+  $('daysLeft').textContent=free?'✓':left;$('daysLeftL').textContent=free?'срок отбыт':c.t<1?pl(left,'день до заезда','дня до заезда','дней до заезда'):pl(left,'день до выхода','дня до выхода','дней до выхода');
+  $('dayNow').textContent=Math.max(0,c.t);$('dayTotal').textContent=c.total;$('goalW').textContent=P.goal;$('curW').textContent=c.cur;$('startW2').textContent=P.startW;$('kcal').textContent=P.kcal;
   $('bar').style.width=Math.max(2,c.progress)+'%';
-  let ex='';
-  if(!free&&c.t>=1)ex+=`<div>Условно-досрочное: ${UDO_DAYS} дней подряд без пропусков = минус день.${c.bonus?` Уже заработано: <b>−${c.bonus} ${pl(c.bonus,'день','дня','дней')}</b>.`:''}<div class="udo">${Array.from({length:UDO_DAYS},(_,i)=>`<i class="${i<c.run?'on':''}"></i>`).join('')}</div></div>`;
-  if(P.why.eventDate&&!free){const dd=Math.round((pd(P.why.eventDate)-pd(iso(new Date())))/DAY);if(dd>=0)ex+=`<div>${esc(P.why.eventName||'Событие')}: через <b>${dd} ${pl(dd,'день','дня','дней')}</b>${pd(P.why.eventDate)>=rel?' — успеваешь к нему выйти':''}</div>`}
-  if(P.reward)ex+=`<div>${free?'Время забрать награду':'Награда на выходе'}: <b>${esc(P.reward)}</b></div>`;
-  $('relExtra').innerHTML=ex;
-  const rows=[[`План: ${P.startW} → ${P.goal} кг по ${g(P.weekly||Math.min(1,P.startW*.01))} кг в неделю`,`${P.planDays} дн.`]];
-  if(c.miss)rows.push([`Пропущенные тренировки`,`+${c.miss}`]);
-  if(Math.floor(c.food/2))rows.push([`${c.food} ${pl(c.food,'день','дня','дней')} без отметки питания`,`+${Math.floor(c.food/2)}`]);
-  if(c.weightAdj>0)rows.push([`Вес идёт медленнее плана${c.discipline?' (считаем большее из этого и пропусков)':''}`,`+${c.weightAdj}`]);
-  if(c.weightAdj<0)rows.push([`Худеешь быстрее плана`,`${c.weightAdj}`]);
-  if(c.bonus)rows.push([`Условно-досрочное`,`−${c.bonus}`]);
-  rows.push([`Итого`,`${c.total} дн.`]);
-  $('whyDate').innerHTML=rows.map(([a,b])=>`<li><span>${a}</span><b>${b}</b></li>`).join('');
+  const key='sr_total_'+P.email,prev=+recall(key);
+  if(prev&&prev!==c.total&&!free){const el=$('relDate');el.classList.remove('flip');void el.offsetWidth;el.classList.add('flip');
+    toast(c.total<prev?`Дата выхода приблизилась на ${prev-c.total} ${pl(prev-c.total,'день','дня','дней')}`:`Дата выхода отодвинулась на ${c.total-prev} ${pl(c.total-prev,'день','дня','дней')}`)}
+  store(key,c.total);
+  let ch='';
+  if(!free&&c.t>=1)ch+=`<button class="chip2" data-hint="udo">УДО <span class="udo">${Array.from({length:UDO_DAYS},(_,i)=>`<i class="${i<c.run?'on':''}"></i>`).join('')}</span><b>${c.run}/${UDO_DAYS}</b></button>`;
+  if(P.why.eventDate&&!free){const dd=Math.round((pd(P.why.eventDate)-pd(iso(new Date())))/DAY);if(dd>=0)ch+=`<span class="chip2">${esc(P.why.eventName||'Событие')} · <b>${dd} дн.</b></span>`}
+  if(P.reward)ch+=`<span class="chip2">Приз: <b>${esc(P.reward)}</b></span>`;
+  $('relExtra').innerHTML=ch;
   $('finishBox').classList.toggle('hidden',!free||!!P.finalReview);
-  if(free&&P.reward)$('finishLead').textContent=`Цель достигнута. Самое время для «${P.reward}». И расскажи, как это было — нам важен каждый отзыв.`;
-  renderToday();renderWeek();renderMeas(c);drawChart(c);
+  if(free&&P.reward)$('finishLead').textContent=`Самое время для «${P.reward}». Расскажи, как это было.`;
+  renderTally(c);renderToday(c);renderStatus(c,s,pts);renderWeek();renderMeas(c);drawChart(c);
+  checkRewards(c,s,pts);justDone=false;
 }
-function taskRow(title,sub,right){return `<div class="task"><div><div class="t">${title}</div><div class="s">${sub}</div></div><div class="r">${right}</div></div>`}
-function renderToday(){
-  const t=dayIdx(P.start);
-  if(t<1){$('today').innerHTML=`<p class="lead">Режим начнётся ${fmt(pd(P.start))}. План первой недели и меню — ниже.</p>`;return}
-  const e=P.plan[t-1],l=P.log['d'+t]||{};let h='';
+function quest(o){
+  return `<div class="quest ${o.cls||''} ${o.done?'done':''}"><div class="qi">${o.done?ICON.done:ICON[o.icon]}</div><div class="qt"><b>${o.title}</b><span>${o.sub}</span></div><div class="qr">${o.done?(o.pts?`<span class="pts">+${o.pts}</span>`:''):o.right||''}</div></div>`;
+}
+const TIPS={
+  open:'Отметка «Выполнила» откроется через 20 минут после старта — так мы видим, что тренировка правда была.',
+  rest:'Сегодня день отдыха: он засчитается, если отметишь питание.',
+  miss:'Пропуск отодвинул дату выхода на день. Вернуть можно: 7 дней подряд без пропусков — минус день.',
+  meas:'Пора на весы. Взвешивайся утром натощак — так цифры честнее. Вкладка «Прогресс».',
+  feel:'Ответь, как прошла тренировка: два «тяжело» — нагрузка снизится, три «легко» — вырастет.'
+};
+function pickTip(c,e,l){
+  const seen=P.tips||[],ok=id=>!seen.includes(id);
+  if(l.opened&&!l.done&&ok('open'))return'open';
+  if(l.done&&!l.feel&&ok('feel'))return'feel';
+  if(e.rest&&ok('rest'))return'rest';
+  if(c.miss>0&&ok('miss'))return'miss';
+  if(c.measAgo>=3&&c.t>1&&ok('meas'))return'meas';
+  return null;
+}
+function renderToday(c){
+  c=c||calc(P);const t=c.t;
+  if(t<1){$('today').innerHTML=`<p class="lead">Задания появятся ${fmt(pd(P.start))}. Меню и план уже готовы.</p>`;$('qRing').innerHTML='';$('dayStamp').innerHTML='';$('tipBox').innerHTML='';return}
+  const e=P.plan[t-1]||{},l=P.log['d'+t]||{};let h='',Q=[];
   if(P.adapt&&P.adapt.d>=t-2)h+=`<div class="adapt">${esc(P.adapt.msg)}</div>`;
-  if(e.rest)h+=taskRow('День восстановления','Прогулка 6–8 тысяч шагов и растяжка. Тренировки сегодня нет.','<span class="tag rest">отдых</span>');
-  else{
-    const w=W[e.w];
-    if(!w)h+=taskRow('Тренировка снята из базы','Напиши куратору — он подберёт замену.','<span class="tag late">нет ссылки</span>');
-    else{
-      let right;
-      if(l.done)right='<span class="tag done">выполнена</span>';
-      else if(!l.opened)right=`<a class="btn small" href="${esc(w.url)}" target="_blank" rel="noopener" data-act="open">Открыть тренировку</a>`;
-      else{const left=Math.ceil(MIN_OPEN-(Date.now()-l.opened)/6e4);
-        right=left>0?`<span class="tag todo">идёт тренировка</span><br><button class="btn small" disabled style="margin-top:6px">Выполнила · через ${left} мин</button><br><a href="${esc(w.url)}" target="_blank" rel="noopener" style="font-size:.78rem;color:var(--steel)">открыть снова</a>`
-          :`<button class="btn small green" data-act="done">Выполнила</button><br><a href="${esc(w.url)}" target="_blank" rel="noopener" style="font-size:.78rem;color:var(--steel)">открыть снова</a>`}
-      h+=taskRow(esc(w.program),`Уровень «${LV[w.level]}». Подобрана под твой райдер, не повторится, пока не пройдёшь все ${poolFor(P.rider,P.level).length}.`,right);
-    }
-  }
+  if(e.rest)Q.push({icon:'rest',done:true,pts:0,title:'День отдыха',sub:'Прогулка и растяжка'});
+  else{const w=W[e.w];
+    if(!w)Q.push({icon:'train',title:'Тренировка снята',sub:'Напиши куратору',right:'<span class="tag late">нет</span>'});
+    else{let right='';
+      if(!l.done){if(!l.opened)right=`<a class="btn small" href="${esc(w.url)}" target="_blank" rel="noopener" data-act="open">Начать</a>`;
+        else{const lf=Math.ceil(MIN_OPEN-(Date.now()-l.opened)/6e4);right=lf>0?`<button class="btn small" disabled>${lf} мин</button>`:`<button class="btn small green" data-act="done">Готово</button>`}}
+      Q.push({icon:'train',done:!!l.done,pts:PTS.train,title:esc(w.program),sub:`${LV[w.level]}${l.opened&&!l.done?` · <a href="${esc(w.url)}" target="_blank" rel="noopener" style="color:inherit">открыть снова</a>`:''}`,right})}}
   const md=P.menu&&P.menu['d'+t];
-  h+=taskRow('Питание по меню',`${md?Math.round(MEALS.reduce((s,[k])=>s+kcalOf(md[k],P),0)*md.f)+' ккал сегодня. ':''}<a href="#menuSec" style="color:inherit">Открыть меню</a>`,l.food?'<span class="tag done">отмечено</span>':'<button class="btn small ghost" data-act="food">Ела по меню</button>');
-  if(l.done&&!l.feel)h+=`<div class="feel"><div class="t" style="font-weight:500">Как прошла тренировка?</div><p class="s" style="font-size:.8rem;color:var(--steel)">По твоим ответам программа подстроит нагрузку.</p><div class="opts" style="margin-top:8px">${['Легко','Нормально','Тяжело'].map(f=>`<button class="opt" data-act="feel" data-v="${f}">${f}</button>`).join('')}</div><label for="fbText">Пара слов для куратора (по желанию)</label><textarea id="fbText" placeholder="Что понравилось, что было трудно"></textarea></div>`;
+  Q.push({icon:'food',done:!!l.food,pts:PTS.food,title:'Питание по меню',sub:`${md?Math.round(MEALS.reduce((s,[k])=>s+kcalOf(md[k],P),0)*md.f)+' ккал · ':''}<a href="#" data-go="menu" style="color:inherit">меню</a>`,right:'<button class="btn small ghost" data-act="food">Ела</button>'});
+  const bq=bonusOf(t);
+  Q.push({icon:'bonus',cls:'bonus',done:!!l.bonus,pts:PTS.bonus,title:`${bq[0]} <button class="hint" data-hint="bonus" aria-label="Подробнее" style="width:18px;height:18px;font-size:.68rem">?</button>`,sub:'бонус',right:'<button class="btn small ghost" data-act="bonus">Да</button>'});
+  const measToday=(P.measurements||[]).some(m=>m.date===iso(new Date())&&t>1);
+  if(c.measAgo>=3||measToday)Q.push({icon:'meas',done:measToday,pts:PTS.meas,title:'Замеры',sub:'утром, натощак',right:'<button class="btn small ghost" data-go="progress">Внести</button>'});
+  h+=Q.map(quest).join('');
+  if(l.done&&!l.feel)h+=`<div class="feel"><b>Как прошла тренировка?</b> <span style="color:var(--release);font-family:'Russo One'">+${PTS.feel}</span><div class="opts">${['Легко','Нормально','Тяжело'].map(f=>`<button class="opt" data-act="feel" data-v="${f}">${f}</button>`).join('')}</div><details class="more"><summary>Комментарий куратору</summary><textarea id="fbText" style="margin-top:8px"></textarea></details></div>`;
   $('today').innerHTML=h;
+  const tip=pickTip(c,e,l);
+  $('tipBox').innerHTML=tip?`<div class="tip"><span class="ti">!</span><div>${TIPS[tip]}<br><button data-tipok="${tip}">Понятно</button></div></div>`:'';
+  const dn=Q.filter(q=>q.done).length,r=18,C=2*Math.PI*r;
+  $('qRing').innerHTML=`<svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="${r}" fill="none" stroke="#DCDDD7" stroke-width="5"/><circle cx="22" cy="22" r="${r}" fill="none" stroke="${dn===Q.length?'#1F7A4D':'#1F211D'}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C*dn/Q.length} ${C}" transform="rotate(-90 22 22)" style="transition:stroke-dasharray .5s"/></svg><b style="color:var(--ink)">${dn}/${Q.length}</b>`;
+  const core=(e.rest||l.done)&&l.food;
+  $('dayStamp').innerHTML=core?`<div class="daystamp ${justDone?'slam':''}">День засчитан</div>`:'';
 }
+$('tipBox').onclick=e=>{const b=e.target.closest('[data-tipok]');if(!b)return;P.tips=[...(P.tips||[]),b.dataset.tipok];ref.update({tips:P.tips}).catch(console.warn);renderToday()};
 function adaptAfterFeel(){
   const t=dayIdx(P.start);if(P.adapt&&P.adapt.d>t-5)return;
   const feels=P.plan.filter(e=>e.w&&e.d<=t&&(P.log['d'+e.d]||{}).feel).map(e=>P.log['d'+e.d].feel);
@@ -712,15 +960,19 @@ function adaptAfterFeel(){
 }
 $('today').onclick=async e=>{
   const a=e.target.closest('[data-act]');if(!a)return;
-  const t=dayIdx(P.start),key='d'+t;P.log[key]=P.log[key]||{};const act=a.dataset.act;
-  if(act==='open'){P.log[key].opened=Date.now();ref.update({[`log.${key}.opened`]:P.log[key].opened,lastSeen:Date.now()});setTimeout(renderToday,300);return}
-  if(act==='done'){P.log[key].done=Date.now();await ref.update({[`log.${key}.done`]:P.log[key].done})}
-  if(act==='food'){P.log[key].food=true;await ref.update({[`log.${key}.food`]:true})}
+  const t=dayIdx(P.start),key='d'+t;P.log[key]=P.log[key]||{};const act=a.dataset.act,en=P.plan[t-1]||{};
+  const wasCore=(en.rest||P.log[key].done)&&P.log[key].food;
+  if(act==='open'){P.log[key].opened=Date.now();ref.update({[`log.${key}.opened`]:P.log[key].opened,lastSeen:Date.now()});setTimeout(()=>renderToday(),300);return}
+  if(act==='done'){P.log[key].done=Date.now();await ref.update({[`log.${key}.done`]:P.log[key].done});toast(`+${PTS.train} баллов поведения. Тренировка засчитана`)}
+  if(act==='food'){P.log[key].food=true;await ref.update({[`log.${key}.food`]:true});toast(`+${PTS.food} баллов поведения`)}
+  if(act==='bonus'){P.log[key].bonus=true;await ref.update({[`log.${key}.bonus`]:true});toast(`+${PTS.bonus} за бонус-задание`)}
   if(act==='feel'){const c=($('fbText')||{}).value||'';P.log[key].feel=a.dataset.v;P.log[key].comment=c.trim();
     await ref.update({[`log.${key}.feel`]:a.dataset.v,[`log.${key}.comment`]:c.trim()});adaptAfterFeel()}
+  const isCore=(en.rest||P.log[key].done)&&P.log[key].food;
+  if(isCore&&!wasCore){justDone=true;setTimeout(()=>toast(`День засчитан: +${PTS.perfect} сверху. На стене — новая черта`),900)}
   renderCabinet();
 };
-setInterval(()=>{if(P&&!$('cabinet').classList.contains('hidden'))renderToday()},30000);
+setInterval(()=>{if(P&&!$('cabinet').classList.contains('hidden')&&$('modal').classList.contains('hidden'))renderToday()},30000);
 function renderWeek(){
   const t=Math.max(1,dayIdx(P.start));let h='';
   for(let d=t;d<t+7&&d<=P.plan.length;d++){
@@ -736,7 +988,7 @@ $('editFood').onclick=()=>{const f=foodOf(P);D={mode:'food',noTags:f.noTags.slic
 
 /* ================= ЗАМЕРЫ И ГРАФИК ================= */
 function renderMeas(c){
-  $('measDue').textContent=c.t<1?'Стартовые цифры уже сохранены из анкеты.':c.measAgo>=3?`Пора на замеры — последние были ${c.measAgo} ${pl(c.measAgo,'день','дня','дней')} назад.`:`Следующие замеры — через ${3-c.measAgo} ${pl(3-c.measAgo,'день','дня','дней')}.`;
+  $('measDue').textContent=c.t<1?'':c.measAgo>=3?'пора взвеситься':`следующие через ${3-c.measAgo} ${pl(3-c.measAgo,'день','дня','дней')}`;
   $('mW').placeholder=c.cur;
 }
 $('measBtn').onclick=async()=>{
@@ -749,25 +1001,25 @@ $('measBtn').onclick=async()=>{
     if(w<=P.goal&&!P.finishedAt){P.finishedAt=Date.now();upd.finishedAt=P.finishedAt}
     await ref.update(upd);['mW','mWaist','mHip','mChest'].forEach(id=>$(id).value='');$('measMsg').textContent='';
     const after=calc(P).total,diff=w-prev;
-    toast(P.finishedAt&&w<=P.goal?'Цель достигнута. Поздравляем!':`${diff<0?'Минус '+g(-diff)+' кг с прошлого раза.':diff>0?'Плюс '+g(diff)+' кг — это может быть вода, смотрим по неделе.':'Вес стоит.'}${after<before?' Дата выхода приблизилась на '+(before-after)+' дн.':after>before?' Дата выхода сдвинулась на '+(after-before)+' дн.':''}`);
+    store('sr_total_'+P.email,after);toast(P.finishedAt&&w<=P.goal?'Цель достигнута!':`+${PTS.meas} баллов. ${diff<0?'−'+g(-diff)+' кг.':diff>0?'+'+g(diff)+' кг — скорее всего вода.':'Вес стоит.'}${after<before?' Дата выхода приблизилась на '+(before-after)+' дн.':after>before?' Дата выхода сдвинулась на '+(after-before)+' дн.':''}`);
     renderCabinet();
   }catch(e){$('measMsg').textContent='Не сохранилось: '+e.message}
   finally{$('measBtn').disabled=false}
 };
 function drawChart(c){
   const ms=(P.measurements||[]).filter(x=>x.w).map(x=>({d:Math.round((pd(x.date)-pd(P.start))/DAY)+1,w:x.w}));
-  const X0=34,X1=572,Y0=18,Y1=186,maxD=Math.max(c.total,P.planDays,c.t,2);
+  const X0=44,X1=572,Y0=18,Y1=186,maxD=Math.max(c.total,P.planDays,c.t,2);
   const lo=Math.min(P.goal,...ms.map(m=>m.w))-1,hi=Math.max(P.startW,...ms.map(m=>m.w))+1;
   const x=d=>X0+(clamp(d,1,maxD)-1)/(maxD-1)*(X1-X0),y=v=>Y0+(hi-v)/(hi-lo)*(Y1-Y0);
-  let s=`<line x1="${X0}" x2="${X1}" y1="${y(P.goal)}" y2="${y(P.goal)}" stroke="#1F7A4D" stroke-width="1" opacity=".5"/><text x="${X0-4}" y="${y(P.goal)+4}" font-size="11" text-anchor="end" fill="#1F7A4D">${P.goal}</text><text x="${X0-4}" y="${y(P.startW)+4}" font-size="11" text-anchor="end" fill="#6B6E67">${P.startW}</text>`;
+  let s=`<line x1="${X0}" x2="${X1}" y1="${y(P.goal)}" y2="${y(P.goal)}" stroke="#1F7A4D" stroke-width="1" opacity=".5"/><text x="${X0-4}" y="${y(P.goal)+4}" font-size="17" text-anchor="end" fill="#1F7A4D">${P.goal}</text><text x="${X0-4}" y="${y(P.startW)+4}" font-size="17" text-anchor="end" fill="#6B6E67">${P.startW}</text>`;
   s+=`<line x1="${x(1)}" y1="${y(P.startW)}" x2="${x(P.planDays)}" y2="${y(P.goal)}" stroke="#9A9D95" stroke-width="2" stroke-dasharray="6 5"/>`;
-  if(c.t>=1&&!c.finished){s+=`<line x1="${x(c.t)}" x2="${x(c.t)}" y1="${Y0}" y2="${Y1}" stroke="#C9CBC4"/><text x="${x(c.t)}" y="${Y1+16}" font-size="11" text-anchor="middle" fill="#6B6E67">сегодня</text>`}
+  if(c.t>=1&&!c.finished){s+=`<line x1="${x(c.t)}" x2="${x(c.t)}" y1="${Y0}" y2="${Y1}" stroke="#C9CBC4"/><text x="${x(c.t)}" y="${Y1+22}" font-size="17" text-anchor="middle" fill="#6B6E67">сегодня</text>`}
   if(ms.length){
     const last=ms[ms.length-1];
     if(!c.finished&&c.total>last.d)s+=`<line x1="${x(last.d)}" y1="${y(avgWeek(P))}" x2="${x(c.total)}" y2="${y(P.goal)}" stroke="#D9A800" stroke-width="2.5" stroke-dasharray="4 5"/>`;
     s+=`<path d="${ms.map((m,i)=>(i?'L':'M')+x(m.d)+' '+y(m.w)).join(' ')}" fill="none" stroke="#1F211D" stroke-width="2.5" stroke-linejoin="round"/>`+ms.map(m=>`<circle cx="${x(m.d)}" cy="${y(m.w)}" r="4" fill="#F2C230" stroke="#1F211D" stroke-width="1.5"/>`).join('');
   }
-  s+=`<circle cx="${x(c.total)}" cy="${y(P.goal)}" r="6" fill="#1F7A4D"/><text x="${Math.min(x(c.total),X1)}" y="${y(P.goal)+22}" font-size="12" text-anchor="end" fill="#1F7A4D" font-weight="600">выход ${fmt(addDays(pd(P.start),c.total-1))}</text>`;
+  s+=`<circle cx="${x(c.total)}" cy="${y(P.goal)}" r="6" fill="#1F7A4D"/><text x="${Math.min(x(c.total),X1)}" y="${y(P.goal)+26}" font-size="18" text-anchor="end" fill="#1F7A4D" font-weight="600">выход ${fmt(addDays(pd(P.start),c.total-1))}</text>`;
   $('chart').innerHTML=s;
 }
 $('finishBtn').onclick=async()=>{
@@ -840,12 +1092,12 @@ function ingLines(r,k){return r.ingredients.map(line=>{const i=line.indexOf(' �
 function recipeBody(r,f,isSide){
   const fam=famMode&&P.household>1,k=(fam?P.household:1)*f/(r.servings||4);
   const fav=foodOf(P).favs.includes(r.id);
-  return `<div class="rb"><p class="s">Твоя порция: ${Math.round(r.kcal*f)} ккал, белки ${g(r.p*f)} г, жиры ${g(r.f*f)} г, углеводы ${g(r.c*f)} г</p>
+  return `<div class="rb"><p class="s">${Math.round(r.kcal*f)} ккал · Б ${g(r.p*f)} · Ж ${g(r.f*f)} · У ${g(r.c*f)}</p>
   ${r.serve?`<p class="s">Подача: ${esc(r.serve)}</p>`:''}
-  ${P.household>1&&!isSide?`<div class="seg" role="group" aria-label="Граммы"><button data-fam="0" aria-pressed="${!famMode}">Моя порция</button><button data-fam="1" aria-pressed="${famMode}">На ${P.household} ${pl(P.household,'человека','человек','человек')}</button></div>`:''}
-  ${r.ingredients.length?`<h5>${fam?`Ингредиенты на ${P.household} ${pl(P.household,'человека','человек','человек')}`:'Ингредиенты на твою порцию'}</h5><ul>${ingLines(r,k).map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
+  ${P.household>1&&!isSide?`<div class="seg" role="group" aria-label="Граммы"><button data-fam="0" aria-pressed="${!famMode}">Моя порция</button><button data-fam="1" aria-pressed="${famMode}">На ${P.household} чел.</button></div>`:''}
+  ${r.ingredients.length?`<h5>Ингредиенты</h5><ul>${ingLines(r,k).map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
   ${r.steps.length?`<h5>Приготовление</h5><ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`:''}
-  ${isSide?'':`<div class="acts"><button class="btn small ${fav?'':'ghost'}" data-fav="${r.id}">${fav?'♥ В любимых':'♡ Нравится'}</button><button class="btn small ghost" data-swap>Заменить</button><button class="btn small ghost" data-never="${r.id}">Больше не предлагать</button></div>`}</div>`;
+  ${isSide?'':`<div class="acts"><button class="btn small ${fav?'':'ghost'}" data-fav="${r.id}" aria-label="${fav?'Убрать из любимых':'Нравится'}">${fav?'♥':'♡'}</button><button class="btn small ghost" data-swap>Заменить</button><button class="btn small ghost" data-never="${r.id}">Не предлагать</button></div>`}</div>`;
 }
 function mealRow(d,k,label,day){
   const r=RX[day[k]];
@@ -858,7 +1110,6 @@ function renderMenu(){
   if(ensureMenu(P))saveMenu();
   const t=Math.max(1,dayIdx(P.start)),food=foodOf(P);
   const ex=[...food.noTags.map(x=>(FOODTAGS.find(f=>f[0]===x)||[,x])[1].toLowerCase()),...food.noWords];
-  $('menuNote').textContent=`Собрано под твою норму ${P.kcal} ккал${ex.length?', без: '+ex.join(', '):''}. Нажми на блюдо — откроется рецепт в твоих граммах.`;
   let h='';
   for(let d=t;d<t+menuDays;d++){
     const day=P.menu['d'+d];if(!day)continue;
@@ -894,10 +1145,69 @@ function renderShop(){
         const it=items[key]=items[key]||{name,u:{}};it.u[u]=(it.u[u]||0)+v;plain.delete(name)})})})}
   const rows=Object.values(items).sort((a,b)=>a.name.localeCompare(b.name,'ru')).map(it=>[it.name,Object.entries(it.u).map(([u,v])=>(u==='г'||u==='мл')&&v>=1000?`${g(v/1000)} ${u==='г'?'кг':'л'}`:`${fmtAmt(v,u)} ${u}`).join(' + ')]);
   [...plain].filter(n=>!items[n.toLowerCase()]).sort((a,b)=>a.localeCompare(b,'ru')).forEach(n=>rows.push([n,'']));
-  $('shopSum').textContent=`Список продуктов на ${menuDays===3?'3 дня':'неделю'}${hh>1?' · на '+hh+' '+pl(hh,'человека','человек','человек'):''}`;
+  $('shopSum').innerHTML=`Продукты на ${menuDays===3?'3 дня':'неделю'}${hh>1?' · '+hh+' чел.':''} <button class="hint" data-hint="shop" aria-label="Как считается список" style="width:18px;height:18px;font-size:.68rem">?</button>`;
   $('shopList').innerHTML=rows.map(([n,q])=>{const id=n.toLowerCase();return`<li class="${shopGot.has(id)?'got':''}"><input type="checkbox" data-shop="${esc(id)}" ${shopGot.has(id)?'checked':''} aria-label="${esc(n)}"><span>${esc(n)}${q?' — '+q:''}</span></li>`}).join('');
 }
 $('shopList').onchange=e=>{const id=e.target.dataset.shop;if(!id)return;e.target.checked?shopGot.add(id):shopGot.delete(id);store('sr_shop',JSON.stringify([...shopGot]));e.target.closest('li').classList.toggle('got',e.target.checked)};
+
+/* ================= ВКЛАДКИ, ПОДСКАЗКИ, ТУР ================= */
+function go(tab){
+  document.querySelectorAll('[data-pane]').forEach(p=>p.classList.toggle('hidden',p.dataset.pane!==tab));
+  document.querySelectorAll('#tabbar [data-go]').forEach(b=>b.setAttribute('aria-selected',b.dataset.go===tab));
+  $('pop').classList.add('hidden');window.scrollTo(0,0);
+}
+document.addEventListener('click',e=>{const g2=e.target.closest('[data-go]');if(g2&&P&&!$('cabinet').classList.contains('hidden')){e.preventDefault();go(g2.dataset.go)}});
+function hintHtml(key){
+  const c=calc(P);
+  if(key==='wall')return'<b>Стена камеры.</b> Каждая черта — день срока. Белая — день засчитан (тренировка или отдых + питание), бледная — сделано наполовину, красная — пропуск, жёлтая — сегодня.';
+  if(key==='date'){const rows=[[`${P.startW} → ${P.goal} кг по ${g(P.weekly||Math.min(1,P.startW*.01))} кг/нед`,`${P.planDays} дн.`]];
+    if(c.miss)rows.push(['Пропущенные тренировки',`+${c.miss}`]);if(Math.floor(c.food/2))rows.push([`${c.food} дн. без питания`,`+${Math.floor(c.food/2)}`]);
+    if(c.weightAdj>0)rows.push(['Вес медленнее плана',`+${c.weightAdj}`]);if(c.weightAdj<0)rows.push(['Худеешь быстрее',`${c.weightAdj}`]);if(c.bonus)rows.push(['Условно-досрочное',`−${c.bonus}`]);rows.push(['Итого',`${c.total} дн.`]);
+    return`<b>Дата живая.</b> Пропуски отодвигают её, неделя без пропусков приближает.<ul>${rows.map(([a,b])=>`<li><span>${a}</span><b>${b}</b></li>`).join('')}</ul>`}
+  if(key==='udo')return`<b>Условно-досрочное.</b> ${UDO_DAYS} дней подряд без пропусков — минус день срока и +${PTS.udo} баллов. Сейчас подряд: ${c.run}.${c.bonus?` Уже заработано: −${c.bonus} дн.`:''}`;
+  if(key==='points')return`<b>Баллы поведения</b><ul><li><span>Тренировка</span><b>+${PTS.train}</b></li><li><span>День по меню</span><b>+${PTS.food}</b></li><li><span>День без пропусков</span><b>+${PTS.perfect}</b></li><li><span>Бонус-задание</span><b>+${PTS.bonus}</b></li><li><span>Замеры</span><b>+${PTS.meas}</b></li><li><span>Отзыв</span><b>+${PTS.feel}</b></li><li><span>УДО</span><b>+${PTS.udo}</b></li></ul>`;
+  if(key==='meas')return'Раз в 3 дня, утром натощак. Колебания ±1–2 кг — норма: дата считается по среднему за неделю.';
+  if(key==='menu'){const f=foodOf(P),ex=[...f.noTags.map(x=>(FOODTAGS.find(y=>y[0]===x)||[,x])[1].toLowerCase()),...f.noWords];return`Собрано под твою норму <b>${P.kcal} ккал</b>${ex.length?', без: '+esc(ex.join(', ')):''}. Нажми на блюдо — рецепт в граммах твоей порции. ♥ — будет чаще, «Не предлагать» — исчезнет навсегда.`}
+  if(key==='shop')return'Сумма по рецептам за выбранные дни, с твоими порциями и числом едоков. Соль и специи — в конце списка.';
+  if(key==='plan')return`Тренировки из твоего райдера: ${poolFor(P.rider,P.level).length} шт., без повторов, пока не пройдёшь все. «Тяжело» дважды — нагрузка ниже, «легко» трижды — уровень выше.`;
+  if(key==='bonus'){const b=bonusOf(dayIdx(P.start));return`<b>${b[0]}.</b> ${b[1]}. +${PTS.bonus} балла.`}
+  if(key.startsWith('badge:')){const b=BADGES.find(x=>x[0]===key.slice(6));const on=b[4](c,stats(P));return`<b>${b[2]}</b><br>${b[3]}.${on?' Получена.':' Ещё впереди.'}`}
+  return'';
+}
+function openPop(btn,html){
+  const p=$('pop');p.innerHTML=html+'<button class="popx" aria-label="Закрыть">×</button>';p.classList.remove('hidden');
+  const r=btn.getBoundingClientRect(),w=Math.min(320,innerWidth-24);p.style.width=w+'px';
+  p.style.left=clamp(r.left+r.width/2-w/2,12,innerWidth-w-12)+'px';
+  const below=r.bottom+8,h=p.offsetHeight;p.style.top=(below+h>innerHeight-80&&r.top-h-8>0?r.top-h-8:below)+scrollY+'px';
+}
+document.addEventListener('click',e=>{
+  const h=e.target.closest('[data-hint]');
+  if(h&&P){e.preventDefault();e.stopPropagation();if(!$('pop').classList.contains('hidden')&&$('pop').dataset.k===h.dataset.hint){$('pop').classList.add('hidden');return}$('pop').dataset.k=h.dataset.hint;openPop(h,hintHtml(h.dataset.hint));return}
+  if(!e.target.closest('#pop')||e.target.closest('.popx'))$('pop').classList.add('hidden');
+},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('pop').classList.add('hidden')});
+const TOUR=[
+  ['today','#tallyBox','Это твоя стена. Каждая черта — день срока. Выполнила задания — день засчитан мелом, пропустила — красная черта.'],
+  ['today','#relRow','Дата выхода живая: пропуски отодвигают её, а 7 дней без пропусков — минус день срока.'],
+  ['today','#questSec','Каждый день — 3–4 задания. За них баллы поведения, статусы и нашивки.'],
+  ['today','#tabbar [data-go=menu]','В «Меню» — блюда под твою норму. Рецепты сразу в граммах твоей порции.'],
+  ['today','#tabbar [data-go=progress]','В «Прогрессе» — вес, график и твои нашивки. Если что-то непонятно, нажми на «?» рядом.']
+];
+let tourI=-1;
+function tourStep(){
+  document.querySelectorAll('.spot').forEach(x=>x.classList.remove('spot'));$('tabbar').style.zIndex='';
+  let c=$('coach');if(tourI>=TOUR.length){c&&c.remove();$('tourBlock')&&$('tourBlock').remove();tourI=-1;P.tourDone=true;store('sr_tour_'+P.email,'1');ref.update({tourDone:true}).catch(console.warn);showModal();return}
+  const[pane,sel,text]=TOUR[tourI];go(pane);const el=document.querySelector(sel);if(!el){tourI++;return tourStep()}
+  if(el.closest('#tabbar'))$('tabbar').style.zIndex=31;
+  el.classList.add('spot');el.scrollIntoView({block:'center',behavior:reduced?'auto':'smooth'});
+  if(!$('tourBlock')){const b=document.createElement('div');b.id='tourBlock';b.className='tour-block';document.body.appendChild(b)}
+  if(!c){c=document.createElement('div');c.id='coach';c.className='coach';c.setAttribute('role','dialog');document.body.appendChild(c)}
+  c.innerHTML=`<p>${text}</p><div class="cfoot"><button class="skip" data-tour="skip">Пропустить</button><span>${tourI+1} из ${TOUR.length}</span><button class="btn" data-tour="next">${tourI===TOUR.length-1?'Понятно':'Дальше'}</button></div>`;
+  setTimeout(()=>{const r=el.getBoundingClientRect();c.style.top=r.top>innerHeight/2?'':Math.min(innerHeight-190,r.bottom+14)+'px';c.style.bottom=r.top>innerHeight/2?(innerHeight-r.top+14)+'px':'';c.querySelector('[data-tour=next]').focus()},reduced?0:350);
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-tour]');if(!b)return;tourI=b.dataset.tour==='skip'?TOUR.length:tourI+1;tourStep()});
+function startTour(){tourI=0;tourStep()}
+$('tourBtn').onclick=startTour;$('tourBtn2').onclick=startTour;
 
 /* ================= КУРАТОР ================= */
 $('modeBtn').onclick=()=>{
