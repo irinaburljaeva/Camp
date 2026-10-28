@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Строгий режим — пробный день</title>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Golos+Text:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+
+:root{--concrete:#E4E5E0;--wall:#F3F3F0;--paper:#FBFAF5;--ink:#1F211D;--steel:#6B6E67;--hazard:#F2C230;--release:#1F7A4D;--alarm:#C9352B;--line:#C9CBC4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--concrete);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,.stencil{font-family:"Russo One",sans-serif;font-weight:400;letter-spacing:.01em}
+h2{font-size:1.2rem;margin-bottom:12px;text-transform:uppercase}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 80px}
+.stripe{height:14px;background:repeating-linear-gradient(135deg,var(--hazard) 0 18px,var(--ink) 18px 36px)}
+header{padding:16px 0 10px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:3px solid var(--ink)}
+header .brand{font-family:"Russo One";font-size:1.05rem;text-transform:uppercase}
+header small{display:block;color:var(--steel);font-size:.75rem;font-family:"Golos Text";text-transform:none}
+.toggle{font:inherit;font-size:.8rem;color:var(--steel);background:none;border:1px solid var(--line);padding:6px 10px;border-radius:4px;cursor:pointer}
+section{background:var(--wall);border:1px solid var(--line);padding:20px;margin-top:20px;border-radius:4px}
+.hidden{display:none!important}
+.lead{font-size:.95rem;color:var(--steel)}
+label{display:block;font-size:.85rem;color:var(--steel);margin:14px 0 4px}
+input,select,textarea{width:100%;font:inherit;font-size:1rem;padding:12px 14px;border:1.5px solid var(--line);border-radius:4px;background:#fff;color:var(--ink)}
+textarea{min-height:80px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--hazard);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.btn{display:inline-block;text-align:center;text-decoration:none;font-family:"Russo One",sans-serif;text-transform:uppercase;font-size:.95rem;border:0;border-radius:4px;padding:15px 20px;cursor:pointer;width:100%;margin-top:18px;background:var(--ink);color:var(--hazard)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+.btn.green{background:var(--release);color:#fff}
+.btn.small{width:auto;padding:9px 14px;font-size:.78rem;margin-top:0}
+.btn:disabled{opacity:.45;cursor:default}
+.msg{font-size:.88rem;color:var(--alarm);margin-top:10px;min-height:1em}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt,.chip{font:inherit;font-size:.9rem;padding:10px 14px;border:1.5px solid var(--ink);background:#fff;border-radius:4px;cursor:pointer;color:var(--ink);text-align:left}
+.opt[aria-pressed=true]{background:var(--ink);color:var(--hazard)}
+.chip[aria-pressed=false]{border-color:var(--line);color:var(--steel);text-decoration:line-through;background:transparent}
+.chip small{color:var(--steel);margin-left:4px}
+.card-opt{display:block;width:100%;padding:14px 16px;margin-top:8px}
+.card-opt b{display:block;font-weight:600}
+.card-opt span{font-size:.85rem;color:var(--steel)}
+.card-opt[aria-pressed=true] span{color:#E8D9A0}
+.verdict{padding:16px;border-left:6px solid;margin-top:16px;border-radius:0 4px 4px 0;font-size:.95rem}
+.verdict.ok{border-color:var(--release);background:#E8F3EC}.verdict.warn{border-color:var(--hazard);background:#FBF3D6}.verdict.stop{border-color:var(--alarm);background:#F7E0DD}
+.verdict p+p{margin-top:6px}
+.loading{text-align:center;color:var(--steel);padding:60px 0}
+
+/* ---------- приём ---------- */
+#onb{padding-top:22px}
+.prog{display:flex;align-items:center;gap:12px;font-size:.78rem;color:var(--steel)}
+.prog .track{flex:1;height:6px;background:#D3D4CE;border-radius:3px;overflow:hidden}
+.prog .track i{display:block;height:100%;background:var(--ink);transition:width .35s}
+.qtitle{font-family:"Russo One";font-size:clamp(1.6rem,6vw,2.3rem);line-height:1.1;margin:22px 0 8px}
+.qbox{background:var(--wall);border:1px solid var(--line);border-radius:4px;padding:20px;margin-top:18px}
+.q{margin-top:18px}.q:first-child{margin-top:0}
+.q>p{font-weight:500;margin-bottom:8px}
+.live{margin-top:16px}
+.live .nums{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.live .nums div{background:#fff;border:1px solid var(--line);border-radius:4px;padding:8px 12px;font-size:.8rem;color:var(--steel)}
+.live .nums b{display:block;font-family:"Russo One";font-weight:400;font-size:1.15rem;color:var(--ink)}
+.nav{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:6px}
+.nav .btn{margin-top:14px}
+.pool{margin-top:14px;padding:12px;background:#fff;border:1px dashed var(--ink);border-radius:4px;font-size:.9rem}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+
+/* ---------- личное дело ---------- */
+#reveal{min-height:100vh;background:var(--ink);color:#E9EAE4;margin:0 -16px;padding:40px 20px 60px}
+#reveal .in{max-width:640px;margin:0 auto}
+.rvl{opacity:0;transform:translateY(6px);transition:opacity .45s,transform .45s;font-size:1rem;padding:10px 0;border-bottom:1px solid #3A3D37;display:grid;grid-template-columns:22px 1fr;gap:10px}
+.rvl.on{opacity:1;transform:none}
+.rvl::before{content:"";width:10px;height:10px;margin-top:7px;background:var(--hazard);border-radius:50%}
+.rvl b{color:#fff;font-weight:600}
+.rvl small{display:block;color:#9FA29A;font-size:.82rem}
+.rvhead{font-family:"Russo One";color:var(--hazard);font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.dossier{opacity:0;margin-top:30px;background:var(--paper);color:var(--ink);border-radius:4px;padding:24px 20px;position:relative;transform:rotate(-1deg);transition:opacity .6s;box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.dossier.on{opacity:1}
+.dossier .no{font-size:.8rem;color:var(--steel)}
+.dossier h3{font-family:"Russo One";font-weight:400;font-size:clamp(1.6rem,7vw,2.4rem);line-height:1.05;margin:4px 0 14px}
+.dossier dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.92rem}
+.dossier dt{color:var(--steel)}
+.dossier .out{margin-top:16px;padding-top:14px;border-top:2px dashed var(--line)}
+.dossier .out span{font-size:.8rem;color:var(--steel)}
+.dossier .out b{display:block;font-family:"Russo One";font-weight:400;font-size:clamp(2rem,9vw,3rem);line-height:1}
+.bigstamp{position:absolute;right:14px;top:18px;border:4px solid var(--alarm);color:var(--alarm);font-family:"Russo One";font-size:1.3rem;padding:6px 12px;transform:rotate(-12deg) scale(2.2);opacity:0;letter-spacing:.06em;transition:transform .35s cubic-bezier(.2,1.6,.4,1),opacity .2s}
+.bigstamp.on{opacity:.9;transform:rotate(-12deg) scale(1)}
+
+/* ---------- кабинет ---------- */
+.hero{padding:26px 0 4px}
+.hero .hi{font-size:.9rem;color:var(--steel)}
+.hero h1{font-size:clamp(2.2rem,10vw,3.6rem);line-height:1;margin:2px 0 12px}
+.hero .line{font-size:1.1rem;line-height:1.45;max-width:36ch}
+.hero .why{font-size:.85rem;color:var(--steel);margin-top:10px}
+.release{background:var(--ink);color:var(--wall);padding:24px 20px;position:relative;overflow:hidden;border-radius:4px;margin-top:20px}
+.release::after{content:"";position:absolute;right:-40px;bottom:-40px;width:220px;height:220px;border:14px solid var(--hazard);border-radius:50%;opacity:.12}
+.release .lbl{color:var(--hazard);font-size:.8rem}
+.release .date{font-family:"Russo One";font-size:clamp(2.2rem,9vw,3.6rem);line-height:1;margin:6px 0 10px}
+.release .meta{display:flex;gap:18px;flex-wrap:wrap;font-size:.85rem;color:#C8CAC3}
+.release .meta b{color:#fff;font-weight:600}
+.stamp{position:absolute;right:14px;top:14px;border:3px solid var(--hazard);color:var(--hazard);font-family:"Russo One";font-size:.7rem;padding:4px 8px;transform:rotate(8deg);letter-spacing:.08em}
+.release.free .stamp{border-color:#7BE0A8;color:#7BE0A8}
+.bar{height:14px;background:#3A3D37;border-radius:7px;overflow:hidden;margin-top:16px}
+.bar i{display:block;height:100%;background:var(--hazard);transition:width .5s}
+.rel-extra{margin-top:14px;font-size:.88rem;color:#DADBD4;display:grid;gap:6px;position:relative;z-index:1}
+.rel-extra b{color:#fff;font-weight:600}
+.udo{display:flex;gap:4px;margin-top:4px}
+.udo i{width:22px;height:8px;border-radius:2px;background:#3A3D37}
+.udo i.on{background:var(--hazard)}
+.why-date{margin-top:12px;position:relative;z-index:1}
+.why-date summary{cursor:pointer;font-size:.82rem;color:#FFD766}
+.why-date ul{list-style:none;margin-top:8px;font-size:.85rem;color:#C8CAC3}
+.why-date li{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #3A3D37}
+.task{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line)}
+.task:last-child{border-bottom:0}
+.task .t{font-weight:500}.task .s{font-size:.8rem;color:var(--steel)}
+.task .r{text-align:right;flex-shrink:0}
+.tag{font-size:.72rem;padding:3px 8px;border-radius:3px;font-weight:600;white-space:nowrap;display:inline-block}
+.tag.todo{background:#FBF3D6;color:#7A5B00}.tag.done{background:#E8F3EC;color:var(--release)}.tag.late{background:#F7E0DD;color:var(--alarm)}.tag.rest{background:#E4E5E0;color:var(--steel)}
+.adapt{background:var(--ink);color:#fff;border-radius:4px;padding:12px 14px;font-size:.9rem;margin-bottom:12px;border-left:6px solid var(--hazard)}
+.week{list-style:none}
+.week li{display:grid;grid-template-columns:92px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.week li:last-child{border-bottom:0}
+.week .d{color:var(--steel);font-size:.8rem}
+.week .now{font-weight:600;color:var(--ink)}
+.feel{margin-top:12px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:4px}
+svg.chart{width:100%;height:auto;margin-top:12px;display:block}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.75rem;color:var(--steel);margin-top:6px}
+.legend i{display:inline-block;width:18px;height:0;border-top:2.5px solid;vertical-align:middle;margin-right:5px}
+
+/* меню */
+.menu{display:grid;gap:12px;margin-top:12px}
+.day{border:1px solid var(--line);background:#fff;padding:12px;border-radius:4px}
+.day h4{font-family:"Russo One";font-weight:400;font-size:.85rem}
+.day .dh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+.day .dh span{font-size:.8rem;color:var(--steel)}
+.meal{border-top:1px dashed var(--line)}
+.mhead{all:unset;box-sizing:border-box;display:grid;grid-template-columns:74px 1fr auto;gap:10px;width:100%;padding:10px 0;cursor:pointer;align-items:start}
+.mhead:focus-visible{outline:3px solid var(--hazard)}
+.mhead .ml{font-size:.75rem;color:var(--steel);padding-top:2px}
+.mhead .mn{font-size:.92rem;font-weight:500;line-height:1.35}
+.mhead .mn i{font-style:normal;color:var(--steel);font-weight:400}
+.mhead .mn small{font-weight:400;color:var(--steel)}
+.mhead .mk{font-size:.8rem;color:var(--steel);white-space:nowrap;padding-top:2px}
+.fav{color:var(--alarm)}
+.rb{padding:2px 0 12px 84px;font-size:.88rem}
+.rb h5{font-size:.8rem;margin:12px 0 4px;font-weight:600}
+.rb ul,.rb ol{padding-left:18px}.rb li{margin:3px 0}
+.rb .s{font-size:.8rem;color:var(--steel)}
+.rb .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:4px;overflow:hidden;margin-top:10px}
+.seg button{font:inherit;font-size:.78rem;border:0;background:#fff;padding:6px 10px;cursor:pointer;color:var(--ink)}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--hazard)}
+.shop{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px}
+.shop summary{cursor:pointer;font-weight:600}
+.shop ul{list-style:none;margin-top:10px;columns:2;column-gap:18px}
+.shop li{break-inside:avoid;font-size:.86rem;padding:3px 0;display:flex;gap:8px;align-items:flex-start}
+.shop li input{width:auto;margin-top:4px}
+.shop li.got span{text-decoration:line-through;color:var(--steel)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 16px;border-radius:4px;font-size:.9rem;max-width:92vw;z-index:9;border-left:5px solid var(--hazard)}
+
+/* куратор */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:20px}
+.tabs button{font:inherit;font-size:.85rem;padding:8px 12px;border:1.5px solid var(--ink);background:transparent;border-radius:4px;cursor:pointer;color:var(--ink)}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--hazard)}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--steel);font-size:.75rem}
+td .s{font-size:.78rem;color:var(--steel)}
+.quote{font-size:.82rem;border-left:3px solid var(--hazard);padding-left:8px;margin-top:6px}
+details.pg{border-bottom:1px solid var(--line);padding:8px 0}
+details.pg summary{cursor:pointer;font-weight:500}
+.wl{list-style:none;font-size:.82rem;margin-top:6px}
+.wl li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:4px 0}
+.wl a{color:var(--ink)}
+.wl li.off a,.wl li.off>span{color:var(--steel);text-decoration:line-through}
+.note{font-size:.8rem;color:var(--steel);margin-top:10px}
+
+/* ---------- полировка ---------- */
+.btn{border-radius:6px;transition:transform .08s,filter .15s}
+.btn:hover:not(:disabled){filter:brightness(1.12)}
+.btn:active:not(:disabled){transform:scale(.98)}
+.opt,.chip{border-radius:6px;transition:background .12s,color .12s}
+.opt:hover{border-color:var(--ink)}
+.qbox,section{border-radius:8px}
+input,select,textarea{border-radius:6px}
+
+/* ---------- стена камеры ---------- */
+.wall{position:relative;margin-top:18px;border-radius:10px;padding:22px 20px 20px;color:#ECEAE2;overflow:hidden;
+  background:radial-gradient(120% 80% at 15% 0%,#34362F 0%,#22231F 45%,#1A1B18 100%);box-shadow:inset 0 0 0 1px #2E302B,0 14px 30px rgba(31,33,29,.25)}
+.wall::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.35;
+  background-image:linear-gradient(#2B2D28 1px,transparent 1px),linear-gradient(90deg,#2B2D28 1px,transparent 1px);background-size:100% 34px,68px 34px}
+.wall>*{position:relative}
+.wall-top{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.78rem}
+.cellno{white-space:nowrap;border:2px solid var(--hazard);color:var(--hazard);font-family:"Russo One";padding:3px 8px;border-radius:3px;letter-spacing:.05em;transform:rotate(-2deg)}
+.rankchip{color:#BDBFB6}.rankchip b{color:#fff;font-weight:600}
+.wall .hi{margin-top:16px;font-size:.9rem;color:#A9ABA3}
+.wall h1{font-size:clamp(2.3rem,11vw,3.8rem);line-height:1;margin:2px 0 10px;color:#fff}
+.wall .line{font-size:1.06rem;line-height:1.45;max-width:38ch;color:#E7E5DC}
+.wall .why{font-size:.84rem;color:#9FA29A;margin-top:8px}
+svg.tally{display:block;width:100%;height:auto;margin-top:20px;overflow:visible}
+.tl{fill:none;stroke:#EDEAE0;stroke-width:2.7;stroke-linecap:round;filter:url(#chalk)}
+.tl.half{opacity:.45}.tl.miss{stroke:#E0584C}.tl.fut{opacity:.11}
+.tl.now{stroke:var(--hazard);animation:blink 1.4s ease-in-out infinite}
+.tl.ok.now{stroke:#EDEAE0;animation:none}
+.tl.draw{stroke-dasharray:44;stroke-dashoffset:44;animation:draw .9s .25s forwards}
+@keyframes blink{50%{opacity:.25}}
+@keyframes draw{to{stroke-dashoffset:0}}
+.tlegend{font-family:"Caveat",cursive;font-size:1.1rem;color:#A9ABA3;margin-top:6px}
+.tlegend .c-ok{color:#EDEAE0}.tlegend .c-miss{color:#E0584C}.tlegend .c-now{color:var(--hazard)}
+.relrow{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-top:18px;padding-top:16px;border-top:1px dashed #44463F}
+.relrow .lbl{color:var(--hazard);font-size:.8rem}
+.relrow .date{font-family:"Russo One";font-size:clamp(2rem,9vw,3.2rem);line-height:1;margin-top:4px;color:#fff}
+.relrow .date.flip{animation:flip .7s ease}
+@keyframes flip{0%{transform:rotateX(0)}45%{transform:rotateX(90deg);opacity:.2}55%{transform:rotateX(-90deg);opacity:.2}100%{transform:rotateX(0)}}
+.relrow .left{text-align:right;font-family:"Caveat",cursive;color:#DAD8CE;line-height:1}
+.relrow .left b{display:block;font-size:2.6rem;font-weight:700;color:#fff}
+.relrow .left span{font-size:1.15rem}
+.wall .meta{display:flex;gap:16px;flex-wrap:wrap;font-size:.84rem;color:#B9BBB3;margin-top:14px}
+.wall .meta b{color:#fff;font-weight:600}
+.wall.free .cellno{border-color:#7BE0A8;color:#7BE0A8}
+
+/* ---------- задания ---------- */
+section.quests{position:relative}
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.qhead h2{margin:0}
+.ring{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--steel);white-space:nowrap;flex-shrink:0}
+.ring svg{width:44px;height:44px}
+.quest{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:14px;border:1.5px solid var(--line);border-radius:8px;background:#fff;margin-top:10px;transition:background .3s,border-color .3s}
+.quest.done{background:#EEF6F0;border-color:#BFDCC9}
+.quest .qi{width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--hazard);display:grid;place-items:center}
+.quest .qi svg{width:22px;height:22px}
+.quest.done .qi{background:var(--release);color:#fff}
+.quest .qt b{display:block;font-weight:600;line-height:1.3}
+.quest .qt span{display:block;font-size:.8rem;color:var(--steel);margin-top:2px}
+.quest .qr{text-align:right}
+.quest .pts{font-family:"Russo One";color:var(--release);font-size:1rem}
+.quest.bonus .qi{background:var(--hazard);color:var(--ink)}
+.quest.bonus.done .qi{background:var(--release);color:#fff}
+.daystamp{position:absolute;right:96px;top:22px;z-index:2;border:3px solid var(--release);color:var(--release);font-family:"Russo One";text-transform:uppercase;padding:4px 10px;transform:rotate(-9deg);font-size:.82rem;letter-spacing:.05em;background:rgba(243,243,240,.85);border-radius:3px;pointer-events:none}
+.daystamp.slam{animation:slam .55s cubic-bezier(.2,1.6,.4,1)}
+@keyframes slam{from{transform:rotate(-9deg) scale(2.6);opacity:0}to{transform:rotate(-9deg) scale(1);opacity:1}}
+
+/* ---------- статус и нашивки ---------- */
+.rankbox{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center}
+.rk-name{font-family:"Russo One";font-size:1.6rem;line-height:1}
+.rk-pts{font-size:.85rem;color:var(--steel)}
+.rk-bar{grid-column:1/-1;height:10px;background:#DCDDD7;border-radius:5px;overflow:hidden;margin-top:10px}
+.rk-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--hazard),#E3A700);border-radius:5px;transition:width .6s}
+.rk-next{grid-column:1/-1;font-size:.8rem;color:var(--steel)}
+.rules{margin-top:10px;font-size:.85rem}.rules summary{cursor:pointer;color:var(--steel)}
+.rules ul{margin:8px 0 0 18px;color:var(--steel)}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px;margin-top:18px}
+.badge{text-align:center;font-size:.72rem;color:var(--steel)}
+.badge svg{width:58px;height:66px;display:block;margin:0 auto 4px}
+.badge b{display:block;font-size:.8rem;color:var(--ink);font-weight:600;line-height:1.2}
+.badge:not(.on){opacity:.75}.badge:not(.on) b{color:var(--steel)}
+.modal{position:fixed;inset:0;background:rgba(20,21,18,.72);display:grid;place-items:center;z-index:20;padding:16px}
+.mbox{background:var(--paper);border-radius:12px;padding:28px 22px 22px;max-width:360px;width:100%;text-align:center;animation:pop .45s cubic-bezier(.2,1.5,.4,1)}
+.mbox svg{width:110px;height:124px}
+.mbox .mk{font-size:.8rem;color:var(--steel);text-transform:uppercase;letter-spacing:.06em;margin-top:8px}
+.mbox h3{font-family:"Russo One";font-weight:400;font-size:1.6rem;margin:4px 0 6px}
+.mbox p{color:var(--steel)}
+@keyframes pop{from{transform:scale(.6) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+
+/* ---------- приложение: вкладки, подсказки, тур ---------- */
+body.app .wrap{padding-bottom:110px}
+body.app .toast{bottom:calc(84px + env(safe-area-inset-bottom))}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(251,250,245,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.tabbar button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.72rem;color:var(--steel);padding:6px 0;border-radius:8px;position:relative}
+.tabbar button svg{width:24px;height:24px}
+.tabbar button[aria-selected=true]{color:var(--ink);font-weight:600}
+.tabbar button[aria-selected=true]::before{content:"";position:absolute;top:-7px;left:30%;right:30%;height:3px;border-radius:2px;background:var(--hazard)}
+.tabbar button:focus-visible{outline:3px solid var(--hazard)}
+.tabbar .dot{position:absolute;top:4px;right:calc(50% - 18px);width:8px;height:8px;border-radius:50%;background:var(--alarm)}
+.hint{all:unset;cursor:pointer;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;font-size:.75rem;font-weight:700;opacity:.7;vertical-align:middle;flex-shrink:0;font-family:"Golos Text"}
+.hint:hover,.hint:focus-visible{opacity:1;outline:none;background:var(--hazard);color:var(--ink);border-color:var(--hazard)}
+.h2row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.h2row h2{margin:0;display:flex;align-items:center;gap:8px}
+.pop{position:absolute;z-index:25;background:var(--ink);color:#EDEBE3;border-radius:10px;padding:14px 38px 14px 14px;font-size:.88rem;line-height:1.45;box-shadow:0 12px 30px rgba(0,0,0,.3);animation:popin .18s ease-out}
+.pop b{color:#fff}.pop ul{list-style:none;margin-top:8px}.pop li{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #3A3D37}
+.pop .popx{all:unset;cursor:pointer;position:absolute;top:8px;right:10px;font-size:1.2rem;color:#9FA29A}
+@keyframes popin{from{opacity:0;transform:translateY(-4px)}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip2{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-size:.8rem;color:#DAD8CE;border:1px solid #44463F;border-radius:20px;padding:5px 12px;background:rgba(255,255,255,.04)}
+.chip2 b{color:#fff;font-weight:600}
+.chip2 .udo{margin:0}.chip2 .udo i{width:10px;height:6px}
+.wall h1{font-size:clamp(1.9rem,8.5vw,2.8rem)}
+.kgcard{display:grid;gap:8px}
+.kgrow{display:flex;justify-content:space-between;align-items:baseline;font-size:.9rem;color:var(--steel)}
+.kgrow b{font-family:"Russo One";font-weight:400;font-size:1.4rem;color:var(--ink)}
+.kgcard .bar{background:#DCDDD7;margin-top:0}
+.minirow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.minirow .btn{margin-top:0;height:50px}
+details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85rem;color:var(--steel)}
+.tip{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;background:#FBF3D6;border:1px solid #EBD58A;border-radius:8px;padding:12px;margin-bottom:10px;font-size:.88rem;animation:popin .25s ease-out}
+.tip .ti{width:24px;height:24px;border-radius:50%;background:var(--hazard);display:grid;place-items:center;font-weight:700;font-size:.8rem}
+.tip button{all:unset;cursor:pointer;font-weight:600;font-size:.82rem;margin-top:6px;text-decoration:underline}
+.badge{all:unset;cursor:pointer;text-align:center}
+.feel .opts{margin-top:8px}
+.tour-block{position:fixed;inset:0;z-index:30}
+.spot{position:relative;z-index:31!important;box-shadow:0 0 0 9999px rgba(18,19,16,.72)!important;border-radius:10px}
+.coach{position:fixed;z-index:32;left:16px;right:16px;max-width:420px;margin:0 auto;background:var(--paper);border-radius:12px;padding:16px;box-shadow:0 16px 40px rgba(0,0,0,.35);animation:popin .2s ease-out}
+.coach p{font-size:.95rem;line-height:1.45}
+.coach .cfoot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px}
+.coach .cfoot span{font-size:.8rem;color:var(--steel)}
+.coach .cfoot .btn{margin:0;width:auto;padding:10px 16px}
+.coach .skip{all:unset;cursor:pointer;font-size:.82rem;color:var(--steel);text-decoration:underline}
+@media (prefers-reduced-motion:reduce){.pop,.tip,.coach{animation:none}}
+@media (prefers-reduced-motion:reduce){.tl.now,.tl.draw,.relrow .date.flip,.daystamp.slam,.mbox{animation:none}.tl.draw{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.bar i,.prog .track i,.rvl,.dossier,.bigstamp{transition:none}}
+@media (max-width:480px){.row{grid-template-columns:1fr}.week li{grid-template-columns:70px 1fr}.week li .tag{grid-column:2}.mhead{grid-template-columns:60px 1fr auto}.rb{padding-left:0}.shop ul{columns:1}}
+
+/* ---------- демо ---------- */
+body.demo .wrap{padding-bottom:100px}
+.cta-bar{position:fixed;left:0;right:0;bottom:0;z-index:12;background:rgba(31,33,29,.97);color:#fff;padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;gap:12px}
+.cta-bar span{font-size:.85rem;color:#C8CAC3;line-height:1.3}
+.cta-bar b{color:#fff}
+.cta-bar .btn{width:auto;margin:0;padding:12px 16px;background:var(--hazard);color:var(--ink);font-size:.82rem;white-space:nowrap}
+body.demo .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
+.lock{position:relative;overflow:hidden}
+.lock .blur{filter:blur(5px);pointer-events:none;user-select:none;opacity:.7}
+.lock .lockmsg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:16px}
+.lock .lockmsg div{background:var(--paper);border:1.5px solid var(--ink);border-radius:8px;padding:12px 16px;font-size:.88rem;max-width:280px;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.lock .lockmsg b{display:block;font-family:"Russo One";font-weight:400;margin-bottom:2px}
+.lockico{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+.mhead.locked{cursor:default}.mhead.locked .mn{color:var(--steel)}
+.sale h2{font-size:1.5rem;text-transform:none;line-height:1.15}
+.sale ul{list-style:none;margin-top:14px;display:grid;gap:10px}
+.sale li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;font-size:.95rem}
+.sale li i{width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--hazard);display:grid;place-items:center;font-style:normal;font-family:"Russo One";font-size:.8rem}
+.sale li span small{display:block;color:var(--steel);font-size:.82rem}
+.price{font-family:"Russo One";font-size:1.8rem;margin-top:16px}
+.price s{font-size:1rem;color:var(--steel);margin-left:8px}
+.sale .btn.buy{background:var(--hazard);color:var(--ink);font-size:1.05rem;padding:18px}
+.sale .fine{font-size:.8rem;color:var(--steel);margin-top:8px;text-align:center}
+.leadrow{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}
+.leadrow .btn{margin:0;width:auto}
+.demo-badge{display:inline-block;background:var(--hazard);color:var(--ink);font-family:"Russo One";font-size:.7rem;padding:3px 8px;border-radius:3px;letter-spacing:.05em;text-transform:uppercase}
+</style>
+</head>
+<body class="demo">
+<div class="stripe"></div>
+<div class="wrap">
+<header>
+  <div class="brand">Строгий режим<small>пробный день · «Шагай Дома»</small></div>
+  <span class="demo-badge">Демо</span>
+</header>
+
+<!-- СТАРТ -->
+<div id="hello">
+  <h1 class="qtitle">Узнай свою дату выхода</h1>
+  <p class="lead">7 коротких вопросов — и программа посчитает безопасную цель, твой срок и соберёт пробный день: тренировку и меню.</p>
+  <button class="btn" id="startBtn">Начать — 2 минуты</button>
+  <p class="note" style="text-align:center">Без регистрации</p>
+</div>
+
+<!-- ВОПРОСЫ -->
+<div id="onb" class="hidden">
+  <div class="prog"><span id="stepNo"></span><span class="track"><i id="stepBar"></i></span></div>
+  <div id="stepBody"></div>
+  <div class="msg" id="onbMsg" role="alert"></div>
+  <div class="nav"><button class="btn ghost" id="backBtn">Назад</button><button class="btn" id="nextBtn">Дальше</button></div>
+</div>
+
+<!-- ЛИЧНОЕ ДЕЛО -->
+<div id="reveal" class="hidden"><div class="in">
+  <div class="rvhead">Заводим личное дело</div>
+  <div id="rvLines"></div>
+  <div class="dossier" id="dossier"></div>
+</div></div>
+
+<!-- ПРОБНЫЙ ДЕНЬ -->
+<div id="cabinet" class="hidden">
+  <div class="wall" id="relCard">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="chalk" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2"/></filter></defs></svg>
+    <div class="wall-top"><span class="cellno" id="stamp">Камера</span><span class="rankchip" id="rankChip"></span></div>
+    <h1 id="hName"></h1><p class="line" id="hLine"></p>
+    <svg class="tally" id="tally" role="img" aria-label="Дни срока"></svg>
+    <div class="relrow"><div><span class="lbl">Дата выхода, если начать сегодня</span><div class="date" id="relDate">—</div></div><div class="left"><b id="daysLeft">—</b><span id="daysLeftL"></span></div></div>
+  </div>
+
+  <section class="quests" id="questSec">
+    <div class="qhead"><h2>День 1</h2><div class="ring" id="qRing"></div></div>
+    <div id="dayStamp"></div>
+    <div id="today"></div>
+  </section>
+
+  <section id="menuSec">
+    <div class="h2row"><h2>Меню дня 1</h2><span class="note" id="menuKcal" style="margin:0"></span></div>
+    <div class="menu"><div class="day" id="menu"></div></div>
+  </section>
+
+  <section class="lock" id="lockedPlan">
+    <div class="blur" id="lockedBody"></div>
+    <div class="lockmsg"><div><b id="lockTitle">Дни 2–79</b>Тренировки без повторов, меню на каждый день, замеры и график — в полной версии</div></div>
+  </section>
+
+  <section class="sale" id="sale"></section>
+</div>
+</div>
+
+<div class="cta-bar hidden" id="ctaBar"><span id="ctaText"></span><a class="btn" id="ctaBtn" href="#sale">Полный доступ</a></div>
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="mbox"><div id="mIcon"></div><p class="mk" id="mKicker">Новая нашивка</p><h3 id="mTitle"></h3><p id="mText"></p><button class="btn" id="mClose">Забрать</button></div></div>
+
+<script>
+/* ================= НАСТРОЙКИ ДЕМО ================= */
+// Ссылка на покупку полного доступа (страница оплаты). Откроется поверх лендинга.
+const BUY_URL='https://walk-walk.ru/';
+// Цена: оставь пустым, чтобы не показывать. OLD_PRICE — зачёркнутая, необязательно.
+const PRICE='', OLD_PRICE='';
+// Пробная тренировка — одна для всех. Лучше дать открытую ссылку (VK Видео, YouTube, Rutube),
+// иначе без доступа к школе она не откроется.
+const DEMO_WORKOUT={title:'Шагай дома: пробная тренировка',level:'Новичок',url:'https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339702301'};
+// Сколько секунд после старта тренировки ждать до кнопки «Готово» (в полной версии — 20 минут).
+const DEMO_WAIT=15;
+// Сохранять email из формы «Пришлите мне…» в Firestore (коллекция strict_leads).
+const SAVE_LEADS=true;
+const firebaseConfig={apiKey:"AIzaSyApSUQxealmL13siDzauRWO_J6-fSHkN-4",authDomain:"walk-walk-d8a14.firebaseapp.com",projectId:"walk-walk-d8a14",storageBucket:"walk-walk-d8a14.firebasestorage.app",messagingSenderId:"1022340791272",appId:"1:1022340791272:web:d4009903a21ffdb0dac25d"};
+
+/* ================= ДАННЫЕ (собраны из workouts.js и recipes.js) ================= */
+const WSTAT=[["Раскрываем женственность",2],["Раскрываем женственность",3],["Раскрываем женственность",1],["Раскрываем женственность",3],["Раскрываем женственность",2],["Раскрываем женственность",2],["Раскрываем женственность",1],["Раскрываем женственность",1],["Раскрываем женственность",2],["Учимся танцевать",2],["Учимся танцевать",2],["Учимся танцевать",1],["Учимся танцевать",1],["Шагай и танцуй",1],["Шагай и танцуй",1],["Шагай и танцуй",1],["Шагай и танцуй",1],["Шагай и танцуй",1],["Шагай и танцуй",1],["Танцевальный фитнес",2],["Танцевальный фитнес",2],["Танцевальный фитнес",2],["Танцевальный фитнес",2],["Танцевальный фитнес",2],["Танцевальный фитнес",2],["Танцевальный фитнес",2],["Танцевальный фитнес",2],["Танцевальный фитнес",2],["Танцевальный фитнес",2],["Танцевальный фитнес",2],["Танцевальный фитнес",2],["В стиле Тай-Бо",2],["В стиле Тай-Бо",2],["В стиле Тай-Бо",2],["В стиле Тай-Бо",2],["В стиле Тай-Бо",2],["В стиле Тай-Бо",2],["В стиле Тай-Бо",2],["В стиле Тай-Бо",2],["Лимфодренажные тренировки",2],["Лимфодренажные тренировки",2],["Лимфодренажные тренировки",2],["Лимфодренажные тренировки",2],["Лимфодренажные тренировки",2],["Лимфодренажные тренировки",2],["Лимфодренажные тренировки",2],["Лимфодренажные тренировки",2],["Лимфодренажные тренировки",2],["Лимфодренажные тренировки",2],["Шагательная табата",1],["Шагательная табата",2],["Шагательная табата",1],["Шагательная табата",1],["Шагательная табата",1],["Шагательная табата",1],["Шагательная табата",1],["Шагательная табата",3],["Шагательная табата",3],["Шагательная табата",3],["Шагательная табата",2],["Шагательная табата",2],["Шагательная табата",2],["Шагательная табата",2],["Шагательная табата",1],["Шагательная табата",2],["Шагательная табата",2],["Шагательная табата",2],["Шагательная табата",3],["Шагательная табата",3],["Шагательная табата",3],["Зумбавидные тренировки",2],["Зумбавидные тренировки",2],["Зумбавидные тренировки",3],["Зумбавидные тренировки",3],["Зумбавидные тренировки",3],["Зумбавидные тренировки",3],["Зумбавидные тренировки",3],["Плавный старт",1],["Плавный старт",1],["Плавный старт",1],["Плавный старт",2],["Плавный старт",2],["Плавный старт",2],["Плавный старт",3],["Плавный старт",3],["Плавный старт",3],["Плавный старт",3],["Мягкий фитнес",1],["Мягкий фитнес",1],["Мягкий фитнес",1],["Мягкий фитнес",1],["Мягкий фитнес",1],["Шагай дома. Активно",3],["Шагай дома. Активно",3],["Шагай дома. Активно",3],["Шагай дома. Активно",3],["Шагай дома. Активно",3],["Шагай дома. Активно",3],["Шагай дома. Активно",3],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Шагай дома. БАЗА",1],["Тренировки для 100 кг+",1],["Тренировки для 100 кг+",1],["Тренировки для 100 кг+",1],["Тренировки для 100 кг+",1],["Тренировки для 100 кг+",1],["Тренировки для 100 кг+",1],["Тренировки для 100 кг+",1],["Тренировки для 50+",3],["Тренировки для 50+",2],["Тренировки для 50+",1],["Тренировки для 50+",2],["Тренировки для 50+",2],["Тренировки для 50+",1],["Тренировки для 50+",2]];     // [программа, уровень] — для подсчёта, сколько тренировок подойдёт
+const RTAGS=[["breakfast",["dairy"]],["breakfast",["fish","dairy","egg"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["egg"]],["breakfast",["gluten","egg"]],["breakfast",["gluten","egg"]],["breakfast",["fish","egg","gluten"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["dairy","gluten"]],["breakfast",["egg","gluten"]],["breakfast",["dairy"]],["breakfast",["poultry","dairy","egg"]],["breakfast",["meat","poultry","dairy","egg","gluten"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["poultry","egg","gluten"]],["breakfast",["dairy","nuts"]],["breakfast",["poultry","dairy","egg","nuts"]],["breakfast",["dairy"]],["breakfast",["poultry","dairy","egg"]],["breakfast",["dairy","egg"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["mushroom"]],["breakfast",[]],["breakfast",["egg"]],["breakfast",["poultry","dairy","gluten"]],["breakfast",["dairy","egg"]],["breakfast",["dairy","egg"]],["breakfast",["dairy","nuts"]],["breakfast",["dairy","egg"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["dairy"]],["breakfast",["dairy","gluten","egg"]],["breakfast",["dairy"]],["breakfast",["dairy","gluten","egg"]],["breakfast",["dairy","gluten","egg"]],["breakfast",["fish","dairy","gluten"]],["breakfast",["dairy"]],["breakfast",["dairy","gluten","egg"]],["breakfast",["poultry","dairy","egg"]],["breakfast",["poultry","dairy","nuts"]],["breakfast",["dairy","egg","nuts"]],["breakfast",["dairy","gluten","egg"]],["breakfast",["fish","dairy","gluten"]],["breakfast",["dairy"]],["breakfast",["poultry","dairy","gluten"]],["breakfast",["egg","mushroom"]],["breakfast",["dairy"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["dairy","egg"]],["breakfast",["fish","dairy","gluten"]],["breakfast",["dairy"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["fish","dairy","egg"]],["breakfast",["poultry","dairy","gluten"]],["breakfast",["dairy","egg"]],["breakfast",["egg","gluten"]],["breakfast",["fish","egg","gluten"]],["breakfast",["fish","egg"]],["breakfast",["dairy","nuts"]],["breakfast",["dairy"]],["breakfast",["fish","dairy","egg","gluten"]],["breakfast",["dairy","mushroom"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["fish","dairy","egg","gluten"]],["breakfast",["dairy","egg"]],["breakfast",["fish","dairy","gluten"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["dairy","nuts"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["dairy","gluten","egg"]],["breakfast",["dairy"]],["breakfast",["dairy","gluten","egg"]],["breakfast",["dairy","egg"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["dairy","egg"]],["breakfast",["dairy"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["dairy","egg"]],["breakfast",["dairy","egg"]],["breakfast",["dairy","mushroom","gluten","egg"]],["breakfast",["dairy","egg","gluten"]],["breakfast",["nuts","egg"]],["breakfast",["gluten","egg"]],["breakfast",["dairy"]],["breakfast",["poultry","dairy","gluten","egg"]],["breakfast",["dairy","nuts"]],["breakfast",["dairy","egg"]],["breakfast",["dairy","nuts"]],["breakfast",[]],["breakfast",["dairy"]],["breakfast",[]],["breakfast",[]],["breakfast",["poultry","dairy","egg"]],["breakfast",["dairy","gluten","egg"]],["breakfast",["fish","dairy","gluten","egg"]],["breakfast",["fish","dairy","egg"]],["breakfast",["dairy","nuts"]],["breakfast",["poultry","dairy","gluten","egg"]],["breakfast",["dairy","egg"]],["snack",["dairy","egg","gluten"]],["snack",["fish","dairy","gluten"]],["snack",["poultry","mushroom"]],["snack",["poultry","dairy","gluten"]],["snack",["poultry","dairy"]],["snack",["dairy","gluten"]],["snack",["fish","dairy","gluten"]],["snack",["dairy","nuts"]],["snack",["dairy","nuts"]],["snack",[]],["snack",["fish","dairy"]],["snack",["dairy"]],["snack",["poultry","gluten"]],["snack",["dairy"]],["snack",["dairy","nuts"]],["snack",["dairy","nuts","egg"]],["snack",["egg","gluten"]],["snack",["dairy","egg","gluten"]],["snack",["poultry","dairy","gluten","egg"]],["snack",["poultry","dairy"]],["snack",["dairy"]],["snack",["nuts"]],["snack",[]],["snack",["dairy","egg","gluten"]],["snack",["dairy","gluten"]],["snack",["dairy","nuts","gluten"]],["snack",["dairy","nuts"]],["snack",["dairy","gluten"]],["snack",["dairy","nuts"]],["snack",["dairy"]],["snack",["poultry","dairy","egg"]],["snack",["egg"]],["snack",["dairy"]],["snack",[]],["snack",["fish","gluten"]],["snack",["dairy"]],["snack",["dairy","gluten"]],["snack",["poultry","dairy","nuts"]],["snack",["dairy"]],["snack",["dairy"]],["snack",["dairy","nuts"]],["snack",["dairy","egg","gluten"]],["snack",["dairy"]],["snack",["dairy","gluten"]],["snack",["mushroom"]],["snack",["poultry"]],["snack",["fish","dairy"]],["snack",["poultry"]],["snack",["poultry","dairy","gluten"]],["snack",["dairy","nuts"]],["snack",[]],["snack",["dairy","egg","gluten"]],["snack",["dairy","nuts","gluten"]],["snack",["fish","dairy","gluten"]],["snack",["dairy","nuts"]],["snack",["poultry","dairy","gluten"]],["snack",["dairy","gluten"]],["snack",["dairy","egg","gluten"]],["snack",["poultry","dairy"]],["snack",["fish","poultry","dairy","egg"]],["snack",["dairy"]],["snack",["dairy"]],["snack",["dairy","gluten"]],["snack",["dairy","gluten"]],["snack",["gluten"]],["snack",["dairy"]],["snack",["dairy","nuts","gluten"]],["snack",["meat","dairy"]],["snack",["dairy","gluten"]],["snack",["dairy","gluten"]],["snack",[]],["snack",["dairy","egg"]],["snack",["dairy","egg","gluten"]],["snack",["dairy"]],["snack",["dairy"]],["snack",["poultry"]],["snack",["dairy","nuts"]],["snack",["dairy","egg"]],["snack",["dairy","gluten"]],["snack",["dairy","egg","gluten"]],["snack",["dairy","egg","gluten"]],["snack",["dairy"]],["snack",["dairy","egg","gluten"]],["snack",["dairy","gluten"]],["snack",["dairy","nuts"]],["snack",["dairy","gluten"]],["snack",["dairy","gluten"]],["snack",["dairy","nuts"]],["snack",["dairy","egg","gluten"]],["snack",["dairy"]],["snack",[]],["snack",["dairy"]],["snack",["dairy","nuts"]],["snack",["dairy","egg"]],["snack",["dairy","gluten"]],["snack",["dairy","gluten"]],["snack",["dairy","nuts"]],["snack",["dairy"]],["snack",[]],["snack",["poultry","dairy","nuts","gluten"]],["snack",["dairy","egg"]],["snack",["fish","dairy","egg"]],["snack",["fish","dairy"]],["snack",["dairy"]],["lunch",["poultry","mushroom","gluten"]],["lunch",["poultry","dairy"]],["lunch",["fish","dairy"]],["lunch",["dairy","nuts"]],["lunch",["poultry"]],["lunch",["fish"]],["lunch",["meat","poultry","dairy"]],["lunch",["fish"]],["lunch",["dairy","gluten"]],["lunch",["fish"]],["lunch",["poultry"]],["lunch",["poultry"]],["lunch",["egg"]],["lunch",["fish"]],["lunch",["fish","gluten"]],["lunch",["poultry"]],["lunch",["meat","poultry","mushroom","egg"]],["lunch",["meat","egg"]],["lunch",["dairy","egg"]],["lunch",["poultry","egg"]],["lunch",["fish","poultry"]],["lunch",["dairy","mushroom"]],["lunch",["poultry","dairy"]],["lunch",["poultry"]],["lunch",["poultry","gluten"]],["lunch",["dairy","nuts"]],["lunch",["fish","dairy"]],["lunch",["poultry","gluten"]],["lunch",["poultry"]],["lunch",["meat","poultry","gluten"]],["lunch",["poultry","dairy","mushroom"]],["lunch",["fish","dairy"]],["lunch",["poultry","gluten"]],["lunch",["fish","egg"]],["lunch",["poultry","egg","gluten"]],["lunch",["fish"]],["lunch",["gluten"]],["lunch",[]],["lunch",["fish","gluten"]],["lunch",["poultry"]],["lunch",["poultry","gluten"]],["lunch",["meat","mushroom"]],["lunch",["meat","egg"]],["lunch",["dairy"]],["lunch",["poultry"]],["lunch",[]],["lunch",["fish"]],["lunch",["poultry"]],["lunch",["fish"]],["lunch",["meat","gluten"]],["lunch",["poultry","dairy"]],["lunch",["meat","dairy"]],["lunch",["poultry"]],["lunch",["poultry"]],["lunch",["fish","dairy"]],["lunch",["dairy","mushroom","gluten"]],["lunch",["meat"]],["lunch",["poultry","dairy"]],["lunch",["fish","dairy"]],["lunch",["poultry","egg","gluten"]],["lunch",["poultry","dairy"]],["lunch",["poultry","mushroom"]],["lunch",["fish"]],["lunch",["meat","poultry","dairy","mushroom"]],["lunch",["poultry","gluten"]],["lunch",["dairy","egg"]],["lunch",["fish"]],["lunch",["meat","poultry"]],["lunch",["poultry","gluten"]],["lunch",["poultry","dairy","gluten"]],["lunch",["poultry","dairy"]],["lunch",["fish","dairy","gluten"]],["lunch",["poultry"]],["lunch",["fish","dairy","egg"]],["lunch",["meat","gluten"]],["lunch",[]],["lunch",["poultry","dairy"]],["lunch",["fish","meat","dairy","gluten"]],["lunch",["poultry","egg"]],["lunch",["poultry","dairy"]],["lunch",["meat"]],["lunch",["poultry"]],["lunch",["poultry"]],["lunch",["poultry"]],["lunch",["fish","dairy","egg"]],["lunch",["fish"]],["lunch",["poultry"]],["lunch",["meat","poultry"]],["lunch",["meat","poultry","dairy","egg"]],["lunch",["meat","poultry"]],["lunch",["fish","poultry"]],["lunch",["fish","poultry","gluten"]],["lunch",["meat","dairy","mushroom"]],["lunch",["meat","poultry"]],["lunch",["poultry","nuts"]],["lunch",["fish","gluten"]],["lunch",["poultry"]],["lunch",["fish","gluten"]],["lunch",["poultry"]],["lunch",["poultry"]],["lunch",["meat"]],["lunch",["poultry"]],["lunch",["fish","gluten"]],["dinner",["meat","dairy"]],["dinner",["meat","dairy","gluten"]],["dinner",["meat"]],["dinner",["meat","poultry","dairy"]],["dinner",["poultry","dairy"]],["dinner",["fish"]],["dinner",["fish"]],["dinner",["egg","gluten"]],["dinner",["dairy","egg","gluten"]],["dinner",["fish"]],["dinner",["fish","dairy"]],["dinner",["poultry","gluten"]],["dinner",["poultry"]],["dinner",["meat","poultry","dairy","egg"]],["dinner",["fish","poultry"]],["dinner",["poultry"]],["dinner",["fish","nuts","egg"]],["dinner",["meat"]],["dinner",["poultry","mushroom"]],["dinner",["fish"]],["dinner",["dairy"]],["dinner",[]],["dinner",[]],["dinner",["fish","dairy"]],["dinner",["meat"]],["dinner",["poultry"]],["dinner",["fish","dairy","egg","nuts"]],["dinner",["poultry","egg"]],["dinner",["poultry","dairy"]],["dinner",["poultry","dairy","egg"]],["dinner",["fish"]],["dinner",["dairy"]],["dinner",["poultry","dairy"]],["dinner",["fish","gluten"]],["dinner",["fish"]],["dinner",["poultry","gluten"]],["dinner",["poultry","dairy","gluten"]],["dinner",["fish","dairy","egg"]],["dinner",["fish"]],["dinner",["poultry","dairy"]],["dinner",["fish","dairy","nuts","egg"]],["dinner",["poultry"]],["dinner",["meat"]],["dinner",["fish","dairy","nuts"]],["dinner",["meat","dairy"]],["dinner",["meat","poultry","dairy"]],["dinner",["poultry","gluten"]],["dinner",["poultry"]],["dinner",["poultry","dairy"]],["dinner",["fish"]],["dinner",["fish","gluten"]],["dinner",["meat","dairy","gluten"]],["dinner",["meat","gluten"]],["dinner",["fish"]],["dinner",["poultry","dairy","egg"]],["dinner",["fish","dairy","egg","nuts"]],["dinner",["fish","egg"]],["dinner",["fish"]],["dinner",[]],["dinner",["poultry","dairy","egg"]],["dinner",["poultry","dairy"]],["dinner",["fish","gluten"]],["dinner",["meat","poultry","dairy"]],["dinner",["poultry","dairy","egg"]],["dinner",["meat","poultry"]],["dinner",["poultry","dairy"]],["dinner",["fish","dairy"]],["dinner",["poultry","dairy","egg"]],["dinner",["fish"]],["dinner",[]],["dinner",["meat","poultry","dairy","egg"]],["dinner",["poultry"]],["dinner",["poultry"]],["dinner",["poultry","dairy","egg"]],["dinner",["fish"]],["dinner",["egg"]],["dinner",["poultry","dairy"]],["dinner",["meat"]],["dinner",["fish","gluten"]],["dinner",["poultry","egg"]],["dinner",["poultry"]],["dinner",["poultry"]],["dinner",["fish","dairy"]],["dinner",["poultry"]],["dinner",["fish","poultry"]],["dinner",["fish"]],["dinner",["poultry"]],["dinner",["dairy","mushroom"]],["dinner",["poultry","egg"]],["dinner",["poultry","dairy","gluten"]],["dinner",["meat","poultry","dairy","mushroom"]],["dinner",["fish","egg","gluten"]],["dinner",["fish","dairy"]],["dinner",["meat"]],["dinner",["poultry","dairy","egg"]],["dinner",["fish","dairy","egg"]],["dinner",["poultry"]],["dinner",["fish"]],["dinner",["fish","dairy","egg"]],["dinner",["meat","egg"]],["dinner",["poultry"]],["dinner",["fish"]],["bake",["poultry","dairy","egg","gluten"]],["bake",["dairy","egg","gluten"]],["bake",["dairy"]],["bake",["dairy"]],["bake",["dairy","egg"]],["bake",["poultry","dairy","egg","mushroom","gluten"]],["bake",["poultry","dairy","egg","gluten"]],["bake",["dairy","egg","gluten"]],["bake",["dairy","egg","gluten"]],["bake",["fish","dairy","egg","gluten"]],["bake",["fish","dairy","egg","gluten"]],["bake",["poultry","dairy","egg","gluten"]],["bake",["dairy","egg","gluten"]],["bake",["dairy","egg","gluten"]]];     // [приём пищи, теги] — для подсчёта, сколько блюд подойдёт
+const DEMO_RECIPES=[{"id":"73b390d2","meal":"breakfast","name":"Запеченная фриттата с индейкой, сладким перцем и кабачком","nick":"Фанк-микс","kcal":225,"p":25.5,"f":11,"c":5,"servings":4,"tags":["poultry","dairy","egg"],"ingredients":["Молоко 1,5% — 100 мл","Филе грудки индейки (отварное или запеченное) — 200 г","Кабачок молодой — 200 г","Перец болгарский красный — 150 г","Сыр легкий (до 30% жирности) — 50 г","Свежая петрушка, прованские травы, соль, перец — По вкусу","Яйца куриные — 6 шт."],"steps":["Готовое филе индейки и болгарский перец нарезать небольшими кубиками, кабачок — тонкими четвертинками кружков.","В глубокой миске взбить венчиком яйца с молоком, солью, прованскими травами и перцем.","Форму для запекания слегка сбрызнуть водой или выстелить пергаментом.","Выложить в форму нарезанную индейку, кабачок и сладкий перец.","Залить овощи с мясом яично-молочной смесью, посыпать мелко нарубленной петрушкой.","Сверху равномерно присыпать натертым легким сыром.","Запекать в разогретой до 180°C духовке в течение 25–30 минут до золотистой корочки и стабильной середины."]},{"id":"14fb3506","meal":"breakfast","name":"Овсяноблин с легкой рикоттой и красной рыбой","nick":"Лечебная фитотерапия","kcal":330,"p":21,"f":15,"c":27,"servings":4,"tags":["fish","dairy","egg"],"ingredients":["Яйца куриные — 4 шт.","Молоко 1,5% — 120 мл","Рикотта легкая (или творожный сыр) — 120 г","Слабосоленая красная рыба (горбуша/кета) — 100 г","Свежая зелень (укроп или петрушка) — 20 г","Соль — По вкусу","Овсяные хлопья (долгой варки) — 120 г"],"steps":["Овсяные хлопья измельчить в блендере до состояния крупной крошки (но не в муку).","В миске смешать измельченные хлопья, яйца, молоко и щепотку соли. Оставить массу на 5–7 минут для набухания.","Красную рыбу нарезать тонкими слайсами. Зелень мелко порубить и смешать с рикоттой.","Антипригарную сковороду хорошо разогреть.","Вылить четверть овсяной массы, распределяя ложкой в ровный блин. Готовить под крышкой на среднем огне по 2–3 минуты с каждой стороны. Повторить для остальных порций.","Готовый горячий овсяноблин смазать порцией рикотты с зеленью.","На одну половину блина выложить ломтики рыбы и накрыть второй половиной."]},{"id":"f58d21ac","meal":"breakfast","name":"Слоистое творожное парфе с чиа и ассорти ягод","nick":"","kcal":228,"p":23,"f":9,"c":12,"servings":4,"tags":["dairy"],"ingredients":["Творог 5% (в брикетах) — 400 г","Семена чиа — 30 г","Вода фильтрованная (для чиа) — 100 мл","Свежие или замороженные ягоды (черника, малина) — 200 г","Подсластитель, ванилин — По вкусу"],"steps":["Семена чиа залить 100 мл теплой воды, перемешать и оставить на 15–20 минут до полного набухания и образования геля.","В глубокой миске соединить творог, греческий йогурт, подсластитель и ванилин на кончике ножа.","Тщательно пробить массу погружным блендером до состояния абсолютно гладкого, шелковистого крема.","Замороженные ягоды (если используются они) заранее разморозить и слегка размять вилкой, чтобы они пустили сок.","Подготовить 4 красивых прозрачных стакана или креманки.","Выложить ингредиенты слоями: сначала творожный крем, затем слой разбухших семян чиа, далее — слой сочных ягод.","4.0 Повторить слои еще раз. Перед подачей десерт можно охладить в холодильнике в течение 10 минут."]},{"id":"ad112e47","meal":"breakfast","name":"Овсянка на воде с семенами льна и бананом","nick":"Солнечное утро","kcal":320,"p":9,"f":8,"c":53,"servings":4,"tags":[],"ingredients":["Овсяные хлопья — 200г","Вода — 600мл","Семена льна — 20г (2 ст. л.)","Семечки подсолнечные — 20г","Банан спелый — 2 шт.","Соли"],"steps":["Хлопья засыпать в кипящую воду, посолить и варить до готовности (около 10–15 минут).","Снять кашу с огня, добавить семена льна, перемешать и накрыть крышкой на 5 минут.","Банан нарезать кружочками.","Разложить кашу по тарелкам, сверху выложить бананы и посыпать семечками."]},{"id":"5e9f3056","meal":"snack","name":"Йогуртовое парфе с гранолой и черникой","nick":"Funky Berry","kcal":190,"p":12,"f":5,"c":24,"servings":4,"tags":["dairy"],"ingredients":["Греческий йогурт 2% — 500 г","Черника (свежая или замороженная) — 200 г","Гранола запеченная (без сахара) — 80 г","Мёд или сироп топинамбура — 20 г","Мята свежая Для украшения"],"steps":["Если используется замороженная черника — достать её заранее и слить лишний сок.","Греческий йогурт смешать в миске с мёдом до однородного состояния.","Подготовить 4 прозрачных стакана или пиалы для красивой подачи.","На дно каждого стакана выложить по ложке сладкого йогурта.","Сверху сделать слой из ягод черники, затем посыпать хрустящей гранолой.","Повторить слои в такой же последовательности, пока ингредиенты не закончатся.","Верхний слой йогурта украсить оставшимися ягодами и листочком свежей мяты. Подавать сразу."]},{"id":"77e8bb4b","meal":"snack","name":"Печеные яблоки с творогом","nick":"Зимняя сказка","kcal":235,"p":14,"f":7,"c":29,"servings":4,"tags":["dairy","nuts"],"ingredients":["Яблоки крупные — 4 шт.","Мед — 20 г","Корица — 1 ч. л.","Творог 5% — 300 г","Изюм или клюква сушеная — 40 г","Грецкие орехи — 20 г"],"steps":["У яблок срезать верхушку ( «крышечку») и аккуратно ложкой вынуть сердцевину, не прорезая дно, чтобы получился «бочонок».","Смешать творог с промытым изюмом, корицей и медом.","Поставить яблоки в форму, налить на дно формы совсем немного воды (50 мл).","Запекать при 180°C около 20–25 минут, пока яблоко не станет мягким (но не должно разваливаться).","Плотно начинить яблоки творожной массой. Сверху посыпать рублеными орехами."]},{"id":"5beb15cf","meal":"snack","name":"Хумус из белой фасоли с овощными палочками","nick":"Полевая разведка","kcal":185,"p":8,"f":7,"c":22,"servings":4,"tags":[],"ingredients":["Фасоль белая консервированная 1 банка","Чеснок — 1 зубчик","Растительное масло — 10мл (2 ч. л.)","Сок лимона — 1 ч. л.","Огурец — 200г","Морковь — 200г для подачи"],"steps":["С фасоли слить жидкость. Поместить фасоль, чеснок, масло и лимонный сок в блендер.","Взбить до состояния гладкого пюре(если слишком г усто— добавить ложку воды).","Морковь и огурец нарезать длинными брусочками.","Подавать хумус в пиале, мака я в него овощные палочки."]},{"id":"b9d910b7","meal":"lunch","name":"Пряное филе индейки с булгуром и запеченной тыквой","nick":"Майами Хит","kcal":306,"p":31.5,"f":7,"c":25,"servings":4,"tags":["poultry","gluten"],"ingredients":["Крупа булгур (сухая) — 120 г","Тыква свежая (очищенная мякоть) — 400 г","Стручковая зеленая фасоль (замороженная) — 200 г","Оливковое масло — 1 ст. л. (15 г)","Чеснок 2 зубчика","Соль, молотая паприка, кумин — По вкусу","Филе грудки индейки — 500 г"],"steps":["Булгур засыпать в кастрюлю, залить кипятком (1:2), посолить и варить на минимальном огне под крышкой 15 минут до полного впитывания воды.","Филе индейки нарезать крупными кусочками, натереть смесью соли, паприки, кумина и измельченного чеснока.","Мякоть тыквы нарезать кубиками размером примерно 2х 2 см.","В форму для запекания выложить кусочки индейки, тыкву и стручковую фасоль (не размораживая). Сбрызнуть всё оливковым маслом.","Запекать в духовке, разогретой до 180°C, в течение 25 минут до мягкости тыквы и готовности мяса.","Подавать пряную индейку с овощами вместе с порцией теплого булгура."]},{"id":"0542b5a3","meal":"lunch","name":"Рыбная запеканка","nick":"По щучьему велению","kcal":310,"p":28,"f":10,"c":25,"servings":4,"tags":["fish","dairy"],"ingredients":["Филе минтая или хека — 700 г","Гречка отварная (на гарнир) — 400 г (готовой)","Соленый огурец ( — 2 шт.)","Морковь — 3 шт. (большие)","Лук — 2 шт.","Сметана 10% — 100 г"],"steps":["Морковь натрите, лук нарежьте. Спассеруйте на сковороде до мягкости.","В форму выложите куски рыбы, посолите. Сверху накройте толстым слоем овощей. Смажьте сметаной.","Запекайте 25 минут при 180°C.","Подавайте с гречкой и соленым огурчиком."]},{"id":"090d3c34","meal":"lunch","name":"Плов из бурого риса с курицей и нутом","nick":"","kcal":370,"p":32,"f":10,"c":38,"servings":4,"tags":["poultry"],"ingredients":["Филе","Куриное — 500г","Рис бурый (нешлифованный) — 160г (сухой вес)","Морковь — 2 шт.","Лук — 2 шт.","Чеснок — 1г","Оловка","Масло растительное — 20мл","Зира, барбарис, куркума, соль","Нут консервированный (или вареный) — 200г"],"steps":["В казане или глубокой сковороде обжарьте нарезанную курицу с луком и нарезанной соломкой морковью на масле (5-7 минут). Добавьте специи.","Всыпьте промытый рис и нут.","Залейте водой (на 1,5-2 см выше уровня риса). В центр воткните целую головку чеснока.","Тушите под крышкой на медленном огне 40-45 минут (бурый рис варится дольше белого).","Подавайте с ферментированными овощами (капустой или редькой) для пищеварения."]},{"id":"d4445b56","meal":"lunch","name":"Запеченный фалафель с хумусом и свежими овощами","nick":"MediterraneanMix","kcal":265,"p":11.7,"f":8.2,"c":36.2,"servings":4,"tags":[],"ingredients":["Хумус классический (готовый) — 100 г","Огурцы свежие — 200 г","Помидоры — 200 г","Перец болгарский — 150 г","Оливковое масло (для смазывания) — 10 г","Свежая петрушка или кинза Пучок","Чеснок 1 зубчик","Соль, зира (кумин) — По вкусу"],"steps":["Нут предварительно замочить в холодной воде минимум на 8–10 часов (на ночь). Воду слить.","Пропустить разбухший сырой нут через мясорубку или измельчить в блендере вместе с чесноком, зеленью, солью и зирой до состояния густого однородного фарша.","Влажными руками сформировать из нутовой массы небольшие шарики (фалафель). Выложить их на противень с пергаментом и слегка смазать оливковым маслом с помощью кисти.","Запекать в разогретой до 180°C духовке около 20–25 минут до образования золотистой корочки.","Огурцы, помидоры и болгарский перец нарезать крупными кусочками.","На тарелки выложить теплый запеченный фалафель, нарезку из свежих овощей и порцию готового хумуса в качестве соуса.","Нут (сухой) 200 г Калории на 100г ~106 КБЖУ на 1 порцию Калории 265 Белки 11,7г Жиры 8,2г Углеводы 36,2г"]},{"id":"e5c4da1d","meal":"dinner","name":"Нежные куриные котлеты с творогом и зеленью","nick":"","kcal":310,"p":32,"f":10,"c":20,"servings":4,"tags":["poultry","dairy","egg"],"ingredients":["Филе","Куриное — 600 г","Соль, перец — по вкусу","Овощное рагу или тушеная стручковая фасольЯброкколик — 600 г","Творог 5% — 200 г","Яйцо — 1 шт.","Зелень — 30 г","Лук — 100 г","Лук — 100 г","Чеснок в зубчика"],"steps":["Куриное филе пропустить через мясорубку или измельчить в блендере вместе с луком и чесноком.","Добавить к фаршу творог, яйцо, мелко рубленую зелень, соль и перец. Очень тщательно вымешать.","Сформировать влажными руками котлеты (получится 8-10 шт).","Выложить на противень с пергаментом или в форму. Запекать при 180°C 25-30 минут до золотистости. Также можно приготовить на пару.","Подавать с легким овощным гарниром."]},{"id":"5d5c0eee","meal":"dinner","name":"Судак, запеченный с цукини и прованскими травами","nick":"Вечерний покой","kcal":195,"p":28,"f":4.5,"c":7.5,"servings":4,"tags":["fish"],"ingredients":["Филе судака или трески — 600 г","Кабачки или цукини — 400 г","Помидоры черри — 200 г","Оливковое масло — 15 г (1 ст. л.)","Лимонный сок — 2 ст. л.","Соль, прованские травы — По вкусу"],"steps":["Филе судака промыть, обсушить и нарезать на 4 порционных куска.","Сбрызнуть рыбу лимонным соком, слегка посолить и посыпать прованскими травами.","Цукини нарезать тонкими кружочками, помидоры черри разрезать пополам.","В глубокую форму для запекания выложить ровным слоем кружочки цукини и половинки черри.","Овощи немного подсолить и сбрызнуть оливковым маслом.","Сверху на овощную «подушку» выложить подготовленные кусочки рыбы.","Запекать в разогретой до 180°C духовке в течение 20–23 минут до готовности рыбы."]},{"id":"3ed42a8c","meal":"dinner","name":"Запеченные овощи с моцареллой и рисом","nick":"Night Garden","kcal":405,"p":23,"f":15,"c":44,"servings":4,"tags":["dairy"],"ingredients":["Кабачок — 600 г","Баклажан — 600 г","Помидоры — 600 г","Моцарелла лайт — 320 г","Рис (сухой) — 135 г","Итальянские травы, свежий базилик, соль — По вкусу"],"steps":["Рис тщательно промыть под проточной водой, отварить до готовности в подсоленной воде и оставить теплым.","Кабачок, баклажан и помидоры вымыть и нарезать ровными кружочками толщиной около 1 см.","В глубокую форму для запекания выложить овощи вертикально, плотно чередуя кружки кабачка, баклажана и томата.","Равномерно посыпать овощные ряды солью и сушеными итальянскими травами.","Моцарелу лайт нарезать тонкими ломтиками и аккуратно распределить их между овощами и на поверхности блюда.","Запекать в духовке при 180°C около 30 минут, пока овощи не станут мягкими, а сыр полностью не расплавится.","На тарелки выложить подушку из теплого риса, сверху разместить сочные запеченные овощи с сыром и украсить листиками свежего базилика."]},{"id":"21b4aa43","meal":"dinner","name":"Салат из нута с редисом, огурцом и зеленью","nick":"Звездное небо","kcal":265,"p":14,"f":9,"c":32,"servings":4,"tags":[],"ingredients":["Нут конс. (или отварной) — 400г","Редис — 200г","Огурец свежий — 200г","Зеленый лук и петрушка—пучок растительное масло","Нерафинированное — 15мл","Лимонный сок — 1 ст. л., соль—по вкусу"],"steps":["Нут откинуть на дуршлаг и промыть.","Редис и огурец нарезать тонкими кружочками.","Зелень мелко порубить.","В большой миске смешать нут, овощи и зелень.","Заправить маслом, лимонным соком и солью. Тщательно перемешать."]}];
+
+/* ================= УТИЛИТЫ ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const DAY=864e5,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const num=v=>{const n=parseFloat(String(v??'').replace(',','.'));return isNaN(n)?null:n};
+const g=v=>v==null?'—':(Math.round(v*10)/10).toString().replace('.',',');
+const pl=(n,a,b,c)=>{n=Math.abs(n)%100;const m=n%10;return n>10&&n<20?c:m===1?a:m>=2&&m<=4?b:c};
+const fmt=d=>d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function store(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
+function recall(k){try{return localStorage.getItem(k)}catch(e){return null}}
+const SCREENS=['hello','onb','reveal','cabinet'];
+function show(id){SCREENS.forEach(s=>$(s).classList.toggle('hidden',s!==id));document.querySelector('header').classList.toggle('hidden',id==='reveal');$('ctaBar').classList.toggle('hidden',id!=='cabinet');window.scrollTo(0,0)}
+let toastT;function toast(t){let el=$('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';el.setAttribute('role','status');document.body.appendChild(el)}el.textContent=t;el.classList.remove('hidden');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.add('hidden'),3500)}
+const dossierNo=s=>{let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))%9000;return String(1000+h)};
+
+/* ================= РАСЧЁТ ЦЕЛИ (как в полной версии) ================= */
+function goalCheck(d){
+  const w=num(d.weight),h=num(d.height),loss=num(d.loss),age=num(d.age),act=num(d.act)||1.375,sex=d.sex||'f';
+  if(!w||!h||!loss||w<35||h<130)return{state:'empty'};
+  const hm=(h/100)**2,b=w/hm,bmr=Math.round(sex==='m'?10*w+6.25*h-5*(age||35)+5:10*w+6.25*h-5*(age||35)-161);
+  const kcal=Math.max(sex==='m'?1500:1200,bmr,Math.round(bmr*act*.8));
+  if(b<18.5)return{state:'stop',b,text:`ИМТ ${g(b)} — уже ниже нормы. Снижать вес дальше небезопасно.`};
+  const minW=Math.ceil(19.5*hm*10)/10,want=Math.round((w-loss)*10)/10,tb=want/hm;
+  let goal=want,state='ok',text;
+  if(tb<18.5){goal=minW;state='warn';
+    if(goal>=w)return{state:'stop',b,text:`Твой вес уже у нижней границы нормы — сбрасывать не нужно.`};
+    text=`${want} кг — это ИМТ ${g(tb)}, ниже безопасной границы. Возьмём <b>${goal} кг</b>.`;
+  }else text=`Цель ${goal} кг безопасна: ИМТ ${g(tb)}.`;
+  const weekly=Math.round(Math.min(1,w*.01)*10)/10,planDays=Math.max(14,Math.ceil((w-goal)/weekly*7));
+  return{state,b,goal,want,weekly,planDays,bmr,kcal,text};
+}
+
+/* ================= ВОПРОСЫ ================= */
+const DANCE=['Раскрываем женственность','Учимся танцевать','Шагай и танцуй','Танцевальный фитнес','Зумбавидные тренировки'];
+const HIGH=['Шагательная табата','Зумбавидные тренировки','В стиле Тай-Бо','Шагай дома. Активно'];
+const STOPS=[['preg','Беременность или кормление грудью'],['dis','Диабет на инсулине, болезни сердца или почек'],['ed','Расстройство пищевого поведения в прошлом'],['op','Операция в последние 3 месяца']];
+const ACTS=[[1.2,'Сидячий день','Работа за компьютером'],[1.375,'Немного движения','5–7 тысяч шагов'],[1.55,'Много на ногах','Активная работа или спорт']];
+const FOODTAGS=[['fish','Рыба'],['meat','Говядина и свинина'],['poultry','Птица'],['dairy','Молочное'],['egg','Яйца'],['mushroom','Грибы'],['nuts','Орехи'],['gluten','Мука и хлеб']];
+let D={sex:'f',act:1.375,noTags:[],stops:[],level:1,dance:'yes',joints:'no'};
+const opt=(key,v,l,sel)=>`<button class="opt" data-set="${key}" data-v="${v}" aria-pressed="${String(sel)===String(v)}">${l}</button>`;
+const inp=(f,label,type='text',ph='')=>`<label for="f_${f}">${label}</label><input id="f_${f}" data-f="${f}" type="${type}" value="${esc(D[f]??'')}" placeholder="${ph}" ${type==='number'?'inputmode="decimal"':''}>`;
+function liveHtml(){const c=goalCheck(D);if(c.state==='empty')return'';if(c.state==='stop')return`<div class="verdict stop"><p>${c.text}</p></div>`;
+  return`<div class="verdict ${c.state}"><p>${c.text}</p><div class="nums"><div>ИМТ<b>${g(c.b)}</b></div><div>темп<b>${g(c.weekly)} кг/нед</b></div><div>срок<b>${c.planDays} дн.</b></div></div></div>`}
+const STEPS=[
+  {t:()=>'Как тебя зовут?',h:()=>inp('name','Имя','text','Например, Оля'),v:()=>(D.name||'').trim()?true:'Напиши имя'},
+  {t:()=>`${esc(D.name)}, пара цифр`,h:()=>`<div class="opts">${opt('sex','f','Женщина',D.sex)}${opt('sex','m','Мужчина',D.sex)}</div><div class="row">${'<div>'+inp('age','Возраст','number','38')+'</div><div>'+inp('height','Рост, см','number','165')+'</div>'}</div>`,
+   v:()=>{const a=num(D.age),h=num(D.height);if(!a||!h)return'Заполни возраст и рост';if(a<18)return'Строгий режим — только с 18 лет';if(a>90||h<130||h>220)return'Проверь цифры';return true}},
+  {t:()=>'Вес и цель',h:()=>`<div class="row"><div>${inp('weight','Вес сейчас, кг','number','72')}</div><div>${inp('loss','Хочу сбросить, кг','number','7')}</div></div><div class="live" id="live">${liveHtml()}</div>`,live:1,
+   v:()=>{const c=goalCheck(D);if(c.state==='empty')return'Впиши вес и цель';if(c.state==='stop')return'С такими цифрами строгий режим не подходит';return true}},
+  {t:()=>'Твой обычный день',h:()=>ACTS.map(([v,t,s])=>`<button class="opt card-opt" data-set="act" data-v="${v}" aria-pressed="${String(D.act)===String(v)}"><b>${t}</b><span>${s}</span></button>`).join(''),v:()=>true},
+  {t:()=>'Есть что-то из этого?',h:()=>STOPS.map(([k,l])=>`<button class="opt card-opt" data-multi="stops" data-v="${k}" aria-pressed="${D.stops.includes(k)}"><b>${l}</b></button>`).join('')+(D.stops.length?`<div class="verdict stop"><p>С этим строгий режим может навредить — только с разрешения врача. Напиши нам, подберём мягкую программу.</p></div>`:''),
+   v:()=>D.stops.length?'Строгий режим недоступен без разрешения врача':true},
+  {t:()=>'Пара вопросов о тренировках',h:()=>`<div class="q"><p>Как сейчас с движением?</p><div class="opts">${opt('level',1,'Почти не двигаюсь',D.level)}${opt('level',2,'Иногда тренируюсь',D.level)}${opt('level',3,'Регулярно',D.level)}</div></div>
+   <div class="q"><p>Танцевальные тренировки?</p><div class="opts">${opt('dance','yes','Люблю',D.dance)}${opt('dance','no','Не моё',D.dance)}</div></div>
+   <div class="q"><p>Ограничения по коленям или спине?</p><div class="opts">${opt('joints','no','Нет',D.joints)}${opt('joints','yes','Есть',D.joints)}</div></div>`,v:()=>true},
+  {t:()=>'Что ты не ешь?',h:()=>`<div class="opts">${FOODTAGS.map(([k,l])=>`<button class="opt" data-multi="noTags" data-v="${k}" aria-pressed="${D.noTags.includes(k)}">${l}</button>`).join('')}</div><p class="note">Если ешь всё — просто жми «Дальше».</p>`,v:()=>true}
+];
+let si=0;
+function renderStep(){const s=STEPS[si];$('stepBar').style.width=((si+1)/STEPS.length*100)+'%';$('stepNo').textContent=`${si+1} из ${STEPS.length}`;
+  $('stepBody').innerHTML=`<h1 class="qtitle">${s.t()}</h1><div class="qbox">${s.h()}</div>`;$('onbMsg').textContent='';
+  $('nextBtn').textContent=si===STEPS.length-1?'Завести личное дело':'Дальше';}
+$('stepBody').oninput=e=>{const f=e.target.dataset.f;if(!f)return;D[f]=e.target.value;if(STEPS[si].live)$('live').innerHTML=liveHtml();$('onbMsg').textContent=''};
+$('stepBody').onclick=e=>{const b=e.target.closest('[data-set],[data-multi]');if(!b)return;
+  if(b.dataset.set){const v=b.dataset.v;D[b.dataset.set]=isNaN(+v)?v:+v}
+  if(b.dataset.multi){const k=b.dataset.multi,v=b.dataset.v;D[k]=D[k].includes(v)?D[k].filter(x=>x!==v):[...D[k],v]}
+  const y=scrollY;renderStep();scrollTo(0,y)};
+$('backBtn').onclick=()=>{if(si>0){si--;renderStep()}else show('hello')};
+$('nextBtn').onclick=()=>{const v=STEPS[si].v();if(v!==true){$('onbMsg').textContent=v;return}
+  if(si<STEPS.length-1){si++;renderStep();scrollTo(0,0);return}finish()};
+$('startBtn').onclick=()=>{si=0;renderStep();show('onb')};
+
+/* ================= РАСЧЁТ ЛИЧНОГО ДЕЛА ================= */
+let S=null;   // всё, что посчитали
+function finish(){
+  const c=goalCheck(D);
+  const lvl=D.joints==='yes'?Math.min(D.level,2):D.level,L=lvl<=1?[1]:[lvl-1,lvl];
+  const ex=new Set();if(D.dance==='no')DANCE.forEach(p=>ex.add(p));if(D.joints==='yes')HIGH.forEach(p=>ex.add(p));
+  if(num(D.weight)<95)ex.add('Тренировки для 100 кг+');if(num(D.age)<50)ex.add('Тренировки для 50+');
+  const pool=WSTAT.filter(([p,l])=>L.includes(l)&&!ex.has(p)).length;
+  const meals=RTAGS.filter(([,t])=>!t.some(x=>D.noTags.includes(x))).length;
+  S={name:D.name.trim(),num:dossierNo(D.name+D.weight+D.age),startW:num(D.weight),goal:c.goal,want:c.want,kcal:c.kcal,bmr:c.bmr,weekly:c.weekly,planDays:c.planDays,
+     pool,meals,allMeals:RTAGS.length,allW:WSTAT.length,noTags:D.noTags.slice(),dance:D.dance,joints:D.joints,lvl,log:{}};
+  S.menu=pickMenu();store('sr_demo',JSON.stringify(S));
+  reveal();
+}
+function pickMenu(){
+  const out={};let sum=0;
+  ['breakfast','snack','lunch','dinner'].forEach(m=>{const r=DEMO_RECIPES.filter(x=>x.meal===m).find(x=>!x.tags.some(t=>S.noTags.includes(t)))||null;out[m]=r&&r.id;sum+=r?r.kcal:0});
+  out.f=sum?Math.round(clamp(S.kcal/sum,.7,1.6)*20)/20:1;return out;
+}
+const RX=Object.fromEntries(DEMO_RECIPES.map(r=>[r.id,r]));
+const LVN={1:'Новичок',2:'База',3:'Продвинутый'};
+
+function reveal(){
+  show('reveal');
+  const rel=addDays(new Date(),S.planDays-1),noF=S.noTags.map(x=>FOODTAGS.find(f=>f[0]===x)[1].toLowerCase());
+  const cut=[];if(S.dance==='no')cut.push('танцы');if(S.joints==='yes')cut.push('прыжки и удары — бережём суставы');
+  const L=[
+    `Личное дело <b>№ ${S.num}</b> заведено на имя <b>${esc(S.name)}</b>`,
+    `Твоё тело в покое тратит <b>${S.bmr} ккал</b><small>Норма для снижения — ${S.kcal} ккал в день</small>`,
+    ...(S.want<S.goal?[`Цель ${S.want} кг заменили на <b>${S.goal} кг</b><small>Ниже — уже опасно для твоего роста</small>`]:[]),
+    `Безопасный темп — <b>${g(S.weekly)} кг в неделю</b><small>${S.startW} → ${S.goal} кг за ${S.planDays} ${pl(S.planDays,'день','дня','дней')}</small>`,
+    `Из ${S.allW} тренировок тебе подходят <b>${S.pool}</b><small>${cut.length?'убрали '+cut.join(', ')+'; ':''}уровень «${LVN[S.lvl]}»</small>`,
+    `Из ${S.allMeals} блюд для тебя — <b>${S.meals}</b><small>${noF.length?'без: '+noF.join(', '):'граммы — под твою норму'}</small>`
+  ];
+  $('rvLines').innerHTML=L.map(x=>`<div class="rvl"><div>${x}</div></div>`).join('');
+  $('dossier').innerHTML=`<span class="bigstamp" id="bigstamp">Принята</span><div class="no">Личное дело № ${S.num}</div><h3>${esc(S.name)}</h3>
+    <dl><dt>Статья</dt><dd>−${g(S.startW-S.goal)} кг</dd><dt>Паёк</dt><dd>${S.kcal} ккал в день</dd><dt>Режим</dt><dd>${S.pool} тренировок без повторов</dd></dl>
+    <div class="out"><span>Дата выхода, если начать сегодня</span><b>${fmt(rel)}</b></div>
+    <button class="btn" id="enterBtn">Пройти пробный день</button>`;
+  $('enterBtn').onclick=openDemo;
+  const lines=[...document.querySelectorAll('.rvl')],step=reduced?0:700;
+  lines.forEach((el,i)=>setTimeout(()=>el.classList.add('on'),200+i*step));
+  setTimeout(()=>{$('dossier').classList.add('on');setTimeout(()=>$('bigstamp').classList.add('on'),reduced?0:500)},200+lines.length*step+(reduced?0:300));
+}
+
+/* ================= ПРОБНЫЙ ДЕНЬ ================= */
+const ICON={
+  train:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/></svg>',
+  food:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="7"/><path d="M12 3v3"/></svg>',
+  bonus:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2.8 2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9Z"/></svg>',
+  done:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  lock:'<svg class="lockico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
+};
+const badgeSvg=(gl,on)=>`<svg viewBox="0 0 64 72" aria-hidden="true"><path d="M32 3 59 13v25c0 16-13 26-27 31C18 64 5 54 5 38V13Z" fill="${on?'#1F211D':'#DCDDD7'}"/><path d="M32 9 53 17v21c0 13-10 21-21 25-11-4-21-12-21-25V17Z" fill="none" stroke="${on?'#F2C230':'#BFC1BA'}" stroke-width="1.6" stroke-dasharray="3 2.5"/><text x="32" y="46" text-anchor="middle" font-family="Russo One,sans-serif" font-size="22" fill="${on?'#F2C230':'#A9ACA4'}">${gl}</text></svg>`;
+let justDone=false,openMeal=null;
+const pts=()=>(S.log.done?10:0)+(S.log.food?5:0)+(S.log.bonus?3:0)+(S.log.done&&S.log.food?5:0);
+function openDemo(){show('cabinet');render();setTimeout(()=>toast('Это твой день 1. Выполни задания — и день засчитается'),600)}
+function renderTally(){
+  const total=S.planDays,perRow=30,gw=46,rh=48,rows=Math.ceil(total/perRow),ok=S.log.done&&S.log.food;
+  const rnd=i=>{const x=Math.sin(i*12.9898)*43758.5453;return x-Math.floor(x)};let s='';
+  for(let d=1;d<=total;d++){const i=d-1,row=Math.floor(i/perRow),gi=Math.floor((i%perRow)/5),k=i%5,gx=gi*gw+6,top=row*rh+8,j=rnd(d)*3-1.5;
+    const st=d===1?(ok?'ok now':'now'):'fut';
+    const path=k<4?`M${gx+k*8+j/2} ${top+j} L${gx+k*8-j/2} ${top+32-j/2}`:`M${gx-5} ${top+25+j} L${gx+30} ${top+7-j}`;
+    s+=`<path class="tl ${st}${d===1&&justDone&&ok?' draw':''}" d="${path}"/>`}
+  $('tally').setAttribute('viewBox',`0 0 ${6*gw} ${rows*rh}`);$('tally').innerHTML=s;
+}
+function quest(o){return`<div class="quest ${o.cls||''} ${o.done?'done':''}"><div class="qi">${o.done?ICON.done:ICON[o.icon]}</div><div class="qt"><b>${o.title}</b><span>${o.sub}</span></div><div class="qr">${o.done?`<span class="pts">+${o.pts}</span>`:o.right||''}</div></div>`}
+function render(){
+  const l=S.log,ok=l.done&&l.food,rel=addDays(new Date(),S.planDays-1);
+  $('stamp').textContent=`Камера № ${S.num}`;$('rankChip').innerHTML=`<b>Новенькая</b> · ${pts()}`;
+  $('hName').textContent=S.name;
+  $('hLine').textContent=ok?`День 1 засчитан. Так выглядит каждый из ${S.planDays} дней — до ${S.goal} кг.`:'Пробный день: тренировка, меню и бонус. Попробуй, как это работает.';
+  $('relDate').textContent=fmt(rel);$('daysLeft').textContent=S.planDays;$('daysLeftL').textContent=pl(S.planDays,'день срока','дня срока','дней срока');
+  renderTally();
+  // задания
+  let tr='';
+  if(!l.done){if(!l.opened)tr=`<a class="btn small" href="${esc(DEMO_WORKOUT.url)}" target="_blank" rel="noopener" data-act="open">Начать</a>`;
+    else{const lf=Math.ceil(DEMO_WAIT-(Date.now()-l.opened)/1000);tr=lf>0?`<button class="btn small" disabled>${lf} с</button>`:`<button class="btn small green" data-act="done">Готово</button>`}}
+  const Q=[{icon:'train',done:!!l.done,pts:10,title:esc(DEMO_WORKOUT.title),sub:DEMO_WORKOUT.level,right:tr},
+    {icon:'food',done:!!l.food,pts:5,title:'Питание по меню',sub:`${dayKcal()} ккал · меню ниже`,right:'<button class="btn small ghost" data-act="food">Буду есть</button>'},
+    {icon:'bonus',cls:'bonus',done:!!l.bonus,pts:3,title:'8 000 шагов',sub:'бонус',right:'<button class="btn small ghost" data-act="bonus">Да</button>'}];
+  $('today').innerHTML=Q.map(quest).join('');
+  const dn=Q.filter(q=>q.done).length,r=18,C=2*Math.PI*r;
+  $('qRing').innerHTML=`<svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="${r}" fill="none" stroke="#DCDDD7" stroke-width="5"/><circle cx="22" cy="22" r="${r}" fill="none" stroke="${dn===3?'#1F7A4D':'#1F211D'}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C*dn/3} ${C}" transform="rotate(-90 22 22)"/></svg><b style="color:var(--ink)">${dn}/3</b>`;
+  $('dayStamp').innerHTML=ok?`<div class="daystamp ${justDone?'slam':''}">День засчитан</div>`:'';
+  renderMenu();renderLocked();renderSale();
+  $('ctaText').innerHTML=ok?`<b>День 1 из ${S.planDays}</b> засчитан`:`До <b>${S.goal} кг</b> — ${S.planDays} ${pl(S.planDays,'день','дня','дней')}`;
+  justDone=false;
+}
+setInterval(()=>{if(S&&S.log.opened&&!S.log.done&&!$('cabinet').classList.contains('hidden'))render()},1000);
+const dayKcal=()=>Math.round(['breakfast','snack','lunch','dinner'].reduce((s,m)=>s+(RX[S.menu[m]]?RX[S.menu[m]].kcal:0),0)*S.menu.f);
+$('today').onclick=e=>{const a=e.target.closest('[data-act]');if(!a)return;const l=S.log,was=l.done&&l.food;
+  if(a.dataset.act==='open'){l.opened=Date.now();setTimeout(render,200);save();return}
+  if(a.dataset.act==='done'){l.done=Date.now();toast('+10 баллов поведения');badge('1','Первый шаг','Первая тренировка в лагере')}
+  if(a.dataset.act==='food'){l.food=true;toast('+5 баллов поведения')}
+  if(a.dataset.act==='bonus'){l.bonus=true;toast('+3 за бонус-задание')}
+  if(l.done&&l.food&&!was){justDone=true;setTimeout(()=>{badge('✓','День засчитан','Первая черта на стене. В лагере таких будет '+S.planDays);setTimeout(()=>document.getElementById('sale').scrollIntoView({behavior:reduced?'auto':'smooth'}),400)},1100)}
+  save();render()};
+function save(){store('sr_demo',JSON.stringify(S))}
+
+/* меню: 2 рецепта открыты, остальные — в полной версии */
+const OPEN=['breakfast','lunch'];
+const MEALN={breakfast:'Завтрак',snack:'Полдник',lunch:'Обед',dinner:'Ужин'};
+const QRX=/(\d+(?:[.,]\d+)?)(?:\s*[-–]\s*(\d+(?:[.,]\d+)?))?\s*(кг|гр|г|мл|л|шт\.?|ст\.\s?л\.?|ч\.\s?л\.?|зубч\w*)(?![а-яё])/gi;
+function fmtAmt(v,u){const lu=u.toLowerCase();if(/^(г|гр|мл)$/.test(lu))return String(v>=20?Math.round(v/5)*5:Math.max(1,Math.round(v)));if(/^(кг|л)$/.test(lu))return String(Math.round(v*100)/100).replace('.',',');const r=Math.max(.5,Math.round(v*2)/2),w=Math.floor(r);return(w?String(w):'')+(r-w?'½':'')}
+const scaleQty=(q,k)=>q.replace(QRX,(m,a,b,u)=>b?`${fmtAmt(num(a)*k,u)}–${fmtAmt(num(b)*k,u)} ${u}`:`${fmtAmt(num(a)*k,u)} ${u}`);
+function renderMenu(){
+  const f=S.menu.f;$('menuKcal').textContent=`${dayKcal()} ккал — твоя норма`;
+  $('menu').innerHTML=['breakfast','snack','lunch','dinner'].map(m=>{const r=RX[S.menu[m]];if(!r)return'';const open=OPEN.includes(m),isOpen=openMeal===m;
+    if(!open)return`<div class="meal"><div class="mhead locked"><span class="ml">${MEALN[m]}</span><span class="mn">${ICON.lock}${esc(r.name)}<br><small>рецепт — в полной версии</small></span><span class="mk">${Math.round(r.kcal*f)} ккал</span></div></div>`;
+    const k=f/(r.servings||4);
+    return`<div class="meal"><button class="mhead" data-open="${m}" aria-expanded="${isOpen}"><span class="ml">${MEALN[m]}</span><span class="mn">${esc(r.name)}${r.nick?` <i>«${esc(r.nick)}»</i>`:''}<br><small>${isOpen?'свернуть':'открыть рецепт'}</small></span><span class="mk">${Math.round(r.kcal*f)} ккал</span></button>
+    ${isOpen?`<div class="rb"><p class="s">${Math.round(r.kcal*f)} ккал · Б ${g(r.p*f)} · Ж ${g(r.f*f)} · У ${g(r.c*f)}${f!==1?` · порция ×${String(f).replace('.',',')}`:''}</p><h5>Ингредиенты на твою порцию</h5><ul>${r.ingredients.map(i=>{const x=i.indexOf(' — ');return`<li>${x<0?esc(i):esc(i.slice(0,x))+' — <b>'+esc(scaleQty(i.slice(x+3),k))+'</b>'}</li>`}).join('')}</ul><h5>Приготовление</h5><ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>`:''}</div>`}).join('');
+}
+$('menu').onclick=e=>{const o=e.target.closest('[data-open]');if(!o)return;openMeal=openMeal===o.dataset.open?null:o.dataset.open;renderMenu()};
+
+/* закрытая часть: размытый план следующих дней — чтобы было видно, что за ним */
+function renderLocked(){
+  const names=['Мягкий фитнес','Шагательная табата','Отдых, прогулка','Плавный старт','Шагай дома. БАЗА','Лимфодренаж'];
+  $('lockTitle').textContent=`Дни 2–${S.planDays}`;
+  $('lockedBody').innerHTML=`<h2>Неделя</h2><ul class="week">${names.map((n,i)=>`<li><span class="d">${fmt(addDays(new Date(),i+1))}</span><span>${n}</span><span class="tag rest">день ${i+2}</span></li>`).join('')}</ul>
+    <svg class="chart" viewBox="0 0 600 160"><line x1="40" y1="20" x2="560" y2="140" stroke="#9A9D95" stroke-width="3" stroke-dasharray="8 6"/><circle cx="560" cy="140" r="8" fill="#1F7A4D"/><text x="560" y="120" text-anchor="end" font-size="20" fill="#1F7A4D">${S.goal} кг</text></svg>`;
+}
+
+/* продающий блок — с её цифрами */
+function renderSale(){
+  const ok=S.log.done&&S.log.food,rel=addDays(new Date(),S.planDays-1);
+  const noF=S.noTags.map(x=>FOODTAGS.find(f=>f[0]===x)[1].toLowerCase());
+  $('sale').innerHTML=`<h2>${ok?`${esc(S.name)}, день 1 засчитан.<br>Осталось ${S.planDays-1} ${pl(S.planDays-1,'день','дня','дней')} до ${S.goal} кг`:`${esc(S.name)}, твой срок — ${S.planDays} ${pl(S.planDays,'день','дня','дней')}`}</h2>
+  <p class="lead">Личное дело № ${S.num} уже заведено. В полной версии всё продолжится с того места, где ты сейчас.</p>
+  <ul>
+    <li><i>${S.pool}</i><span>тренировок под тебя<small>без повторов, нагрузка подстраивается под «тяжело / легко»</small></span></li>
+    <li><i>${S.planDays}</i><span>дней меню под ${S.kcal} ккал<small>${S.meals} блюд${noF.length?', без: '+noF.join(', '):''} · граммы на твою порцию · список продуктов</small></span></li>
+    <li><i>✓</i><span>Живая дата выхода<small>пропуски отодвигают её, неделя без пропусков приближает</small></span></li>
+    <li><i>★</i><span>Куратор, статусы и нашивки<small>напомнит, поддержит и не даст сойти с режима</small></span></li>
+  </ul>
+  ${PRICE?`<div class="price">${esc(PRICE)}${OLD_PRICE?`<s>${esc(OLD_PRICE)}</s>`:''}</div>`:''}
+  <a class="btn buy" href="${esc(BUY_URL)}" target="_top" rel="noopener">Забрать полный доступ</a>
+  <p class="fine">Если начнёшь сегодня — дата выхода ${fmt(rel)}</p>
+  <details class="more" style="margin-top:16px"><summary>Пока не готова? Пришлём личное дело на почту</summary>
+    <div class="leadrow"><input id="leadEmail" type="email" placeholder="email" autocomplete="email" aria-label="Email"><button class="btn ghost" id="leadBtn">Прислать</button></div><div class="msg" id="leadMsg"></div></details>
+  <button class="toggle" id="restartBtn" style="margin-top:16px">Пройти заново</button>`;
+  $('leadBtn').onclick=sendLead;$('restartBtn').onclick=()=>{store('sr_demo',null);S=null;D={sex:'f',act:1.375,noTags:[],stops:[],level:1,dance:'yes',joints:'no'};show('hello')};
+}
+async function sendLead(){
+  const email=$('leadEmail').value.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(email)){$('leadMsg').textContent='Проверь email';return}
+  $('leadBtn').disabled=true;
+  try{
+    if(SAVE_LEADS){
+      if(!window.firebase){for(const s of['firebase-app-compat','firebase-firestore-compat'])await new Promise((ok,no)=>{const el=document.createElement('script');el.src=`https://www.gstatic.com/firebasejs/10.12.2/${s}.js`;el.onload=ok;el.onerror=no;document.head.appendChild(el)});firebase.initializeApp(firebaseConfig)}
+      await firebase.firestore().collection('strict_leads').doc(email).set({email,name:S.name,num:S.num,startW:S.startW,goal:S.goal,kcal:S.kcal,planDays:S.planDays,noTags:S.noTags,dayDone:!!(S.log.done&&S.log.food),at:Date.now()},{merge:true});
+    }
+    $('leadMsg').style.color='var(--release)';$('leadMsg').textContent='Готово — личное дело сохранено.';
+  }catch(e){$('leadMsg').textContent='Не получилось отправить, попробуй ещё раз'}
+  finally{$('leadBtn').disabled=false}
+}
+$('ctaBtn').onclick=e=>{e.preventDefault();$('sale').scrollIntoView({behavior:reduced?'auto':'smooth'})};
+
+/* нашивка */
+function badge(gl,title,text){$('mIcon').innerHTML=badgeSvg(gl,true);$('mKicker').textContent='Новая нашивка';$('mTitle').textContent=title;$('mText').textContent=text;$('modal').classList.remove('hidden');$('mClose').focus()}
+$('mClose').onclick=()=>$('modal').classList.add('hidden');
+
+/* вернуть сохранённое демо */
+try{const s=JSON.parse(recall('sr_demo')||'null');if(s&&s.planDays&&s.menu){S=s;show('cabinet');render()}}catch(e){}
+</script>
+</body>
+</html>
