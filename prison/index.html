@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Строгий режим — Шагай Дома</title>
+<title>Строгий режим от ШАГАЙ ДОМА</title>
 <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Golos+Text:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -319,7 +319,7 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
 <div class="stripe"></div>
 <div class="wrap">
 <header>
-  <div class="brand">Строгий режим<small>интенсив-лагерь «Шагай Дома»</small></div>
+  <div class="brand">Строгий режим<small>интенсив-лагерь от ШАГАЙ ДОМА»</small></div>
   <div style="display:flex;gap:8px"><button class="toggle hidden" id="tourBtn" aria-label="Как играть">?</button><button class="toggle" id="modeBtn">Кабинет куратора</button></div>
 </header>
 
@@ -336,7 +336,6 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
   </div>
 </div>
 
-<!-- ПРИЁМ: один вопрос на экран -->
 <div id="onb" class="hidden">
   <div class="prog"><span id="stepNo"></span><span class="track"><i id="stepBar"></i></span></div>
   <div id="stepBody"></div>
@@ -344,14 +343,12 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
   <div class="nav"><button class="btn ghost" id="backBtn">Назад</button><button class="btn" id="nextBtn">Дальше</button></div>
 </div>
 
-<!-- ЛИЧНОЕ ДЕЛО -->
 <div id="reveal" class="hidden"><div class="in">
   <div class="rvhead">Заводим личное дело</div>
   <div id="rvLines"></div>
   <div class="dossier" id="dossier"></div>
 </div></div>
 
-<!-- КАБИНЕТ: 4 вкладки -->
 <div id="cabinet" class="hidden">
  <div data-pane="today">
   <div class="wall" id="relCard">
@@ -408,7 +405,7 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
   <section>
     <div class="h2row"><h2>Тренировки <button class="hint" data-hint="plan" aria-label="Как подбираются тренировки">?</button></h2></div>
     <ul class="week" id="week"></ul>
-    <button class="btn ghost" id="editRider">Изменить райдер</button>
+    <button class="btn ghost" id="editRider">Изменить настройки</button>
   </section>
   <section>
     <div class="h2row"><h2>Норма</h2></div>
@@ -464,9 +461,9 @@ const firebaseConfig={
   messagingSenderId:"1022340791272",
   appId:"1:1022340791272:web:d4009903a21ffdb0dac25d"
 };
-const PART='strict_participants';   // участницы (doc id = email)
-const WCOL='strict_workouts';       // база тренировок (doc id = id урока)
-const CURATOR_PASS='strogo2026';    // поменяй перед запуском
+const PART='strict_participants';   // участницы 
+const WCOL='strict_workouts';       // база тренировок 
+const CURATOR_PASS='strogo2026';    
 const MIN_OPEN=20;                  // через сколько минут после открытия можно нажать «Выполнила»
 const UDO_DAYS=7;                   // столько идеальных дней подряд = минус день срока
 const REST={4:[2,4,6],5:[3,6],6:[6]};
@@ -474,8 +471,7 @@ const DANCE=['Раскрываем женственность','Учимся т�
 const HIGH=['Шагательная табата','Зумбавидные тренировки','В стиле Тай-Бо','Шагай дома. Активно'];
 const SOFT=['Мягкий фитнес','Плавный старт','Лимфодренажные тренировки','Тренировки для 100 кг+','Тренировки для 50+','Шагай дома. БАЗА'];
 const LV={1:'Новичок',2:'База',3:'Продвинутый'};
-// Как программы называются у участницы. Слева — название в школе (его видит только куратор), справа — для кабинета.
-// Программы, которых нет в списке, показываются как есть.
+
 const PROGRAM_TITLES={
   'Тренировки для 100 кг+':'Бережная ходьба',
   'Тренировки для 50+':'Мягкий тонус'
@@ -546,7 +542,7 @@ function extendPlan(p,upto){
     if(!p.queue.length)newCycle(p);p.plan.push({d,w:p.queue.shift(),c:p.cycle})}
   return changed;
 }
-// пересобрать будущие тренировки (прошлое и сегодняшний день не трогаем)
+
 function rebuildFuture(p,soft){
   const t=Math.max(0,dayIdx(p.start));
   p.plan=p.plan.filter(e=>e.d<=t);
@@ -589,7 +585,7 @@ function goalCheck(d){
   const w=num(d.weight),h=num(d.height),loss=num(d.loss),age=num(d.age),act=num(d.act)||1.375,sex=d.sex||'f';
   if(!w||!h||!loss||w<35||h<130)return{state:'empty'};
   const hm=(h/100)**2,b=w/hm,bmr=Math.round(sex==='m'?10*w+6.25*h-5*(age||35)+5:10*w+6.25*h-5*(age||35)-161);
-  const kcal=Math.max(sex==='m'?1500:1200,bmr,Math.round(bmr*act*.8)); // не ниже обмена в покое
+  const kcal=Math.max(sex==='m'?1500:1200,bmr,Math.round(bmr*act*.8)); 
   if(b<18.5)return{state:'stop',b,text:`ИМТ ${g(b)} — уже ниже нормы. Снижать вес дальше небезопасно. Тебе подойдёт программа на тонус без дефицита калорий.`};
   const minW=Math.ceil(19.5*hm*10)/10,want=Math.round((w-loss)*10)/10,tb=want/hm;
   let goal=want,state='ok',text;
@@ -607,7 +603,7 @@ function goalCheck(d){
 const Q=[
   {k:'level',t:'Как у тебя с тренировками сейчас?',o:[[1,'Почти не двигаюсь'],[2,'Тренируюсь иногда'],[3,'Тренируюсь регулярно']]},
   {k:'dance',t:'Танцевальные тренировки — твоё?',o:[['yes','Да, люблю'],['no','Точно нет']]},
-  {k:'box',t:'Удары руками, как в боксе (Тай-Бо)?',o:[['yes','Да'],['no','Нет']]},
+  {k:'box',t:'Удары руками, как в боксе?',o:[['yes','Да'],['no','Нет']]},
   {k:'tabata',t:'Короткие интенсивные интервалы (табата)?',o:[['yes','Да'],['no','Нет']]},
   {k:'joints',t:'Есть ограничения по коленям, суставам или спине?',o:[['no','Нет'],['yes','Есть']]},
   {k:'perWeek',t:'Сколько тренировок в неделю готова делать?',o:[[4,'4'],[5,'5'],[6,'6']]}
