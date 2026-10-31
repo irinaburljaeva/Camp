@@ -312,6 +312,12 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
 @media (max-width:480px){.row{grid-template-columns:1fr}.week li{grid-template-columns:70px 1fr}.week li .tag{grid-column:2}.mhead{grid-template-columns:60px 1fr auto}.rb{padding-left:0}.shop ul{columns:1}}
 
 /* ---------- демо ---------- */
+.player{margin-top:12px;border-radius:10px;overflow:hidden;background:#000;box-shadow:0 10px 26px rgba(0,0,0,.18)}
+.player .frame{position:relative;padding-top:56.25%}
+.player iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.player .pbar{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--ink);color:#DAD8CE;font-size:.82rem;padding:10px 12px}
+.hint-link{all:unset;cursor:pointer;font-size:.75rem;color:var(--steel);text-decoration:underline;margin-top:4px}
+.player .pbar button{all:unset;cursor:pointer;text-decoration:underline;color:#fff}
 body.demo .wrap{padding-bottom:100px}
 .cta-bar{position:fixed;left:0;right:0;bottom:0;z-index:12;background:rgba(31,33,29,.97);color:#fff;padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;gap:12px}
 .cta-bar span{font-size:.85rem;color:#C8CAC3;line-height:1.3}
@@ -384,6 +390,7 @@ body.demo .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
     <div class="qhead"><h2>День 1</h2><div class="ring" id="qRing"></div></div>
     <div id="dayStamp"></div>
     <div id="today"></div>
+    <div id="player" class="player hidden"></div>
   </section>
 
   <section id="menuSec">
@@ -409,9 +416,9 @@ body.demo .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
 const BUY_URL='https://walk-walk.ru/';
 // Цена: оставь пустым, чтобы не показывать. OLD_PRICE — зачёркнутая, необязательно.
 const PRICE='', OLD_PRICE='';
-// Пробная тренировка — одна для всех. Лучше дать открытую ссылку (VK Видео, YouTube, Rutube),
-// иначе без доступа к школе она не откроется.
-const DEMO_WORKOUT={title:'Шагай дома: пробная тренировка',level:'Новичок',url:'https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339702301'};
+// Пробная тренировка — одна для всех, видео Kinescope встраивается прямо в страницу.
+// Чтобы поменять видео, замени id — последнюю часть ссылки kinescope.io/…
+const DEMO_WORKOUT={title:'Шагай дома: пробная тренировка',level:'Новичок',kinescope:'4sshWNgNjHsByP7u2hPBFV'};
 // Сколько секунд после старта тренировки ждать до кнопки «Готово» (в полной версии — 20 минут).
 const DEMO_WAIT=15;
 // Сохранять email из формы «Пришлите мне…» в Firestore (коллекция strict_leads).
@@ -572,12 +579,13 @@ function render(){
   renderTally();
   // задания
   let tr='';
-  if(!l.done){if(!l.opened)tr=`<a class="btn small" href="${esc(DEMO_WORKOUT.url)}" target="_blank" rel="noopener" data-act="open">Начать</a>`;
-    else{const lf=Math.ceil(DEMO_WAIT-(Date.now()-l.opened)/1000);tr=lf>0?`<button class="btn small" disabled>${lf} с</button>`:`<button class="btn small green" data-act="done">Готово</button>`}}
+  if(!l.done){if(!l.opened)tr=`<button class="btn small" data-act="open">Начать</button>`;
+    else{const lf=Math.ceil(DEMO_WAIT-(Date.now()-l.opened)/1000);tr=(lf>0?`<button class="btn small" disabled data-cd>${lf} с</button>`:`<button class="btn small green" data-act="done">Готово</button>`)+(playerOpen?'':`<br><button class="hint-link" data-act="reopen">видео</button>`)}}
   const Q=[{icon:'train',done:!!l.done,pts:10,title:esc(DEMO_WORKOUT.title),sub:DEMO_WORKOUT.level,right:tr},
     {icon:'food',done:!!l.food,pts:5,title:'Питание по меню',sub:`${dayKcal()} ккал · меню ниже`,right:'<button class="btn small ghost" data-act="food">Буду есть</button>'},
     {icon:'bonus',cls:'bonus',done:!!l.bonus,pts:3,title:'8 000 шагов',sub:'бонус',right:'<button class="btn small ghost" data-act="bonus">Да</button>'}];
   $('today').innerHTML=Q.map(quest).join('');
+  renderPlayer();
   const dn=Q.filter(q=>q.done).length,r=18,C=2*Math.PI*r;
   $('qRing').innerHTML=`<svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="${r}" fill="none" stroke="#DCDDD7" stroke-width="5"/><circle cx="22" cy="22" r="${r}" fill="none" stroke="${dn===3?'#1F7A4D':'#1F211D'}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C*dn/3} ${C}" transform="rotate(-90 22 22)"/></svg><b style="color:var(--ink)">${dn}/3</b>`;
   $('dayStamp').innerHTML=ok?`<div class="daystamp ${justDone?'slam':''}">День засчитан</div>`:'';
@@ -585,16 +593,30 @@ function render(){
   $('ctaText').innerHTML=ok?`<b>День 1 из ${S.planDays}</b> засчитан`:`До <b>${S.goal} кг</b> — ${S.planDays} ${pl(S.planDays,'день','дня','дней')}`;
   justDone=false;
 }
-setInterval(()=>{if(S&&S.log.opened&&!S.log.done&&!$('cabinet').classList.contains('hidden'))render()},1000);
+setInterval(()=>{const cd=document.querySelector('[data-cd]');if(!cd||!S||!S.log.opened||S.log.done)return;const lf=Math.ceil(DEMO_WAIT-(Date.now()-S.log.opened)/1000);if(lf>0)cd.textContent=lf+' с';else render()},1000);
 const dayKcal=()=>Math.round(['breakfast','snack','lunch','dinner'].reduce((s,m)=>s+(RX[S.menu[m]]?RX[S.menu[m]].kcal:0),0)*S.menu.f);
 $('today').onclick=e=>{const a=e.target.closest('[data-act]');if(!a)return;const l=S.log,was=l.done&&l.food;
-  if(a.dataset.act==='open'){l.opened=Date.now();setTimeout(render,200);save();return}
+  if(a.dataset.act==='open'){l.opened=Date.now();playerOpen=true;save();render();setTimeout(()=>$('player').scrollIntoView({block:'center',behavior:reduced?'auto':'smooth'}),100);return}
+  if(a.dataset.act==='done')playerOpen=false;
+  if(a.dataset.act==='reopen'){playerOpen=true;renderPlayer();$('player').scrollIntoView({block:'center'});return}
   if(a.dataset.act==='done'){l.done=Date.now();toast('+10 баллов поведения');badge('1','Первый шаг','Первая тренировка в лагере')}
   if(a.dataset.act==='food'){l.food=true;toast('+5 баллов поведения')}
   if(a.dataset.act==='bonus'){l.bonus=true;toast('+3 за бонус-задание')}
   if(l.done&&l.food&&!was){justDone=true;setTimeout(()=>{badge('✓','День засчитан','Первая черта на стене. В лагере таких будет '+S.planDays);setTimeout(()=>document.getElementById('sale').scrollIntoView({behavior:reduced?'auto':'smooth'}),400)},1100)}
   save();render()};
 function save(){store('sr_demo',JSON.stringify(S))}
+
+/* плеер тренировки: встраивается один раз, чтобы видео не перезапускалось при обновлении экрана */
+let playerOpen=false;
+function renderPlayer(){
+  const el=$('player'),show=playerOpen&&!S.log.done;
+  el.classList.toggle('hidden',!show);
+  if(show&&!el.dataset.ready){
+    el.innerHTML=`<div class="frame"><iframe src="https://kinescope.io/embed/${encodeURIComponent(DEMO_WORKOUT.kinescope)}" title="${esc(DEMO_WORKOUT.title)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock" allowfullscreen></iframe></div><div class="pbar"><span>Тренируйся вместе с видео, потом жми «Готово»</span><button data-hide>Свернуть</button></div>`;
+    el.dataset.ready='1';el.querySelector('[data-hide]').onclick=()=>{playerOpen=false;renderPlayer()};
+  }
+  if(!show&&S.log.done&&el.dataset.ready){el.innerHTML='';delete el.dataset.ready}
+}
 
 /* меню: 2 рецепта открыты, остальные — в полной версии */
 const OPEN=['breakfast','lunch'];
@@ -663,3 +685,4 @@ try{const s=JSON.parse(recall('sr_demo')||'null');if(s&&s.planDays&&s.menu){S=s;
 </script>
 </body>
 </html>
+
