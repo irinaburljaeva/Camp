@@ -267,6 +267,7 @@ section.quests{position:relative}
 @keyframes pop{from{transform:scale(.6) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
 
 /* ---------- приложение: вкладки, подсказки, тур ---------- */
+.hint-link{all:unset;cursor:pointer;font-size:.85rem;text-decoration:underline}
 body.app .wrap{padding-bottom:110px}
 body.app .toast{bottom:calc(84px + env(safe-area-inset-bottom))}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:rgba(251,250,245,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
@@ -423,6 +424,15 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
 </nav>
 <div class="pop hidden" id="pop" role="dialog"></div>
 
+<div class="modal hidden" id="edModal" role="dialog" aria-modal="true" aria-labelledby="edTitle"><div class="mbox" style="text-align:left">
+  <h3 id="edTitle">Нужно согласие специалиста</h3>
+  <p style="color:var(--ink)">Строгий режим — это дефицит калорий, регулярные взвешивания и цель в килограммах. При РПП, даже давнем, это может вернуть симптомы.</p>
+  <p style="color:var(--ink);margin-top:8px">Участвовать можно, если твой лечащий специалист — психотерапевт или врач, который ведёт РПП, — знает об участии и не против.</p>
+  <label style="display:flex;gap:10px;align-items:flex-start;color:var(--ink);margin-top:14px;font-size:.95rem"><input type="checkbox" id="edCheck" style="width:auto;margin-top:4px">Мой специалист знает о моём участии в строгом режиме и согласен</label>
+  <p class="note">Если во время лагеря станет тяжело — остановись и напиши куратору или своему специалисту.</p>
+  <button class="btn" id="edYes" disabled>Подтверждаю</button>
+  <button class="btn ghost" id="edNo" style="margin-top:8px">Пока нет согласия</button>
+</div></div>
 <div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="mbox"><div id="mIcon"></div><p class="mk" id="mKicker">Новая нашивка</p><h3 id="mTitle"></h3><p id="mText"></p><button class="btn" id="mClose">Забрать</button></div></div>
 
 <!-- КУРАТОР -->
@@ -465,7 +475,8 @@ const PART='strict_participants';   // участницы
 const WCOL='strict_workouts';       // база тренировок 
 const CURATOR_PASS='strogo2026';    
 const MIN_OPEN=20;                  // через сколько минут после открытия можно нажать «Выполнила»
-const UDO_DAYS=7;                   // столько идеальных дней подряд = минус день срока
+const UDO_DAYS=7;
+const TONE_DAYS=42;                 // срок в режиме «Тонус» (без похудения), дней                   // столько идеальных дней подряд = минус день срока
 const REST={4:[2,4,6],5:[3,6],6:[6]};
 const DANCE=['Раскрываем женственность','Учимся танцевать','Шагай и танцуй','Танцевальный фитнес','Зумбавидные тренировки'];
 const HIGH=['Шагательная табата','Зумбавидные тренировки','В стиле Тай-Бо','Шагай дома. Активно'];
@@ -590,33 +601,35 @@ function calc(p){
   let streak=0;for(let d=t-1;d>=1&&d<=p.plan.length;d--){if(dayOk(p,t,d,wm))streak++;else break}
   const discipline=miss+Math.floor(food/2);
   let weightAdj=0;const ms=(p.measurements||[]).filter(x=>x.w);
-  if(ms.length>=2&&t>=8){const lost=p.startW-avgWeek(p),need=p.startW-p.goal;weightAdj=lost>0?clamp(Math.round(need/lost*(t-1))-p.planDays,-14,21):7}
+  const tone=p.track==='tone';
+  if(!tone&&ms.length>=2&&t>=8){const lost=p.startW-avgWeek(p),need=p.startW-p.goal;weightAdj=lost>0?clamp(Math.round(need/lost*(t-1))-p.planDays,-14,21):7}
   const extra=weightAdj>0?Math.max(discipline,weightAdj):discipline+weightAdj;
   const total=Math.max(t,p.planDays+extra-bonus);
   const cur=lastWeight(p);
-  const progress=clamp(Math.round((p.startW-cur)/(p.startW-p.goal)*100),0,100);
+  const progress=tone?clamp(Math.round((t-1)/total*100),0,100):clamp(Math.round((p.startW-cur)/(p.startW-p.goal)*100),0,100);
   const lastM=ms.length?pd(ms[ms.length-1].date):pd(p.start);
   const measAgo=Math.round((pd(iso(new Date()))-lastM)/DAY);
-  return {t,wm,miss,food,discipline,weightAdj,bonus,run,streak,total,cur,progress,measAgo,recentMiss,finished:cur<=p.goal};
+  return {t,wm,miss,food,discipline,weightAdj,bonus,run,streak,total,cur,progress,measAgo,recentMiss,tone,dropped:tone&&cur<p.startW-1,finished:tone?t>total:cur<=p.goal};
 }
 
 /* ================= ПРОВЕРКА ЦЕЛИ ================= */
 function goalCheck(d){
   const w=num(d.weight),h=num(d.height),loss=num(d.loss),age=num(d.age),act=num(d.act)||1.375,sex=d.sex||'f';
-  if(!w||!h||!loss||w<35||h<130)return{state:'empty'};
-  const hm=(h/100)**2,b=w/hm,bmr=Math.round(sex==='m'?10*w+6.25*h-5*(age||35)+5:10*w+6.25*h-5*(age||35)-161);
+  if(!w||!h||w<35||h<130)return{state:'empty'};
+  const hm0=(h/100)**2;if(!loss&&w/hm0>=18.5)return{state:'empty'};
+  const hm=hm0,b=w/hm,bmr=Math.round(sex==='m'?10*w+6.25*h-5*(age||35)+5:10*w+6.25*h-5*(age||35)-161);
   const kcal=Math.max(sex==='m'?1500:1200,bmr,Math.round(bmr*act*.8)); 
-  if(b<18.5)return{state:'stop',b,text:`ИМТ ${g(b)} — уже ниже нормы. Снижать вес дальше небезопасно. Тебе подойдёт программа на тонус без дефицита калорий.`};
+  if(b<18.5)return{state:'stop',tone:true,b,bmr,text:`ИМТ ${g(b)} — уже ниже нормы, худеть тебе небезопасно.`};
   const minW=Math.ceil(19.5*hm*10)/10,want=Math.round((w-loss)*10)/10,tb=want/hm;
   let goal=want,state='ok',text;
   if(tb<18.5){
     goal=minW;state='warn';
-    if(goal>=w)return{state:'stop',b,text:`Твой вес уже у нижней границы здоровой зоны для роста ${h} см. Сбрасывать килограммы не нужно — подтянуться можно за счёт мышц и объёмов.`};
-    text=`${want} кг при твоём росте — это ИМТ ${g(tb)}, ниже безопасной границы 18,5. Возьмём цель <b>${goal} кг</b> (−${g(w-goal)} кг). Остальное сделают объёмы — их тоже будем мерить.`;
+    if(goal>=w)return{state:'stop',tone:true,b,bmr,text:`Твой вес уже у нижней границы нормы для роста ${h} см — сбрасывать килограммы не нужно.`};
+    text=`${want} кг при твоём росте — это ИМТ ${g(tb)}, ниже безопасной границы. Безопасно сбросить не больше ${g(w-goal)} кг.`;
   }else text=`Цель ${goal} кг реалистична и безопасна: ИМТ ${g(tb)}.`;
   const weekly=Math.round(Math.min(1,w*.01)*10)/10;
   const planDays=Math.max(14,Math.ceil((w-goal)/weekly*7));
-  return{state,b,tb:goal/hm,goal,want,weekly,planDays,bmr,kcal,text};
+  return{state,b,tb:goal/hm,goal,want,weekly,planDays,bmr,kcal,text,maxLoss:Math.round((w-minW)*10)/10};
 }
 
 /* ================= ПРИЁМ ================= */
@@ -639,7 +652,7 @@ function riderDefaults(r,weight,age){
   if((age||0)<50)ex.add('Тренировки для 50+');
   r.excluded=[...ex];
 }
-const STOPS=[['preg','Беременность или кормление грудью'],['dis','Диабет на инсулине, болезни сердца или почек'],['ed','Расстройство пищевого поведения в прошлом'],['op','Операция в последние 3 месяца']];
+const STOPS=[['preg','Беременность или кормление грудью'],['dis','Диабет на инсулине, болезни сердца или почек'],['ed','Расстройство пищевого поведения — сейчас или в прошлом'],['op','Операция в последние 3 месяца']];
 const ACTS=[[1.2,'Сидячий день','Работа за компьютером, хожу мало'],[1.375,'Немного движения','5–7 тысяч шагов, иногда гуляю'],[1.55,'Много на ногах','Активная работа или спорт 2–3 раза в неделю']];
 const WHY=['Влезть в любимые вещи','Больше энергии','Здоровье','Нравиться себе в зеркале','Доказать себе, что могу','К событию'];
 const FOODTAGS=[['fish','Рыба и морепродукты'],['meat','Говядина и свинина'],['poultry','Птица'],['dairy','Молочное'],['egg','Яйца'],['mushroom','Грибы'],['nuts','Орехи'],['gluten','Мука и хлеб']];
@@ -659,13 +672,17 @@ const STEPS={
   weight:{title:()=>'Сколько весишь и сколько хочешь сбросить?',sub:()=>'Программа сразу проверит, безопасна ли цель.',
     html:()=>`<div class="row"><div>${inp('weight','Вес сейчас, кг','number','72')}</div><div>${inp('loss','Хочу сбросить, кг','number','7')}</div></div><div class="live" id="live">${liveHtml()}</div>`,
     live:()=>{$('live').innerHTML=liveHtml()},
-    valid:()=>{const c=goalCheck(D);if(c.state==='empty')return'Впиши вес и сколько хочешь сбросить';if(c.state==='stop')return'С такими цифрами строгий режим не подходит';return true}},
+    valid:()=>{const c=goalCheck(D);if(c.state==='empty')return'Впиши вес и сколько хочешь сбросить';if(c.state==='stop'&&D.track!=='tone')return'Выбери режим «Тонус», чтобы продолжить';if(c.state==='warn'&&D.track!=='tone')return'Выбери: сбросить меньше или режим «Тонус»';if(c.state==='ok')D.track=null;return true}},
   act:{title:()=>'Как проходит твой обычный день?',sub:()=>'Без учёта тренировок — они добавятся сверху.',
     html:()=>ACTS.map(([v,t,s])=>`<button class="opt card-opt" data-set="act" data-v="${v}" aria-pressed="${String(D.act)===String(v)}"><b>${t}</b><span>${s}</span></button>`).join(''),
     valid:()=>D.act?true:'Выбери вариант'},
   health:{title:()=>'Есть что-то из этого?',sub:()=>'Если ничего — просто нажми «Дальше».',
-    html:()=>STOPS.map(([k,l])=>`<button class="opt card-opt" data-multi="stops" data-v="${k}" aria-pressed="${(D.stops||[]).includes(k)}"><b>${l}</b></button>`).join('')+((D.stops||[]).length?`<div class="verdict stop"><p><b>Строгий режим тебе сейчас не подойдёт.</b></p><p>С этим жёсткий дефицит калорий может навредить. Возьмём тебя только с разрешения врача, а пока предлагаем мягкую программу «Санаторий».</p></div>`:''),
-    valid:()=>(D.stops||[]).length?'Строгий режим недоступен без разрешения врача':true},
+    html:()=>{const st=D.stops||[],hard=st.filter(k=>k!=='ed'),ed=st.includes('ed');
+      return STOPS.map(([k,l])=>`<button class="opt card-opt" data-multi="stops" data-v="${k}" aria-pressed="${st.includes(k)}"><b>${l}</b></button>`).join('')
+      +(hard.length?`<div class="verdict stop"><p><b>Строгий режим тебе сейчас не подойдёт.</b></p><p>С этим жёсткий дефицит калорий может навредить. Возьмём тебя только с разрешения врача, а пока предлагаем мягкую программу «Санаторий».</p></div>`:'')
+      +(ed&&!hard.length?(D.edConsent?`<div class="verdict ok"><p><b>Согласие специалиста подтверждено.</b> Если станет тяжело — остановись и напиши куратору или своему специалисту.</p><p><button class="hint-link" data-ed-open>изменить</button></p></div>`
+        :`<div class="verdict warn"><p><b>Нужно согласие специалиста.</b> Без него участвовать в строгом режиме нельзя.</p><p><button class="btn small" data-ed-open style="margin-top:6px">У меня есть согласие</button></p></div>`):'');},
+    valid:()=>{const st=D.stops||[];if(st.some(k=>k!=='ed'))return'Строгий режим недоступен без разрешения врача';if(st.includes('ed')&&!D.edConsent)return'Нужно подтвердить согласие специалиста';return true}},
   why:{title:()=>'Зачем тебе это?',sub:()=>'Можно выбрать несколько. Будем напоминать об этом в трудные дни.',
     html:()=>`<div class="opts">${WHY.map(w=>multi('why',w,w,D.why)).join('')}</div>
       ${(D.why||[]).includes('К событию')?`<div class="row"><div>${inp('eventName','Какое событие?','text','отпуск, свадьба подруги')}</div><div>${inp('eventDate','Когда?','date')}</div></div>`:''}
@@ -691,7 +708,16 @@ const STEPS={
 };
 function liveHtml(){
   const c=goalCheck(D);if(c.state==='empty')return'<p class="note">Впиши цифры — сразу покажем расчёт.</p>';
-  if(c.state==='stop')return`<div class="verdict stop"><p>${c.text}</p></div>`;
+  const toneOn=`<div class="verdict ok"><p><b>Режим «Тонус» выбран.</b> Без дефицита калорий и без цели в килограммах: ${TONE_DAYS/7} недель тренировок, сила, выносливость и привычки. Меню — на поддержание веса.</p><p><button class="hint-link" data-untone>передумала</button></p></div>`;
+  if(c.state==='warn'){
+    if(D.track==='tone')return toneOn;
+    return`<div class="verdict warn"><p>${c.text}</p><p>Выбери, как идти дальше:</p>
+      <button class="opt card-opt" data-less="${c.maxLoss}"><b>Сбросить ${g(c.maxLoss)} кг — до ${g(c.goal)} кг</b><span>Строгий режим, срок ${c.planDays} ${pl(c.planDays,'день','дня','дней')}</span></button>
+      <button class="opt card-opt" data-tone><b>Режим «Тонус»</b><span>Без похудения: сила, выносливость и привычки, ${TONE_DAYS/7} недель</span></button></div>`}
+  if(c.state==='stop'){
+    if(D.track==='tone')return toneOn;
+    if(false)return`<div class="verdict ok"><p><b>Режим «Тонус» выбран.</b> Без дефицита калорий и без цели в килограммах: ${TONE_DAYS/7} недель тренировок, сила, выносливость и привычки. Меню — на поддержание веса.</p></div>`;
+    return`<div class="verdict warn"><p>${c.text}</p><p>Но в лагерь можно — в режиме <b>«Тонус»</b>: без дефицита калорий, цель — сила, выносливость и привычки. Срок ${TONE_DAYS/7} недель.</p><p><button class="btn small" data-tone style="margin-top:6px">Пойти в режиме «Тонус»</button></p></div>`}
   return`<div class="verdict ${c.state}"><p>${c.text}</p><div class="nums"><div>ИМТ сейчас<b>${g(c.b)}</b></div><div>цель<b>${c.goal} кг</b></div><div>темп<b>${g(c.weekly)} кг/нед</b></div><div>срок<b>${c.planDays} дн.</b></div></div></div>`;
 }
 let flow=[],si=0;
@@ -705,11 +731,16 @@ function renderStep(){
   $('nextBtn').textContent=si===flow.length-1?(D.mode==='new'?'Завести личное дело':'Сохранить'):'Дальше';
   $('onbMsg').textContent='';
 }
-$('stepBody').oninput=e=>{const f=e.target.dataset.f;if(!f)return;D[f]=e.target.value;const s=STEPS[flow[si]];s.live&&s.live();$('onbMsg').textContent=''};
+$('stepBody').oninput=e=>{const f=e.target.dataset.f;if(!f)return;D[f]=e.target.value;if((f==='weight'||f==='loss')&&goalCheck(D).state==='ok')D.track=null;const s=STEPS[flow[si]];s.live&&s.live();$('onbMsg').textContent=''};
 $('stepBody').onclick=e=>{
+  if(e.target.closest('[data-ed-open]')){openEd();return}
+  if(e.target.closest('[data-tone]')){D.track='tone';$('live').innerHTML=liveHtml();$('onbMsg').textContent='';return}
+  if(e.target.closest('[data-untone]')){D.track=null;$('live').innerHTML=liveHtml();return}
+  const ls=e.target.closest('[data-less]');if(ls){D.loss=ls.dataset.less;D.track=null;const f=$('f_loss');if(f)f.value=ls.dataset.less;$('live').innerHTML=liveHtml();$('onbMsg').textContent='';return}
   const b=e.target.closest('[data-set],[data-multi],[data-rk],[data-p],[data-q]');if(!b)return;
   if(b.dataset.set){const v=b.dataset.v;D[b.dataset.set]=isNaN(+v)?v:+v}
-  if(b.dataset.multi){const k=b.dataset.multi,v=b.dataset.v;D[k]=D[k]||[];D[k]=D[k].includes(v)?D[k].filter(x=>x!==v):[...D[k],v]}
+  if(b.dataset.multi){const k=b.dataset.multi,v=b.dataset.v;D[k]=D[k]||[];D[k]=D[k].includes(v)?D[k].filter(x=>x!==v):[...D[k],v];
+    if(k==='stops'&&v==='ed'){if(D.stops.includes('ed')){if(!D.edConsent)setTimeout(openEd,50)}else D.edConsent=false}}
   if(b.dataset.rk){const k=b.dataset.rk,v=b.dataset.v;D.rider[k]=['level','perWeek'].includes(k)?+v:v;if(k!=='perWeek'&&k!=='level')riderDefaults(D.rider,num(D.weight),num(D.age))}
   if(b.dataset.p){const p=b.dataset.p,r=D.rider;r.excluded=r.excluded.includes(p)?r.excluded.filter(x=>x!==p):[...r.excluded,p]}
   if(b.dataset.q){const now=new Date();let d=now;if(b.dataset.q==='1')d=addDays(now,1);if(b.dataset.q==='mon')d=addDays(now,((8-now.getDay())%7)||7);D.start=iso(d)}
@@ -724,6 +755,12 @@ $('nextBtn').onclick=async()=>{
   try{await finishOnb()}catch(e){$('onbMsg').textContent='Не получилось сохранить: '+e.message}
   finally{$('nextBtn').disabled=false}
 };
+
+/* ---------- окно согласия специалиста при РПП ---------- */
+function openEd(){$('edCheck').checked=!!D.edConsent;$('edYes').disabled=!D.edConsent;$('edModal').classList.remove('hidden');$('edCheck').focus()}
+$('edCheck').onchange=()=>{$('edYes').disabled=!$('edCheck').checked};
+$('edYes').onclick=()=>{D.edConsent=true;D.edConsentAt=Date.now();$('edModal').classList.add('hidden');renderStep()};
+$('edNo').onclick=()=>{D.edConsent=false;$('edModal').classList.add('hidden');renderStep()};
 
 /* ================= ВХОД ================= */
 $('loginBtn').onclick=async()=>{
@@ -750,13 +787,14 @@ async function finishOnb(){
     const t=Math.max(1,dayIdx(P.start));Object.keys(P.menu||{}).forEach(k=>{if(+k.slice(1)>=t)delete P.menu[k]});P.mq={};ensureMenu(P);
     await ref.update({food:P.food,household:P.household,menu:P.menu,mq:P.mq});toast('Меню пересобрано');openCabinet();return;
   }
-  const c=goalCheck(D);
+  const c=goalCheck(D),tone=D.track==='tone'&&(c.state==='stop'||c.state==='warn');
+  if(tone){const fl=D.sex==='m'?1500:1200;Object.assign(c,{goal:num(D.weight),want:null,weekly:0,planDays:TONE_DAYS,kcal:Math.max(fl,Math.round(c.bmr*(num(D.act)||1.375)))})}
   const m0={date:D.start,w:num(D.weight),t:Date.now(),waist:num(D.waist),hips:num(D.hips),chest:num(D.chest)};
   const r={...D.rider,cap:D.rider.joints==='yes'?2:3};
   P={email:D.email,name:D.name.trim(),contact:(D.contact||'').trim(),sex:D.sex,age:num(D.age),height:num(D.height),act:num(D.act),
-     startW:num(D.weight),goal:c.goal,wantGoal:c.want,kcal:c.kcal,bmr:c.bmr,weekly:c.weekly,planDays:c.planDays,start:D.start,
+     track:tone?'tone':'loss',startW:num(D.weight),goal:c.goal,wantGoal:c.want,kcal:c.kcal,bmr:c.bmr,weekly:c.weekly,planDays:c.planDays,start:D.start,
      why:{list:D.why||[],eventName:(D.eventName||'').trim(),eventDate:D.eventDate||''},reward:(D.reward||'').trim(),household:+D.household||1,
-     food:{noTags:D.noTags||[],noWords:words,favs:[],noIds:[]},num:dossierNo(D.email),
+     food:{noTags:D.noTags||[],noWords:words,favs:[],noIds:[]},num:dossierNo(D.email),ed:(D.stops||[]).includes('ed')?{consent:true,at:D.edConsentAt||Date.now()}:null,
      rider:r,level:effLevel(r),cycle:0,queue:[],plan:[],log:{},measurements:[m0],menu:{},mq:{},createdAt:Date.now(),lastSeen:Date.now()};
   extendPlan(P,P.planDays+14);ensureMenu(P);
   await ref.set(P);
@@ -775,15 +813,17 @@ function reveal(){
   const rel=addDays(pd(P.start),P.planDays-1);
   const L=[];
   L.push(`Личное дело <b>№ ${P.num}</b> заведено на имя <b>${esc(P.name)}</b>`);
-  L.push(`Твоё тело в покое тратит <b>${P.bmr} ккал</b> в день<small>С учётом твоего обычного дня норма для снижения — ${P.kcal} ккал</small>`);
-  if(P.wantGoal&&P.wantGoal<P.goal)L.push(`Цель ${P.wantGoal} кг мы заменили на <b>${P.goal} кг</b><small>Ниже — уже опасно для твоего роста. Остальное сделают объёмы</small>`);
-  L.push(`Безопасный темп для тебя — <b>${g(P.weekly)} кг в неделю</b><small>${P.startW} → ${P.goal} кг за ${P.planDays} ${pl(P.planDays,'день','дня','дней')}</small>`);
+  const TONE=P.track==='tone';
+  L.push(`Твоё тело в покое тратит <b>${P.bmr} ккал</b> в день<small>${TONE?'Норма на поддержание веса':'С учётом твоего обычного дня норма для снижения'} — ${P.kcal} ккал</small>`);
+  if(TONE)L.push(`Режим <b>«Тонус»</b> — без дефицита калорий<small>Худеть тебе не нужно. ${TONE_DAYS/7} недель: сила, выносливость, привычки. Меню — на поддержание веса</small>`);
+  if(!TONE&&P.wantGoal&&P.wantGoal<P.goal)L.push(`Цель ${P.wantGoal} кг мы заменили на <b>${P.goal} кг</b><small>Ниже — уже опасно для твоего роста. Остальное сделают объёмы</small>`);
+  if(!TONE)L.push(`Безопасный темп для тебя — <b>${g(P.weekly)} кг в неделю</b><small>${P.startW} → ${P.goal} кг за ${P.planDays} ${pl(P.planDays,'день','дня','дней')}</small>`);
   L.push(`Из ${Object.keys(W).length} тренировок тебе подходят <b>${pool.length}</b><small>${[cut.length?'убрали '+cut.join(', '):'',add.length?'добавили '+add.join(' и '):'','уровень «'+LV[P.level]+'», каждый день, обязательно '+r.perWeek+' в неделю'].filter(Boolean).join('; ')}</small>`);
   L.push(`Из ${allMeals} блюд для тебя — <b>${meals}</b><small>${noFood.length?'без: '+noFood.join(', ')+'. ':''}Граммы посчитаны под твою норму${P.household>1?', продукты — на '+P.household+' '+pl(P.household,'человека','человек','человек'):''}</small>`);
-  if(P.why.eventDate){const days=Math.round((pd(P.why.eventDate)-pd(P.start))/DAY);if(days>0){const kg=Math.min(P.startW-P.goal,P.weekly*days/7);L.push(`${esc(P.why.eventName||'Событие')}, ${fmt(pd(P.why.eventDate))}: к этому дню <b>−${g(kg)} кг</b><small>${pd(P.why.eventDate)<rel?'и ещё −'+g(P.startW-P.goal-kg)+' кг к финишу':'придёшь уже с достигнутой целью'}</small>`)}}
+  if(!TONE&&P.why.eventDate){const days=Math.round((pd(P.why.eventDate)-pd(P.start))/DAY);if(days>0){const kg=Math.min(P.startW-P.goal,P.weekly*days/7);L.push(`${esc(P.why.eventName||'Событие')}, ${fmt(pd(P.why.eventDate))}: к этому дню <b>−${g(kg)} кг</b><small>${pd(P.why.eventDate)<rel?'и ещё −'+g(P.startW-P.goal-kg)+' кг к финишу':'придёшь уже с достигнутой целью'}</small>`)}}
   $('rvLines').innerHTML=L.map(x=>`<div class="rvl"><div>${x}</div></div>`).join('');
   $('dossier').innerHTML=`<span class="bigstamp" id="bigstamp">Принята</span><div class="no">Личное дело № ${P.num}</div><h3>${esc(P.name)}</h3>
-    <dl><dt>Статья</dt><dd>−${g(P.startW-P.goal)} кг</dd><dt>Режим</dt><dd>тренировка каждый день, обязательно ${r.perWeek} в неделю</dd><dt>Паёк</dt><dd>${P.kcal} ккал в день</dd>${P.why.list.length?`<dt>Мотив</dt><dd>${esc(whyText(P))}</dd>`:''}${P.reward?`<dt>На выходе</dt><dd>${esc(P.reward)}</dd>`:''}</dl>
+    <dl><dt>Статья</dt><dd>${TONE?'«Тонус»: сила и выносливость':'−'+g(P.startW-P.goal)+' кг'}</dd><dt>Режим</dt><dd>тренировка каждый день, обязательно ${r.perWeek} в неделю</dd><dt>Паёк</dt><dd>${P.kcal} ккал в день</dd>${P.why.list.length?`<dt>Мотив</dt><dd>${esc(whyText(P))}</dd>`:''}${P.reward?`<dt>На выходе</dt><dd>${esc(P.reward)}</dd>`:''}</dl>
     <div class="out"><span>Дата выхода</span><b>${fmt(rel)}</b><span>Может сдвинуться: пропуски отодвигают её, а неделя без пропусков приближает.</span></div>
     <button class="btn" id="enterBtn">Войти в режим</button>`;
   $('enterBtn').onclick=openCabinet;
@@ -807,7 +847,8 @@ const whyText=p=>p.why.list.map(w=>w==='К событию'&&p.why.eventName?'к 
 function greeting(){const h=new Date().getHours();return h<5?'Доброй ночи':h<12?'Доброе утро':h<18?'Добрый день':'Добрый вечер'}
 function personalLine(c){
   const t=c.t;
-  if(c.finished)return`Ты сделала это: ${P.startW} → ${c.cur} кг. Личное дело закрыто, ты на свободе.`;
+  if(c.finished)return c.tone?`${TONE_DAYS/7} недель позади — ты сильнее и выносливее, чем в первый день. Ты на свободе.`:`Ты сделала это: ${P.startW} → ${c.cur} кг. Личное дело закрыто, ты на свободе.`;
+  if(c.dropped)return`Вес немного снизился, а в «Тонусе» его держим. Добавь перекус и напиши куратору — подправим меню.`;
   if(t<1)return`До заезда ${1-t} ${pl(1-t,'день','дня','дней')}. Меню на первые дни уже собрано — можно закупиться по списку внизу.`;
   const ye=P.plan[t-2],yl=P.log['d'+(t-1)]||{};
   if(t>1&&c.wm.miss.has(t-1))return`На прошлой неделе не хватило тренировок до нормы — дата выхода отъехала. Эту неделю можно закрыть без потерь.`;
@@ -815,7 +856,7 @@ function personalLine(c){
   if(c.measAgo>=3)return`Сегодня день замеров: ${c.measAgo} ${pl(c.measAgo,'день','дня','дней')} без взвешивания. Встань на весы утром, до завтрака.`;
   if(c.streak>=2)return`${c.streak} ${pl(c.streak,'день','дня','дней')} подряд без единого пропуска. Ещё ${UDO_DAYS-c.run} — и минус день срока.`;
   const lost=P.startW-c.cur;
-  if(lost>=.5)return`Минус ${g(lost)} кг с первого дня — это ${c.progress}% пути к ${P.goal} кг.`;
+  if(!c.tone&&lost>=.5)return`Минус ${g(lost)} кг с первого дня — это ${c.progress}% пути к ${P.goal} кг.`;
   if(P.why.eventDate){const dd=Math.round((pd(P.why.eventDate)-pd(iso(new Date())))/DAY);if(dd>0&&dd<=60)return`До события «${esc(P.why.eventName||'твоё событие')}» ${dd} ${pl(dd,'день','дня','дней')}. Каждый день сейчас на счету.`}
   return`День ${t} из ${c.total}. Всё идёт по плану.`;
 }
@@ -836,17 +877,17 @@ function rankOf(pts){let i=0;RANKS.forEach((r,j)=>{if(pts>=r[0])i=j});return{i,n
 const BADGES=[
   ['first','1','Первый шаг','Первая тренировка',(c,s)=>s.train>=1],
   ['udo','7','Без нарушений','7 дней подряд без пропусков',(c,s)=>c.bonus>=1],
-  ['kg1','−1','Минус один','Первый килограмм позади',c=>P.startW-c.cur>=1],
-  ['kg3','−3','Минус три','Три килограмма позади',c=>P.startW-c.cur>=3],
-  ['kg5','−5','Минус пять','Пять килограммов позади',c=>P.startW-c.cur>=5],
-  ['half','½','Экватор','Половина пути к цели',c=>c.progress>=50],
+  ['kg1','−1','Минус один','Первый килограмм позади',c=>!c.tone&&P.startW-c.cur>=1],
+  ['kg3','−3','Минус три','Три килограмма позади',c=>!c.tone&&P.startW-c.cur>=3],
+  ['kg5','−5','Минус пять','Пять килограммов позади',c=>!c.tone&&P.startW-c.cur>=5],
+  ['half','½','Экватор','Половина пути',c=>c.progress>=50],
   ['t10','10','Десятка','10 тренировок',(c,s)=>s.train>=10],
   ['t25','25','Четвертак','25 тренировок',(c,s)=>s.train>=25],
   ['menu7','7','Строгий паёк','7 дней по меню',(c,s)=>s.food>=7],
   ['bonus5','+5','Сверх нормы','5 бонус-заданий',(c,s)=>s.bonus>=5],
   ['early','7:00','Ранняя пташка','Тренировка до 9 утра',(c,s)=>s.early>=1],
   ['meas5','5','Под контролем','5 замеров',(c,s)=>s.meas>=5],
-  ['free','✓','На свободе','Цель достигнута',c=>c.finished]
+  ['free','✓','На свободе','Срок отбыт, цель достигнута',c=>c.finished]
 ];
 const badgeSvg=(g,on)=>`<svg viewBox="0 0 64 72" aria-hidden="true"><path d="M32 3 59 13v25c0 16-13 26-27 31C18 64 5 54 5 38V13Z" fill="${on?'#1F211D':'#DCDDD7'}"/><path d="M32 9 53 17v21c0 13-10 21-21 25-11-4-21-12-21-25V17Z" fill="none" stroke="${on?'#F2C230':'#BFC1BA'}" stroke-width="1.6" stroke-dasharray="3 2.5"/><text x="32" y="${g.length>2?43:46}" text-anchor="middle" font-family="Russo One,sans-serif" font-size="${g.length>2?14:22}" fill="${on?'#F2C230':'#A9ACA4'}">${g}</text></svg>`;
 const ICON={
@@ -1024,10 +1065,10 @@ $('measBtn').onclick=async()=>{
   try{
     const before=calc(P).total,prev=lastWeight(P);
     const upd={measurements:FV.arrayUnion(m),lastSeen:Date.now()};P.measurements.push(m);
-    if(w<=P.goal&&!P.finishedAt){P.finishedAt=Date.now();upd.finishedAt=P.finishedAt}
+    if(P.track!=='tone'&&w<=P.goal&&!P.finishedAt){P.finishedAt=Date.now();upd.finishedAt=P.finishedAt}
     await ref.update(upd);['mW','mWaist','mHip','mChest'].forEach(id=>$(id).value='');$('measMsg').textContent='';
     const after=calc(P).total,diff=w-prev;
-    store('sr_total_'+P.email,after);toast(P.finishedAt&&w<=P.goal?'Цель достигнута!':`+${PTS.meas} баллов. ${diff<0?'−'+g(-diff)+' кг.':diff>0?'+'+g(diff)+' кг — скорее всего вода.':'Вес стоит.'}${after<before?' Дата выхода приблизилась на '+(before-after)+' дн.':after>before?' Дата выхода сдвинулась на '+(after-before)+' дн.':''}`);
+    store('sr_total_'+P.email,after);toast(P.track==='tone'?(diff<-.4?`+${PTS.meas} баллов. Вес снизился — в «Тонусе» его держим: добавь перекус.`:`+${PTS.meas} баллов. Вес стабилен.`):P.finishedAt&&w<=P.goal?'Цель достигнута!':`+${PTS.meas} баллов. ${diff<0?'−'+g(-diff)+' кг.':diff>0?'+'+g(diff)+' кг — скорее всего вода.':'Вес стоит.'}${after<before?' Дата выхода приблизилась на '+(before-after)+' дн.':after>before?' Дата выхода сдвинулась на '+(after-before)+' дн.':''}`);
     renderCabinet();
   }catch(e){$('measMsg').textContent='Не сохранилось: '+e.message}
   finally{$('measBtn').disabled=false}
@@ -1186,7 +1227,7 @@ document.addEventListener('click',e=>{const g2=e.target.closest('[data-go]');if(
 function hintHtml(key){
   const c=calc(P);
   if(key==='wall')return'<b>Стена камеры.</b> Каждая черта — день срока. Белая — день засчитан (питание + тренировка или выходной, если норма недели не страдает), бледная — сделано наполовину, красная — пропуск, жёлтая — сегодня.';
-  if(key==='date'){const rows=[[`${P.startW} → ${P.goal} кг по ${g(P.weekly||Math.min(1,P.startW*.01))} кг/нед`,`${P.planDays} дн.`]];
+  if(key==='date'){const rows=[[P.track==='tone'?'Режим «Тонус»':`${P.startW} → ${P.goal} кг по ${g(P.weekly||Math.min(1,P.startW*.01))} кг/нед`,`${P.planDays} дн.`]];
     if(c.miss)rows.push(['Недобор тренировок до нормы',`+${c.miss}`]);if(Math.floor(c.food/2))rows.push([`${c.food} дн. без питания`,`+${Math.floor(c.food/2)}`]);
     if(c.weightAdj>0)rows.push(['Вес медленнее плана',`+${c.weightAdj}`]);if(c.weightAdj<0)rows.push(['Худеешь быстрее',`${c.weightAdj}`]);if(c.bonus)rows.push(['Условно-досрочное',`−${c.bonus}`]);rows.push(['Итого',`${c.total} дн.`]);
     return`<b>Дата живая.</b> Пропуски отодвигают её, неделя без пропусков приближает.<ul>${rows.map(([a,b])=>`<li><span>${a}</span><b>${b}</b></li>`).join('')}</ul>`}
@@ -1262,16 +1303,16 @@ function reminder(p,reasons){
 }
 function renderRed(){
   const rows=CUR.filter(({c})=>!c.finished&&c.t>=1).map(({p,c})=>{const r=[];const sa=seenAgo(p);
-    if(sa>=2)r.push(`не заходила ${sa} ${pl(sa,'день','дня','дней')}`);if(c.recentMiss>=2)r.push(`пропустила ${c.recentMiss} тренировки за 3 дня`);if(c.measAgo>4)r.push(`нет замеров ${c.measAgo} ${pl(c.measAgo,'день','дня','дней')}`);
+    if(sa>=2)r.push(`не заходила ${sa} ${pl(sa,'день','дня','дней')}`);if(c.recentMiss>=2)r.push(`пропустила ${c.recentMiss} тренировки за 3 дня`);if(c.dropped)r.push('вес снижается в «Тонусе» — проверь питание');if(c.measAgo>4)r.push(`нет замеров ${c.measAgo} ${pl(c.measAgo,'день','дня','дней')}`);
     return {p,c,r}}).filter(x=>x.r.length).sort((a,b)=>b.r.length-a.r.length);
-  panel('red').innerHTML=`<h2>Красная зона · ${rows.length}</h2>`+(rows.length?`<div class="tbl"><table><tr><th>Участница</th><th>Что не так</th><th>Сдвиг</th><th></th></tr>${rows.map((x,i)=>`<tr><td>${esc(x.p.name)}<div class="s">${esc(x.p.contact||x.p.email)}</div></td><td>${x.r.join('<br>')}</td><td>+${x.c.total-x.p.planDays} дн.</td><td><button class="btn small ghost" data-rem="${i}">Скопировать напоминание</button></td></tr>`).join('')}</table></div><p class="note">Напоминание личное: с её мотивом и наградой из анкеты. Вставь его в Телеграм или ВК.</p>`:'<p class="lead">Все на месте. Хороший день.</p>');
+  panel('red').innerHTML=`<h2>Красная зона · ${rows.length}</h2>`+(rows.length?`<div class="tbl"><table><tr><th>Участница</th><th>Что не так</th><th>Сдвиг</th><th></th></tr>${rows.map((x,i)=>`<tr><td>${esc(x.p.name)}${x.p.ed?' <span class="tag todo">РПП</span>':''}<div class="s">${esc(x.p.contact||x.p.email)}</div></td><td>${x.r.join('<br>')}</td><td>+${x.c.total-x.p.planDays} дн.</td><td><button class="btn small ghost" data-rem="${i}">Скопировать напоминание</button></td></tr>`).join('')}</table></div><p class="note">Напоминание личное: с её мотивом и наградой из анкеты. Вставь его в Телеграм или ВК.</p>`:'<p class="lead">Все на месте. Хороший день.</p>');
   panel('red').onclick=e=>{const b=e.target.closest('[data-rem]');if(!b)return;const x=rows[+b.dataset.rem];copy(reminder(x.p,x.r),b)};
 }
 function copy(text,btn){const done=()=>{const o=btn.textContent;btn.textContent='Скопировано';setTimeout(()=>btn.textContent=o,1500)};
   if(navigator.clipboard)navigator.clipboard.writeText(text).then(done,()=>prompt('Скопируй текст:',text));else prompt('Скопируй текст:',text)}
 function comments(p){return Object.entries(p.log||{}).filter(([,l])=>l.comment).sort((a,b)=>(b[1].done||0)-(a[1].done||0)).map(([,l])=>l.comment)}
 function renderCases(){
-  const rows=CUR.filter(({p,c})=>c.finished||(c.progress>=40&&c.total<=p.planDays)).sort((a,b)=>b.c.progress-a.c.progress);
+  const rows=CUR.filter(({p,c})=>p.track!=='tone'&&(c.finished||(c.progress>=40&&c.total<=p.planDays))).sort((a,b)=>b.c.progress-a.c.progress);
   panel('cases').innerHTML=`<h2>Кейсы для соцсетей · ${rows.length}</h2>`+(rows.length?`<div class="tbl"><table><tr><th>Участница</th><th>Результат</th><th>История</th></tr>${rows.map(({p,c})=>{
     const m=p.measurements||[],f=m[0]||{},l=m[m.length-1]||{};const cm=(f.waist&&l.waist)?`, талия −${g(f.waist-l.waist)} см`:'';const cs=comments(p).slice(0,2);
     return `<tr><td>${esc(p.name)}<div class="s">${esc(p.contact||p.email)}</div>${c.finished?'<span class="tag done">вышла</span>':`<span class="tag todo">${c.progress}%</span>`} ${p.consent?'<span class="tag done">согласие есть</span>':'<span class="tag rest">без согласия</span>'}</td>
@@ -1282,7 +1323,7 @@ function renderAll(){
   const rows=CUR.slice().sort((a,b)=>b.c.progress-a.c.progress);
   panel('all').innerHTML=`<h2>Все участницы · ${rows.length}</h2><div class="tbl"><table><tr><th>Имя</th><th>Вес</th><th>Прогресс</th><th>Тренировки</th><th>Выход</th></tr>${rows.map(({p,c})=>{
     const past=p.plan.filter(e=>e.d<c.t&&e.w),done=past.filter(e=>(p.log['d'+e.d]||{}).done).length;
-    return `<tr><td>${esc(p.name)}<div class="s">№ ${esc(p.num||'')} · ${esc(p.contact||p.email)}</div></td><td>${p.startW} → ${c.cur}<div class="s">цель ${p.goal}</div></td><td>${c.progress}%${c.streak?`<div class="s">${c.streak} дн. без пропусков</div>`:''}</td><td>${done}/${past.length}<div class="s">уровень: ${LV[p.level]}</div></td><td>${c.finished?'вышла':fmt(addDays(pd(p.start),c.total-1))}<div class="s">${c.total>p.planDays?'+'+(c.total-p.planDays)+' дн.':c.total<p.planDays?'−'+(p.planDays-c.total)+' дн.':'по плану'}</div></td></tr>`}).join('')}</table></div>`;
+    return `<tr><td>${esc(p.name)}${p.track==='tone'?' <span class="tag rest">Тонус</span>':''}${p.ed?' <span class="tag todo" title="РПП, согласие специалиста подтверждено">РПП · согласие</span>':''}<div class="s">№ ${esc(p.num||'')} · ${esc(p.contact||p.email)}</div></td><td>${p.startW} → ${c.cur}<div class="s">цель ${p.goal}</div></td><td>${c.progress}%${c.streak?`<div class="s">${c.streak} дн. без пропусков</div>`:''}</td><td>${done}/${past.length}<div class="s">уровень: ${LV[p.level]}</div></td><td>${c.finished?'вышла':fmt(addDays(pd(p.start),c.total-1))}<div class="s">${c.total>p.planDays?'+'+(c.total-p.planDays)+' дн.':c.total<p.planDays?'−'+(p.planDays-c.total)+' дн.':'по плану'}</div></td></tr>`}).join('')}</table></div>`;
 }
 function renderWk(){
   const byP={};Object.values(W).forEach(w=>(byP[w.program]=byP[w.program]||[]).push(w));
