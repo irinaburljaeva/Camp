@@ -408,6 +408,14 @@ body.demo .toast{bottom:calc(76px + env(safe-area-inset-bottom))}
 </div>
 
 <div class="cta-bar hidden" id="ctaBar"><span id="ctaText"></span><a class="btn" id="ctaBtn" href="#sale">Полный доступ</a></div>
+<div class="modal hidden" id="edModal" role="dialog" aria-modal="true" aria-labelledby="edTitle"><div class="mbox" style="text-align:left">
+  <h3 id="edTitle">Нужно согласие специалиста</h3>
+  <p style="color:var(--ink)">Строгий режим — это дефицит калорий, регулярные взвешивания и цель в килограммах. При РПП, даже давнем, это может вернуть симптомы.</p>
+  <p style="color:var(--ink);margin-top:8px">Участвовать можно, если твой лечащий специалист — психотерапевт или врач, который ведёт РПП, — знает об участии и не против.</p>
+  <label style="display:flex;gap:10px;align-items:flex-start;color:var(--ink);margin-top:14px;font-size:.95rem"><input type="checkbox" id="edCheck" style="width:auto;margin-top:4px">Мой специалист знает о моём участии в строгом режиме и согласен</label>
+  <button class="btn" id="edYes" disabled>Подтверждаю</button>
+  <button class="btn ghost" id="edNo" style="margin-top:8px">Пока нет согласия</button>
+</div></div>
 <div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="mbox"><div id="mIcon"></div><p class="mk" id="mKicker">Новая нашивка</p><h3 id="mTitle"></h3><p id="mText"></p><button class="btn" id="mClose">Забрать</button></div></div>
 
 <script>
@@ -421,6 +429,8 @@ const PRICE='', OLD_PRICE='';
 const DEMO_WORKOUT={title:'Шагай дома: пробная тренировка',level:'Новичок',kinescope:'4sshWNgNjHsByP7u2hPBFV'};
 // Сколько секунд после старта тренировки ждать до кнопки «Готово» (в полной версии — 20 минут).
 const DEMO_WAIT=15;
+// Срок в режиме «Тонус» (для тех, кому худеть небезопасно), дней.
+const TONE_DAYS=42;
 // Сохранять email из формы «Пришлите мне…» в Firestore (коллекция strict_leads).
 const SAVE_LEADS=true;
 const firebaseConfig={apiKey:"AIzaSyApSUQxealmL13siDzauRWO_J6-fSHkN-4",authDomain:"walk-walk-d8a14.firebaseapp.com",projectId:"walk-walk-d8a14",storageBucket:"walk-walk-d8a14.firebasestorage.app",messagingSenderId:"1022340791272",appId:"1:1022340791272:web:d4009903a21ffdb0dac25d"};
@@ -450,40 +460,48 @@ const dossierNo=s=>{let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))%9000;retur
 /* ================= РАСЧЁТ ЦЕЛИ (как в полной версии) ================= */
 function goalCheck(d){
   const w=num(d.weight),h=num(d.height),loss=num(d.loss),age=num(d.age),act=num(d.act)||1.375,sex=d.sex||'f';
-  if(!w||!h||!loss||w<35||h<130)return{state:'empty'};
-  const hm=(h/100)**2,b=w/hm,bmr=Math.round(sex==='m'?10*w+6.25*h-5*(age||35)+5:10*w+6.25*h-5*(age||35)-161);
+  if(!w||!h||w<35||h<130)return{state:'empty'};
+  const hm=(h/100)**2;if(!loss&&w/hm>=18.5)return{state:'empty'};
+  const b=w/hm,bmr=Math.round(sex==='m'?10*w+6.25*h-5*(age||35)+5:10*w+6.25*h-5*(age||35)-161);
   const kcal=Math.max(sex==='m'?1500:1200,bmr,Math.round(bmr*act*.8));
-  if(b<18.5)return{state:'stop',b,text:`ИМТ ${g(b)} — уже ниже нормы. Снижать вес дальше небезопасно.`};
+  if(b<18.5)return{state:'stop',b,bmr,text:`ИМТ ${g(b)} — уже ниже нормы, худеть тебе небезопасно.`};
   const minW=Math.ceil(19.5*hm*10)/10,want=Math.round((w-loss)*10)/10,tb=want/hm;
   let goal=want,state='ok',text;
   if(tb<18.5){goal=minW;state='warn';
-    if(goal>=w)return{state:'stop',b,text:`Твой вес уже у нижней границы нормы — сбрасывать не нужно.`};
-    text=`${want} кг — это ИМТ ${g(tb)}, ниже безопасной границы. Возьмём <b>${goal} кг</b>.`;
+    if(goal>=w)return{state:'stop',b,bmr,text:`Твой вес уже у нижней границы нормы — сбрасывать не нужно.`};
+    text=`${want} кг — это ИМТ ${g(tb)}, ниже безопасной границы. Безопасно сбросить не больше ${g(w-goal)} кг.`;
   }else text=`Цель ${goal} кг безопасна: ИМТ ${g(tb)}.`;
   const weekly=Math.round(Math.min(1,w*.01)*10)/10,planDays=Math.max(14,Math.ceil((w-goal)/weekly*7));
-  return{state,b,goal,want,weekly,planDays,bmr,kcal,text};
+  return{state,b,goal,want,weekly,planDays,bmr,kcal,text,maxLoss:Math.round((w-minW)*10)/10};
 }
 
 /* ================= ВОПРОСЫ ================= */
 const DANCE=['Раскрываем женственность','Учимся танцевать','Шагай и танцуй','Танцевальный фитнес','Зумбавидные тренировки'];
 const HIGH=['Шагательная табата','Зумбавидные тренировки','В стиле Тай-Бо','Шагай дома. Активно'];
-const STOPS=[['preg','Беременность или кормление грудью'],['dis','Диабет на инсулине, болезни сердца или почек'],['ed','Расстройство пищевого поведения в прошлом'],['op','Операция в последние 3 месяца']];
+const STOPS=[['preg','Беременность или кормление грудью'],['dis','Диабет на инсулине, болезни сердца или почек'],['ed','Расстройство пищевого поведения — сейчас или в прошлом'],['op','Операция в последние 3 месяца']];
 const ACTS=[[1.2,'Сидячий день','Работа за компьютером'],[1.375,'Немного движения','5–7 тысяч шагов'],[1.55,'Много на ногах','Активная работа или спорт']];
 const FOODTAGS=[['fish','Рыба'],['meat','Говядина и свинина'],['poultry','Птица'],['dairy','Молочное'],['egg','Яйца'],['mushroom','Грибы'],['nuts','Орехи'],['gluten','Мука и хлеб']];
 let D={sex:'f',act:1.375,noTags:[],stops:[],level:1,dance:'yes',joints:'no'};
 const opt=(key,v,l,sel)=>`<button class="opt" data-set="${key}" data-v="${v}" aria-pressed="${String(sel)===String(v)}">${l}</button>`;
 const inp=(f,label,type='text',ph='')=>`<label for="f_${f}">${label}</label><input id="f_${f}" data-f="${f}" type="${type}" value="${esc(D[f]??'')}" placeholder="${ph}" ${type==='number'?'inputmode="decimal"':''}>`;
-function liveHtml(){const c=goalCheck(D);if(c.state==='empty')return'';if(c.state==='stop')return`<div class="verdict stop"><p>${c.text}</p></div>`;
+function liveHtml(){const c=goalCheck(D);if(c.state==='empty')return'';
+  const toneOn=`<div class="verdict ok"><p><b>Режим «Тонус» выбран.</b> Без похудения: ${TONE_DAYS/7} недель тренировок, сила, выносливость и привычки. Меню — на поддержание веса.</p><p><button class="hint-link" data-untone>передумала</button></p></div>`;
+  const toneBtn=`<button class="opt card-opt" data-tone><b>Режим «Тонус»</b><span>Без похудения: сила, выносливость и привычки, ${TONE_DAYS/7} недель</span></button>`;
+  if(c.state==='stop')return D.track==='tone'?toneOn:`<div class="verdict warn"><p>${c.text}</p><p>Но в лагерь можно:</p>${toneBtn}</div>`;
+  if(c.state==='warn')return D.track==='tone'?toneOn:`<div class="verdict warn"><p>${c.text}</p><p>Выбери, как идти дальше:</p><button class="opt card-opt" data-less="${c.maxLoss}"><b>Сбросить ${g(c.maxLoss)} кг — до ${g(c.goal)} кг</b><span>Строгий режим, ${c.planDays} ${pl(c.planDays,'день','дня','дней')}</span></button>${toneBtn}</div>`;
   return`<div class="verdict ${c.state}"><p>${c.text}</p><div class="nums"><div>ИМТ<b>${g(c.b)}</b></div><div>темп<b>${g(c.weekly)} кг/нед</b></div><div>срок<b>${c.planDays} дн.</b></div></div></div>`}
 const STEPS=[
   {t:()=>'Как тебя зовут?',h:()=>inp('name','Имя','text','Например, Оля'),v:()=>(D.name||'').trim()?true:'Напиши имя'},
   {t:()=>`${esc(D.name)}, пара цифр`,h:()=>`<div class="opts">${opt('sex','f','Женщина',D.sex)}${opt('sex','m','Мужчина',D.sex)}</div><div class="row">${'<div>'+inp('age','Возраст','number','38')+'</div><div>'+inp('height','Рост, см','number','165')+'</div>'}</div>`,
    v:()=>{const a=num(D.age),h=num(D.height);if(!a||!h)return'Заполни возраст и рост';if(a<18)return'Строгий режим — только с 18 лет';if(a>90||h<130||h>220)return'Проверь цифры';return true}},
   {t:()=>'Вес и цель',h:()=>`<div class="row"><div>${inp('weight','Вес сейчас, кг','number','72')}</div><div>${inp('loss','Хочу сбросить, кг','number','7')}</div></div><div class="live" id="live">${liveHtml()}</div>`,live:1,
-   v:()=>{const c=goalCheck(D);if(c.state==='empty')return'Впиши вес и цель';if(c.state==='stop')return'С такими цифрами строгий режим не подходит';return true}},
+   v:()=>{const c=goalCheck(D);if(c.state==='empty')return'Впиши вес и цель';if(c.state==='stop'&&D.track!=='tone')return'Выбери режим «Тонус», чтобы продолжить';if(c.state==='warn'&&D.track!=='tone')return'Выбери: сбросить меньше или режим «Тонус»';if(c.state==='ok')D.track=null;return true}},
   {t:()=>'Твой обычный день',h:()=>ACTS.map(([v,t,s])=>`<button class="opt card-opt" data-set="act" data-v="${v}" aria-pressed="${String(D.act)===String(v)}"><b>${t}</b><span>${s}</span></button>`).join(''),v:()=>true},
-  {t:()=>'Есть что-то из этого?',h:()=>STOPS.map(([k,l])=>`<button class="opt card-opt" data-multi="stops" data-v="${k}" aria-pressed="${D.stops.includes(k)}"><b>${l}</b></button>`).join('')+(D.stops.length?`<div class="verdict stop"><p>С этим строгий режим может навредить — только с разрешения врача. Напиши нам, подберём мягкую программу.</p></div>`:''),
-   v:()=>D.stops.length?'Строгий режим недоступен без разрешения врача':true},
+  {t:()=>'Есть что-то из этого?',h:()=>{const hard=D.stops.filter(k=>k!=='ed'),ed=D.stops.includes('ed');
+     return STOPS.map(([k,l])=>`<button class="opt card-opt" data-multi="stops" data-v="${k}" aria-pressed="${D.stops.includes(k)}"><b>${l}</b></button>`).join('')
+     +(hard.length?`<div class="verdict stop"><p>С этим строгий режим может навредить — только с разрешения врача. Напиши нам, подберём мягкую программу.</p></div>`:'')
+     +(ed&&!hard.length?(D.edConsent?`<div class="verdict ok"><p><b>Согласие специалиста подтверждено.</b></p><p><button class="hint-link" data-ed-open>изменить</button></p></div>`:`<div class="verdict warn"><p><b>Нужно согласие специалиста.</b></p><p><button class="btn small" data-ed-open style="margin-top:6px">У меня есть согласие</button></p></div>`):'')},
+   v:()=>D.stops.some(k=>k!=='ed')?'Строгий режим недоступен без разрешения врача':D.stops.includes('ed')&&!D.edConsent?'Нужно подтвердить согласие специалиста':true},
   {t:()=>'Пара вопросов о тренировках',h:()=>`<div class="q"><p>Как сейчас с движением?</p><div class="opts">${opt('level',1,'Почти не двигаюсь',D.level)}${opt('level',2,'Иногда тренируюсь',D.level)}${opt('level',3,'Регулярно',D.level)}</div></div>
    <div class="q"><p>Танцевальные тренировки?</p><div class="opts">${opt('dance','yes','Люблю',D.dance)}${opt('dance','no','Не моё',D.dance)}</div></div>
    <div class="q"><p>Ограничения по коленям или спине?</p><div class="opts">${opt('joints','no','Нет',D.joints)}${opt('joints','yes','Есть',D.joints)}</div></div>`,v:()=>true},
@@ -493,11 +511,21 @@ let si=0;
 function renderStep(){const s=STEPS[si];$('stepBar').style.width=((si+1)/STEPS.length*100)+'%';$('stepNo').textContent=`${si+1} из ${STEPS.length}`;
   $('stepBody').innerHTML=`<h1 class="qtitle">${s.t()}</h1><div class="qbox">${s.h()}</div>`;$('onbMsg').textContent='';
   $('nextBtn').textContent=si===STEPS.length-1?'Завести личное дело':'Дальше';}
-$('stepBody').oninput=e=>{const f=e.target.dataset.f;if(!f)return;D[f]=e.target.value;if(STEPS[si].live)$('live').innerHTML=liveHtml();$('onbMsg').textContent=''};
-$('stepBody').onclick=e=>{const b=e.target.closest('[data-set],[data-multi]');if(!b)return;
+$('stepBody').oninput=e=>{const f=e.target.dataset.f;if(!f)return;D[f]=e.target.value;if((f==='weight'||f==='loss')&&goalCheck(D).state==='ok')D.track=null;if(STEPS[si].live)$('live').innerHTML=liveHtml();$('onbMsg').textContent=''};
+$('stepBody').onclick=e=>{
+  if(e.target.closest('[data-ed-open]')){openEd();return}
+  if(e.target.closest('[data-tone]')){D.track='tone';$('live').innerHTML=liveHtml();$('onbMsg').textContent='';return}
+  if(e.target.closest('[data-untone]')){D.track=null;$('live').innerHTML=liveHtml();return}
+  const ls=e.target.closest('[data-less]');if(ls){D.loss=ls.dataset.less;D.track=null;const f=$('f_loss');if(f)f.value=ls.dataset.less;$('live').innerHTML=liveHtml();$('onbMsg').textContent='';return}
+  const b=e.target.closest('[data-set],[data-multi]');if(!b)return;
   if(b.dataset.set){const v=b.dataset.v;D[b.dataset.set]=isNaN(+v)?v:+v}
-  if(b.dataset.multi){const k=b.dataset.multi,v=b.dataset.v;D[k]=D[k].includes(v)?D[k].filter(x=>x!==v):[...D[k],v]}
+  if(b.dataset.multi){const k=b.dataset.multi,v=b.dataset.v;D[k]=D[k].includes(v)?D[k].filter(x=>x!==v):[...D[k],v];
+    if(k==='stops'&&v==='ed'){if(D.stops.includes('ed')){if(!D.edConsent)setTimeout(openEd,50)}else D.edConsent=false}}
   const y=scrollY;renderStep();scrollTo(0,y)};
+function openEd(){$('edCheck').checked=!!D.edConsent;$('edYes').disabled=!D.edConsent;$('edModal').classList.remove('hidden');$('edCheck').focus()}
+$('edCheck').onchange=()=>{$('edYes').disabled=!$('edCheck').checked};
+$('edYes').onclick=()=>{D.edConsent=true;$('edModal').classList.add('hidden');renderStep()};
+$('edNo').onclick=()=>{D.edConsent=false;$('edModal').classList.add('hidden');renderStep()};
 $('backBtn').onclick=()=>{if(si>0){si--;renderStep()}else show('hello')};
 $('nextBtn').onclick=()=>{const v=STEPS[si].v();if(v!==true){$('onbMsg').textContent=v;return}
   if(si<STEPS.length-1){si++;renderStep();scrollTo(0,0);return}finish()};
@@ -506,13 +534,14 @@ $('startBtn').onclick=()=>{si=0;renderStep();show('onb')};
 /* ================= РАСЧЁТ ЛИЧНОГО ДЕЛА ================= */
 let S=null;   // всё, что посчитали
 function finish(){
-  const c=goalCheck(D);
+  const c=goalCheck(D),tone=D.track==='tone'&&c.state!=='ok';
+  if(tone)Object.assign(c,{goal:num(D.weight),want:null,weekly:0,planDays:TONE_DAYS,kcal:Math.max(D.sex==='m'?1500:1200,Math.round(c.bmr*(num(D.act)||1.375)))});
   const lvl=D.joints==='yes'?Math.min(D.level,2):D.level,L=lvl<=1?[1]:[lvl-1,lvl];
   const ex=new Set();if(D.dance==='no')DANCE.forEach(p=>ex.add(p));if(D.joints==='yes')HIGH.forEach(p=>ex.add(p));
   if(num(D.weight)<95)ex.add('Тренировки для 100 кг+');if(num(D.age)<50)ex.add('Тренировки для 50+');
   const pool=WSTAT.filter(([p,l])=>L.includes(l)&&!ex.has(p)).length;
   const meals=RTAGS.filter(([,t])=>!t.some(x=>D.noTags.includes(x))).length;
-  S={name:D.name.trim(),num:dossierNo(D.name+D.weight+D.age),startW:num(D.weight),goal:c.goal,want:c.want,kcal:c.kcal,bmr:c.bmr,weekly:c.weekly,planDays:c.planDays,
+  S={tone,name:D.name.trim(),num:dossierNo(D.name+D.weight+D.age),startW:num(D.weight),goal:c.goal,want:c.want,kcal:c.kcal,bmr:c.bmr,weekly:c.weekly,planDays:c.planDays,
      pool,meals,allMeals:RTAGS.length,allW:WSTAT.length,noTags:D.noTags.slice(),dance:D.dance,joints:D.joints,lvl,log:{}};
   S.menu=pickMenu();store('sr_demo',JSON.stringify(S));
   reveal();
@@ -531,15 +560,16 @@ function reveal(){
   const cut=[];if(S.dance==='no')cut.push('танцы');if(S.joints==='yes')cut.push('прыжки и удары — бережём суставы');
   const L=[
     `Личное дело <b>№ ${S.num}</b> заведено на имя <b>${esc(S.name)}</b>`,
-    `Твоё тело в покое тратит <b>${S.bmr} ккал</b><small>Норма для снижения — ${S.kcal} ккал в день</small>`,
-    ...(S.want<S.goal?[`Цель ${S.want} кг заменили на <b>${S.goal} кг</b><small>Ниже — уже опасно для твоего роста</small>`]:[]),
-    `Безопасный темп — <b>${g(S.weekly)} кг в неделю</b><small>${S.startW} → ${S.goal} кг за ${S.planDays} ${pl(S.planDays,'день','дня','дней')}</small>`,
+    `Твоё тело в покое тратит <b>${S.bmr} ккал</b><small>${S.tone?'Норма на поддержание веса':'Норма для снижения'} — ${S.kcal} ккал в день</small>`,
+    ...(S.tone?[`Режим <b>«Тонус»</b> — без похудения<small>${TONE_DAYS/7} недель: сила, выносливость, привычки</small>`]:[]),
+    ...(!S.tone&&S.want&&S.want<S.goal?[`Цель ${S.want} кг заменили на <b>${g(S.goal)} кг</b><small>Ниже — уже опасно для твоего роста</small>`]:[]),
+    ...(S.tone?[]:[`Безопасный темп — <b>${g(S.weekly)} кг в неделю</b><small>${S.startW} → ${g(S.goal)} кг за ${S.planDays} ${pl(S.planDays,'день','дня','дней')}</small>`]),
     `Из ${S.allW} тренировок тебе подходят <b>${S.pool}</b><small>${cut.length?'убрали '+cut.join(', ')+'; ':''}уровень «${LVN[S.lvl]}»</small>`,
     `Из ${S.allMeals} блюд для тебя — <b>${S.meals}</b><small>${noF.length?'без: '+noF.join(', '):'граммы — под твою норму'}</small>`
   ];
   $('rvLines').innerHTML=L.map(x=>`<div class="rvl"><div>${x}</div></div>`).join('');
   $('dossier').innerHTML=`<span class="bigstamp" id="bigstamp">Принята</span><div class="no">Личное дело № ${S.num}</div><h3>${esc(S.name)}</h3>
-    <dl><dt>Статья</dt><dd>−${g(S.startW-S.goal)} кг</dd><dt>Паёк</dt><dd>${S.kcal} ккал в день</dd><dt>Режим</dt><dd>${S.pool} тренировок без повторов</dd></dl>
+    <dl><dt>Статья</dt><dd>${S.tone?'«Тонус»: сила и выносливость':'−'+g(S.startW-S.goal)+' кг'}</dd><dt>Паёк</dt><dd>${S.kcal} ккал в день</dd><dt>Режим</dt><dd>${S.pool} тренировок без повторов</dd></dl>
     <div class="out"><span>Дата выхода, если начать сегодня</span><b>${fmt(rel)}</b></div>
     <button class="btn" id="enterBtn">Пройти пробный день</button>`;
   $('enterBtn').onclick=openDemo;
@@ -574,7 +604,7 @@ function render(){
   const l=S.log,ok=l.done&&l.food,rel=addDays(new Date(),S.planDays-1);
   $('stamp').textContent=`Камера № ${S.num}`;$('rankChip').innerHTML=`<b>Новенькая</b> · ${pts()}`;
   $('hName').textContent=S.name;
-  $('hLine').textContent=ok?`День 1 засчитан. Так выглядит каждый из ${S.planDays} дней — до ${S.goal} кг.`:'Пробный день: тренировка, меню и бонус. Попробуй, как это работает.';
+  $('hLine').textContent=ok?`День 1 засчитан. Так выглядит каждый из ${S.planDays} дней${S.tone?'':' — до '+g(S.goal)+' кг'}.`:'Пробный день: тренировка, меню и бонус. Попробуй, как это работает.';
   $('relDate').textContent=fmt(rel);$('daysLeft').textContent=S.planDays;$('daysLeftL').textContent=pl(S.planDays,'день срока','дня срока','дней срока');
   renderTally();
   // задания
@@ -590,7 +620,7 @@ function render(){
   $('qRing').innerHTML=`<svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="${r}" fill="none" stroke="#DCDDD7" stroke-width="5"/><circle cx="22" cy="22" r="${r}" fill="none" stroke="${dn===3?'#1F7A4D':'#1F211D'}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C*dn/3} ${C}" transform="rotate(-90 22 22)"/></svg><b style="color:var(--ink)">${dn}/3</b>`;
   $('dayStamp').innerHTML=ok?`<div class="daystamp ${justDone?'slam':''}">День засчитан</div>`:'';
   renderMenu();renderLocked();renderSale();
-  $('ctaText').innerHTML=ok?`<b>День 1 из ${S.planDays}</b> засчитан`:`До <b>${S.goal} кг</b> — ${S.planDays} ${pl(S.planDays,'день','дня','дней')}`;
+  $('ctaText').innerHTML=ok?`<b>День 1 из ${S.planDays}</b> засчитан`:S.tone?`«Тонус» — ${S.planDays} ${pl(S.planDays,'день','дня','дней')}`:`До <b>${g(S.goal)} кг</b> — ${S.planDays} ${pl(S.planDays,'день','дня','дней')}`;
   justDone=false;
 }
 setInterval(()=>{const cd=document.querySelector('[data-cd]');if(!cd||!S||!S.log.opened||S.log.done)return;const lf=Math.ceil(DEMO_WAIT-(Date.now()-S.log.opened)/1000);if(lf>0)cd.textContent=lf+' с';else render()},1000);
@@ -639,18 +669,18 @@ function renderLocked(){
   const names=['Мягкий фитнес','Шагательная табата','Отдых, прогулка','Плавный старт','Шагай дома. БАЗА','Лимфодренаж'];
   $('lockTitle').textContent=`Дни 2–${S.planDays}`;
   $('lockedBody').innerHTML=`<h2>Неделя</h2><ul class="week">${names.map((n,i)=>`<li><span class="d">${fmt(addDays(new Date(),i+1))}</span><span>${n}</span><span class="tag rest">день ${i+2}</span></li>`).join('')}</ul>
-    <svg class="chart" viewBox="0 0 600 160"><line x1="40" y1="20" x2="560" y2="140" stroke="#9A9D95" stroke-width="3" stroke-dasharray="8 6"/><circle cx="560" cy="140" r="8" fill="#1F7A4D"/><text x="560" y="120" text-anchor="end" font-size="20" fill="#1F7A4D">${S.goal} кг</text></svg>`;
+    ${S.tone?'':`<svg class="chart" viewBox="0 0 600 160"><line x1="40" y1="20" x2="560" y2="140" stroke="#9A9D95" stroke-width="3" stroke-dasharray="8 6"/><circle cx="560" cy="140" r="8" fill="#1F7A4D"/><text x="560" y="120" text-anchor="end" font-size="20" fill="#1F7A4D">${g(S.goal)} кг</text></svg>`}`;
 }
 
 /* продающий блок — с её цифрами */
 function renderSale(){
   const ok=S.log.done&&S.log.food,rel=addDays(new Date(),S.planDays-1);
   const noF=S.noTags.map(x=>FOODTAGS.find(f=>f[0]===x)[1].toLowerCase());
-  $('sale').innerHTML=`<h2>${ok?`${esc(S.name)}, день 1 засчитан.<br>Осталось ${S.planDays-1} ${pl(S.planDays-1,'день','дня','дней')} до ${S.goal} кг`:`${esc(S.name)}, твой срок — ${S.planDays} ${pl(S.planDays,'день','дня','дней')}`}</h2>
+  $('sale').innerHTML=`<h2>${ok?`${esc(S.name)}, день 1 засчитан.<br>Осталось ${S.planDays-1} ${pl(S.planDays-1,'день','дня','дней')}${S.tone?' в «Тонусе»':' до '+g(S.goal)+' кг'}`:`${esc(S.name)}, твой срок — ${S.planDays} ${pl(S.planDays,'день','дня','дней')}`}</h2>
   <p class="lead">Личное дело № ${S.num} уже заведено. В полной версии всё продолжится с того места, где ты сейчас.</p>
   <ul>
     <li><i>${S.pool}</i><span>тренировок под тебя<small>без повторов, нагрузка подстраивается под «тяжело / легко»</small></span></li>
-    <li><i>${S.planDays}</i><span>дней меню под ${S.kcal} ккал<small>${S.meals} блюд${noF.length?', без: '+noF.join(', '):''} · граммы на твою порцию · список продуктов</small></span></li>
+    <li><i>${S.planDays}</i><span>дней меню под ${S.kcal} ккал${S.tone?' — на поддержание веса':''}<small>${S.meals} блюд${noF.length?', без: '+noF.join(', '):''} · граммы на твою порцию · список продуктов</small></span></li>
     <li><i>✓</i><span>Живая дата выхода<small>пропуски отодвигают её, неделя без пропусков приближает</small></span></li>
     <li><i>★</i><span>Куратор, статусы и нашивки<small>напомнит, поддержит и не даст сойти с режима</small></span></li>
   </ul>
@@ -668,7 +698,7 @@ async function sendLead(){
   try{
     if(SAVE_LEADS){
       if(!window.firebase){for(const s of['firebase-app-compat','firebase-firestore-compat'])await new Promise((ok,no)=>{const el=document.createElement('script');el.src=`https://www.gstatic.com/firebasejs/10.12.2/${s}.js`;el.onload=ok;el.onerror=no;document.head.appendChild(el)});firebase.initializeApp(firebaseConfig)}
-      await firebase.firestore().collection('strict_leads').doc(email).set({email,name:S.name,num:S.num,startW:S.startW,goal:S.goal,kcal:S.kcal,planDays:S.planDays,noTags:S.noTags,dayDone:!!(S.log.done&&S.log.food),at:Date.now()},{merge:true});
+      await firebase.firestore().collection('strict_leads').doc(email).set({email,name:S.name,num:S.num,startW:S.startW,goal:S.goal,kcal:S.kcal,planDays:S.planDays,noTags:S.noTags,track:S.tone?'tone':'loss',dayDone:!!(S.log.done&&S.log.food),at:Date.now()},{merge:true});
     }
     $('leadMsg').style.color='var(--release)';$('leadMsg').textContent='Готово — личное дело сохранено.';
   }catch(e){$('leadMsg').textContent='Не получилось отправить, попробуй ещё раз'}
@@ -685,4 +715,3 @@ try{const s=JSON.parse(recall('sr_demo')||'null');if(s&&s.planDays&&s.menu){S=s;
 </script>
 </body>
 </html>
-
