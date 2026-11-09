@@ -1027,7 +1027,7 @@ function pickTip(c,e,l){
 }
 function renderToday(c){
   c=c||calc(P);const t=c.t;
-  if(t<1){$('today').innerHTML=`<p class="lead">Задания появятся ${fmt(pd(P.start))}. Меню и план уже готовы.</p>`;$('qRing').innerHTML='';$('dayStamp').innerHTML='';$('tipBox').innerHTML='';return}
+  if(t<1){$('today').innerHTML=`<p class="lead">Срок начнётся ${fmt(pd(P.start))}. Меню и план уже готовы.</p><p class="lead" style="margin-top:8px">Не хочешь ждать? Начни сегодня — дата выхода станет на ${1-t} ${pl(1-t,'день','дня','дней')} ближе.</p><button class="btn" data-act="startnow">Начать сейчас</button>`;$('qRing').innerHTML='';$('dayStamp').innerHTML='';$('tipBox').innerHTML='';return}
   const e=P.plan[t-1]||{},l=P.log['d'+t]||{};let h='',Q=[];
   if(P.adapt&&P.adapt.d>=t-2)h+=`<div class="adapt">${esc(P.adapt.msg)}</div>`;
   if(e.rest)Q.push({icon:'rest',done:true,pts:0,title:'День отдыха',sub:'Прогулка и растяжка'});
@@ -1055,6 +1055,15 @@ function renderToday(c){
   $('dayStamp').innerHTML=core?`<div class="daystamp ${justDone?'slam':''}">День засчитан</div>`:'';
 }
 $('tipBox').onclick=e=>{const b=e.target.closest('[data-tipok]');if(!b)return;P.tips=[...(P.tips||[]),b.dataset.tipok];ref.update({tips:P.tips}).catch(console.warn);renderToday()};
+// «Начать сейчас»: для тех, кто выбрал отложенный старт и передумал
+async function startNow(){
+  const today=iso(new Date()),old=P.start;if(dayIdx(old)>=1)return;
+  P.start=today;   // дни плана и меню считаются от старта, поэтому день 1 просто становится сегодняшним
+  (P.measurements||[]).forEach(m=>{if(m.date===old)m.date=today});
+  P.startedEarly={from:old,at:Date.now()};store('sr_total_'+P.email,null);
+  await put(ref.update({start:today,measurements:P.measurements,startedEarly:P.startedEarly}));
+  backup();openCabinet();toast(`Срок пошёл! Дата выхода — ${fmt(addDays(pd(today),calc(P).total-1))}`);
+}
 function adaptAfterFeel(){
   const t=dayIdx(P.start);if(P.adapt&&P.adapt.d>t-5)return;
   const feels=P.plan.filter(e=>e.w&&e.d<=t&&(P.log['d'+e.d]||{}).feel).map(e=>P.log['d'+e.d].feel);
@@ -1070,6 +1079,7 @@ function adaptAfterFeel(){
 }
 $('today').onclick=async e=>{
   const a=e.target.closest('[data-act]');if(!a)return;
+  if(a.dataset.act==='startnow'){a.disabled=true;await startNow();return}
   const t=dayIdx(P.start),key='d'+t;P.log[key]=P.log[key]||{};const act=a.dataset.act,en=P.plan[t-1]||{};
   const coreNow=()=>dayOk(P,t,t,weekMiss(P,t)),wasCore=coreNow();
   if(act==='open'){P.log[key].opened=Date.now();ref.update({[`log.${key}.opened`]:P.log[key].opened,lastSeen:Date.now()});setTimeout(()=>renderToday(),300);return}
