@@ -30,6 +30,7 @@ textarea{min-height:80px;resize:vertical}
 input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--hazard);outline-offset:1px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
 .btn{display:inline-block;text-align:center;text-decoration:none;font-family:"Russo One",sans-serif;text-transform:uppercase;font-size:.95rem;border:0;border-radius:4px;padding:15px 20px;cursor:pointer;width:100%;margin-top:18px;background:var(--ink);color:var(--hazard)}
+.qr .again{margin-left:6px;padding:5px 10px;font-size:.78rem;white-space:nowrap}
 .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink)}
 .btn.green{background:var(--release);color:#fff}
 .btn.small{width:auto;padding:9px 14px;font-size:.78rem;margin-top:0}
@@ -1080,7 +1081,7 @@ function renderCabinet(){
   checkRewards(c,s,pts);justDone=false;backup();
 }
 function quest(o){
-  return `<div class="quest ${o.cls||''} ${o.done?'done':''}"><div class="qi">${o.done?ICON.done:ICON[o.icon]}</div><div class="qt"><b>${o.title}</b><span>${o.sub}</span></div><div class="qr">${o.done?(o.pts?`<span class="pts">+${o.pts}</span>`:''):o.right||''}</div></div>`;
+  return `<div class="quest ${o.cls||''} ${o.done?'done':''}"><div class="qi">${o.done?ICON.done:ICON[o.icon]}</div><div class="qt"><b>${o.title}</b><span>${o.sub}</span></div><div class="qr">${o.done?(o.pts?`<span class="pts">+${o.pts}</span>`:'')+(o.after||''):o.right||''}</div></div>`;
 }
 const TIPS={
   open:'Отметка «Выполнила» откроется через 20 минут после старта — так мы видим, что тренировка правда была.',
@@ -1110,7 +1111,9 @@ function renderToday(c){
       if(!l.done){if(!l.opened)right=`<a class="btn small" href="${esc(w.url)}" target="_blank" rel="noopener" data-act="open">Начать</a>`;
         else{const lf=Math.ceil(MIN_OPEN-(Date.now()-l.opened)/6e4);right=lf>0?`<button class="btn small" disabled>${lf} мин</button>`:`<button class="btn small green" data-act="done">Готово</button>`}}
       const cw=c.wm.cur,left=Math.max(0,cw.need-cw.done),skip=canSkipToday(P,t,c.wm);
-      Q.push({icon:'train',opt:skip,done:!!l.done,pts:PTS.train,title:esc(pn(w.program)),sub:`${l.done?'':left===0?'сверх нормы · ':skip?'по желанию · ':'обязательная · '}неделя ${cw.done}/${cw.need}${l.opened&&!l.done?` · <a href="${esc(w.url)}" target="_blank" rel="noopener" style="color:inherit">открыть снова</a>`:''}`,right})}}
+      // после отчёта тренировку можно пройти ещё раз — по желанию, баллы и срок не меняются
+      const again=l.done?`<a class="btn small ghost again" href="${esc(w.url)}" target="_blank" rel="noopener" data-act="again" title="Пройти эту тренировку ещё раз — по желанию">Ещё раз${l.again?` · ${l.again}`:''}</a>`:'';
+      Q.push({icon:'train',opt:skip,done:!!l.done,pts:PTS.train,after:again,title:esc(pn(w.program)),sub:`${l.done?'':left===0?'сверх нормы · ':skip?'по желанию · ':'обязательная · '}неделя ${cw.done}/${cw.need}${l.opened&&!l.done?` · <a href="${esc(w.url)}" target="_blank" rel="noopener" style="color:inherit">открыть снова</a>`:''}`,right})}}
   const md=P.menu&&P.menu['d'+t];
   Q.push({icon:'food',done:!!l.food,pts:PTS.food,title:'Питание по меню',sub:`${md?Math.round(MEALS.reduce((s,[k])=>s+kcalOf(md[k],P),0)*md.f)+' ккал · ':''}<a href="#" data-go="menu" style="color:inherit">меню</a>`,right:'<button class="btn small ghost" data-act="food">Ела</button>'});
   const bq=bonusOf(t);
@@ -1155,6 +1158,7 @@ $('today').onclick=async e=>{
   if(a.dataset.act==='startnow'){a.disabled=true;await startNow();return}
   const t=dayIdx(P.start),key='d'+t;P.log[key]=P.log[key]||{};const act=a.dataset.act,en=P.plan[t-1]||{};
   const coreNow=()=>dayOk(P,t,t,weekMiss(P,t)),wasCore=coreNow();
+  if(act==='again'){P.log[key].again=(P.log[key].again||0)+1;ref.update({[`log.${key}.again`]:P.log[key].again,lastSeen:Date.now()}).catch(console.warn);toast('Отличный настрой! Повтор — по желанию, отметка дня уже засчитана');setTimeout(()=>renderToday(),300);return}
   if(act==='open'){P.log[key].opened=Date.now();ref.update({[`log.${key}.opened`]:P.log[key].opened,lastSeen:Date.now()});setTimeout(()=>renderToday(),300);return}
   if(act==='done'){P.log[key].done=Date.now();await put(ref.update({[`log.${key}.done`]:P.log[key].done}));{const cw=weekMiss(P,t).cur;toast(cw.done>cw.need?`+${PTS.train} — тренировка сверх нормы`:cw.done===cw.need?`+${PTS.train}. Норма недели выполнена: ${cw.done}/${cw.need}`:`+${PTS.train}. Неделя: ${cw.done}/${cw.need}`)}}
   if(act==='food'){P.log[key].food=true;await put(ref.update({[`log.${key}.food`]:true}));toast(`+${PTS.food} баллов поведения`)}
@@ -1552,4 +1556,5 @@ function renderRc(){
 </script>
 </body>
 </html>
+
 
