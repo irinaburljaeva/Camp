@@ -498,15 +498,69 @@ const pn=p=>PROGRAM_TITLES[p]||p;
 const SEED=window.WORKOUTS||[];
 if(!SEED.length)console.warn('workouts.js не подключён — лежит ли он рядом с index.html?');
 
-firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
-// Long polling вместо WebChannel: работает через VPN, прокси, блокировщики и капризные мобильные сети.
-try{db.settings({experimentalForceLongPolling:true,ignoreUndefinedProperties:true,merge:true})}catch(e){console.warn(e)}
-// Локальная копия базы: при плохой связи кабинет открывается, а отметки отправятся, когда сеть вернётся.
-try{db.enablePersistence({synchronizeTabs:true}).catch(e=>console.warn('persistence',e.code))}catch(e){}
+// Если скрипты Firebase не загрузились (сайты Google недоступны), лагерь всё равно работает — на телефоне.
+const FB_OK=!!(window.firebase&&firebase.firestore);
+const noNet=()=>Promise.reject(Object.assign(new Error('unavailable'),{code:'unavailable'}));
+const STUB={get:noNet,set:noNet,update:noNet};
+const db=FB_OK?(firebase.initializeApp(firebaseConfig),firebase.firestore()):{collection:()=>({...STUB,doc:()=>({...STUB})})};
+if(FB_OK){
+  // Long polling вместо WebChannel: работает через VPN, прокси, блокировщики и капризные мобильные сети.
+  try{db.settings({experimentalForceLongPolling:true,ignoreUndefinedProperties:true,merge:true})}catch(e){console.warn(e)}
+  // Локальная копия базы: при плохой связи кабинет открывается, а отметки отправятся, когда сеть вернётся.
+  try{db.enablePersistence({synchronizeTabs:true}).catch(e=>console.warn('persistence',e.code))}catch(e){}
+}
 const wait=(p,ms)=>Promise.race([p,new Promise((_,no)=>setTimeout(()=>no(Object.assign(new Error('timeout'),{code:'timeout'})),ms))]);
 // запись не держит экран: если сервер долго не отвечает, продолжаем — запись уйдёт сама, когда появится связь
-async function put(p,ms=8000){try{await wait(p,ms);return true}catch(e){if(e.code==='timeout'){toast('Сохраним, как только появится связь');return false}throw e}}
+async function put(p,ms=8000){try{await wait(p,ms);return true}catch(e){if(e.code!=='permission-denied'){return false}throw e}}
+
+/* ---------- офлайн-режим: всё хранится на телефоне и досылается в базу, когда появляется связь ---------- */
+let realRef=null,netWarned=false,flushing=false;
+const isDirty=()=>!!(P&&P.email&&recall('sr_dirty_'+P.email));
+function markDirty(){
+  if(!P||!P.email)return;backup();store('sr_dirty_'+P.email,'1');
+  if(!netWarned){netWarned=true;toast('Нет связи с базой — всё сохраняется на телефоне и отправится само')}
+}
+// оборачиваем документ участницы: каждая запись сначала сохраняется на телефоне, потом уходит в базу
+function track(p){
+  Promise.resolve().then(backup);
+  return wait(p,15000).then(r=>r,e=>{if(e.code!=='permission-denied')markDirty();throw e});
+}
+function bindRef(email){
+  realRef=db.collection(PART).doc(email);
+  ref={id:email,get:o=>o?realRef.get(o):realRef.get(),
+    // анкету прошли без связи: пока не сверились с базой, на сервер ничего не шлём
+    update:x=>P&&P.offlineNew?(markDirty(),Promise.resolve()):track(realRef.update(x)),
+    set:(x,o)=>P&&P.offlineNew?(markDirty(),Promise.resolve()):track(o?realRef.set(x,o):realRef.set(x))};
+  return ref;
+}
+async function flush(){
+  if(flushing||!realRef||!isDirty())return;
+  flushing=true;
+  try{
+    if(P.offlineNew){   // анкета пройдена без связи: вдруг личное дело уже есть в базе (например, с другого телефона)
+      const s=await wait(realRef.get({source:'server'}),15000);
+      if(s.exists){P=s.data();store('sr_dirty_'+P.email,null);backup();toast('Нашли твоё личное дело в базе — открыли его');openCabinet();return}
+      delete P.offlineNew;
+    }
+    await wait(realRef.set(P),20000);
+    store('sr_dirty_'+P.email,null);netWarned=false;toast('Связь есть — всё сохранено в базе ✓');
+  }catch(e){console.warn('flush',e)}
+  finally{flushing=false}
+}
+// при открытии подтягиваем свежую версию из базы (если на телефоне нет неотправленного)
+async function refresh(){
+  if(!realRef)return;
+  if(isDirty())return flush();
+  try{
+    const s=await wait(realRef.get({source:'server'}),15000);if(!s.exists)return;
+    const sd=s.data(),strip=o=>JSON.stringify({...o,lastSeen:0});
+    if(isDirty()||strip(sd)===strip(P))return;
+    P=sd;backup();if(!$('cabinet').classList.contains('hidden'))openCabinet();
+  }catch(e){console.warn('refresh',e)}
+}
+setInterval(flush,60000);
+addEventListener('online',()=>setTimeout(flush,2000));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)flush()});
 // читаем документ: сервер → локальная копия → резервная копия в браузере
 async function readDoc(r){
   try{return await wait(r.get(),12000)}catch(e){
@@ -519,9 +573,15 @@ function netError(e){
   const c=(e&&e.code)||'';
   if(c==='permission-denied')return'База не пускает: проверь правила Firestore (код permission-denied).';
   if(c==='resource-exhausted')return'Сегодня исчерпан дневной лимит базы. Напиши куратору (код resource-exhausted).';
-  return'Не получилось связаться с базой. Проверь интернет, выключи VPN или блокировщик рекламы и нажми «Войти» ещё раз.'+(c?` (код ${c})`:'');
+  return'Не получилось связаться с базой — похоже, твой интернет сейчас не пускает к серверам Google. Попробуй переключиться между Wi‑Fi и мобильным интернетом или включить/выключить VPN и нажми «Войти» ещё раз.'+(c?` (код ${c})`:'');
 }
-const FV=firebase.firestore.FieldValue;
+// при ошибке входа — объяснение и выход: новенькие могут пройти анкету без связи
+function loginFail(e){
+  const c=e&&e.code;
+  $('loginMsg').innerHTML=esc(netError(e))+(c==='permission-denied'||c==='resource-exhausted'?'':
+    '<p style="margin-top:10px"><b>Ты здесь впервые?</b> Можно пройти анкету прямо сейчас — всё сохранится на телефоне и отправится в базу, когда связь появится.</p><button class="btn ghost" data-offnew style="margin-top:8px">Я впервые — пройти анкету</button>');
+}
+const FV=FB_OK?firebase.firestore.FieldValue:{arrayUnion:(...a)=>a};
 
 /* ================= УТИЛИТЫ ================= */
 let W={},wSource='seed',P=null,ref=null,D={},curAuthed=false,CUR=[];
@@ -548,9 +608,9 @@ let toastT;function toast(t){let el=$('toast');if(!el){el=document.createElement
 const dossierNo=email=>{let h=7;for(const c of email)h=(h*31+c.charCodeAt(0))%9000;return String(1000+h)};
 
 /* ================= БАЗА ТРЕНИРОВОК ================= */
-async function loadWorkouts(){
+async function loadWorkouts(ms=10000){
   try{const c=JSON.parse(recall('sr_wcache')||'null');if(c&&Date.now()-c.at<6*36e5&&!curAuthed){W=c.W;wSource='db';return}}catch(e){}
-  try{const s=await wait(db.collection(WCOL).get(),10000);if(!s.empty){W={};s.forEach(d=>W[d.id]={id:d.id,...d.data()});wSource='db';store('sr_wcache',JSON.stringify({at:Date.now(),W}));return}}
+  try{const s=await wait(db.collection(WCOL).get(),ms);if(!s.empty){W={};s.forEach(d=>W[d.id]={id:d.id,...d.data()});wSource='db';store('sr_wcache',JSON.stringify({at:Date.now(),W}));return}}
   catch(e){console.warn('Не удалось прочитать базу тренировок',e)}
   W={};SEED.forEach(w=>W[w.id]={...w,active:true});wSource='seed';
 }
@@ -799,12 +859,23 @@ $('loginBtn').onclick=async()=>{
   const email=$('email').value.trim().toLowerCase();
   if(!/^\S+@\S+\.\S+$/.test(email)){$('loginMsg').textContent='Введи email в формате name@mail.ru';return}
   $('loginMsg').textContent='';$('loginBtn').disabled=true;
+  $('loginMsg').textContent='Подключаемся…';
+  // на этом телефоне есть неотправленные отметки — открываем их, а не старую версию из базы
+  const bk=recall('sr_dirty_'+email)&&recall('sr_bk_'+email);
+  if(bk){try{bindRef(email);store('sr_email',email);P=JSON.parse(bk);$('loginMsg').textContent='';$('loginBtn').disabled=false;openCabinet();flush();return}catch(e){console.warn(e)}}
   try{
-    ref=db.collection(PART).doc(email);const s=await readDoc(ref);store('sr_email',email);
-    if(s.exists){P=s.data();if(s.fromBackup)toast('Нет связи — открыли сохранённую копию');openCabinet()}
-    else{D={email,sex:'f',act:1.375,household:1,why:[],noTags:[],stops:[],simple:1,cook:1};startOnb(ONB_FLOW,'new')}
-  }catch(e){console.warn(e);$('loginMsg').textContent=netError(e)}
+    bindRef(email);const s=await readDoc(ref);store('sr_email',email);$('loginMsg').textContent='';
+    if(s.exists){P=s.data();if(s.fromBackup){toast('Нет связи — открыли копию с телефона');openCabinet();refresh()}else openCabinet()}
+    else newbie(email,false);
+  }catch(e){console.warn(e);loginFail(e)}
   finally{$('loginBtn').disabled=false}
+};
+function newbie(email,offline){D={email,sex:'f',act:1.375,household:1,why:[],noTags:[],stops:[],simple:1,cook:1,offline};startOnb(ONB_FLOW,'new')}
+$('loginMsg').onclick=e=>{
+  if(!e.target.closest('[data-offnew]'))return;
+  const email=$('email').value.trim().toLowerCase();
+  if(!/^\S+@\S+\.\S+$/.test(email)){$('loginMsg').textContent='Введи email в формате name@mail.ru';return}
+  bindRef(email);store('sr_email',email);$('loginMsg').textContent='';newbie(email,true);
 };
 $('logoutBtn').onclick=()=>{store('sr_email',null);P=null;ref=null;$('email').value='';show('login')};
 
@@ -837,6 +908,8 @@ async function finishOnb(){
     P.history=[...(prev.history||[]),{at:Date.now(),start:prev.start,startW:prev.startW,goal:prev.goal,track:prev.track||'loss'}].slice(-10);
     store('sr_total_'+P.email,null);
   }
+  if(D.offline&&!prev)P.offlineNew=true;
+  else if(prev&&prev.offlineNew)P.offlineNew=true;
   extendPlan(P,P.planDays+14);ensureMenu(P);P.menuV=MENU_V;
   backup();
   await put(ref.set(P),10000);
@@ -1168,10 +1241,10 @@ const MENU_AHEAD=7;
 const MENU_V=3;   // при смене правил подбора меню будущие дни пересобираются
 let RX={},RDIS=new Set(),menuDays=3,openMeal=null,famMode=false,shopGot=new Set();
 try{shopGot=new Set(JSON.parse(recall('sr_shop')||'[]'))}catch(e){}
-async function loadRecipes(){
+async function loadRecipes(ms=5000){
   RX={};(window.RECIPES||[]).forEach(r=>RX[r.id]=r);
   if(!Object.keys(RX).length)console.warn('recipes.js не подключён — лежит ли он рядом с index.html?');
-  try{const s=await wait(CFG.get(),8000);if(s.exists)RDIS=new Set(s.data().disabled||[])}catch(e){console.warn(e)}
+  try{const s=await wait(CFG.get(),ms);if(s.exists)RDIS=new Set(s.data().disabled||[])}catch(e){console.warn(e)}
 }
 function foodOf(p){const f=p.food||{};return{noTags:f.noTags||[],noWords:(f.noWords||p.excl||[]).map(w=>w.toLowerCase()).filter(Boolean),favs:f.favs||[],noIds:f.noIds||[],simple:f.simple!==false}}
 function recipeOk(r,food){
@@ -1465,10 +1538,13 @@ function renderRc(){
 
 /* ================= СТАРТ ================= */
 (async()=>{
-  await Promise.all([loadWorkouts(),loadRecipes()]).catch(console.warn);
-  const saved=recall('sr_email');
+  const saved=recall('sr_email'),bk=saved&&recall('sr_bk_'+saved);
+  await Promise.all([loadWorkouts(bk?2500:4000),loadRecipes(bk?2500:4000)]).catch(console.warn);
   if(saved){
-    try{ref=db.collection(PART).doc(saved);const s=await readDoc(ref);if(s.exists){P=s.data();openCabinet();return}}catch(e){console.warn(e);$('loginMsg').textContent=netError(e)}
+    bindRef(saved);
+    // есть копия на телефоне — открываем кабинет сразу, свежие данные из базы подтянем в фоне
+    if(bk){try{P=JSON.parse(bk);openCabinet();setTimeout(refresh,500);return}catch(e){console.warn(e)}}
+    try{const s=await readDoc(ref);if(s.exists){P=s.data();openCabinet();return}}catch(e){console.warn(e);loginFail(e)}
     $('email').value=saved;
   }
   show('login');
