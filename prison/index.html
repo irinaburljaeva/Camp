@@ -267,6 +267,9 @@ section.quests{position:relative}
 @keyframes pop{from{transform:scale(.6) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
 
 /* ---------- приложение: вкладки, подсказки, тур ---------- */
+.cookbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;font-size:.85rem;color:var(--steel)}.cookbar .seg{margin-top:0}
+.rb .portion{background:#FBF3D6;border-radius:6px;padding:8px 10px;margin:4px 0 8px;font-size:.92rem}
+.rb .portion b{font-family:"Russo One";font-weight:400;font-size:1.05rem}
 .hint-link{all:unset;cursor:pointer;font-size:.85rem;text-decoration:underline}
 body.app .wrap{padding-bottom:110px}
 body.app .toast{bottom:calc(84px + env(safe-area-inset-bottom))}
@@ -379,6 +382,7 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
  <div data-pane="menu" class="hidden">
   <section id="menuSec">
     <div class="h2row"><h2>Меню <button class="hint" data-hint="menu" aria-label="Как устроено меню">?</button></h2><div class="opts" id="menuDays"><button class="opt" data-days="3" aria-pressed="true">3 дня</button><button class="opt" data-days="7" aria-pressed="false">Неделя</button></div></div>
+    <div class="cookbar"><span>Готовлю:</span><div class="seg" role="group" aria-label="Как часто готовить" id="cookSeg"><button data-cook="1">каждый день</button><button data-cook="2">раз в 2 дня</button><button data-cook="3">раз в 3 дня</button></div><button class="hint" data-hint="cook" aria-label="Что это значит">?</button></div>
     <div class="menu" id="menu"></div>
     <details class="shop" id="shop"><summary id="shopSum">Список продуктов</summary><ul id="shopList"></ul></details>
     <button class="btn ghost" id="editFood">Не ем / на сколько готовлю</button>
@@ -412,6 +416,8 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
     <div class="h2row"><h2>Норма</h2></div>
     <p class="lead"><b id="kcal">—</b> ккал в день · день <b id="dayNow">—</b> из <b id="dayTotal">—</b></p>
     <button class="btn ghost" id="tourBtn2">Как играть — пройти обучение</button>
+    <button class="btn ghost" id="retakeBtn">Пройти анкету заново</button>
+    <div class="verdict warn hidden" id="retakeBox"><p><b>Пройти анкету заново?</b> Срок начнётся с сегодняшнего дня, отметки и баллы обнулятся. Замеры, любимые блюда и нашивки сохранятся.</p><button class="btn small" id="retakeYes" style="margin-top:10px">Да, пройти заново</button> <button class="btn small ghost" id="retakeNo" style="margin-top:10px">Отмена</button></div>
   </section>
   <button class="toggle" id="logoutBtn" style="margin-top:20px">Выйти</button>
  </div>
@@ -493,6 +499,27 @@ if(!SEED.length)console.warn('workouts.js не подключён — лежит
 
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
+// Long polling вместо WebChannel: работает через VPN, прокси, блокировщики и капризные мобильные сети.
+try{db.settings({experimentalForceLongPolling:true,ignoreUndefinedProperties:true,merge:true})}catch(e){console.warn(e)}
+// Локальная копия базы: при плохой связи кабинет открывается, а отметки отправятся, когда сеть вернётся.
+try{db.enablePersistence({synchronizeTabs:true}).catch(e=>console.warn('persistence',e.code))}catch(e){}
+const wait=(p,ms)=>Promise.race([p,new Promise((_,no)=>setTimeout(()=>no(Object.assign(new Error('timeout'),{code:'timeout'})),ms))]);
+// запись не держит экран: если сервер долго не отвечает, продолжаем — запись уйдёт сама, когда появится связь
+async function put(p,ms=8000){try{await wait(p,ms);return true}catch(e){if(e.code==='timeout'){toast('Сохраним, как только появится связь');return false}throw e}}
+// читаем документ: сервер → локальная копия → резервная копия в браузере
+async function readDoc(r){
+  try{return await wait(r.get(),12000)}catch(e){
+    try{const s=await r.get({source:'cache'});if(s.exists)return s}catch(_){}
+    const bk=recall('sr_bk_'+r.id);if(bk)return{exists:true,data:()=>JSON.parse(bk),fromBackup:true};
+    throw e}
+}
+function backup(){if(P&&P.email)store('sr_bk_'+P.email,JSON.stringify(P))}
+function netError(e){
+  const c=(e&&e.code)||'';
+  if(c==='permission-denied')return'База не пускает: проверь правила Firestore (код permission-denied).';
+  if(c==='resource-exhausted')return'Сегодня исчерпан дневной лимит базы. Напиши куратору (код resource-exhausted).';
+  return'Не получилось связаться с базой. Проверь интернет, выключи VPN или блокировщик рекламы и нажми «Войти» ещё раз.'+(c?` (код ${c})`:'');
+}
 const FV=firebase.firestore.FieldValue;
 
 /* ================= УТИЛИТЫ ================= */
@@ -521,7 +548,8 @@ const dossierNo=email=>{let h=7;for(const c of email)h=(h*31+c.charCodeAt(0))%90
 
 /* ================= БАЗА ТРЕНИРОВОК ================= */
 async function loadWorkouts(){
-  try{const s=await db.collection(WCOL).get();if(!s.empty){W={};s.forEach(d=>W[d.id]={id:d.id,...d.data()});wSource='db';return}}
+  try{const c=JSON.parse(recall('sr_wcache')||'null');if(c&&Date.now()-c.at<6*36e5&&!curAuthed){W=c.W;wSource='db';return}}catch(e){}
+  try{const s=await wait(db.collection(WCOL).get(),10000);if(!s.empty){W={};s.forEach(d=>W[d.id]={id:d.id,...d.data()});wSource='db';store('sr_wcache',JSON.stringify({at:Date.now(),W}));return}}
   catch(e){console.warn('Не удалось прочитать базу тренировок',e)}
   W={};SEED.forEach(w=>W[w.id]={...w,active:true});wSource='seed';
 }
@@ -656,11 +684,13 @@ const STOPS=[['preg','Беременность или кормление гру�
 const ACTS=[[1.2,'Сидячий день','Работа за компьютером, хожу мало'],[1.375,'Немного движения','5–7 тысяч шагов, иногда гуляю'],[1.55,'Много на ногах','Активная работа или спорт 2–3 раза в неделю']];
 const WHY=['Влезть в любимые вещи','Больше энергии','Здоровье','Нравиться себе в зеркале','Доказать себе, что могу','К событию'];
 const FOODTAGS=[['fish','Рыба и морепродукты'],['meat','Говядина и свинина'],['poultry','Птица'],['dairy','Молочное'],['egg','Яйца'],['mushroom','Грибы'],['nuts','Орехи'],['gluten','Мука и хлеб']];
+const COOK=[[1,'Каждый день'],[2,'Раз в 2 дня'],[3,'Раз в 3 дня']];
 const HOUSE=[[1,'Только себе'],[2,'Двоим'],[3,'Троим'],[4,'Четверым'],[5,'Пятерым и больше']];
 const opt=(key,v,l,sel,cls='opt')=>`<button class="${cls}" data-set="${key}" data-v="${v}" aria-pressed="${String(sel)===String(v)}">${l}</button>`;
 const multi=(key,v,l,arr)=>`<button class="opt" data-multi="${key}" data-v="${esc(v)}" aria-pressed="${(arr||[]).includes(v)}">${l}</button>`;
 const inp=(f,label,type='text',ph='',extra='')=>`<label for="f_${f}">${label}</label><input id="f_${f}" data-f="${f}" type="${type}" value="${esc(D[f]??'')}" placeholder="${ph}" ${type==='number'?'inputmode="decimal"':''} ${extra}>`;
 
+const ONB_FLOW=['name','body','weight','act','health','why','train','food','start'];
 const STEPS={
   name:{title:()=>'Как тебя зовут?',sub:()=>'Так программа будет к тебе обращаться.',
     html:()=>inp('name','Имя','text','Например, Оля','autocomplete="given-name"'),
@@ -698,13 +728,14 @@ const STEPS={
     html:()=>`<div class="opts">${FOODTAGS.map(([k,l])=>multi('noTags',k,l,D.noTags)).join('')}</div>
       ${inp('noWordsStr','Ещё не ем или не люблю (через запятую)','text','печень, тыква, гречка')}
       <div class="q" style="margin-top:18px"><p>На сколько человек готовишь?</p><div class="opts">${HOUSE.map(([v,l])=>opt('household',v,l,D.household)).join('')}</div></div>
-      <p class="note">Посчитаем граммы и список продуктов на всю семью, а твою порцию — отдельно, под твою норму.</p>`,
+      <p class="note">Посчитаем граммы и список продуктов на всю семью, а твою порцию — отдельно, под твою норму.</p>
+      <div class="q" style="margin-top:18px"><p>Какие продукты?</p><div class="opts">${opt('simple',1,'Простые, без изысков',D.simple)}${opt('simple',0,'Любые, люблю новое',D.simple)}</div><p class="note">«Простые» — без авокадо, чиа, креветок, рукколы и других продуктов, которые покупаешь упаковкой ради одной ложки.</p></div>
+      <div class="q" style="margin-top:18px"><p>Как часто готов(а) готовить?</p><div class="opts">${COOK.map(([v,l])=>opt('cook',v,l,D.cook)).join('')}</div><p class="note">Не любишь стоять у плиты? Готовь сразу на 2–3 дня — одно и то же меню можно есть несколько дней подряд, норма калорий от этого не меняется.</p></div>`,
     valid:()=>true},
-  start:{title:()=>'Когда заезжаешь?',sub:()=>'С этого дня пойдёт срок.',
-    html:()=>`${inp('start','Дата начала','date')}<div class="quick"><button class="opt" data-q="0">Сегодня</button><button class="opt" data-q="1">Завтра</button><button class="opt" data-q="mon">С понедельника</button></div>
-      ${inp('contact','Телеграм или телефон — для куратора','text','@username')}
+  start:{title:()=>'Последний шаг',sub:()=>'Срок начнётся сегодня — в день заполнения анкеты.',
+    html:()=>`${inp('contact','Телеграм или телефон — для куратора','text','@username')}
       <label>Стартовые замеры, см (можно позже)</label><div class="row" style="grid-template-columns:1fr 1fr 1fr"><input data-f="waist" type="number" inputmode="decimal" placeholder="талия" value="${esc(D.waist??'')}" aria-label="Талия"><input data-f="hips" type="number" inputmode="decimal" placeholder="бёдра" value="${esc(D.hips??'')}" aria-label="Бёдра"><input data-f="chest" type="number" inputmode="decimal" placeholder="грудь" value="${esc(D.chest??'')}" aria-label="Грудь"></div>`,
-    valid:()=>D.start?true:'Выбери дату'}
+    valid:()=>true}
 };
 function liveHtml(){
   const c=goalCheck(D);if(c.state==='empty')return'<p class="note">Впиши цифры — сразу покажем расчёт.</p>';
@@ -768,10 +799,10 @@ $('loginBtn').onclick=async()=>{
   if(!/^\S+@\S+\.\S+$/.test(email)){$('loginMsg').textContent='Введи email в формате name@mail.ru';return}
   $('loginMsg').textContent='';$('loginBtn').disabled=true;
   try{
-    ref=db.collection(PART).doc(email);const s=await ref.get();store('sr_email',email);
-    if(s.exists){P=s.data();openCabinet()}
-    else{D={email,sex:'f',act:1.375,household:1,why:[],noTags:[],stops:[],start:iso(new Date())};startOnb(['name','body','weight','act','health','why','train','food','start'],'new')}
-  }catch(e){$('loginMsg').textContent='Нет связи с базой: '+e.message}
+    ref=db.collection(PART).doc(email);const s=await readDoc(ref);store('sr_email',email);
+    if(s.exists){P=s.data();if(s.fromBackup)toast('Нет связи — открыли сохранённую копию');openCabinet()}
+    else{D={email,sex:'f',act:1.375,household:1,why:[],noTags:[],stops:[],simple:1,cook:1};startOnb(ONB_FLOW,'new')}
+  }catch(e){console.warn(e);$('loginMsg').textContent=netError(e)}
   finally{$('loginBtn').disabled=false}
 };
 $('logoutBtn').onclick=()=>{store('sr_email',null);P=null;ref=null;$('email').value='';show('login')};
@@ -780,13 +811,15 @@ async function finishOnb(){
   const words=(D.noWordsStr||'').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
   if(D.mode==='train'){
     P.rider={...D.rider,cap:D.rider.joints==='yes'?2:3};P.level=effLevel(P.rider);rebuildFuture(P,false);
-    await ref.update({rider:P.rider,level:P.level,cycle:P.cycle,queue:P.queue,plan:P.plan});toast('План тренировок пересобран под новый райдер');openCabinet();return;
+    await put(ref.update({rider:P.rider,level:P.level,cycle:P.cycle,queue:P.queue,plan:P.plan}));toast('План тренировок пересобран под новый райдер');openCabinet();return;
   }
   if(D.mode==='food'){
-    P.food={...(P.food||{}),noTags:D.noTags||[],noWords:words};P.household=+D.household||1;
+    P.food={...(P.food||{}),noTags:D.noTags||[],noWords:words,simple:+D.simple!==0};P.household=+D.household||1;P.cook=+D.cook||1;
     const t=Math.max(1,dayIdx(P.start));Object.keys(P.menu||{}).forEach(k=>{if(+k.slice(1)>=t)delete P.menu[k]});P.mq={};ensureMenu(P);
-    await ref.update({food:P.food,household:P.household,menu:P.menu,mq:P.mq});toast('Меню пересобрано');openCabinet();return;
+    await put(ref.update({food:P.food,household:P.household,cook:P.cook,menu:P.menu,mq:P.mq}));toast('Меню пересобрано');openCabinet();return;
   }
+  D.start=iso(new Date());   // срок всегда считается с дня прохождения анкеты
+  const prev=D.mode==='retake'?P:null;
   const c=goalCheck(D),tone=D.track==='tone'&&(c.state==='stop'||c.state==='warn');
   if(tone){const fl=D.sex==='m'?1500:1200;Object.assign(c,{goal:num(D.weight),want:null,weekly:0,planDays:TONE_DAYS,kcal:Math.max(fl,Math.round(c.bmr*(num(D.act)||1.375)))})}
   const m0={date:D.start,w:num(D.weight),t:Date.now(),waist:num(D.waist),hips:num(D.hips),chest:num(D.chest)};
@@ -794,10 +827,18 @@ async function finishOnb(){
   P={email:D.email,name:D.name.trim(),contact:(D.contact||'').trim(),sex:D.sex,age:num(D.age),height:num(D.height),act:num(D.act),
      track:tone?'tone':'loss',startW:num(D.weight),goal:c.goal,wantGoal:c.want,kcal:c.kcal,bmr:c.bmr,weekly:c.weekly,planDays:c.planDays,start:D.start,
      why:{list:D.why||[],eventName:(D.eventName||'').trim(),eventDate:D.eventDate||''},reward:(D.reward||'').trim(),household:+D.household||1,
-     food:{noTags:D.noTags||[],noWords:words,favs:[],noIds:[]},num:dossierNo(D.email),ed:(D.stops||[]).includes('ed')?{consent:true,at:D.edConsentAt||Date.now()}:null,
+     food:{noTags:D.noTags||[],noWords:words,favs:[],noIds:[],simple:+D.simple!==0},cook:+D.cook||1,num:dossierNo(D.email),ed:(D.stops||[]).includes('ed')?{consent:true,at:D.edConsentAt||Date.now()}:null,
      rider:r,level:effLevel(r),cycle:0,queue:[],plan:[],log:{},measurements:[m0],menu:{},mq:{},createdAt:Date.now(),lastSeen:Date.now()};
-  extendPlan(P,P.planDays+14);ensureMenu(P);
-  await ref.set(P);
+  if(prev){   // анкета заново: прошлые замеры, обучение и подсказки сохраняем, срок и отметки — с нуля
+    P.measurements=[...(prev.measurements||[]).filter(m=>m.date!==D.start),m0];
+    P.createdAt=prev.createdAt||Date.now();P.tourDone=!!prev.tourDone;P.tips=prev.tips||[];P.badges=prev.badges||[];P.rankI=prev.rankI??0;
+    P.food.favs=(prev.food&&prev.food.favs)||[];P.food.noIds=(prev.food&&prev.food.noIds)||[];
+    P.history=[...(prev.history||[]),{at:Date.now(),start:prev.start,startW:prev.startW,goal:prev.goal,track:prev.track||'loss'}].slice(-10);
+    store('sr_total_'+P.email,null);
+  }
+  extendPlan(P,P.planDays+14);ensureMenu(P);P.menuV=MENU_V;
+  backup();
+  await put(ref.set(P),10000);
   reveal();
 }
 
@@ -840,6 +881,8 @@ function openCabinet(){
   const c=calc(P);
   if(extendPlan(P,Math.max(c.total,c.t)+14))ref.update({plan:P.plan,queue:P.queue,cycle:P.cycle,level:P.level}).catch(console.warn);
   ref.update({lastSeen:Date.now()}).catch(console.warn);
+  if((P.menuV||1)<MENU_V){const t0=Math.max(1,dayIdx(P.start));Object.keys(P.menu||{}).forEach(k=>{if(+k.slice(1)>=t0)delete P.menu[k]});P.mq={};ensureMenu(P);P.menuV=MENU_V;ref.update({menu:P.menu,mq:P.mq,menuV:MENU_V}).catch(console.warn)}
+  backup();
   go('today');renderCabinet();renderMenu();
   if(!P.tourDone&&!recall('sr_tour_'+P.email))setTimeout(startTour,500);
 }
@@ -960,7 +1003,7 @@ function renderCabinet(){
   $('finishBox').classList.toggle('hidden',!free||!!P.finalReview);
   if(free&&P.reward)$('finishLead').textContent=`Самое время для «${P.reward}». Расскажи, как это было.`;
   renderTally(c);renderToday(c);renderStatus(c,s,pts);renderWeek();renderMeas(c);drawChart(c);
-  checkRewards(c,s,pts);justDone=false;
+  checkRewards(c,s,pts);justDone=false;backup();
 }
 function quest(o){
   return `<div class="quest ${o.cls||''} ${o.done?'done':''}"><div class="qi">${o.done?ICON.done:ICON[o.icon]}</div><div class="qt"><b>${o.title}</b><span>${o.sub}</span></div><div class="qr">${o.done?(o.pts?`<span class="pts">+${o.pts}</span>`:''):o.right||''}</div></div>`;
@@ -1029,11 +1072,11 @@ $('today').onclick=async e=>{
   const t=dayIdx(P.start),key='d'+t;P.log[key]=P.log[key]||{};const act=a.dataset.act,en=P.plan[t-1]||{};
   const coreNow=()=>dayOk(P,t,t,weekMiss(P,t)),wasCore=coreNow();
   if(act==='open'){P.log[key].opened=Date.now();ref.update({[`log.${key}.opened`]:P.log[key].opened,lastSeen:Date.now()});setTimeout(()=>renderToday(),300);return}
-  if(act==='done'){P.log[key].done=Date.now();await ref.update({[`log.${key}.done`]:P.log[key].done});{const cw=weekMiss(P,t).cur;toast(cw.done>cw.need?`+${PTS.train} — тренировка сверх нормы`:cw.done===cw.need?`+${PTS.train}. Норма недели выполнена: ${cw.done}/${cw.need}`:`+${PTS.train}. Неделя: ${cw.done}/${cw.need}`)}}
-  if(act==='food'){P.log[key].food=true;await ref.update({[`log.${key}.food`]:true});toast(`+${PTS.food} баллов поведения`)}
-  if(act==='bonus'){P.log[key].bonus=true;await ref.update({[`log.${key}.bonus`]:true});toast(`+${PTS.bonus} за бонус-задание`)}
+  if(act==='done'){P.log[key].done=Date.now();await put(ref.update({[`log.${key}.done`]:P.log[key].done}));{const cw=weekMiss(P,t).cur;toast(cw.done>cw.need?`+${PTS.train} — тренировка сверх нормы`:cw.done===cw.need?`+${PTS.train}. Норма недели выполнена: ${cw.done}/${cw.need}`:`+${PTS.train}. Неделя: ${cw.done}/${cw.need}`)}}
+  if(act==='food'){P.log[key].food=true;await put(ref.update({[`log.${key}.food`]:true}));toast(`+${PTS.food} баллов поведения`)}
+  if(act==='bonus'){P.log[key].bonus=true;await put(ref.update({[`log.${key}.bonus`]:true}));toast(`+${PTS.bonus} за бонус-задание`)}
   if(act==='feel'){const c=($('fbText')||{}).value||'';P.log[key].feel=a.dataset.v;P.log[key].comment=c.trim();
-    await ref.update({[`log.${key}.feel`]:a.dataset.v,[`log.${key}.comment`]:c.trim()});adaptAfterFeel()}
+    await put(ref.update({[`log.${key}.feel`]:a.dataset.v,[`log.${key}.comment`]:c.trim()}));adaptAfterFeel()}
   const isCore=coreNow();
   if(isCore&&!wasCore){justDone=true;setTimeout(()=>toast(`День засчитан: +${PTS.perfect} сверху. На стене — новая черта`),900)}
   renderCabinet();
@@ -1050,8 +1093,19 @@ function renderWeek(){
   }
   $('week').innerHTML=h;
 }
+$('retakeBtn').onclick=()=>{$('retakeBox').classList.remove('hidden');$('retakeBtn').classList.add('hidden')};
+$('retakeNo').onclick=()=>{$('retakeBox').classList.add('hidden');$('retakeBtn').classList.remove('hidden')};
+$('retakeYes').onclick=()=>{
+  $('retakeBox').classList.add('hidden');$('retakeBtn').classList.remove('hidden');
+  const f=foodOf(P),lw=lastWeight(P);
+  D={email:P.email,name:P.name,sex:P.sex,age:P.age,height:P.height,weight:lw,loss:P.track==='tone'?'':Math.max(0,Math.round((lw-P.goal)*10)/10)||'',act:P.act||1.375,
+     stops:P.ed?['ed']:[],edConsent:!!P.ed,edConsentAt:P.ed&&P.ed.at,track:P.track==='tone'?'tone':null,
+     why:(P.why&&P.why.list)||[],eventName:(P.why&&P.why.eventName)||'',eventDate:(P.why&&P.why.eventDate)||'',reward:P.reward||'',
+     rider:JSON.parse(JSON.stringify(P.rider)),noTags:f.noTags.slice(),noWordsStr:f.noWords.join(', '),household:P.household||1,simple:f.simple?1:0,cook:P.cook||1,contact:P.contact||''};
+  startOnb(ONB_FLOW,'retake');
+};
 $('editRider').onclick=()=>{D={mode:'train',weight:lastWeight(P),age:P.age,rider:JSON.parse(JSON.stringify(P.rider))};startOnb(['train'],'train')};
-$('editFood').onclick=()=>{const f=foodOf(P);D={mode:'food',noTags:f.noTags.slice(),noWordsStr:f.noWords.join(', '),household:P.household||1};startOnb(['food'],'food')};
+$('editFood').onclick=()=>{const f=foodOf(P);D={mode:'food',noTags:f.noTags.slice(),noWordsStr:f.noWords.join(', '),household:P.household||1,simple:f.simple?1:0,cook:P.cook||1};startOnb(['food'],'food')};
 
 /* ================= ЗАМЕРЫ И ГРАФИК ================= */
 function renderMeas(c){
@@ -1066,7 +1120,7 @@ $('measBtn').onclick=async()=>{
     const before=calc(P).total,prev=lastWeight(P);
     const upd={measurements:FV.arrayUnion(m),lastSeen:Date.now()};P.measurements.push(m);
     if(P.track!=='tone'&&w<=P.goal&&!P.finishedAt){P.finishedAt=Date.now();upd.finishedAt=P.finishedAt}
-    await ref.update(upd);['mW','mWaist','mHip','mChest'].forEach(id=>$(id).value='');$('measMsg').textContent='';
+    await put(ref.update(upd));['mW','mWaist','mHip','mChest'].forEach(id=>$(id).value='');$('measMsg').textContent='';
     const after=calc(P).total,diff=w-prev;
     store('sr_total_'+P.email,after);toast(P.track==='tone'?(diff<-.4?`+${PTS.meas} баллов. Вес снизился — в «Тонусе» его держим: добавь перекус.`:`+${PTS.meas} баллов. Вес стабилен.`):P.finishedAt&&w<=P.goal?'Цель достигнута!':`+${PTS.meas} баллов. ${diff<0?'−'+g(-diff)+' кг.':diff>0?'+'+g(diff)+' кг — скорее всего вода.':'Вес стоит.'}${after<before?' Дата выхода приблизилась на '+(before-after)+' дн.':after>before?' Дата выхода сдвинулась на '+(after-before)+' дн.':''}`);
     renderCabinet();
@@ -1091,7 +1145,7 @@ function drawChart(c){
 }
 $('finishBtn').onclick=async()=>{
   const txt=$('finalReview').value.trim();if(!txt)return;
-  await ref.update({finalReview:txt,consent:$('consent').checked});
+  await put(ref.update({finalReview:txt,consent:$('consent').checked}));
   P.finalReview=txt;P.consent=$('consent').checked;$('finishMsg').textContent='Спасибо! Отзыв у куратора.';setTimeout(renderCabinet,1500);
 };
 
@@ -1100,22 +1154,24 @@ $('finishBtn').onclick=async()=>{
 const CFG=db.collection('strict_config').doc('recipes');
 const MEALS=[['b','breakfast','Завтрак'],['s','snack','Полдник'],['l','lunch','Обед'],['d','dinner','Ужин']];
 const MENU_AHEAD=7;
+const MENU_V=3;   // при смене правил подбора меню будущие дни пересобираются
 let RX={},RDIS=new Set(),menuDays=3,openMeal=null,famMode=false,shopGot=new Set();
 try{shopGot=new Set(JSON.parse(recall('sr_shop')||'[]'))}catch(e){}
 async function loadRecipes(){
   RX={};(window.RECIPES||[]).forEach(r=>RX[r.id]=r);
   if(!Object.keys(RX).length)console.warn('recipes.js не подключён — лежит ли он рядом с index.html?');
-  try{const s=await CFG.get();if(s.exists)RDIS=new Set(s.data().disabled||[])}catch(e){console.warn(e)}
+  try{const s=await wait(CFG.get(),8000);if(s.exists)RDIS=new Set(s.data().disabled||[])}catch(e){console.warn(e)}
 }
-function foodOf(p){const f=p.food||{};return{noTags:f.noTags||[],noWords:(f.noWords||p.excl||[]).map(w=>w.toLowerCase()).filter(Boolean),favs:f.favs||[],noIds:f.noIds||[]}}
+function foodOf(p){const f=p.food||{};return{noTags:f.noTags||[],noWords:(f.noWords||p.excl||[]).map(w=>w.toLowerCase()).filter(Boolean),favs:f.favs||[],noIds:f.noIds||[],simple:f.simple!==false}}
 function recipeOk(r,food){
-  if(!r||RDIS.has(r.id)||food.noIds.includes(r.id))return false;
+  if(!r||r.hide||RDIS.has(r.id)||food.noIds.includes(r.id))return false;
+  if(food.simple&&r.x&&!food.favs.includes(r.id))return false;
   if((r.tags||[]).some(t=>food.noTags.includes(t)))return false;
   const blob=(r.name+' '+r.ingredients.join(' ')).toLowerCase();return !food.noWords.some(w=>blob.includes(w));
 }
 const sideOf=(r,p)=>r&&r.sideId&&RX[r.sideId]&&recipeOk(RX[r.sideId],foodOf(p))?RX[r.sideId]:null;
 const kcalOf=(id,p)=>{const r=RX[id];if(!r)return 0;const s=sideOf(r,p);return r.kcal+(s?s.kcal:0)};
-function mealPool(p,key){const food=foodOf(p);return Object.values(RX).filter(r=>!r.side&&(key==='snack'?(r.meal==='snack'||r.meal==='bake'):r.meal===key)&&recipeOk(r,food)).map(r=>r.id)}
+function mealPool(p,key){const food=foodOf(p);return Object.values(RX).filter(r=>!r.side&&r.ingredients.length>0&&(key==='snack'?(r.meal==='snack'||r.meal==='bake'):r.meal===key)&&recipeOk(r,food)).map(r=>r.id)}
 // очередь без повторов; любимые блюда вставляются второй раз — появляются чаще
 function queue(p,key){
   p.mq=p.mq||{};const food=foodOf(p);let q=(p.mq[key]||[]).filter(id=>RX[id]&&recipeOk(RX[id],food));
@@ -1127,24 +1183,49 @@ function queue(p,key){
   return p.mq[key]=q;
 }
 const portion=f=>Math.round(clamp(f,.7,1.6)*20)/20;
+// основные продукты блюда — чтобы меню соседних дней использовало одни и те же покупки
+const PANTRY=/^(соль|перец|специи|зелень|вода|масло|сахар|подсласт|разрыхл|ванил|корица|лавров|чеснок|сок|уксус|мука|соевый|томатн.*паст|сода|стевия|горчиц|паприк|куркум|прованс|итальянск|приправ)/i;
+const ING={};function ingOf(id){if(ING[id])return ING[id];const r=RX[id];if(!r)return[];
+  return ING[id]=[...new Set(r.ingredients.map(i=>i.split(' — ')[0].toLowerCase().replace(/\([^)]*\)/g,'').replace(/ё/g,'е').trim()).filter(n=>n&&!PANTRY.test(n)).map(n=>n.split(/[\s,]+/)[0].slice(0,6)))]}
+// ключ блюда: одинаковые по названию блюда из разных марафонов не должны встречаться в один день
+const dishKey=id=>{const r=RX[id];return r?(r.name+'|'+(r.nick||'')).toLowerCase().replace(/[^а-яёa-z|]/g,''):''};
+// вес порции для участницы, г
+const gramsOf=(r,f)=>r&&r.g?Math.round(r.g*f/5)*5:null;
+// короткое описание из основных продуктов — для блюд с общими названиями («Блюдо», «Запеканка», «Салат»)
+const SKIP=/^(соль|перец|специи|зелень|вода|масло|сахар|подсласт|разрыхл|ванил|корица|лавров|чеснок|лимонн|сок|мёд|мед)/i;
+function aboutOf(r){if(!r||(r.name||'').split(/\s+/).length>3)return'';
+  return r.ingredients.map(i=>i.split(' — ')[0].replace(/\([^)]*\)/g,'').replace(/[:;,].*$/,'').replace(/\*|\b(ozon|вкусвилл|spar|озон)\b/gi,'').trim()).filter(n=>n.length>2&&!SKIP.test(n)).slice(0,3).map(n=>n.toLowerCase()).join(', ')}
 function buildDay(p){
   const q={};MEALS.forEach(([k,key])=>q[k]=queue(p,key));
-  const L=k=>Math.max(1,Math.min(6,q[k].length));let best=null;
+  const L=k=>Math.max(1,Math.min(8,q[k].length));let best=null;
+  const prevDays=Object.values(p.menu||{}).slice(-3);
+  const recent=new Set(prevDays.flatMap(dd=>MEALS.map(([k])=>dishKey(dd[k]))));
+  const bought=new Set(prevDays.slice(-2).flatMap(dd=>MEALS.flatMap(([k])=>ingOf(dd[k]))));   // уже купленное за последние дни
   for(let a=0;a<L('b');a++)for(let b=0;b<L('s');b++)for(let c=0;c<L('l');c++)for(let d=0;d<L('d');d++){
+    const ids=[q.b[a],q.s[b],q.l[c],q.d[d]],keys=ids.map(dishKey);
+    if(new Set(keys).size<keys.length)continue;                 // одно и то же блюдо дважды за день
+    const rep=keys.filter(k=>recent.has(k)).length;             // то же блюдо, что было вчера-позавчера
     const sum=kcalOf(q.b[a],p)+kcalOf(q.s[b],p)+kcalOf(q.l[c],p)+kcalOf(q.d[d],p);if(!sum)continue;
-    const sc=Math.abs(Math.log(p.kcal/sum))+(a+b+c+d)*.015;if(!best||sc<best.sc)best={sc,i:{b:a,s:b,l:c,d:d},f:p.kcal/sum};
+    const ing=new Set(ids.flatMap(ingOf)),fresh=[...ing].filter(x=>!bought.has(x)).length;   // сколько новых продуктов придётся купить
+    const sc=Math.abs(Math.log(p.kcal/sum))+(a+b+c+d)*.015+rep*.5+fresh*.012;if(!best||sc<best.sc)best={sc,i:{b:a,s:b,l:c,d:d},f:p.kcal/sum};
   }
   const day={};MEALS.forEach(([k])=>{day[k]=q[k].length?q[k].splice(best?best.i[k]:0,1)[0]:null});
   day.f=best?portion(best.f):1;return day;
 }
-function ensureMenu(p){p.menu=p.menu||{};const t=Math.max(1,dayIdx(p.start));let ch=false;for(let d=t;d<t+MENU_AHEAD;d++)if(!p.menu['d'+d]){p.menu['d'+d]=buildDay(p);ch=true}return ch}
+const blockOf=(p,d)=>{const n=+p.cook||1;return d-((d-1)%n)};   // первый день «готовочного» блока
+function ensureMenu(p){p.menu=p.menu||{};const t=Math.max(1,dayIdx(p.start));let ch=false;
+  for(let d=t;d<t+MENU_AHEAD;d++){if(p.menu['d'+d])continue;const b=blockOf(p,d);
+    if(b<d&&p.menu['d'+b]){const{copy,...src}=p.menu['d'+b];p.menu['d'+d]={...src,copy:b}}else p.menu['d'+d]=buildDay(p);ch=true}
+  return ch}
+// после замены блюда — обновить копии этого дня в остальных днях блока
+function syncBlock(p,d){const b=blockOf(p,d),n=+p.cook||1,{copy,...src}=p.menu['d'+b]||{};for(let x=b+1;x<b+n;x++)if(p.menu['d'+x])p.menu['d'+x]={...src,copy:b}}
 function saveMenu(extra={}){return ref.update({menu:P.menu,mq:P.mq,...extra}).catch(e=>console.warn(e))}
 function swapMeal(d,k,silent){
-  const day=P.menu['d'+d],key=MEALS.find(m=>m[0]===k)[1],q=queue(P,key);if(!q.length)return;
+  d=blockOf(P,d);const day=P.menu['d'+d],key=MEALS.find(m=>m[0]===k)[1],q=queue(P,key);if(!q.length)return;
   const others=MEALS.filter(m=>m[0]!==k).reduce((s,[kk])=>s+kcalOf(day[kk],P),0);
-  let bi=-1,bs=1e9;q.slice(0,8).forEach((id,i)=>{if(id===day[k])return;const sc=Math.abs(Math.log(P.kcal/(others+kcalOf(id,P))));if(sc<bs){bs=sc;bi=i}});
+  const dayKeys=MEALS.filter(m=>m[0]!==k).map(([kk])=>dishKey(day[kk]));let bi=-1,bs=1e9;q.slice(0,12).forEach((id,i)=>{if(id===day[k]||dayKeys.includes(dishKey(id)))return;const sc=Math.abs(Math.log(P.kcal/(others+kcalOf(id,P))));if(sc<bs){bs=sc;bi=i}});
   if(bi<0)return;const old=day[k];day[k]=q.splice(bi,1)[0];if(old&&recipeOk(RX[old],foodOf(P)))q.push(old);
-  day.f=portion(P.kcal/(others+kcalOf(day[k],P)));if(!silent){saveMenu();renderMenu()}
+  day.f=portion(P.kcal/(others+kcalOf(day[k],P)));syncBlock(P,d);if(!silent){saveMenu();renderMenu()}
 }
 // граммы под порцию: «600 г» на 4 порции → «175 г» для тебя
 const QRX=/(\d+(?:[.,]\d+)?)(?:\s*[-–]\s*(\d+(?:[.,]\d+)?))?\s*(кг|гр|г|мл|л|шт\.?|ст\.\s?л\.?|ч\.\s?л\.?|зубч\w*)(?![а-яё])/gi;
@@ -1159,7 +1240,8 @@ function ingLines(r,k){return r.ingredients.map(line=>{const i=line.indexOf(' �
 function recipeBody(r,f,isSide){
   const fam=famMode&&P.household>1,k=(fam?P.household:1)*f/(r.servings||4);
   const fav=foodOf(P).favs.includes(r.id);
-  return `<div class="rb"><p class="s">${Math.round(r.kcal*f)} ккал · Б ${g(r.p*f)} · Ж ${g(r.f*f)} · У ${g(r.c*f)}</p>
+  const gm=gramsOf(r,f);
+  return `<div class="rb">${gm?`<p class="portion">${isSide?'Гарнира':'Положи себе'}: <b>${r.gEst?'≈ ':''}${gm} г</b> готового блюда</p>`:''}<p class="s">${Math.round(r.kcal*f)} ккал · Б ${g(r.p*f)} · Ж ${g(r.f*f)} · У ${g(r.c*f)}</p>
   ${r.serve?`<p class="s">Подача: ${esc(r.serve)}</p>`:''}
   ${P.household>1&&!isSide?`<div class="seg" role="group" aria-label="Граммы"><button data-fam="0" aria-pressed="${!famMode}">Моя порция</button><button data-fam="1" aria-pressed="${famMode}">На ${P.household} чел.</button></div>`:''}
   ${r.ingredients.length?`<h5>Ингредиенты</h5><ul>${ingLines(r,k).map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
@@ -1170,7 +1252,7 @@ function mealRow(d,k,label,day){
   const r=RX[day[k]];
   if(!r)return `<div class="meal"><div class="mhead"><span class="ml">${label}</span><span class="mn">Нет подходящих блюд — убери часть фильтров «Не ем»</span><span></span></div></div>`;
   const s=sideOf(r,P),key=d+'|'+k,open=openMeal===key,fav=foodOf(P).favs.includes(r.id);
-  return `<div class="meal" data-key="${key}"><button class="mhead" data-open="${key}" aria-expanded="${open}"><span class="ml">${label}</span><span class="mn">${fav?'<span class="fav" aria-label="любимое">♥</span> ':''}${esc(r.name)}${r.nick?` <i>«${esc(r.nick)}»</i>`:''}${s?`<br><small>+ ${esc(s.name)}</small>`:''}</span><span class="mk">${Math.round(kcalOf(r.id,P)*day.f)} ккал</span></button>
+  return `<div class="meal" data-key="${key}"><button class="mhead" data-open="${key}" aria-expanded="${open}"><span class="ml">${label}</span><span class="mn">${fav?'<span class="fav" aria-label="любимое">♥</span> ':''}${esc(r.name)}${r.nick?` <i>«${esc(r.nick)}»</i>`:''}${aboutOf(r)?`<br><small>${esc(aboutOf(r))}</small>`:''}${s?`<br><small>+ ${esc(s.name)}</small>`:''}</span><span class="mk">${(()=>{const gm=(gramsOf(r,day.f)||0)+(s?gramsOf(s,day.f)||0:0);return gm?`<b style="color:var(--ink);font-weight:600">${r.gEst||(s&&s.gEst)?"≈ ":""}${gm} г</b><br>`:""})()}${Math.round(kcalOf(r.id,P)*day.f)} ккал</span></button>
   ${open?recipeBody(r,day.f)+(s?`<div class="rb"><h5>Гарнир: ${esc(s.name)}</h5></div>`+recipeBody(s,day.f,true):''):''}</div>`;
 }
 function renderMenu(){
@@ -1181,12 +1263,20 @@ function renderMenu(){
   for(let d=t;d<t+menuDays;d++){
     const day=P.menu['d'+d];if(!day)continue;
     const total=MEALS.reduce((s,[k])=>s+kcalOf(day[k],P),0)*day.f;
-    h+=`<div class="day"><div class="dh"><h4>${fmtS(addDays(pd(P.start),d-1))}${d===dayIdx(P.start)?' · сегодня':''}</h4><span>${Math.round(total)} ккал</span></div>${MEALS.map(([k,,label])=>mealRow(d,k,label,day)).join('')}</div>`;
+    const rep=day.copy?`<p class="note" style="margin:2px 0 4px">То же меню, что ${fmtS(addDays(pd(P.start),day.copy-1))} — ничего готовить не нужно</p>`:'';
+    h+=`<div class="day"><div class="dh"><h4>${fmtS(addDays(pd(P.start),d-1))}${d===dayIdx(P.start)?' · сегодня':''}</h4><span>${Math.round(total)} ккал</span></div>${rep}${MEALS.map(([k,,label])=>mealRow(d,k,label,day)).join('')}</div>`;
   }
   $('menu').innerHTML=h;
   document.querySelectorAll('#menuDays .opt').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.days===menuDays));
+  document.querySelectorAll('#cookSeg [data-cook]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.cook===(+P.cook||1)));
   renderShop();
 }
+$('cookSeg').onclick=e=>{const b=e.target.closest('[data-cook]');if(!b)return;const n=+b.dataset.cook;if(n===(+P.cook||1))return;
+  P.cook=n;const t=Math.max(1,dayIdx(P.start));
+  // пересобираем будущие дни: первый день блока остаётся, остальные становятся его копиями
+  Object.keys(P.menu||{}).forEach(k=>{const d=+k.slice(1);if(d>=t&&(P.menu[k].copy||blockOf(P,d)!==d))delete P.menu[k]});
+  ensureMenu(P);saveMenu({cook:n});renderMenu();
+  toast(n===1?'Меню на каждый день — разное':`Готовишь раз в ${n} дня — меню повторяется ${n} дня подряд`)};
 $('menu').onclick=e=>{
   const o=e.target.closest('[data-open]');if(o){openMeal=openMeal===o.dataset.open?null:o.dataset.open;renderMenu();return}
   const fm=e.target.closest('[data-fam]');if(fm){famMode=fm.dataset.fam==='1';renderMenu();return}
@@ -1235,6 +1325,7 @@ function hintHtml(key){
   if(key==='points')return`<b>Баллы поведения</b><ul><li><span>Тренировка</span><b>+${PTS.train}</b></li><li><span>День по меню</span><b>+${PTS.food}</b></li><li><span>День без пропусков</span><b>+${PTS.perfect}</b></li><li><span>Бонус-задание</span><b>+${PTS.bonus}</b></li><li><span>Замеры</span><b>+${PTS.meas}</b></li><li><span>Отзыв</span><b>+${PTS.feel}</b></li><li><span>УДО</span><b>+${PTS.udo}</b></li></ul>`;
   if(key==='meas')return'Раз в 3 дня, утром натощак. Колебания ±1–2 кг — норма: дата считается по среднему за неделю.';
   if(key==='menu'){const f=foodOf(P),ex=[...f.noTags.map(x=>(FOODTAGS.find(y=>y[0]===x)||[,x])[1].toLowerCase()),...f.noWords];return`Собрано под твою норму <b>${P.kcal} ккал</b>${ex.length?', без: '+esc(ex.join(', ')):''}. Нажми на блюдо — рецепт в граммах твоей порции. ♥ — будет чаще, «Не предлагать» — исчезнет навсегда.`}
+  if(key==='cook')return'Не любишь стоять у плиты? Выбери «раз в 2 дня» или «раз в 3 дня» — меню будет повторяться несколько дней подряд. Готовишь один раз сразу на несколько дней, калорийность та же, а список продуктов посчитан на все дни.';
   if(key==='shop')return'Сумма по рецептам за выбранные дни, с твоими порциями и числом едоков. Соль и специи — в конце списка.';
   if(key==='plan')return`Тренировка — на каждый день, обязательны <b>${P.rider.perWeek} в неделю</b>, остальные по желанию (+баллы). Если неделя закроется с недобором — дата выхода сдвинется на недостающие дни. Подборка из твоего райдера: ${poolFor(P.rider,P.level).length} тренировок без повторов. «Тяжело» дважды — нагрузка ниже, «легко» трижды — уровень выше.`;
   if(key==='bonus'){const b=bonusOf(dayIdx(P.start));return`<b>${b[0]}.</b> ${b[1]}. +${PTS.bonus} балла.`}
@@ -1359,10 +1450,10 @@ function renderRc(){
 
 /* ================= СТАРТ ================= */
 (async()=>{
-  await Promise.all([loadWorkouts(),loadRecipes()]);
+  await Promise.all([loadWorkouts(),loadRecipes()]).catch(console.warn);
   const saved=recall('sr_email');
   if(saved){
-    try{ref=db.collection(PART).doc(saved);const s=await ref.get();if(s.exists){P=s.data();openCabinet();return}}catch(e){console.warn(e)}
+    try{ref=db.collection(PART).doc(saved);const s=await readDoc(ref);if(s.exists){P=s.data();openCabinet();return}}catch(e){console.warn(e);$('loginMsg').textContent=netError(e)}
     $('email').value=saved;
   }
   show('login');
@@ -1370,3 +1461,4 @@ function renderRc(){
 </script>
 </body>
 </html>
+
