@@ -125,6 +125,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 .week li{display:grid;grid-template-columns:92px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:.88rem}
 .week li:last-child{border-bottom:0}
 .week .d{color:var(--steel);font-size:.8rem}
+.week .wlink{color:var(--ink);font-weight:600;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
 .week .now{font-weight:600;color:var(--ink)}
 .feel{margin-top:12px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:4px}
 svg.chart{width:100%;height:auto;margin-top:12px;display:block}
@@ -1175,12 +1176,19 @@ function renderWeek(){
   h+=`<li style="display:block;border-bottom:2px solid var(--ink)"><b>Неделя ${Math.floor((a-1)/7)+1}: ${cw?cw.done:0} из ${cw?cw.need:P.rider.perWeek}</b> <span class="d">обязательных тренировок</span></li>`;
   for(let d=a;d<a+7&&d<=P.plan.length;d++){
     const e=P.plan[d-1],l=P.log['d'+d]||{},date=addDays(pd(P.start),d-1),w=W[e.w];
-    const name=e.rest?'Отдых, прогулка':w?`${esc(pn(w.program))} <span class="d">· ${LV[w.level]}</span>`:'—';
+    const name=e.rest?'Отдых, прогулка':w?`<a class="wlink" href="${esc(w.url)}" target="_blank" rel="noopener" data-wd="${d}">${esc(pn(w.program))} <span aria-hidden="true">↗</span></a> <span class="d">· ${LV[w.level]}</span>`:'—';
     const tag=l.done?'<span class="tag done">готово</span>':wm.miss.has(d)?'<span class="tag late">пропуск</span>':d<t||e.rest?'<span class="tag rest">отдых</span>':d===t?'<span class="tag todo">сегодня</span>':'';
     h+=`<li><span class="d ${d===t?'now':''}">${fmtS(date)}</span><span>${name}</span>${tag}</li>`;
   }
   $('week').innerHTML=h;
 }
+// тренировка из плана открывается по ссылке; если это сегодняшняя — запускаем отсчёт, как кнопка «Начать»
+$('week').onclick=e=>{
+  const a=e.target.closest('[data-wd]');if(!a)return;
+  const d=+a.dataset.wd,t=dayIdx(P.start),key='d'+d;
+  if(d!==t)return;P.log[key]=P.log[key]||{};
+  if(!P.log[key].opened&&!P.log[key].done){P.log[key].opened=Date.now();ref.update({[`log.${key}.opened`]:P.log[key].opened,lastSeen:Date.now()}).catch(console.warn);setTimeout(()=>{renderToday();renderWeek()},300)}
+};
 $('retakeBtn').onclick=()=>{$('retakeBox').classList.remove('hidden');$('retakeBtn').classList.add('hidden')};
 $('retakeNo').onclick=()=>{$('retakeBox').classList.add('hidden');$('retakeBtn').classList.remove('hidden')};
 $('retakeYes').onclick=()=>{
@@ -1556,5 +1564,4 @@ function renderRc(){
 </script>
 </body>
 </html>
-
 
