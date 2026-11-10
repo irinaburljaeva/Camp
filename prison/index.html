@@ -118,6 +118,13 @@ input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{out
 .task:last-child{border-bottom:0}
 .task .t{font-weight:500}.task .s{font-size:.8rem;color:var(--steel)}
 .task .r{text-align:right;flex-shrink:0}
+.lnk{background:none;border:0;padding:0;font:inherit;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;text-align:left}
+.mpick{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;max-height:220px;overflow:auto}
+.mpick .s{font-weight:400;opacity:.75}
+.marks td,.marks th{text-align:center;vertical-align:middle}.marks td:first-child,.marks td:nth-child(2),.marks th:first-child,.marks th:nth-child(2){text-align:left}
+.mk{width:40px;height:34px;border:2px solid var(--line);border-radius:6px;background:transparent;font-size:1rem;font-weight:700;color:var(--steel);cursor:pointer}
+.mk.on{border-color:var(--release);background:#E8F3EC;color:var(--release)}
+.mk:disabled{opacity:.5}
 .tag{font-size:.72rem;padding:3px 8px;border-radius:3px;font-weight:600;white-space:nowrap;display:inline-block}
 .tag.todo{background:#FBF3D6;color:#7A5B00}.tag.done{background:#E8F3EC;color:var(--release)}.tag.late{background:#F7E0DD;color:var(--alarm)}.tag.rest{background:#E4E5E0;color:var(--steel)}
 .adapt{background:var(--ink);color:#fff;border-radius:4px;padding:12px 14px;font-size:.9rem;margin-bottom:12px;border-left:6px solid var(--hazard)}
@@ -457,6 +464,7 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
       <button role="tab" data-tab="red" aria-selected="true">Красная зона</button>
       <button role="tab" data-tab="cases" aria-selected="false">Кейсы</button>
       <button role="tab" data-tab="all" aria-selected="false">Все</button>
+      <button role="tab" data-tab="marks" aria-selected="false">Отметки</button>
       <button role="tab" data-tab="wk" aria-selected="false">База тренировок</button>
       <button role="tab" data-tab="rc" aria-selected="false">База меню</button>
       <button class="toggle" id="reloadCur" style="margin-left:auto">Обновить</button>
@@ -464,6 +472,7 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
     <section data-panel="red"></section>
     <section data-panel="cases" class="hidden"></section>
     <section data-panel="all" class="hidden"></section>
+    <section data-panel="marks" class="hidden"></section>
     <section data-panel="wk" class="hidden"></section>
     <section data-panel="rc" class="hidden"></section>
   </div>
@@ -544,6 +553,10 @@ async function flush(){
       if(s.exists){P=s.data();store('sr_dirty_'+P.email,null);backup();toast('Нашли твоё личное дело в базе — открыли его');openCabinet();return}
       delete P.offlineNew;
     }
+    // правки куратора в отметках важнее старой копии с телефона
+    try{const sv=await wait(realRef.get({source:'server'}),10000);if(sv.exists){const sl=sv.data().log||{};let m=0;
+      Object.entries(sl).forEach(([k,v])=>{if(v&&v.byCur&&(!P.log[k]||!P.log[k].byCur||P.log[k].byCur<v.byCur)){P.log[k]={...(P.log[k]||{}),done:v.done??null,food:v.food??null,bonus:v.bonus??null,byCur:v.byCur};m++}});
+      if(m){backup();if(!$('cabinet').classList.contains('hidden'))renderCabinet()}}}catch(e){console.warn('merge',e)}
     await wait(realRef.set(P),20000);
     store('sr_dirty_'+P.email,null);netWarned=false;toast('Связь есть — всё сохранено в базе ✓');
   }catch(e){console.warn('flush',e)}
@@ -1484,7 +1497,7 @@ async function loadCurator(){
   ['red','cases','all'].forEach(n=>panel(n).innerHTML='<p class="loading">Загружаем…</p>');
   try{const s=await db.collection(PART).get();CUR=[];s.forEach(d=>{const p=d.data();if(p.plan&&p.start)CUR.push({p,c:calc(p)})})}
   catch(e){panel('red').innerHTML=`<p class="msg">Ошибка чтения: ${esc(e.message)}. Проверь правила Firestore.</p>`;return}
-  renderRed();renderCases();renderAll();renderWk();renderRc();
+  renderRed();renderCases();renderAll();renderMarks();renderWk();renderRc();
 }
 const seenAgo=p=>Math.floor((Date.now()-(p.lastSeen||p.createdAt||0))/DAY);
 function reminder(p,reasons){
@@ -1514,8 +1527,44 @@ function renderAll(){
   const rows=CUR.slice().sort((a,b)=>b.c.progress-a.c.progress);
   panel('all').innerHTML=`<h2>Все участницы · ${rows.length}</h2><div class="tbl"><table><tr><th>Имя</th><th>Вес</th><th>Прогресс</th><th>Тренировки</th><th>Выход</th></tr>${rows.map(({p,c})=>{
     const past=p.plan.filter(e=>e.d<c.t&&e.w),done=past.filter(e=>(p.log['d'+e.d]||{}).done).length;
-    return `<tr><td>${esc(p.name)}${p.track==='tone'?' <span class="tag rest">Тонус</span>':''}${p.ed?' <span class="tag todo" title="РПП, согласие специалиста подтверждено">РПП · согласие</span>':''}<div class="s">№ ${esc(p.num||'')} · ${esc(p.contact||p.email)}</div></td><td>${p.startW} → ${c.cur}<div class="s">цель ${p.goal}</div></td><td>${c.progress}%${c.streak?`<div class="s">${c.streak} дн. без пропусков</div>`:''}</td><td>${done}/${past.length}<div class="s">уровень: ${LV[p.level]}</div></td><td>${c.finished?'вышла':fmt(addDays(pd(p.start),c.total-1))}<div class="s">${c.total>p.planDays?'+'+(c.total-p.planDays)+' дн.':c.total<p.planDays?'−'+(p.planDays-c.total)+' дн.':'по плану'}</div></td></tr>`}).join('')}</table></div>`;
+    return `<tr><td><button class="lnk" data-mk="${esc(p.email)}">${esc(p.name)}</button>${p.track==='tone'?' <span class="tag rest">Тонус</span>':''}${p.ed?' <span class="tag todo" title="РПП, согласие специалиста подтверждено">РПП · согласие</span>':''}<div class="s">№ ${esc(p.num||'')} · ${esc(p.contact||p.email)}</div></td><td>${p.startW} → ${c.cur}<div class="s">цель ${p.goal}</div></td><td>${c.progress}%${c.streak?`<div class="s">${c.streak} дн. без пропусков</div>`:''}</td><td>${done}/${past.length}<div class="s">уровень: ${LV[p.level]}</div></td><td>${c.finished?'вышла':fmt(addDays(pd(p.start),c.total-1))}<div class="s">${c.total>p.planDays?'+'+(c.total-p.planDays)+' дн.':c.total<p.planDays?'−'+(p.planDays-c.total)+' дн.':'по плану'}</div></td></tr>`}).join('')}</table></div>`;
 }
+panel('all').addEventListener('click',e=>{const b=e.target.closest('[data-mk]');if(!b)return;markSel=b.dataset.mk;document.querySelector('#curTabs [data-tab="marks"]').click();renderMarks()});
+/* ---------- отметки: куратор ставит или снимает выполнение за любой день ---------- */
+let markSel='',markQ='';
+const MARKS=[['done','Тренировка'],['food','Питание'],['bonus','Бонус']];
+function renderMarks(){
+  const list=CUR.slice().sort((a,b)=>a.p.name.localeCompare(b.p.name,'ru'));
+  const q=markQ.trim().toLowerCase(),found=q?list.filter(({p})=>(p.name+' '+p.email+' '+(p.contact||'')+' '+(p.num||'')).toLowerCase().includes(q)):list;
+  const x=CUR.find(({p})=>p.email===markSel);
+  let h=`<h2>Отметки по дням</h2><p class="note">Поставь или сними выполнение за любой прошедший день — срок, баллы и недельная норма пересчитаются сами. Участница увидит изменения при следующем входе.</p>
+  <label for="markQ">Участница</label><input id="markQ" placeholder="Имя, email, телефон или № дела" value="${esc(markQ)}" autocomplete="off">
+  <div class="mpick">${found.slice(0,30).map(({p})=>`<button class="btn small ${p.email===markSel?'':'ghost'}" data-pick="${esc(p.email)}">${esc(p.name)}<span class="s"> · ${esc(p.contact||p.email)}</span></button>`).join('')||'<p class="note">Никого не нашли</p>'}</div>`;
+  if(x){const{p,c}=x,t=Math.min(c.t,p.plan.length);
+    h+=`<h2 style="margin-top:18px">${esc(p.name)} <span class="s">№ ${esc(p.num||'')} · день ${Math.max(0,c.t)} · выход ${c.finished?'— вышла':fmt(addDays(pd(p.start),c.total-1))}</span></h2>`;
+    if(t<1)h+='<p class="lead">Срок ещё не начался.</p>';
+    else{h+=`<div class="tbl"><table class="marks"><tr><th>День</th><th>Тренировка дня</th>${MARKS.map(([,n])=>`<th>${n}</th>`).join('')}</tr>`;
+      for(let d=t;d>=1;d--){const e=p.plan[d-1]||{},l=(p.log||{})['d'+d]||{},w=W[e.w];
+        h+=`<tr><td><b>${d}</b> <span class="s">${fmtS(addDays(pd(p.start),d-1))}</span>${c.wm&&c.wm.miss.has(d)?' <span class="tag late">пропуск</span>':''}${l.byCur?' <span class="tag rest" title="Менял куратор">куратор</span>':''}</td>
+        <td>${e.rest?'<span class="s">отдых</span>':w?`<a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(pn(w.program))}</a>`:'—'}</td>
+        ${MARKS.map(([k])=>e.rest&&k==='done'?'<td class="s">—</td>':`<td><button class="mk ${l[k]?'on':''}" data-d="${d}" data-k="${k}" aria-pressed="${!!l[k]}" aria-label="${l[k]?'Выполнено — снять':'Не выполнено — отметить'}">${l[k]?'✓':'—'}</button></td>`).join('')}</tr>`}
+      h+='</table></div>'}
+  }
+  panel('marks').innerHTML=h;
+  const qi=$('markQ');if(qi){qi.oninput=()=>{markQ=qi.value;const pos=qi.selectionStart;renderMarks();const n=$('markQ');n.focus();n.setSelectionRange(pos,pos)}}
+}
+panel('marks').addEventListener('click',async e=>{
+  const pk=e.target.closest('[data-pick]');if(pk){markSel=pk.dataset.pick;renderMarks();return}
+  const b=e.target.closest('[data-k]');if(!b)return;
+  const x=CUR.find(({p})=>p.email===markSel);if(!x)return;const p=x.p,d=+b.dataset.d,k=b.dataset.k,key='d'+d;
+  p.log=p.log||{};const l=p.log[key]=p.log[key]||{};const on=!l[k];
+  const val=on?(k==='done'?(l.opened||Date.now()):true):null;
+  b.disabled=true;
+  try{await wait(db.collection(PART).doc(p.email).update({[`log.${key}.${k}`]:val,[`log.${key}.byCur`]:Date.now()}),15000);
+    l[k]=val;l.byCur=Date.now();x.c=calc(p);renderMarks();renderRed();renderCases();renderAll();
+    toast(`${p.name}: день ${d} — ${MARKS.find(m=>m[0]===k)[1].toLowerCase()} ${on?'засчитана':'снята'}`.replace('питание засчитана','питание засчитано').replace('питание снята','питание снято'))}
+  catch(err){b.disabled=false;alert('Не сохранилось: '+(err.code||err.message)+'. Проверь связь и попробуй ещё раз.')}
+});
 function renderWk(){
   const byP={};Object.values(W).forEach(w=>(byP[w.program]=byP[w.program]||[]).push(w));
   const fresh=SEED.filter(s=>!W[s.id]||W[s.id].level!==s.level||W[s.id].program!==s.program||W[s.id].url!==s.url).length;
