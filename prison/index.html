@@ -238,6 +238,19 @@ section.quests{position:relative}
 .qhead h2{margin:0}
 .ring{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--steel);white-space:nowrap;flex-shrink:0}
 .ring svg{width:44px;height:44px}
+.steps{margin-top:14px;padding:14px;border:1.5px solid var(--line);border-radius:8px;background:#fff}
+.steps .sh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.steps .sh b{font-family:"Russo One";font-size:1.4rem}
+.steps .sh span{font-size:.8rem;color:var(--steel)}
+.steps .bar{margin:8px 0 10px}
+.steps .minirow{grid-template-columns:1fr auto}
+.steps.hit{background:#EEF6F0;border-color:#BFDCC9}
+.sstat{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+.sstat div{border:1.5px solid var(--line);border-radius:8px;padding:10px;background:#fff}
+.sstat b{display:block;font-family:"Russo One";font-size:1.05rem}
+.sstat span{font-size:.74rem;color:var(--steel)}
+.minirow.stother{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.stother>div{min-width:0}.stother select{width:100%}
+@media (max-width:480px){.sstat{grid-template-columns:1fr 1fr}.minirow.stother{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.stother .btn{grid-column:1/-1}}
 .quest{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:14px;border:1.5px solid var(--line);border-radius:8px;background:#fff;margin-top:10px;transition:background .3s,border-color .3s}
 .quest.done{background:#EEF6F0;border-color:#BFDCC9}
 .quest .qi{width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--hazard);display:grid;place-items:center}
@@ -408,6 +421,12 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
     <div class="msg" id="measMsg"></div>
     <svg class="chart" id="chart" viewBox="0 0 600 220" role="img" aria-label="График веса: план, факт и прогноз"></svg>
     <div class="legend"><span><i style="border-color:#9A9D95;border-top-style:dashed"></i>план</span><span><i style="border-color:#1F211D"></i>факт</span><span><i style="border-color:#D9A800;border-top-style:dashed"></i>прогноз</span></div>
+  </section>
+  <section id="stepsSec">
+    <div class="h2row"><h2>Шаги <button class="hint" data-hint="steps" aria-label="Как считаются шаги">?</button></h2><button class="toggle" id="stepGoalBtn"></button></div>
+    <div id="stepsStats"></div>
+    <svg class="chart" id="stepsChart" viewBox="0 0 600 200" role="img" aria-label="Шаги за последние 14 дней"></svg>
+    <details class="more"><summary>Внести шаги за другой день</summary><div class="minirow stother"><div><label for="stDay">День</label><select id="stDay"></select></div><div><label for="stVal">Шагов</label><input id="stVal" type="number" min="0" step="100" inputmode="numeric"></div><button class="btn green" id="stSave">Сохранить</button></div></details>
   </section>
   <section id="statusSec">
     <div class="h2row"><h2>Статус <button class="hint" data-hint="points" aria-label="Как начисляются баллы">?</button></h2></div>
@@ -1091,7 +1110,7 @@ function renderCabinet(){
   $('relExtra').innerHTML=ch;
   $('finishBox').classList.toggle('hidden',!free||!!P.finalReview);
   if(free&&P.reward)$('finishLead').textContent=`Самое время для «${P.reward}». Расскажи, как это было.`;
-  renderTally(c);renderToday(c);renderStatus(c,s,pts);renderWeek();renderMeas(c);drawChart(c);
+  renderTally(c);renderToday(c);renderStatus(c,s,pts);renderWeek();renderMeas(c);drawChart(c);renderSteps();
   checkRewards(c,s,pts);justDone=false;backup();
 }
 function quest(o){
@@ -1113,6 +1132,54 @@ function pickTip(c,e,l){
   if(c.measAgo>=3&&c.t>1&&ok('meas'))return'meas';
   return null;
 }
+/* ---------- шаги ---------- */
+const STEP_GOAL=8000,STEP_M=0.7;   // цель по умолчанию; длина шага, м
+const stepGoal=p=>+p.stepGoal||STEP_GOAL;
+const nf=n=>Math.round(n).toLocaleString('ru-RU');
+const kmOf=n=>(n*STEP_M/1000).toFixed(n*STEP_M>=10000?0:1).replace('.',',');
+function stepStats(p,t){
+  const days=[];for(let d=1;d<=Math.max(0,t);d++){const v=+((p.log||{})['d'+d]||{}).steps||0;days.push(v)}
+  const filled=days.filter(v=>v>0),total=filled.reduce((a,b)=>a+b,0);
+  const ws=Math.max(1,t-6),week=days.slice(ws-1).reduce((a,b)=>a+b,0);
+  return{days,total,week,avg:filled.length?total/filled.length:0,best:Math.max(0,...days),hit:days.filter(v=>v>=stepGoal(p)).length,n:filled.length}
+}
+async function saveSteps(d,v){
+  const key='d'+d;P.log[key]=P.log[key]||{};
+  if(!(v>=0&&v<=100000)){toast('Похоже на опечатку: введи число от 0 до 100 000');return false}
+  P.log[key].steps=Math.round(v);await put(ref.update({[`log.${key}.steps`]:P.log[key].steps,lastSeen:Date.now()}));backup();
+  const g=stepGoal(P);toast(v>=g?`${nf(v)} шагов — цель дня выполнена!`:`Записали ${nf(v)} шагов · до цели ${nf(g-v)}`);
+  renderToday();renderSteps();return true;
+}
+function stepsCard(t){
+  const v=+(P.log['d'+t]||{}).steps||0,g=stepGoal(P),st=stepStats(P,t);
+  return `<div class="steps ${v>=g?'hit':''}"><div class="sh"><div><span>Шаги сегодня</span><br><b>${v?nf(v):'—'}</b></div><span>цель ${nf(g)}<br>неделя ${nf(st.week)} · всего ${nf(st.total)}</span></div>
+  <div class="bar"><i style="width:${Math.min(100,Math.max(v?2:0,v/g*100))}%"></i></div>
+  <div class="minirow"><div><label for="stToday" style="margin-top:0">${v?'Исправить':'Сколько шагов за день'}</label><input id="stToday" type="number" min="0" step="100" inputmode="numeric" placeholder="например, 8500" value="${v||''}"></div><button class="btn green" data-act="steps">Сохранить</button></div>
+  ${t>1&&!(+(P.log['d'+(t-1)]||{}).steps)?`<p class="note" style="margin-top:8px">Вчера шаги не внесены — <a href="#" data-go="progress" data-stepsday="${t-1}">внести за вчера</a></p>`:''}</div>`;
+}
+function renderSteps(){
+  if(!$('stepsSec'))return;const t=Math.max(0,dayIdx(P.start)),g=stepGoal(P),st=stepStats(P,t);
+  $('stepGoalBtn').textContent=`Цель: ${nf(g)} в день`;
+  $('stepsStats').innerHTML=`<div class="sstat"><div><b>${nf(st.total)}</b><span>шагов всего</span></div><div><b>${kmOf(st.total)} км</b><span>пройдено</span></div><div><b>${nf(st.avg)}</b><span>в среднем за день</span></div><div><b>${st.hit}</b><span>${pl(st.hit,'день','дня','дней')} с целью</span></div></div>`;
+  // график последних 14 дней
+  const from=Math.max(1,t-13),N=Math.max(1,t-from+1),vals=st.days.slice(from-1),mx=Math.max(g*1.2,...vals,1),W0=600,H=200,L=8,B=170,bw=(W0-L*2)/14;
+  let svg=`<line x1="${L}" x2="${W0-L}" y1="${B-g/mx*150}" y2="${B-g/mx*150}" stroke="#D9A800" stroke-dasharray="6 5" stroke-width="2"/>`;
+  vals.forEach((v,i)=>{const h=v/mx*150,x=L+i*bw+bw*.15,d=from+i;
+    svg+=`<rect x="${x}" y="${B-Math.max(h,v?2:0)}" width="${bw*.7}" height="${Math.max(h,v?2:0)}" rx="3" fill="${v>=g?'#1F7A4D':'#1F211D'}"><title>${fmtS(addDays(pd(P.start),d-1))}: ${nf(v)}</title></rect>`;
+    svg+=`<text x="${x+bw*.35}" y="${B+18}" text-anchor="middle" font-size="12" fill="#6B6E66">${addDays(pd(P.start),d-1).getDate()}</text>`;
+    if(v)svg+=`<text x="${x+bw*.35}" y="${B-h-5}" text-anchor="middle" font-size="11" fill="#1F211D">${v>=1000?String(Math.round(v/100)/10).replace('.',',')+'к':v}</text>`});
+  if(!st.n)svg+=`<text x="300" y="95" text-anchor="middle" font-size="15" fill="#6B6E66">Внеси шаги на вкладке «Сегодня» — здесь появится график</text>`;
+  $('stepsChart').innerHTML=svg;
+  const sel=$('stDay'),cur=sel.value;sel.innerHTML='';for(let d=t;d>=Math.max(1,t-13);d--){const v=+(P.log['d'+d]||{}).steps||0;sel.innerHTML+=`<option value="${d}">${fmtS(addDays(pd(P.start),d-1))}${v?' · '+nf(v):''}</option>`}
+  if(cur&&[...sel.options].some(o=>o.value===cur))sel.value=cur;
+  const fill=()=>{$('stVal').value=+(P.log['d'+sel.value]||{}).steps||''};if(!cur)fill();sel.onchange=fill;
+}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-stepsday]');if(!a)return;e.preventDefault();setTimeout(()=>{renderSteps();$('stDay').value=a.dataset.stepsday;$('stVal').value='';$('stepsSec').querySelector('details').open=true;$('stepsSec').scrollIntoView({block:'start'});$('stVal').focus()},50)});
+document.addEventListener('click',async e=>{
+  if(e.target.id==='stSave'){const b=e.target;b.disabled=true;await saveSteps(+$('stDay').value,+$('stVal').value);b.disabled=false}
+  if(e.target.id==='stepGoalBtn'){const v=prompt('Сколько шагов в день хочешь проходить?',stepGoal(P));if(v==null)return;const n=Math.round(+String(v).replace(/\s/g,''));
+    if(!(n>=1000&&n<=50000)){toast('Цель — от 1 000 до 50 000 шагов');return}P.stepGoal=n;await put(ref.update({stepGoal:n}));backup();renderSteps();renderToday();toast(`Новая цель: ${nf(n)} шагов в день`)}
+});
 function renderToday(c){
   c=c||calc(P);const t=c.t;
   if(t<1){$('today').innerHTML=`<p class="lead">Срок начнётся ${fmt(pd(P.start))}. Меню и план уже готовы.</p><p class="lead" style="margin-top:8px">Не хочешь ждать? Начни сегодня — дата выхода станет на ${1-t} ${pl(1-t,'день','дня','дней')} ближе.</p><button class="btn" data-act="startnow">Начать сейчас</button>`;$('qRing').innerHTML='';$('dayStamp').innerHTML='';$('tipBox').innerHTML='';return}
@@ -1135,6 +1202,7 @@ function renderToday(c){
   const measToday=(P.measurements||[]).some(m=>m.date===iso(new Date())&&t>1);
   if(c.measAgo>=3||measToday)Q.push({icon:'meas',done:measToday,pts:PTS.meas,title:'Замеры',sub:'утром, натощак',right:'<button class="btn small ghost" data-go="progress">Внести</button>'});
   h+=Q.map(quest).join('');
+  h+=stepsCard(t);
   if(l.done&&!l.feel)h+=`<div class="feel"><b>Как прошла тренировка?</b> <span style="color:var(--release);font-family:'Russo One'">+${PTS.feel}</span><div class="opts">${['Легко','Нормально','Тяжело'].map(f=>`<button class="opt" data-act="feel" data-v="${f}">${f}</button>`).join('')}</div><details class="more"><summary>Комментарий куратору</summary><textarea id="fbText" style="margin-top:8px"></textarea></details></div>`;
   $('today').innerHTML=h;
   const tip=pickTip(c,e,l);
@@ -1170,6 +1238,7 @@ function adaptAfterFeel(){
 $('today').onclick=async e=>{
   const a=e.target.closest('[data-act]');if(!a)return;
   if(a.dataset.act==='startnow'){a.disabled=true;await startNow();return}
+  if(a.dataset.act==='steps'){a.disabled=true;await saveSteps(dayIdx(P.start),+$('stToday').value);a.disabled=false;return}
   const t=dayIdx(P.start),key='d'+t;P.log[key]=P.log[key]||{};const act=a.dataset.act,en=P.plan[t-1]||{};
   const coreNow=()=>dayOk(P,t,t,weekMiss(P,t)),wasCore=coreNow();
   if(act==='again'){P.log[key].again=(P.log[key].again||0)+1;ref.update({[`log.${key}.again`]:P.log[key].again,lastSeen:Date.now()}).catch(console.warn);toast('Отличный настрой! Повтор — по желанию, отметка дня уже засчитана');setTimeout(()=>renderToday(),300);return}
@@ -1440,6 +1509,7 @@ function hintHtml(key){
   if(key==='menu'){const f=foodOf(P),ex=[...f.noTags.map(x=>(FOODTAGS.find(y=>y[0]===x)||[,x])[1].toLowerCase()),...f.noWords];return`Собрано под твою норму <b>${P.kcal} ккал</b>${ex.length?', без: '+esc(ex.join(', ')):''}. Нажми на блюдо — рецепт в граммах твоей порции. ♥ — будет чаще, «Не предлагать» — исчезнет навсегда.`}
   if(key==='cook')return'Не любишь стоять у плиты? Выбери «раз в 2 дня» или «раз в 3 дня» — меню будет повторяться несколько дней подряд. Готовишь один раз сразу на несколько дней, калорийность та же, а список продуктов посчитан на все дни.';
   if(key==='shop')return'Сумма по рецептам за выбранные дни, с твоими порциями и числом едоков. Соль и специи — в конце списка.';
+  if(key==='steps')return`Вноси шаги раз в день — по шагомеру в телефоне, часах или браслете. Можно внести за прошлые дни, если забыла. Цель по умолчанию ${nf(STEP_GOAL)}, её можно поменять. Шаги — для тебя: на срок и баллы они не влияют, а вот ходить больше — отличная поддержка похудения.`;
   if(key==='plan')return`Тренировка — на каждый день, обязательны <b>${P.rider.perWeek} в неделю</b>, остальные по желанию (+баллы). Если неделя закроется с недобором — дата выхода сдвинется на недостающие дни. Подборка из твоего райдера: ${poolFor(P.rider,P.level).length} тренировок без повторов. «Тяжело» дважды — нагрузка ниже, «легко» трижды — уровень выше.`;
   if(key==='bonus'){const b=bonusOf(dayIdx(P.start));return`<b>${b[0]}.</b> ${b[1]}. +${PTS.bonus} балла.`}
   if(key.startsWith('badge:')){const b=BADGES.find(x=>x[0]===key.slice(6));const on=b[4](c,stats(P));return`<b>${b[2]}</b><br>${b[3]}.${on?' Получена.':' Ещё впереди.'}`}
@@ -1525,9 +1595,9 @@ function renderCases(){
 }
 function renderAll(){
   const rows=CUR.slice().sort((a,b)=>b.c.progress-a.c.progress);
-  panel('all').innerHTML=`<h2>Все участницы · ${rows.length}</h2><div class="tbl"><table><tr><th>Имя</th><th>Вес</th><th>Прогресс</th><th>Тренировки</th><th>Выход</th></tr>${rows.map(({p,c})=>{
+  panel('all').innerHTML=`<h2>Все участницы · ${rows.length}</h2><div class="tbl"><table><tr><th>Имя</th><th>Вес</th><th>Прогресс</th><th>Тренировки</th><th>Шаги</th><th>Выход</th></tr>${rows.map(({p,c})=>{
     const past=p.plan.filter(e=>e.d<c.t&&e.w),done=past.filter(e=>(p.log['d'+e.d]||{}).done).length;
-    return `<tr><td><button class="lnk" data-mk="${esc(p.email)}">${esc(p.name)}</button>${p.track==='tone'?' <span class="tag rest">Тонус</span>':''}${p.ed?' <span class="tag todo" title="РПП, согласие специалиста подтверждено">РПП · согласие</span>':''}<div class="s">№ ${esc(p.num||'')} · ${esc(p.contact||p.email)}</div></td><td>${p.startW} → ${c.cur}<div class="s">цель ${p.goal}</div></td><td>${c.progress}%${c.streak?`<div class="s">${c.streak} дн. без пропусков</div>`:''}</td><td>${done}/${past.length}<div class="s">уровень: ${LV[p.level]}</div></td><td>${c.finished?'вышла':fmt(addDays(pd(p.start),c.total-1))}<div class="s">${c.total>p.planDays?'+'+(c.total-p.planDays)+' дн.':c.total<p.planDays?'−'+(p.planDays-c.total)+' дн.':'по плану'}</div></td></tr>`}).join('')}</table></div>`;
+    return `<tr><td><button class="lnk" data-mk="${esc(p.email)}">${esc(p.name)}</button>${p.track==='tone'?' <span class="tag rest">Тонус</span>':''}${p.ed?' <span class="tag todo" title="РПП, согласие специалиста подтверждено">РПП · согласие</span>':''}<div class="s">№ ${esc(p.num||'')} · ${esc(p.contact||p.email)}</div></td><td>${p.startW} → ${c.cur}<div class="s">цель ${p.goal}</div></td><td>${c.progress}%${c.streak?`<div class="s">${c.streak} дн. без пропусков</div>`:''}</td><td>${done}/${past.length}<div class="s">уровень: ${LV[p.level]}</div></td><td>${(()=>{const st=stepStats(p,Math.min(c.t,p.plan.length));return st.n?`${nf(st.total)}<div class="s">≈ ${nf(st.avg)}/день · ${kmOf(st.total)} км</div>`:'<span class="s">—</span>'})()}</td><td>${c.finished?'вышла':fmt(addDays(pd(p.start),c.total-1))}<div class="s">${c.total>p.planDays?'+'+(c.total-p.planDays)+' дн.':c.total<p.planDays?'−'+(p.planDays-c.total)+' дн.':'по плану'}</div></td></tr>`}).join('')}</table></div>`;
 }
 panel('all').addEventListener('click',e=>{const b=e.target.closest('[data-mk]');if(!b)return;markSel=b.dataset.mk;document.querySelector('#curTabs [data-tab="marks"]').click();renderMarks()});
 /* ---------- отметки: куратор ставит или снимает выполнение за любой день ---------- */
@@ -1543,11 +1613,11 @@ function renderMarks(){
   if(x){const{p,c}=x,t=Math.min(c.t,p.plan.length);
     h+=`<h2 style="margin-top:18px">${esc(p.name)} <span class="s">№ ${esc(p.num||'')} · день ${Math.max(0,c.t)} · выход ${c.finished?'— вышла':fmt(addDays(pd(p.start),c.total-1))}</span></h2>`;
     if(t<1)h+='<p class="lead">Срок ещё не начался.</p>';
-    else{h+=`<div class="tbl"><table class="marks"><tr><th>День</th><th>Тренировка дня</th>${MARKS.map(([,n])=>`<th>${n}</th>`).join('')}</tr>`;
+    else{h+=`<div class="tbl"><table class="marks"><tr><th>День</th><th>Тренировка дня</th>${MARKS.map(([,n])=>`<th>${n}</th>`).join('')}<th>Шаги</th></tr>`;
       for(let d=t;d>=1;d--){const e=p.plan[d-1]||{},l=(p.log||{})['d'+d]||{},w=W[e.w];
         h+=`<tr><td><b>${d}</b> <span class="s">${fmtS(addDays(pd(p.start),d-1))}</span>${c.wm&&c.wm.miss.has(d)?' <span class="tag late">пропуск</span>':''}${l.byCur?' <span class="tag rest" title="Менял куратор">куратор</span>':''}</td>
         <td>${e.rest?'<span class="s">отдых</span>':w?`<a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(pn(w.program))}</a>`:'—'}</td>
-        ${MARKS.map(([k])=>e.rest&&k==='done'?'<td class="s">—</td>':`<td><button class="mk ${l[k]?'on':''}" data-d="${d}" data-k="${k}" aria-pressed="${!!l[k]}" aria-label="${l[k]?'Выполнено — снять':'Не выполнено — отметить'}">${l[k]?'✓':'—'}</button></td>`).join('')}</tr>`}
+        ${MARKS.map(([k])=>e.rest&&k==='done'?'<td class="s">—</td>':`<td><button class="mk ${l[k]?'on':''}" data-d="${d}" data-k="${k}" aria-pressed="${!!l[k]}" aria-label="${l[k]?'Выполнено — снять':'Не выполнено — отметить'}">${l[k]?'✓':'—'}</button></td>`).join('')}<td>${l.steps?nf(l.steps):'<span class="s">—</span>'}</td></tr>`}
       h+='</table></div>'}
   }
   panel('marks').innerHTML=h;
@@ -1613,5 +1683,3 @@ function renderRc(){
 </script>
 </body>
 </html>
-
-
