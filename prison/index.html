@@ -185,6 +185,11 @@ details.pg summary{cursor:pointer;font-weight:500}
 .wl{list-style:none;font-size:.82rem;margin-top:6px}
 .wl li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:4px 0}
 .wl a{color:var(--ink)}
+.rcl li{flex-wrap:wrap}.rcb{display:flex;gap:6px;flex-wrap:wrap}
+.rced{display:block!important;background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:12px!important;margin:6px 0 12px;font-size:.9rem}
+.rced textarea{font-size:.88rem;line-height:1.45}
+.rc4{grid-template-columns:repeat(4,1fr)}@media (max-width:640px){.rc4{grid-template-columns:1fr 1fr}}
+.chk{display:flex;gap:8px;align-items:center;margin-top:12px}.chk input{width:auto}
 .wl li.off a,.wl li.off>span{color:var(--steel);text-decoration:line-through}
 .note{font-size:.8rem;color:var(--steel);margin-top:10px}
 
@@ -1338,8 +1343,12 @@ try{shopGot=new Set(JSON.parse(recall('sr_shop')||'[]'))}catch(e){}
 async function loadRecipes(ms=5000){
   RX={};(window.RECIPES||[]).forEach(r=>RX[r.id]=r);
   if(!Object.keys(RX).length)console.warn('recipes.js не подключён — лежит ли он рядом с index.html?');
-  try{const s=await wait(CFG.get(),ms);if(s.exists)RDIS=new Set(s.data().disabled||[])}catch(e){console.warn(e)}
+  // правки куратора (рецепты и выключенные блюда) лежат в одном документе; копия — на телефоне, если база недоступна
+  let cfg=null;try{const s=await wait(CFG.get(),ms);if(s.exists){cfg=s.data();store('sr_rcfg',JSON.stringify(cfg))}}catch(e){console.warn(e);try{cfg=JSON.parse(recall('sr_rcfg')||'null')}catch(_){}}
+  if(cfg){RDIS=new Set(cfg.disabled||[]);RED=cfg.edits||{};applyEdits()}
 }
+let RED={};const BASE={};
+function applyEdits(){Object.entries(RED).forEach(([id,ed])=>{if(!RX[id])return;if(!BASE[id])BASE[id]={...RX[id]};RX[id]=ed?{...BASE[id],...ed}:{...BASE[id]};delete ING[id]})}
 function foodOf(p){const f=p.food||{};return{noTags:f.noTags||[],noWords:(f.noWords||p.excl||[]).map(w=>w.toLowerCase()).filter(Boolean),favs:f.favs||[],noIds:f.noIds||[],simple:f.simple!==false}}
 function recipeOk(r,food){
   if(!r||r.hide||RDIS.has(r.id)||food.noIds.includes(r.id))return false;
@@ -1651,20 +1660,66 @@ function renderWk(){
     if(!m||!prog){$('nwMsg').textContent='Нужны программа и ссылка с id урока';return}if(W[m[1]]){$('nwMsg').textContent='Такая тренировка уже есть';return}
     const w={id:m[1],level:+$('nwLevel').value,program:prog,url,active:true};await db.collection(WCOL).doc(w.id).set(w);W[w.id]=w;renderWk()};
 }
+let rcEdit=null,rcHidden=false;
+const MEALN={breakfast:'Завтрак',snack:'Полдник',lunch:'Обед',dinner:'Ужин',bake:'ПП-выпечка'};
+function rcEditor(r){
+  const lines=a=>esc((a||[]).join('\n'));
+  return `<li class="rced"><div>
+  <p class="note">Ингредиенты указываются <b>на всё блюдо</b> (на число порций ниже), каждый с новой строки в формате «Продукт — количество», например «Творог 5% — 600 г». Участнице количество пересчитается на её порцию.</p>
+  <div class="row"><div><label for="reName">Название</label><input id="reName" value="${esc(r.name)}"></div><div><label for="reNick">Название «в лагере»</label><input id="reNick" value="${esc(r.nick||'')}"></div></div>
+  <div class="row rc4"><div><label for="reMeal">Приём пищи</label><select id="reMeal">${Object.entries(MEALN).map(([k,n])=>`<option value="${k}" ${r.meal===k?'selected':''}>${n}</option>`).join('')}</select></div>
+    <div><label for="reServ">Порций</label><input id="reServ" type="number" min="1" max="20" value="${r.servings||4}"></div>
+    <div><label for="reG">Вес порции, г</label><input id="reG" type="number" min="0" step="5" value="${r.g||''}"></div>
+    <div><label for="reKcal">Ккал на порцию</label><input id="reKcal" type="number" min="0" value="${r.kcal||''}"></div></div>
+  <div class="row rc4"><div><label for="reP">Белки, г</label><input id="reP" type="number" step="0.1" value="${r.p??''}"></div><div><label for="reF">Жиры, г</label><input id="reF" type="number" step="0.1" value="${r.f??''}"></div><div><label for="reC">Углеводы, г</label><input id="reC" type="number" step="0.1" value="${r.c??''}"></div><div></div></div>
+  <label for="reIng">Ингредиенты (на ${r.servings||4} порц.)</label><textarea id="reIng" rows="${Math.max(5,(r.ingredients||[]).length+1)}">${lines(r.ingredients)}</textarea>
+  <label for="reSteps">Шаги приготовления</label><textarea id="reSteps" rows="${Math.max(4,(r.steps||[]).length+1)}">${lines(r.steps)}</textarea>
+  <label for="reServe">Подача (необязательно)</label><input id="reServe" value="${esc(r.serve||'')}">
+  <label class="chk"><input type="checkbox" id="reShow" ${r.hide?'':'checked'}> Показывать в меню участниц</label>
+  <div class="msg" id="reMsg"></div>
+  <div class="rcb" style="margin-top:12px"><button class="btn green" data-resave="${r.id}">Сохранить</button><button class="btn ghost" data-recancel="1">Отмена</button>${RED[r.id]?`<button class="btn ghost" data-rereset="${r.id}">Вернуть исходный</button>`:''}</div>
+  </div></li>`;
+}
+async function saveRecipeEdit(id,btn){
+  const v=k=>$(k).value.trim(),num=k=>v(k)===''?null:+v(k).replace(',','.');
+  const ing=v('reIng').split('\n').map(x=>x.trim().replace(/\s+[-–]\s+/,' — ')).filter(Boolean),steps=v('reSteps').split('\n').map(x=>x.trim().replace(/^\d+[.)]\s*/,'')).filter(Boolean);
+  const bad=ing.filter(l=>!l.includes(' — '));
+  if(!v('reName'))return $('reMsg').textContent='Нужно название';
+  if(!ing.length)return $('reMsg').textContent='Добавь хотя бы один ингредиент';
+  if(bad.length)return $('reMsg').textContent='Без количества: «'+bad.slice(0,3).join('», «')+'». Напиши через тире, например «Соль — по вкусу».';
+  const serv=num('reServ'),kcal=num('reKcal');
+  if(!(serv>=1&&serv<=20))return $('reMsg').textContent='Порций — от 1 до 20';
+  if(!(kcal>0))return $('reMsg').textContent='Укажи калорийность порции';
+  const ed={name:v('reName'),nick:v('reNick'),meal:$('reMeal').value,servings:serv,g:num('reG')||null,gEst:false,kcal,p:num('reP')??0,f:num('reF')??0,c:num('reC')??0,ingredients:ing,steps,serve:v('reServe'),hide:$('reShow').checked?0:1,chk:$('reShow').checked?'':(BASE[id]||RX[id]).chk||'скрыто куратором',editedAt:Date.now()};
+  await writeEdit(id,ed,btn);
+}
+async function writeEdit(id,ed,btn){
+  btn.disabled=true;
+  try{await wait(CFG.update({[`edits.${id}`]:ed}).catch(e=>{if(e.code==='not-found')return CFG.set({edits:{[id]:ed}},{merge:true});throw e}),15000);RED[id]=ed;applyEdits();rcEdit=null;renderRc();toast(ed?'Рецепт сохранён — участницы увидят его при следующем входе':'Рецепт возвращён к исходному')}
+  catch(err){btn.disabled=false;$('reMsg')&&($('reMsg').textContent='Не сохранилось: '+(err.code||err.message)+'. Проверь связь и попробуй ещё раз.')}
+}
 function renderRc(){
   const all=Object.values(RX),q=(($('rcSearch')||{}).value||'').trim().toLowerCase();
   const names={breakfast:'Завтраки',snack:'Полдники',lunch:'Обеды',dinner:'Ужины',bake:'ПП-выпечка'};
   const cnt=Object.keys(names).map(m=>{const a=all.filter(r=>r.meal===m&&!r.side);return `${names[m]}: ${a.filter(r=>!RDIS.has(r.id)).length} из ${a.length}`}).join('<br>');
-  const found=q?all.filter(r=>(r.name+' '+r.nick+' '+r.ingredients.join(' ')).toLowerCase().includes(q)).slice(0,60):[];
+  const hid=all.filter(r=>r.hide&&r.chk);
+  const found=rcHidden?hid:q?all.filter(r=>(r.name+' '+r.nick+' '+r.ingredients.join(' ')).toLowerCase().includes(q)).slice(0,60):[];
   const box=panel('rc'),keep=document.activeElement&&document.activeElement.id==='rcSearch';
-  box.innerHTML=`<h2>База меню · ${all.length}</h2><p class="lead">Рецепты лежат в файле recipes.js. Здесь можно выключить блюдо — оно перестанет попадать в новые меню.</p>
-  <p class="note">${cnt}</p>${RDIS.size?`<p class="note">Выключено: ${RDIS.size}</p>`:''}
+  box.innerHTML=`<h2>База меню · ${all.length}</h2><p class="lead">Найди блюдо и нажми «Править», чтобы исправить ингредиенты, шаги, порции или КБЖУ. Правки сразу видят все участницы — в том числе в уже составленных меню. «Выключить» — блюдо перестанет попадать в новые меню.</p>
+  <p class="note">${cnt}</p>${RDIS.size?`<p class="note">Выключено: ${RDIS.size}</p>`:''}${Object.values(RED).filter(Boolean).length?`<p class="note">Исправлено куратором: ${Object.values(RED).filter(Boolean).length}</p>`:''}
+  <button class="toggle" data-rchid="1" aria-pressed="${rcHidden}" style="margin-top:8px">${rcHidden?'← К поиску':`Скрытые проверкой · ${hid.length}`}</button>
   <label for="rcSearch">Найти блюдо или продукт</label><input id="rcSearch" value="${esc(q)}" placeholder="например, печень">
-  <ul class="wl">${found.map(r=>`<li class="${RDIS.has(r.id)?'off':''}"><span>${esc(r.name)}${r.nick?` «${esc(r.nick)}»`:''} <span class="s" style="color:var(--steel)">${names[r.meal]||''}, ${r.kcal} ккал</span></span><button class="btn small ghost" data-rd="${r.id}">${RDIS.has(r.id)?'Включить':'Выключить'}</button></li>`).join('')}</ul>
+  <ul class="wl rcl">${found.map(r=>`<li class="${RDIS.has(r.id)?'off':''}"><span>${esc(r.name)}${r.nick?` «${esc(r.nick)}»`:''} <span class="s" style="color:var(--steel)">${names[r.meal]||''}, ${r.kcal} ккал</span>${r.hide?' <span class="tag rest">скрыто проверкой</span>':''}${RED[r.id]?' <span class="tag done">исправлено</span>':''}</span><span class="rcb"><button class="btn small" data-re="${r.id}">Править</button><button class="btn small ghost" data-rd="${r.id}">${RDIS.has(r.id)?'Включить':'Выключить'}</button></span></li>${rcEdit===r.id?rcEditor(r):''}`).join('')}</ul>
   ${q&&!found.length?'<p class="note">Ничего не нашлось.</p>':''}`;
-  const inp2=$('rcSearch');inp2.oninput=()=>renderRc();if(keep){inp2.focus();inp2.setSelectionRange(inp2.value.length,inp2.value.length)}
-  box.onclick=async e=>{const b=e.target.closest('[data-rd]');if(!b)return;const id=b.dataset.rd;RDIS.has(id)?RDIS.delete(id):RDIS.add(id);
-    try{await CFG.set({disabled:[...RDIS]})}catch(err){alert('Не сохранилось: '+err.message)}renderRc()};
+  const inp2=$('rcSearch');inp2.oninput=()=>{rcHidden=false;renderRc()};if(keep){inp2.focus();inp2.setSelectionRange(inp2.value.length,inp2.value.length)}
+  box.onclick=async e=>{
+    if(e.target.closest('[data-rchid]')){rcHidden=!rcHidden;rcEdit=null;renderRc();return}
+    const ed=e.target.closest('[data-re]');if(ed){rcEdit=rcEdit===ed.dataset.re?null:ed.dataset.re;renderRc();const f=document.getElementById('reName');f&&f.closest('.rced').scrollIntoView({block:'nearest'});return}
+    if(e.target.closest('[data-recancel]')){rcEdit=null;renderRc();return}
+    const sv=e.target.closest('[data-resave]');if(sv){await saveRecipeEdit(sv.dataset.resave,sv);return}
+    const rs=e.target.closest('[data-rereset]');if(rs){if(!confirm('Вернуть рецепт к исходному варианту из файла? Все правки куратора по нему пропадут.'))return;await writeEdit(rs.dataset.rereset,null,rs);return}
+    const b=e.target.closest('[data-rd]');if(!b)return;const id=b.dataset.rd;RDIS.has(id)?RDIS.delete(id):RDIS.add(id);
+    try{await CFG.set({disabled:[...RDIS]},{merge:true})}catch(err){alert('Не сохранилось: '+err.message)}renderRc()};
 }
 
 /* ================= СТАРТ ================= */
@@ -1683,3 +1738,4 @@ function renderRc(){
 </script>
 </body>
 </html>
+
