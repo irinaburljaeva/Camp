@@ -188,4 +188,3 @@ window.WORKOUTS = [
   {"id": "340235536", "level": 1, "program": "Все только начинается", "title": "Тренировка 8 · 3 000 шагов со всеми", "min": 16, "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/340235536"},
   {"id": "340235537", "level": 1, "program": "Все только начинается", "title": "Тренировка 9 · 2 500 шагов со всеми", "min": 13, "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/340235537"},
 ];
-
