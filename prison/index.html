@@ -217,7 +217,7 @@ input,select,textarea{border-radius:6px}
 .wall .why{font-size:.84rem;color:#9FA29A;margin-top:8px}
 svg.tally{display:block;width:100%;height:auto;margin-top:20px;overflow:visible}
 .tl{fill:none;stroke:#EDEAE0;stroke-width:2.7;stroke-linecap:round;filter:url(#chalk)}
-.tl.half{opacity:.45}.tl.miss{stroke:#E0584C}.tl.fut{opacity:.11}
+.tl.half{stroke:#EDEAE0;opacity:.85;stroke-dasharray:5 6}.tl.miss{stroke:#E0584C}.tl.fut{opacity:.16;stroke-width:2}
 .tl.now{stroke:var(--hazard);animation:blink 1.4s ease-in-out infinite}
 .tl.ok.now{stroke:#EDEAE0;animation:none}
 .tl.draw{stroke-dasharray:44;stroke-dashoffset:44;animation:draw .9s .25s forwards}
@@ -1611,7 +1611,7 @@ function go(tab){
 document.addEventListener('click',e=>{const g2=e.target.closest('[data-go]');if(g2&&P&&!$('cabinet').classList.contains('hidden')){e.preventDefault();go(g2.dataset.go)}});
 function hintHtml(key){
   const c=calc(P);
-  if(key==='wall')return'<b>Стена камеры.</b> Каждая черта — день срока. Белая — день засчитан (питание + тренировка или выходной, если норма недели не страдает), бледная — сделано наполовину, красная — пропуск, жёлтая — сегодня.';
+  if(key==='wall')return'<b>Стена камеры — твой срок по дням.</b> Одна черта — один день. Черты собраны по пять: четыре прямые и пятая наискосок, как считают дни в камере.<br><br><b>Яркая белая</b> — день засчитан: отмечено питание и сделана тренировка (или тренировку можно было пропустить без ущерба для нормы недели).<br><b>Белая пунктирная</b> — день прошёл не до конца: не отмечено питание. Каждые два таких дня сдвигают дату выхода на день, и в серию для УДО такой день не идёт.<br><b>Красная</b> — пропуск: норма недели по тренировкам не выполнена, дата выхода сдвинулась на день.<br><b>Жёлтая мигающая</b> — сегодня, день ещё не закрыт. Закроешь — станет белой.<br><b>Бледные</b> — дни, которые ещё впереди.';
   if(key==='date'){const rows=[[P.track==='tone'?'Режим «Тонус»':`${P.startW} → ${P.goal} кг по ${g(P.weekly||Math.min(1,P.startW*.01))} кг/нед`,`${P.planDays} дн.`]];
     if(c.miss)rows.push(['Недобор тренировок до нормы',`+${c.miss}`]);if(Math.floor(c.food/2))rows.push([`${c.food} дн. без питания`,`+${Math.floor(c.food/2)}`]);
     if(c.weightAdj>0)rows.push(['Вес медленнее плана',`+${c.weightAdj}`]);if(c.weightAdj<0)rows.push(['Худеешь быстрее',`${c.weightAdj}`]);if(c.bonus)rows.push(['Условно-досрочное',`−${c.bonus}`]);rows.push(['Итого',`${c.total} дн.`]);
@@ -1878,5 +1878,6 @@ function renderRc(){
 </script>
 </body>
 </html>
+
 
 
