@@ -779,6 +779,8 @@ function calc(p){
     if(!l.food)food++;
     if(dayOk(p,t,d,wm)){run++;if(run===UDO_DAYS){bonus++;run=0}}else run=0;
   }
+  // сегодняшний день идёт в серию УДО сразу, как только закрыт (раньше засчитывался только назавтра)
+  if(t>=1&&t<=p.plan.length&&dayOk(p,t,t,wm)){run++;if(run===UDO_DAYS){bonus++;run=0}}
   let streak=0;for(let d=t-1;d>=1&&d<=p.plan.length;d--){if(dayOk(p,t,d,wm))streak++;else break}
   const discipline=miss+Math.floor(food/2);
   let weightAdj=0;const ms=(p.measurements||[]).filter(x=>x.w);
@@ -1122,6 +1124,10 @@ function checkRewards(c,s,pts){
   const earned=BADGES.filter(b=>b[4](c,s)).map(b=>b[0]);
   const known=P.badges;const fresh=known?earned.filter(id=>!known.includes(id)):[];
   fresh.forEach(id=>{const b=BADGES.find(x=>x[0]===id);modalQ.push({icon:badgeSvg(b[1],true),kicker:'Новая нашивка',title:b[2],text:b[3]})});
+  // УДО: сообщаем сразу, как только серия из 7 дней закрыта
+  if(P.udoSeen==null){P.udoSeen=c.bonus;ref.update({udoSeen:c.bonus}).catch(console.warn)}
+  else if(c.bonus>P.udoSeen){modalQ.push({icon:badgeSvg('−1',true),kicker:'УДО',title:'Минус день срока',text:`${UDO_DAYS} засчитанных дней подряд. Дата выхода стала ближе на день, +${PTS.udo} баллов. Счёт серии начинается заново.`});P.udoSeen=c.bonus;ref.update({udoSeen:c.bonus}).catch(console.warn)}
+  else if(c.bonus<P.udoSeen){P.udoSeen=c.bonus;ref.update({udoSeen:c.bonus}).catch(console.warn)}
   const rk=rankOf(pts).i;
   if(P.rankI!=null&&rk>P.rankI)modalQ.push({icon:badgeSvg(String(rk+1),true),kicker:'Новый статус',title:RANKS[rk][1],text:`${pts} баллов поведения. Так держать.`});
   if(!known||fresh.length||P.rankI!==rk){P.badges=earned;P.rankI=rk;ref.update({badges:earned,rankI:rk}).catch(console.warn)}
@@ -1619,7 +1625,7 @@ function hintHtml(key){
     if(c.miss)rows.push(['Недобор тренировок до нормы',`+${c.miss}`]);if(Math.floor(c.food/2))rows.push([`${c.food} дн. без питания`,`+${Math.floor(c.food/2)}`]);
     if(c.weightAdj>0)rows.push(['Вес медленнее плана',`+${c.weightAdj}`]);if(c.weightAdj<0)rows.push(['Худеешь быстрее',`${c.weightAdj}`]);if(c.bonus)rows.push(['Условно-досрочное',`−${c.bonus}`]);rows.push(['Итого',`${c.total} дн.`]);
     return`<b>Дата живая.</b> Пропуски отодвигают её, неделя без пропусков приближает.<ul>${rows.map(([a,b])=>`<li><span>${a}</span><b>${b}</b></li>`).join('')}</ul>`}
-  if(key==='udo')return`<b>Условно-досрочное.</b> ${UDO_DAYS} дней подряд без пропусков — минус день срока и +${PTS.udo} баллов. Сейчас подряд: ${c.run}.${c.bonus?` Уже заработано: −${c.bonus} дн.`:''}`;
+  if(key==='udo')return`<b>Условно-досрочное.</b> ${UDO_DAYS} засчитанных дней подряд — минус день срока и +${PTS.udo} баллов. Сейчас подряд: ${c.run} из ${UDO_DAYS}.${c.bonus?` Уже заработано: −${c.bonus} ${pl(c.bonus,'день','дня','дней')} — после каждого УДО счёт начинается заново.`:''}<br><br>День идёт в серию, если отмечено питание и сделана тренировка (или её можно было пропустить без ущерба для нормы недели). Серия обнуляется, если в какой-то день не отмечено питание или неделя закрылась с пропуском.`;
   if(key==='points')return`<b>Баллы поведения</b><ul><li><span>Тренировка</span><b>+${PTS.train}</b></li><li><span>День по меню</span><b>+${PTS.food}</b></li><li><span>День без пропусков</span><b>+${PTS.perfect}</b></li><li><span>Бонус-задание</span><b>+${PTS.bonus}</b></li><li><span>Замеры</span><b>+${PTS.meas}</b></li><li><span>Отзыв</span><b>+${PTS.feel}</b></li><li><span>УДО</span><b>+${PTS.udo}</b></li></ul>`;
   if(key==='meas')return'Раз в 3 дня, утром натощак. Колебания ±1–2 кг — норма: дата считается по среднему за неделю.';
   if(key==='menu'){const f=foodOf(P),ex=[...f.noTags.map(x=>(FOODTAGS.find(y=>y[0]===x)||[,x])[1].toLowerCase()),...f.noWords];return`Собрано под твою норму <b>${P.kcal} ккал</b>${ex.length?', без: '+esc(ex.join(', ')):''}. Нажми на блюдо — рецепт в граммах твоей порции. ♥ — будет чаще, «Не предлагать» — исчезнет навсегда.`}
