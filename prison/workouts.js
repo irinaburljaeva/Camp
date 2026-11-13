@@ -1,9 +1,10 @@
 // База тренировок «Строгий режим».
-// level: 1 — Новичок, 2 — База, 3 — Продвинутый.
+// level: 1 — Новичок, 2 — База, 3 — Продвинутый. min — длительность, мин (если известна).
+// title — название урока (необязательно). active: false — тренировка выключена (битая ссылка и т.п.).
+// lvlGuess: true — уровень в документе не был указан, поставлен по умолчанию — проверь в кабинете куратора.
 // id — номер урока из ссылки, должен быть уникальным.
-// После правок зайди в кабинет куратора → «База тренировок» → «Синхронизировать с Firestore».
+// Новые тренировки отсюда подхватываются сами; править удобнее в кабинете куратора → «База тренировок».
 window.WORKOUTS = [
-  // ── Раскрываем женственность ──
   {"id": "339556004", "level": 2, "program": "Раскрываем женственность", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339556004"},
   {"id": "339556005", "level": 3, "program": "Раскрываем женственность", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339556005"},
   {"id": "339556006", "level": 1, "program": "Раскрываем женственность", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339556006"},
@@ -13,22 +14,16 @@ window.WORKOUTS = [
   {"id": "339556010", "level": 1, "program": "Раскрываем женственность", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339556010"},
   {"id": "339556011", "level": 1, "program": "Раскрываем женственность", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339556011"},
   {"id": "339556012", "level": 2, "program": "Раскрываем женственность", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339556012"},
-
-  // ── Учимся танцевать ──
   {"id": "339556013", "level": 2, "program": "Учимся танцевать", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339556013"},
   {"id": "339556014", "level": 2, "program": "Учимся танцевать", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339556014"},
   {"id": "339556015", "level": 1, "program": "Учимся танцевать", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339556015"},
   {"id": "339556016", "level": 1, "program": "Учимся танцевать", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339556016"},
-
-  // ── Шагай и танцуй ──
   {"id": "339556409", "level": 1, "program": "Шагай и танцуй", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339556409"},
   {"id": "339556678", "level": 1, "program": "Шагай и танцуй", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339556678"},
   {"id": "339563556", "level": 1, "program": "Шагай и танцуй", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339563556"},
   {"id": "339563563", "level": 1, "program": "Шагай и танцуй", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339563563"},
   {"id": "339563627", "level": 1, "program": "Шагай и танцуй", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339563627"},
   {"id": "339563649", "level": 1, "program": "Шагай и танцуй", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339563649"},
-
-  // ── Танцевальный фитнес ──
   {"id": "339564306", "level": 2, "program": "Танцевальный фитнес", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339564306"},
   {"id": "339564311", "level": 2, "program": "Танцевальный фитнес", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339564311"},
   {"id": "339564781", "level": 2, "program": "Танцевальный фитнес", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339564781"},
@@ -41,8 +36,6 @@ window.WORKOUTS = [
   {"id": "339565082", "level": 2, "program": "Танцевальный фитнес", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339565082"},
   {"id": "339565091", "level": 2, "program": "Танцевальный фитнес", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339565091"},
   {"id": "339565098", "level": 2, "program": "Танцевальный фитнес", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339565098"},
-
-  // ── В стиле Тай-Бо ──
   {"id": "339673617", "level": 2, "program": "В стиле Тай-Бо", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339673617"},
   {"id": "339673628", "level": 2, "program": "В стиле Тай-Бо", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339673628"},
   {"id": "339673632", "level": 2, "program": "В стиле Тай-Бо", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339673632"},
@@ -51,8 +44,6 @@ window.WORKOUTS = [
   {"id": "339674011", "level": 2, "program": "В стиле Тай-Бо", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339674011"},
   {"id": "339674121", "level": 2, "program": "В стиле Тай-Бо", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339674121"},
   {"id": "339674535", "level": 2, "program": "В стиле Тай-Бо", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339674535"},
-
-  // ── Лимфодренажные тренировки ──
   {"id": "339675418", "level": 2, "program": "Лимфодренажные тренировки", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339675418"},
   {"id": "339675435", "level": 2, "program": "Лимфодренажные тренировки", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339675435"},
   {"id": "339675501", "level": 2, "program": "Лимфодренажные тренировки", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339675501"},
@@ -63,8 +54,6 @@ window.WORKOUTS = [
   {"id": "339675606", "level": 2, "program": "Лимфодренажные тренировки", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339675606"},
   {"id": "339675614", "level": 2, "program": "Лимфодренажные тренировки", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339675614"},
   {"id": "339675676", "level": 2, "program": "Лимфодренажные тренировки", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339675676"},
-
-  // ── Шагательная табата ──
   {"id": "339687741", "level": 1, "program": "Шагательная табата", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339687741"},
   {"id": "339687745", "level": 2, "program": "Шагательная табата", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339687745"},
   {"id": "339687747", "level": 1, "program": "Шагательная табата", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339687747"},
@@ -86,8 +75,6 @@ window.WORKOUTS = [
   {"id": "339688166", "level": 3, "program": "Шагательная табата", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339688166"},
   {"id": "339688190", "level": 3, "program": "Шагательная табата", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339688190"},
   {"id": "339688193", "level": 3, "program": "Шагательная табата", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339688193"},
-
-  // ── Зумбавидные тренировки ──
   {"id": "339701796", "level": 2, "program": "Зумбавидные тренировки", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339701796"},
   {"id": "339701803", "level": 2, "program": "Зумбавидные тренировки", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339701803"},
   {"id": "339701808", "level": 3, "program": "Зумбавидные тренировки", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339701808"},
@@ -95,8 +82,6 @@ window.WORKOUTS = [
   {"id": "339701823", "level": 3, "program": "Зумбавидные тренировки", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339701823"},
   {"id": "339701832", "level": 3, "program": "Зумбавидные тренировки", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339701832"},
   {"id": "339701869", "level": 3, "program": "Зумбавидные тренировки", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339701869"},
-
-  // ── Плавный старт ──
   {"id": "342162460", "level": 1, "program": "Плавный старт", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=342162460"},
   {"id": "342162461", "level": 1, "program": "Плавный старт", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=342162461"},
   {"id": "342162462", "level": 1, "program": "Плавный старт", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=342162462"},
@@ -107,15 +92,11 @@ window.WORKOUTS = [
   {"id": "342162466", "level": 3, "program": "Плавный старт", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=342162466"},
   {"id": "342162467", "level": 3, "program": "Плавный старт", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=342162467"},
   {"id": "342162468", "level": 3, "program": "Плавный старт", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=342162468"},
-
-  // ── Мягкий фитнес ──
   {"id": "342014738", "level": 1, "program": "Мягкий фитнес", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=342014738"},
   {"id": "342014739", "level": 1, "program": "Мягкий фитнес", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=342014739"},
   {"id": "342014740", "level": 1, "program": "Мягкий фитнес", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=342014740"},
   {"id": "342014741", "level": 1, "program": "Мягкий фитнес", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=342014741"},
   {"id": "342014742", "level": 1, "program": "Мягкий фитнес", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=342014742"},
-
-  // ── Шагай дома. Активно ──
   {"id": "339701950", "level": 3, "program": "Шагай дома. Активно", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339701950"},
   {"id": "339701986", "level": 3, "program": "Шагай дома. Активно", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339701986"},
   {"id": "339702018", "level": 3, "program": "Шагай дома. Активно", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339702018"},
@@ -123,8 +104,6 @@ window.WORKOUTS = [
   {"id": "339702031", "level": 3, "program": "Шагай дома. Активно", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339702031"},
   {"id": "339702036", "level": 3, "program": "Шагай дома. Активно", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339702036"},
   {"id": "339702041", "level": 3, "program": "Шагай дома. Активно", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339702041"},
-
-  // ── Шагай дома. БАЗА ──
   {"id": "339702301", "level": 1, "program": "Шагай дома. БАЗА", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339702301"},
   {"id": "339702310", "level": 1, "program": "Шагай дома. БАЗА", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339702310"},
   {"id": "339702312", "level": 1, "program": "Шагай дома. БАЗА", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339702312"},
@@ -140,17 +119,13 @@ window.WORKOUTS = [
   {"id": "341046529", "level": 1, "program": "Шагай дома. БАЗА", "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/341046529"},
   {"id": "341046676", "level": 1, "program": "Шагай дома. БАЗА", "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/341046676"},
   {"id": "345336679", "level": 1, "program": "Шагай дома. БАЗА", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=345336679"},
-
-  // ── Тренировки для 100 кг+ ──
   {"id": "339707481", "level": 1, "program": "Тренировки для 100 кг+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339707481"},
-  {"id": "339707488", "level": 1, "program": "Тренировки для 100 кг+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339707488"},
+  {"id": "339707488", "level": 1, "program": "Тренировки для 100 кг+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339707488", "active": false, "note": "битая ссылка — урок не открывается (13.11.2026)"},
   {"id": "339707491", "level": 1, "program": "Тренировки для 100 кг+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339707491"},
   {"id": "339707501", "level": 1, "program": "Тренировки для 100 кг+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339707501"},
   {"id": "339707502", "level": 1, "program": "Тренировки для 100 кг+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339707502"},
   {"id": "339707503", "level": 1, "program": "Тренировки для 100 кг+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339707503"},
   {"id": "339707509", "level": 1, "program": "Тренировки для 100 кг+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339707509"},
-
-  // ── Тренировки для 50+ ──
   {"id": "339726530", "level": 3, "program": "Тренировки для 50+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726530"},
   {"id": "339726532", "level": 2, "program": "Тренировки для 50+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726532"},
   {"id": "339726536", "level": 1, "program": "Тренировки для 50+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726536"},
@@ -158,4 +133,59 @@ window.WORKOUTS = [
   {"id": "339726641", "level": 2, "program": "Тренировки для 50+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726641"},
   {"id": "339726644", "level": 1, "program": "Тренировки для 50+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726644"},
   {"id": "339726646", "level": 2, "program": "Тренировки для 50+", "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726646"},
+  {"id": "347633046", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/347633046"},
+  {"id": "347633048", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/347633048"},
+  {"id": "347633050", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/347633050"},
+  {"id": "347633051", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/347633051"},
+  {"id": "348931795", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/348931795"},
+  {"id": "348931799", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/348931799"},
+  {"id": "348931801", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/348931801"},
+  {"id": "348931805", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/348931805"},
+  {"id": "348931807", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/348931807"},
+  {"id": "348931827", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/348931827"},
+  {"id": "348931830", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/348931830"},
+  {"id": "348931832", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/348931832"},
+  {"id": "348931834", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/348931834"},
+  {"id": "348931835", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/348931835"},
+  {"id": "348931837", "level": 2, "program": "Шагательная табата", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/348931837"},
+  {"id": "350785359", "level": 2, "program": "Зумбавидные тренировки", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/350785359"},
+  {"id": "350785366", "level": 2, "program": "Зумбавидные тренировки", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/350785366"},
+  {"id": "350785371", "level": 2, "program": "Зумбавидные тренировки", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/350785371"},
+  {"id": "350785376", "level": 2, "program": "Зумбавидные тренировки", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/350785376"},
+  {"id": "350785379", "level": 2, "program": "Зумбавидные тренировки", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/350785379"},
+  {"id": "350785386", "level": 2, "program": "Зумбавидные тренировки", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/350785386"},
+  {"id": "350785394", "level": 2, "program": "Зумбавидные тренировки", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/350785394"},
+  {"id": "349710502", "level": 2, "program": "Шагай дома. БАЗА", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/349710502"},
+  {"id": "349710639", "level": 2, "program": "Шагай дома. БАЗА", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/349710639"},
+  {"id": "349879394", "level": 2, "program": "Шагай дома. БАЗА", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/349879394"},
+  {"id": "349879398", "level": 2, "program": "Шагай дома. БАЗА", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/349879398"},
+  {"id": "349879404", "level": 2, "program": "Шагай дома. БАЗА", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/349879404"},
+  {"id": "349879411", "level": 2, "program": "Шагай дома. БАЗА", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/349879411"},
+  {"id": "349879414", "level": 2, "program": "Шагай дома. БАЗА", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/349879414"},
+  {"id": "349879416", "level": 2, "program": "Шагай дома. БАЗА", "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/349879416"},
+  {"id": "339726660", "level": 1, "program": "Шагаем под 80-е", "title": "Тренировка 1 · 2 000 шагов с Настей", "min": 14, "lvlGuess": true, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726660"},
+  {"id": "339726661", "level": 2, "program": "Шагаем под 80-е", "title": "Тренировка 2 · 2 500 шагов с Таней", "min": 21, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726661"},
+  {"id": "339726662", "level": 2, "program": "Шагаем под 80-е", "title": "Тренировка 3 · 2 000 шагов с Машей", "min": 16, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726662"},
+  {"id": "339726663", "level": 2, "program": "Шагаем под 80-е", "title": "Тренировка 4 · 3 500 шагов с Таней", "min": 25, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726663"},
+  {"id": "339726664", "level": 1, "program": "Шагаем под 80-е", "title": "Тренировка 5 · 3 000 шагов с Машей", "min": 21, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726664"},
+  {"id": "339726665", "level": 1, "program": "Шагаем под 80-е", "title": "Тренировка 6 · 2 000 шагов с Таней", "min": 16, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726665"},
+  {"id": "339726666", "level": 2, "program": "Шагаем под 80-е", "title": "Тренировка 7 · 3 000 шагов с Машей", "min": 20, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726666"},
+  {"id": "339726667", "level": 3, "program": "Шагаем под 80-е", "title": "Тренировка 8 · 3 000 шагов с Настей", "min": 21, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726667"},
+  {"id": "339726668", "level": 2, "program": "Шагаем под 80-е", "title": "Тренировка 9 · 2 000 шагов с Таней", "min": 16, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726668"},
+  {"id": "339726669", "level": 2, "program": "Шагаем под 80-е", "title": "Тренировка 10 · 2 500 шагов с Машей", "min": 15, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726669"},
+  {"id": "339726670", "level": 3, "program": "Шагаем под 80-е", "title": "Тренировка 11 · 2 500 шагов с Настей", "min": 17, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726670"},
+  {"id": "339726671", "level": 3, "program": "Шагаем под 80-е", "title": "Тренировка 12 · 3 000 шагов с Настей", "min": 20, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726671"},
+  {"id": "339726672", "level": 3, "program": "Шагаем под 80-е", "title": "Тренировка 13 · 2 500 шагов с Настей", "min": 15, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726672"},
+  {"id": "339726673", "level": 2, "program": "Шагаем под 80-е", "title": "Тренировка 14 · 2 000 шагов с Настей", "min": 14, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726673"},
+  {"id": "339726674", "level": 3, "program": "Шагаем под 80-е", "title": "Тренировка 15 · 6 000 шагов с Настей", "min": 47, "url": "https://my.walk-walk.ru/pl/teach/control/lesson/view?id=339726674"},
+  {"id": "340235529", "level": 1, "program": "Все только начинается", "title": "Тренировка 1 · 3 000 шагов со всеми", "min": 16, "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/340235529"},
+  {"id": "340235530", "level": 1, "program": "Все только начинается", "title": "Тренировка 2 · 3 000 шагов со всеми", "min": 15, "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/340235530"},
+  {"id": "340235531", "level": 1, "program": "Все только начинается", "title": "Тренировка 3 · 4 000 шагов со всеми", "min": 15, "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/340235531"},
+  {"id": "340235532", "level": 1, "program": "Все только начинается", "title": "Тренировка 4 · 4 000 шагов со всеми", "min": 23, "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/340235532"},
+  {"id": "340235533", "level": 1, "program": "Все только начинается", "title": "Тренировка 5 · 3 500 шагов со всеми", "min": 21, "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/340235533"},
+  {"id": "340235534", "level": 1, "program": "Все только начинается", "title": "Тренировка 6 · 2 000 шагов со всеми", "min": 22, "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/340235534"},
+  {"id": "340235535", "level": 1, "program": "Все только начинается", "title": "Тренировка 7 · 2 500 шагов со всеми", "min": 15, "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/340235535"},
+  {"id": "340235536", "level": 1, "program": "Все только начинается", "title": "Тренировка 8 · 3 000 шагов со всеми", "min": 16, "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/340235536"},
+  {"id": "340235537", "level": 1, "program": "Все только начинается", "title": "Тренировка 9 · 2 500 шагов со всеми", "min": 13, "lvlGuess": true, "url": "https://my.walk-walk.ru/teach/control/lesson/view/id/340235537"},
 ];
+
