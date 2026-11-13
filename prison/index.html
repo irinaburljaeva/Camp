@@ -7,8 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Golos+Text:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="workouts.js"></script>
-<script src="recipes.js"></script>
+<script src="workouts.js?v=20261113b"></script>
+<script src="recipes.js?v=20261113b"></script>
 <style>
 :root{--concrete:#E4E5E0;--wall:#F3F3F0;--paper:#FBFAF5;--ink:#1F211D;--steel:#6B6E67;--hazard:#F2C230;--release:#1F7A4D;--alarm:#C9352B;--line:#C9CBC4}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -665,12 +665,15 @@ async function loadWorkouts(ms=10000){
   try{const c=JSON.parse(recall('sr_wcache2')||'null');if(c&&Date.now()-c.at<36e5&&!curAuthed){W=c.W;wSource='db';mergeSeed();return}}catch(e){}
   try{const s=await wait(db.collection(WCOL).get(),ms);if(!s.empty){W={};s.forEach(d=>W[d.id]={id:d.id,...d.data()});wSource='db';store('sr_wcache2',JSON.stringify({at:Date.now(),W}));mergeSeed();return}}
   catch(e){console.warn('Не удалось прочитать базу тренировок',e)}
-  W={};SEED.forEach(w=>W[w.id]={...w,active:w.active!==false});wSource='seed';
+  W={};SEED.forEach(w=>W[w.id]={...w,active:w.active!==false});wSource='seed';killDead();
 }
 // тренировки, которых ещё нет в базе, берём из workouts.js; правки куратора (editedAt) важнее файла
-function mergeSeed(){SEED.forEach(s=>{const w=W[s.id];
+// уроки с нерабочей ссылкой: выключены, даже если на сайте остался старый workouts.js (куратор может заменить ссылку — тогда тренировка вернётся)
+const DEAD=['339707488'];
+function killDead(){DEAD.forEach(id=>{const w=W[id];if(w&&String(w.url||'').includes(id))w.active=false})}
+function mergeSeed(){killDead();SEED.forEach(s=>{const w=W[s.id];
   if(!w){W[s.id]={...s,active:s.active!==false,fromSeed:true};return}
-  if(w.editedAt)return;['min','title'].forEach(k=>{if(s[k]!=null&&w[k]==null)w[k]=s[k]});if(s.active===false)w.active=false})}
+  if(w.editedAt)return;['min','title'].forEach(k=>{if(s[k]!=null&&w[k]==null)w[k]=s[k]});if(s.active===false)w.active=false});killDead()}
 /* ---------- длительность дня: обязательная тренировка + дополнительные, чтобы набралось 30–45 минут ---------- */
 const DAY_MIN=30,DAY_MAX=45;
 const wMin=w=>(w&&+w.min)||0;
@@ -1878,7 +1881,6 @@ function renderRc(){
 </script>
 </body>
 </html>
-
 
 
 
