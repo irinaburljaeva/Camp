@@ -1467,7 +1467,8 @@ function buildDay(p){
 const blockOf=(p,d)=>{const n=+p.cook||1;return d-((d-1)%n)};   // первый день «готовочного» блока
 function ensureMenu(p){p.menu=p.menu||{};const t=Math.max(1,dayIdx(p.start));const made=[];
   for(let d=t;d<t+MENU_AHEAD;d++){if(p.menu['d'+d])continue;const b=blockOf(p,d);
-    if(b<d&&p.menu['d'+b]){const{copy,...src}=p.menu['d'+b];p.menu['d'+d]={...src,copy:b}}else p.menu['d'+d]=buildDay(p);made.push(d)}
+    const pv=b<d?(p.menu['d'+(d-1)]||p.menu['d'+b]):null;
+    if(pv){const{copy,...src}=pv;p.menu['d'+d]={...src,copy:p.menu['d'+(d-1)]?(pv.copy||d-1):b}}else p.menu['d'+d]=buildDay(p);made.push(d)}
   return made.length?made:null}
 // после замены блюда — обновить копии этого дня в остальных днях блока
 function syncBlock(p,d){const b=blockOf(p,d),n=+p.cook||1,{copy,...src}=p.menu['d'+b]||{};for(let x=b+1;x<b+n;x++)if(p.menu['d'+x])p.menu['d'+x]={...src,copy:b}}
@@ -1492,14 +1493,24 @@ function fixMenu(p,cookChanged){
     MEALS.forEach(([k])=>{if(day[k]&&!recipeOk(RX[day[k]],food)){const old=day[k];swapMeal(d,k,true);if(p.menu['d'+d][k]!==old)n++}})});
   ensureMenu(p);return n;
 }
+const sameMenu=(a,b)=>!!a&&!!b&&MEALS.every(([k])=>a[k]===b[k]);
+// дни, где участница ест одно и то же меню (готовит на 2–3 дня): только сегодняшние и будущие, и только если блюда правда совпадают
+function menuGroup(p,d){
+  const t=Math.max(1,dayIdx(p.start)),day=p.menu['d'+d];if(!day)return[d];
+  const root=day.copy&&sameMenu(p.menu['d'+day.copy],day)?day.copy:d;
+  const g=Object.keys(p.menu).map(k=>+k.slice(1)).filter(x=>x>=t&&(x===d||((x===root||p.menu['d'+x].copy===root)&&sameMenu(p.menu['d'+x],day)))).sort((a,b)=>a-b);
+  return g.length?g:[d];
+}
 function swapMeal(d,k,silent){
-  d=blockOf(P,d);const day=P.menu['d'+d],key=MEALS.find(m=>m[0]===k)[1],q=queue(P,key);if(!q.length)return;
+  const grp=menuGroup(P,d);d=grp[0];const day=P.menu['d'+d],key=MEALS.find(m=>m[0]===k)[1],q=queue(P,key);if(!day||!q.length)return;
   const others=MEALS.filter(m=>m[0]!==k).reduce((s,[kk])=>s+kcalOf(day[kk],P),0);
   // меняем только это блюдо: ищем замену близкую по калорийности, остальные блюда и порции дня остаются как были
   const ok0=kcalOf(day[k],P)||P.kcal/4;
   const dayKeys=MEALS.filter(m=>m[0]!==k).map(([kk])=>dishKey(day[kk]));let bi=-1,bs=1e9;q.slice(0,20).forEach((id,i)=>{if(id===day[k]||dayKeys.includes(dishKey(id)))return;const sc=Math.abs(Math.log(ok0/(kcalOf(id,P)||1)))+i*.01;if(sc<bs){bs=sc;bi=i}});
-  if(bi<0)return;const old=day[k];day[k]=q.splice(bi,1)[0];if(old&&recipeOk(RX[old],foodOf(P)))q.push(old);syncBlock(P,d);if(!silent){saveMenu({},blockDays(P,d));renderMenu()}
-  return blockDays(P,d);
+  if(bi<0)return;const old=day[k];day[k]=q.splice(bi,1)[0];if(old&&recipeOk(RX[old],foodOf(P)))q.push(old);
+  delete day.copy;grp.slice(1).forEach(x=>{const{copy,...src}=day;P.menu['d'+x]={...src,copy:d}});
+  if(!silent){saveMenu({},grp);renderMenu()}
+  return grp;
 }
 // граммы под порцию: «600 г» на 4 порции → «175 г» для тебя
 const QRX=/(\d+(?:[.,]\d+)?)(?:\s*[-–]\s*(\d+(?:[.,]\d+)?))?\s*(кг|гр|г|мл|л|шт\.?|ст\.\s?л\.?|ч\.\s?л\.?|зубч\w*)(?![а-яё])/gi;
@@ -1548,7 +1559,7 @@ function renderMenu(){
 $('cookSeg').onclick=e=>{const b=e.target.closest('[data-cook]');if(!b)return;const n=+b.dataset.cook;if(n===(+P.cook||1))return;
   P.cook=n;const t=Math.max(1,dayIdx(P.start));
   // пересобираем будущие дни: первый день блока остаётся, остальные становятся его копиями
-  Object.keys(P.menu||{}).forEach(k=>{const d=+k.slice(1);if(d>=t&&(P.menu[k].copy||blockOf(P,d)!==d))delete P.menu[k]});
+  Object.keys(P.menu||{}).forEach(k=>{const d=+k.slice(1);if(d>t)delete P.menu[k]});if(P.menu['d'+t])delete P.menu['d'+t].copy;
   ensureMenu(P);saveMenu({cook:n});renderMenu();
   toast(n===1?'Меню на каждый день — разное':`Готовишь раз в ${n} дня — меню повторяется ${n} дня подряд`)};
 $('menu').onclick=async e=>{
