@@ -264,6 +264,10 @@ section.quests{position:relative}
 .quest .qt b{display:block;font-weight:600;line-height:1.3}
 .quest .qt span{display:block;font-size:.8rem;color:var(--steel);margin-top:2px}
 .quest .qr{text-align:right}
+.parts{grid-column:1/-1;list-style:none;margin:4px 0 0;padding:0;border-top:1px dashed var(--line)}
+.parts li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.86rem}
+.parts li:last-child{border-bottom:0}.parts li b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--steel);font-weight:600}
+.parts li.ok{opacity:.7}.parts .d{color:var(--steel)}
 .quest .pts{font-family:"Russo One";color:var(--release);font-size:1rem}
 .quest.bonus .qi{background:var(--hazard);color:var(--ink)}
 .quest.bonus.done .qi{background:var(--release);color:#fff}
@@ -648,11 +652,47 @@ const dossierNo=email=>{let h=7;for(const c of email)h=(h*31+c.charCodeAt(0))%90
 
 /* ================= БАЗА ТРЕНИРОВОК ================= */
 async function loadWorkouts(ms=10000){
-  try{const c=JSON.parse(recall('sr_wcache')||'null');if(c&&Date.now()-c.at<6*36e5&&!curAuthed){W=c.W;wSource='db';return}}catch(e){}
-  try{const s=await wait(db.collection(WCOL).get(),ms);if(!s.empty){W={};s.forEach(d=>W[d.id]={id:d.id,...d.data()});wSource='db';store('sr_wcache',JSON.stringify({at:Date.now(),W}));return}}
+  try{const c=JSON.parse(recall('sr_wcache2')||'null');if(c&&Date.now()-c.at<36e5&&!curAuthed){W=c.W;wSource='db';mergeSeed();return}}catch(e){}
+  try{const s=await wait(db.collection(WCOL).get(),ms);if(!s.empty){W={};s.forEach(d=>W[d.id]={id:d.id,...d.data()});wSource='db';store('sr_wcache2',JSON.stringify({at:Date.now(),W}));mergeSeed();return}}
   catch(e){console.warn('Не удалось прочитать базу тренировок',e)}
-  W={};SEED.forEach(w=>W[w.id]={...w,active:true});wSource='seed';
+  W={};SEED.forEach(w=>W[w.id]={...w,active:w.active!==false});wSource='seed';
 }
+// тренировки, которых ещё нет в базе, берём из workouts.js; правки куратора (editedAt) важнее файла
+function mergeSeed(){SEED.forEach(s=>{const w=W[s.id];
+  if(!w){W[s.id]={...s,active:s.active!==false,fromSeed:true};return}
+  if(w.editedAt)return;['min','title'].forEach(k=>{if(s[k]!=null&&w[k]==null)w[k]=s[k]});if(s.active===false)w.active=false})}
+/* ---------- длительность дня: обязательная тренировка + дополнительные, чтобы набралось 30–45 минут ---------- */
+const DAY_MIN=30,DAY_MAX=45;
+const wMin=w=>(w&&+w.min)||0;
+const gateOf=w=>wMin(w)?Math.max(3,Math.round(wMin(w)*.7)):MIN_OPEN;
+const wTitle=w=>esc(pn(w.program))+(w.title?` <span class="d">· ${esc(w.title)}</span>`:'');
+function pickExtras(p,e){
+  const main=W[e.w],m=wMin(main);if(!main||!m||m>=DAY_MIN)return[];
+  const near=new Set(p.plan.filter(x=>x!==e&&Math.abs(x.d-e.d)<=3).flatMap(x=>[x.w,...(x.x||[])]));
+  const base=poolFor(p.rider,p.level).filter(w=>wMin(w)&&w.id!==main.id);
+  const pool=shuffle(base.filter(w=>!near.has(w.id)).length>=2?base.filter(w=>!near.has(w.id)):base);
+  const need=DAY_MIN-m,cap=DAY_MAX-m,mid=(need+cap)/2;
+  const sc=s=>s>=need&&s<=cap?Math.abs(s-mid)/20:s<need?10+need-s:5+s-cap;
+  let best=null;
+  pool.forEach((a,i)=>{const s1=wMin(a),v=sc(s1)+(a.program===main.program?.2:0);if(!best||v<best.v)best={v,ids:[a.id]};
+    pool.slice(i+1,i+40).forEach(b=>{const v2=sc(s1+wMin(b))+.6;if(v2<best.v)best={v:v2,ids:[a.id,b.id]}})});
+  return best?best.ids:[];
+}
+// расставляем дополнительные тренировки на ближайшие дни (и пересчитываем, если у тренировки поменялась длительность)
+function ensureExtras(p){const t=Math.max(1,dayIdx(p.start));let ch=false;
+  p.plan.forEach(e=>{if(e.d<t||e.d>t+7||!e.w||e.rest)return;const l=p.log['d'+e.d]||{};
+    if(e.d===t&&(l.opened||l.done||l.po))return;
+    const m=wMin(W[e.w]);if(e.x===undefined||e.xm!==m){e.x=pickExtras(p,e);e.xm=m;ch=true}});
+  return ch}
+// выключенные и битые тренировки в плане меняем на другие
+function fixPlan(p){const t=Math.max(1,dayIdx(p.start));let ch=false;
+  p.plan.forEach(e=>{if(e.d<t||!e.w||(p.log['d'+e.d]||{}).done)return;const w=W[e.w];
+    if(!w||w.active===false){const near=new Set(p.plan.filter(x=>Math.abs(x.d-e.d)<=7).map(x=>x.w));
+      const pool=shuffle(poolFor(p.rider,p.level).filter(x=>!near.has(x.id)));const alt=pool.find(x=>w&&x.program===w.program)||pool[0];
+      if(alt){e.w=alt.id;delete e.x;ch=true}}
+    if(e.x&&e.x.some(id=>!W[id]||W[id].active===false)){delete e.x;ch=true}});
+  return ch}
+function partsOf(e){return[{pid:'m',w:W[e.w]},...(e.x||[]).map(id=>({pid:id,w:W[id]}))].filter(x=>x.w)}
 const programs=()=>[...new Set(Object.values(W).map(w=>w.program))];
 const levelsFor=l=>l<=1?[1]:[l-1,l];
 function poolFor(r,level){const L=levelsFor(level);return Object.values(W).filter(w=>w.active!==false&&L.includes(w.level)&&!r.excluded.includes(w.program))}
@@ -994,8 +1034,9 @@ function openCabinet(){
   show('cabinet');
   P.food=P.food||{noTags:[],noWords:P.excl||[],favs:[],noIds:[]};P.household=P.household||1;P.why=P.why||{list:[]};
   if(P.plan.some(e=>e.rest&&e.d>Math.max(0,dayIdx(P.start)))){rebuildFuture(P,false);ref.update({plan:P.plan,queue:P.queue,cycle:P.cycle}).catch(console.warn)}
-  const c=calc(P);
-  if(extendPlan(P,Math.max(c.total,c.t)+14))ref.update({plan:P.plan,queue:P.queue,cycle:P.cycle,level:P.level}).catch(console.warn);
+  let pch=fixPlan(P);const c=calc(P);
+  if(extendPlan(P,Math.max(c.total,c.t)+14))pch=true;if(ensureExtras(P))pch=true;
+  if(pch)ref.update({plan:P.plan,queue:P.queue,cycle:P.cycle,level:P.level}).catch(console.warn);
   ref.update({lastSeen:Date.now()}).catch(console.warn);
   if((P.menuV||1)<MENU_V){const t0=Math.max(1,dayIdx(P.start));Object.keys(P.menu||{}).forEach(k=>{if(+k.slice(1)>t0)delete P.menu[k]});P.mq={};ensureMenu(P);P.menuV=MENU_V;ref.update({menu:P.menu,mq:P.mq,menuV:MENU_V}).catch(console.warn)}
   backup();
@@ -1122,7 +1163,7 @@ function renderCabinet(){
   checkRewards(c,s,pts);justDone=false;backup();
 }
 function quest(o){
-  return `<div class="quest ${o.cls||''} ${o.done?'done':''}"><div class="qi">${o.done?ICON.done:ICON[o.icon]}</div><div class="qt"><b>${o.title}</b><span>${o.sub}</span></div><div class="qr">${o.done?(o.pts?`<span class="pts">+${o.pts}</span>`:'')+(o.after||''):o.right||''}</div></div>`;
+  return `<div class="quest ${o.cls||''} ${o.done?'done':''}"><div class="qi">${o.done?ICON.done:ICON[o.icon]}</div><div class="qt"><b>${o.title}</b><span>${o.sub}</span></div><div class="qr">${o.done?(o.pts?`<span class="pts">+${o.pts}</span>`:'')+(o.after||''):o.right||''}</div>${o.below||''}</div>`;
 }
 const TIPS={
   open:'Отметка «Выполнила» откроется через 20 минут после старта — так мы видим, что тренировка правда была.',
@@ -1196,13 +1237,20 @@ function renderToday(c){
   if(e.rest)Q.push({icon:'rest',done:true,pts:0,title:'День отдыха',sub:'Прогулка и растяжка'});
   else{const w=W[e.w];
     if(!w)Q.push({icon:'train',title:'Тренировка снята',sub:'Напиши куратору',right:'<span class="tag late">нет</span>'});
-    else{let right='';
-      if(!l.done){if(!l.opened)right=`<a class="btn small" href="${esc(w.url)}" target="_blank" rel="noopener" data-act="open">Начать</a>`;
-        else{const lf=Math.ceil(MIN_OPEN-(Date.now()-l.opened)/6e4);right=lf>0?`<button class="btn small" disabled>${lf} мин</button>`:`<button class="btn small green" data-act="done">Готово</button>`}}
+    else{let right='',below='';if(ensureExtras(P))ref.update({plan:P.plan}).catch(console.warn);
+      const parts=partsOf(e),tot=parts.reduce((s,x)=>s+wMin(x.w),0),many=parts.length>1;
+      if(!many&&!l.done){if(!l.opened)right=`<a class="btn small" href="${esc(w.url)}" target="_blank" rel="noopener" data-act="open">Начать</a>`;
+        else{const lf=Math.ceil(gateOf(w)-(Date.now()-l.opened)/6e4);right=lf>0?`<button class="btn small" disabled>${lf} мин</button>`:`<button class="btn small green" data-act="done">Готово</button>`}}
+      if(many){const pd=l.pd||{},po=l.po||{},nd=parts.filter(x=>pd[x.pid]).length;
+        if(!l.done)right=`<span class="tag todo">${nd} из ${parts.length}</span>`;
+        below=`<ol class="parts">${parts.map((x,i)=>{const op=po[x.pid]||(x.pid==='m'&&l.opened),dn=pd[x.pid]||(l.done&&true);
+          const lf=op?Math.ceil(gateOf(x.w)-(Date.now()-op)/6e4):0;
+          const btn=dn?'<span class="tag done">✓</span>':!op?`<a class="btn small" href="${esc(x.w.url)}" target="_blank" rel="noopener" data-act="popen" data-pid="${x.pid}">Начать</a>`:lf>0?`<button class="btn small" disabled>${lf} мин</button>`:`<button class="btn small green" data-act="pdone" data-pid="${x.pid}">Готово</button>`;
+          return `<li class="${dn?'ok':''}"><span><b>${i?'Дополнительно':'Основная'}</b>${wTitle(x.w)}${wMin(x.w)?` <span class="d">· ${wMin(x.w)} мин</span>`:''}${op&&!dn?` · <a href="${esc(x.w.url)}" target="_blank" rel="noopener" style="color:inherit">открыть снова</a>`:''}</span>${btn}</li>`}).join('')}</ol>`}
       const cw=c.wm.cur,left=Math.max(0,cw.need-cw.done),skip=canSkipToday(P,t,c.wm);
       // после отчёта тренировку можно пройти ещё раз — по желанию, баллы и срок не меняются
       const again=l.done?`<a class="btn small ghost again" href="${esc(w.url)}" target="_blank" rel="noopener" data-act="again" title="Пройти эту тренировку ещё раз — по желанию">Ещё раз${l.again?` · ${l.again}`:''}</a>`:'';
-      Q.push({icon:'train',opt:skip,done:!!l.done,pts:PTS.train,after:again,title:esc(pn(w.program)),sub:`${l.done?'':left===0?'сверх нормы · ':skip?'по желанию · ':'обязательная · '}неделя ${cw.done}/${cw.need}${l.opened&&!l.done?` · <a href="${esc(w.url)}" target="_blank" rel="noopener" style="color:inherit">открыть снова</a>`:''}`,right})}}
+      Q.push({icon:'train',opt:skip,done:!!l.done,pts:PTS.train,after:many?'':again,below,title:many?`Тренировки дня · ≈ ${tot} мин`:esc(pn(w.program))+(wMin(w)?` <span class="d">· ${wMin(w)} мин</span>`:''),sub:`${l.done?'':left===0?'сверх нормы · ':skip?'по желанию · ':'обязательная · '}${many?'основная + дополнительная, чтобы набралось 30–45 минут · ':''}неделя ${cw.done}/${cw.need}${l.opened&&!l.done?` · <a href="${esc(w.url)}" target="_blank" rel="noopener" style="color:inherit">открыть снова</a>`:''}`,right})}}
   const md=P.menu&&P.menu['d'+t];
   Q.push({icon:'food',done:!!l.food,pts:PTS.food,title:'Питание по меню',sub:`${md?Math.round(MEALS.reduce((s,[k])=>s+kcalOf(md[k],P),0)*md.f)+' ккал · ':''}<a href="#" data-go="menu" style="color:inherit">меню</a>`,right:'<button class="btn small ghost" data-act="food">Ела</button>'});
   const bq=bonusOf(t);
@@ -1247,7 +1295,13 @@ $('today').onclick=async e=>{
   const a=e.target.closest('[data-act]');if(!a)return;
   if(a.dataset.act==='startnow'){a.disabled=true;await startNow();return}
   if(a.dataset.act==='steps'){a.disabled=true;await saveSteps(dayIdx(P.start),+$('stToday').value);a.disabled=false;return}
-  const t=dayIdx(P.start),key='d'+t;P.log[key]=P.log[key]||{};const act=a.dataset.act,en=P.plan[t-1]||{};
+  const t=dayIdx(P.start),key='d'+t;P.log[key]=P.log[key]||{};let act=a.dataset.act;const en=P.plan[t-1]||{};
+  if(act==='popen'){const pid=a.dataset.pid,l=P.log[key];l.po={...(l.po||{}),[pid]:Date.now()};const u={[`log.${key}.po`]:l.po,lastSeen:Date.now()};if(pid==='m'&&!l.opened){l.opened=Date.now();u[`log.${key}.opened`]=l.opened}
+    ref.update(u).catch(console.warn);setTimeout(()=>renderToday(),300);return}
+  if(act==='pdone'){const pid=a.dataset.pid,l=P.log[key];l.pd={...(l.pd||{}),[pid]:Date.now()};
+    const all=partsOf(en).every(x=>l.pd[x.pid]);
+    if(!all){await put(ref.update({[`log.${key}.pd`]:l.pd}));toast('Отлично! Осталась ещё одна часть — и тренировка дня засчитана');renderToday();return}
+    ref.update({[`log.${key}.pd`]:l.pd}).catch(console.warn);act='done'}
   const coreNow=()=>dayOk(P,t,t,weekMiss(P,t)),wasCore=coreNow();
   if(act==='again'){P.log[key].again=(P.log[key].again||0)+1;ref.update({[`log.${key}.again`]:P.log[key].again,lastSeen:Date.now()}).catch(console.warn);toast('Отличный настрой! Повтор — по желанию, отметка дня уже засчитана');setTimeout(()=>renderToday(),300);return}
   if(act==='open'){P.log[key].opened=Date.now();ref.update({[`log.${key}.opened`]:P.log[key].opened,lastSeen:Date.now()});setTimeout(()=>renderToday(),300);return}
@@ -1266,7 +1320,8 @@ function renderWeek(){
   h+=`<li style="display:block;border-bottom:2px solid var(--ink)"><b>Неделя ${Math.floor((a-1)/7)+1}: ${cw?cw.done:0} из ${cw?cw.need:P.rider.perWeek}</b> <span class="d">обязательных тренировок</span></li>`;
   for(let d=a;d<a+7&&d<=P.plan.length;d++){
     const e=P.plan[d-1],l=P.log['d'+d]||{},date=addDays(pd(P.start),d-1),w=W[e.w];
-    const name=e.rest?'Отдых, прогулка':w?`<a class="wlink" href="${esc(w.url)}" target="_blank" rel="noopener" data-wd="${d}">${esc(pn(w.program))} <span aria-hidden="true">↗</span></a> <span class="d">· ${LV[w.level]}</span>`:'—';
+    const xs=(e.x||[]).map(id=>W[id]).filter(Boolean),tot=wMin(w)+xs.reduce((s,x)=>s+wMin(x),0);
+    const name=e.rest?'Отдых, прогулка':w?`<a class="wlink" href="${esc(w.url)}" target="_blank" rel="noopener" data-wd="${d}">${esc(pn(w.program))} <span aria-hidden="true">↗</span></a> <span class="d">· ${LV[w.level]}${wMin(w)?' · '+wMin(w)+' мин':''}</span>${xs.map(x=>`<br><span class="d">+ </span><a class="wlink" href="${esc(x.url)}" target="_blank" rel="noopener" data-wd="${d}" data-pid="${x.id}">${esc(pn(x.program))} <span aria-hidden="true">↗</span></a> <span class="d">· ${wMin(x)} мин</span>`).join('')}${xs.length?`<br><span class="d">всего ≈ ${tot} мин</span>`:''}`:'—';
     const tag=l.done?'<span class="tag done">готово</span>':wm.miss.has(d)?'<span class="tag late">пропуск</span>':d<t||e.rest?'<span class="tag rest">отдых</span>':d===t?'<span class="tag todo">сегодня</span>':'';
     h+=`<li><span class="d ${d===t?'now':''}">${fmtS(date)}</span><span>${name}</span>${tag}</li>`;
   }
@@ -1277,7 +1332,10 @@ $('week').onclick=e=>{
   const a=e.target.closest('[data-wd]');if(!a)return;
   const d=+a.dataset.wd,t=dayIdx(P.start),key='d'+d;
   if(d!==t)return;P.log[key]=P.log[key]||{};
-  if(!P.log[key].opened&&!P.log[key].done){P.log[key].opened=Date.now();ref.update({[`log.${key}.opened`]:P.log[key].opened,lastSeen:Date.now()}).catch(console.warn);setTimeout(()=>{renderToday();renderWeek()},300)}
+  const l=P.log[key],pid=a.dataset.pid||'m';if(l.done)return;
+  const u={lastSeen:Date.now()};if(pid==='m'&&!l.opened){l.opened=Date.now();u[`log.${key}.opened`]=l.opened}
+  if(!(l.po||{})[pid]){l.po={...(l.po||{}),[pid]:Date.now()};u[`log.${key}.po`]=l.po}
+  ref.update(u).catch(console.warn);setTimeout(()=>{renderToday();renderWeek()},300);
 };
 $('retakeBtn').onclick=()=>{$('retakeBox').classList.remove('hidden');$('retakeBtn').classList.add('hidden')};
 $('retakeNo').onclick=()=>{$('retakeBox').classList.add('hidden');$('retakeBtn').classList.remove('hidden')};
@@ -1668,22 +1726,58 @@ panel('marks').addEventListener('click',async e=>{
     toast(`${p.name}: день ${d} — ${MARKS.find(m=>m[0]===k)[1].toLowerCase()} ${on?'засчитана':'снята'}`.replace('питание засчитана','питание засчитано').replace('питание снята','питание снято'))}
   catch(err){b.disabled=false;alert('Не сохранилось: '+(err.code||err.message)+'. Проверь связь и попробуй ещё раз.')}
 });
-function renderWk(){
-  const byP={};Object.values(W).forEach(w=>(byP[w.program]=byP[w.program]||[]).push(w));
-  const fresh=SEED.filter(s=>!W[s.id]||W[s.id].level!==s.level||W[s.id].program!==s.program||W[s.id].url!==s.url).length;
-  panel('wk').innerHTML=`<h2>База тренировок · ${Object.keys(W).length}</h2>
-  ${wSource==='seed'?`<p class="verdict warn">Коллекция <b>${WCOL}</b> в Firestore пуста — тренировки берутся прямо из workouts.js (${SEED.length} шт.). Загрузи их в базу, чтобы включать и выключать отсюда.</p><button class="btn" id="seedBtn">Загрузить ${SEED.length} тренировок в Firestore</button>`
-    :`<p class="note">В файле workouts.js: ${SEED.length} тренировок. Новых или изменённых относительно Firestore: <b>${fresh}</b>.</p>${fresh?`<button class="btn" id="seedBtn">Синхронизировать с Firestore</button>`:''}`}
-  <div style="margin-top:14px">${Object.entries(byP).map(([p,ws])=>`<details class="pg"><summary>${esc(p)} · ${ws.length}</summary><ul class="wl">${ws.sort((a,b)=>a.level-b.level).map(w=>`<li class="${w.active===false?'off':''}"><a href="${esc(w.url)}" target="_blank" rel="noopener">${LV[w.level]} · ${w.id}</a>${wSource==='db'?`<button class="btn small ghost" data-tg="${w.id}">${w.active===false?'Включить':'Выключить'}</button>`:''}</li>`).join('')}</ul></details>`).join('')}</div>
-  ${wSource==='db'?`<h2 style="margin-top:20px">Добавить тренировку</h2><div class="row"><div><label for="nwLevel">Уровень</label><select id="nwLevel"><option value="1">Новичок</option><option value="2">База</option><option value="3">Продвинутый</option></select></div><div><label for="nwProg">Программа</label><input id="nwProg" list="progList"><datalist id="progList">${programs().map(p=>`<option value="${esc(p)}">`).join('')}</datalist></div></div><label for="nwUrl">Ссылка на урок</label><input id="nwUrl" placeholder="https://my.walk-walk.ru/pl/teach/control/lesson/view?id=…"><button class="btn" id="nwBtn">Добавить</button><div class="msg" id="nwMsg"></div>`:''}`;
-  const sb=$('seedBtn');if(sb)sb.onclick=async()=>{sb.disabled=true;sb.textContent='Загружаем…';
-    try{const b=db.batch();SEED.forEach(w=>{const d={id:w.id,level:w.level,program:w.program,url:w.url};if(!W[w.id]||wSource==='seed')d.active=true;b.set(db.collection(WCOL).doc(w.id),d,{merge:true})});await b.commit();await loadWorkouts();renderWk()}
-    catch(e){sb.textContent='Ошибка: '+e.message}};
-  panel('wk').onclick=async e=>{const b=e.target.closest('[data-tg]');if(!b)return;const w=W[b.dataset.tg];const a=w.active===false;await db.collection(WCOL).doc(w.id).update({active:a});w.active=a;renderWk()};
-  const nb=$('nwBtn');if(nb)nb.onclick=async()=>{const url=$('nwUrl').value.trim(),prog=$('nwProg').value.trim(),m=url.match(/id[=\/](\d+)/);
-    if(!m||!prog){$('nwMsg').textContent='Нужны программа и ссылка с id урока';return}if(W[m[1]]){$('nwMsg').textContent='Такая тренировка уже есть';return}
-    const w={id:m[1],level:+$('nwLevel').value,program:prog,url,active:true};await db.collection(WCOL).doc(w.id).set(w);W[w.id]=w;renderWk()};
+let wkEdit=null,wkF='all',wkQ='';
+function wkForm(w,isNew){
+  const progs=programs().sort((a,b)=>a.localeCompare(b,'ru'));
+  return `<div class="rced"><div>
+  ${isNew?'<h3 style="margin:0 0 6px">Новая тренировка</h3>':''}
+  <label for="wkUrl">Ссылка на урок</label><input id="wkUrl" value="${esc(w.url||'')}" placeholder="https://my.walk-walk.ru/pl/teach/control/lesson/view?id=…">
+  <div class="row"><div><label for="wkProg">Программа</label><input id="wkProg" list="wkProgs" value="${esc(w.program||'')}"><datalist id="wkProgs">${progs.map(p=>`<option value="${esc(p)}">`).join('')}</datalist></div>
+  <div><label for="wkTitle">Название урока (необязательно)</label><input id="wkTitle" value="${esc(w.title||'')}" placeholder="например, Тренировка 3 · 4 000 шагов"></div></div>
+  <div class="row"><div><label for="wkLevel">Уровень</label><select id="wkLevel">${[1,2,3].map(l=>`<option value="${l}" ${+w.level===l?'selected':''}>${LV[l]}</option>`).join('')}</select></div>
+  <div><label for="wkMin">Длительность, мин</label><input id="wkMin" type="number" min="1" max="180" value="${w.min||''}" placeholder="например, 25"></div></div>
+  <label for="wkNote">Заметка для куратора (необязательно)</label><input id="wkNote" value="${esc(w.note||'')}">
+  <label class="chk"><input type="checkbox" id="wkOn" ${w.active===false?'':'checked'}> Включена — попадает в планы участниц</label>
+  <div class="msg" id="wkMsg"></div>
+  <div class="rcb" style="margin-top:12px"><button class="btn green" data-wksave="${isNew?'':esc(w.id)}">${isNew?'Добавить':'Сохранить'}</button><button class="btn ghost" data-wkcancel="1">Отмена</button></div>
+  </div></div>`;
 }
+function renderWk(){
+  const all=Object.values(W),q=wkQ.trim().toLowerCase();
+  const noMin=all.filter(w=>!wMin(w)&&w.active!==false),guess=all.filter(w=>w.lvlGuess&&!w.editedAt),off=all.filter(w=>w.active===false);
+  const F={all:['Все',all],nomin:['Без длительности',noMin],guess:['Уровень не проверен',guess],off:['Выключенные',off]};
+  let list=F[wkF][1];if(q)list=list.filter(w=>(w.program+' '+(w.title||'')+' '+w.id+' '+pn(w.program)).toLowerCase().includes(q));
+  const byP={};list.forEach(w=>(byP[w.program]=byP[w.program]||[]).push(w));
+  const open=q||wkF!=='all';
+  panel('wk').innerHTML=`<h2>База тренировок · ${all.length}</h2>
+  <p class="note">Активных: ${all.length-off.length} · выключено: ${off.length}. Длительность нужна, чтобы день набирал 30–45 минут: если основная тренировка короче 30 минут, участнице добавляется дополнительная. Без длительности тренировка считается полноценной (≥ 30 мин), и в дополнительные не подбирается.</p>
+  <div class="rcb" style="margin:10px 0">${Object.entries(F).map(([k,[n,a]])=>`<button class="toggle" data-wkf="${k}" aria-pressed="${wkF===k}">${n} · ${a.length}</button>`).join('')}<button class="btn small" data-wknew="1">+ Добавить тренировку</button></div>
+  ${wkEdit==='new'?wkForm({level:1,active:true},true):''}
+  <label for="wkSearch">Найти по программе, названию или номеру урока</label><input id="wkSearch" value="${esc(wkQ)}" placeholder="например, табата или 339707488">
+  <div style="margin-top:14px">${Object.entries(byP).sort((a,b)=>a[0].localeCompare(b[0],'ru')).map(([p,ws])=>`<details class="pg" ${open||ws.some(w=>w.id===wkEdit)?'open':''}><summary>${esc(pn(p))}${pn(p)!==p?` <span class="s">(${esc(p)})</span>`:''} · ${ws.length}</summary><ul class="wl rcl">${ws.sort((a,b)=>a.level-b.level||String(a.id).localeCompare(String(b.id))).map(w=>`<li class="${w.active===false?'off':''}"><span><a href="${esc(w.url)}" target="_blank" rel="noopener">${LV[w.level]} · ${w.title?esc(w.title):'урок '+w.id}</a> <span class="s">${wMin(w)?wMin(w)+' мин':'<span style="color:var(--alarm)">длительность?</span>'}</span>${w.lvlGuess&&!w.editedAt?' <span class="tag todo">уровень?</span>':''}${w.note?` <span class="s">· ${esc(w.note)}</span>`:''}</span><span class="rcb"><button class="btn small" data-wke="${esc(w.id)}">Править</button><button class="btn small ghost" data-tg="${esc(w.id)}">${w.active===false?'Включить':'Выключить'}</button></span></li>${wkEdit===w.id?`<li style="display:block">${wkForm(w,false)}</li>`:''}`).join('')}</ul></details>`).join('')||'<p class="note">Ничего не нашлось.</p>'}</div>`;
+  const si=$('wkSearch'),keep=document.activeElement===si;si.oninput=()=>{wkQ=si.value;const pos=si.selectionStart;renderWk();const n=$('wkSearch');n.focus();n.setSelectionRange(pos,pos)};
+}
+async function saveWk(w,btn){
+  btn.disabled=true;
+  try{await wait(db.collection(WCOL).doc(w.id).set(w,{merge:true}),15000);W[w.id]={...(W[w.id]||{}),...w};delete W[w.id].fromSeed;store('sr_wcache2',null);wkEdit=null;renderWk();return true}
+  catch(err){btn.disabled=false;const m=$('wkMsg');if(m)m.textContent='Не сохранилось: '+(err.code||err.message);else alert('Не сохранилось: '+(err.code||err.message));return false}
+}
+panel('wk').addEventListener('click',async e=>{
+  const f=e.target.closest('[data-wkf]');if(f){wkF=f.dataset.wkf;renderWk();return}
+  if(e.target.closest('[data-wknew]')){wkEdit=wkEdit==='new'?null:'new';renderWk();return}
+  const ed=e.target.closest('[data-wke]');if(ed){wkEdit=wkEdit===ed.dataset.wke?null:ed.dataset.wke;renderWk();return}
+  if(e.target.closest('[data-wkcancel]')){wkEdit=null;renderWk();return}
+  const tg=e.target.closest('[data-tg]');if(tg){const w=W[tg.dataset.tg];const on=w.active===false;await saveWk({...w,active:on,editedAt:Date.now()},tg);toast(on?'Тренировка включена':'Тренировка выключена — в планах участниц её заменят другой');return}
+  const sv=e.target.closest('[data-wksave]');if(!sv)return;
+  const url=$('wkUrl').value.trim(),prog=$('wkProg').value.trim(),mm=url.match(/(?:id=|\/id\/)(\d+)/),min=+$('wkMin').value||null,msg=$('wkMsg');
+  if(!/^https?:\/\//.test(url))return msg.textContent='Вставь ссылку на урок целиком, начиная с https://';
+  if(!prog)return msg.textContent='Укажи программу — можно выбрать из списка или вписать новую';
+  if(min!=null&&!(min>=1&&min<=180))return msg.textContent='Длительность — от 1 до 180 минут';
+  let id=sv.dataset.wksave;
+  if(!id){if(!mm)return msg.textContent='Не нашла номер урока в ссылке (…?id=123456 или …/id/123456)';id=mm[1];if(W[id])return msg.textContent=`Урок ${id} уже есть в базе: ${pn(W[id].program)}`}
+  const w={id,program:prog,title:$('wkTitle').value.trim(),level:+$('wkLevel').value,min,url,note:$('wkNote').value.trim(),active:$('wkOn').checked,lvlGuess:false,editedAt:Date.now()};
+  if(await saveWk(w,sv))toast(sv.dataset.wksave?'Тренировка обновлена':'Тренировка добавлена — она появится в новых планах участниц');
+});
 let rcEdit=null,rcHidden=false;
 const MEALN={breakfast:'Завтрак',snack:'Полдник',lunch:'Обед',dinner:'Ужин',bake:'ПП-выпечка'};
 function rcEditor(r){
@@ -1762,6 +1856,5 @@ function renderRc(){
 </script>
 </body>
 </html>
-
 
 
