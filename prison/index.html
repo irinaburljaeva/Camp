@@ -597,10 +597,14 @@ async function refresh(){
   try{
     const s=await wait(realRef.get({source:'server'}),15000);if(!s.exists)return;
     const sd=s.data(),strip=o=>JSON.stringify({...o,lastSeen:0});
-    if(isDirty()||strip(sd)===strip(P))return;
-    P=sd;menuSyncAt=Date.now();backup();if(!$('cabinet').classList.contains('hidden'))openCabinet();
+    const miss=Object.keys(P.menu||{}).filter(k=>!(sd.menu||{})[k]);
+    if(isDirty())return;
+    if(strip(sd)!==strip(P)){const loc=P.menu||{};P=sd;P.menu=P.menu||{};miss.forEach(k=>P.menu[k]=loc[k]);menuSyncAt=Date.now();backup();if(!$('cabinet').classList.contains('hidden'))openCabinet()}
+    menuReady=true;if(miss.length)saveMenu({},miss.map(k=>+k.slice(1)));
   }catch(e){console.warn('refresh',e)}
+  finally{menuReady=true}
 }
+let menuReady=true;   // false — кабинет открыт из копии на телефоне, база ещё не сверена: новые дни меню пока не записываем
 setInterval(flush,60000);
 addEventListener('online',()=>setTimeout(flush,2000));
 let refAt=0;document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(isDirty())flush();else if(Date.now()-refAt>120000){refAt=Date.now();refresh()}});
@@ -965,7 +969,7 @@ async function finishOnb(){
     await put(ref.update({rider:P.rider,level:P.level,cycle:P.cycle,queue:P.queue,plan:P.plan}));toast('План тренировок пересобран под новый райдер');openCabinet();return;
   }
   if(D.mode==='food'){
-    menuSyncAt=0;await pullMenu();const oldCook=+P.cook||1;
+    const oldCook=+P.cook||1;
     P.food={...(P.food||{}),noTags:D.noTags||[],noWords:words,simple:+D.simple!==0};P.household=+D.household||1;P.cook=+D.cook||1;
     // меню не пересобираем целиком: заменяем только блюда, которые теперь не подходят
     const n=fixMenu(P,P.cook!==oldCook);
@@ -1491,9 +1495,10 @@ function fixMenu(p,cookChanged){
 function swapMeal(d,k,silent){
   d=blockOf(P,d);const day=P.menu['d'+d],key=MEALS.find(m=>m[0]===k)[1],q=queue(P,key);if(!q.length)return;
   const others=MEALS.filter(m=>m[0]!==k).reduce((s,[kk])=>s+kcalOf(day[kk],P),0);
-  const dayKeys=MEALS.filter(m=>m[0]!==k).map(([kk])=>dishKey(day[kk]));let bi=-1,bs=1e9;q.slice(0,12).forEach((id,i)=>{if(id===day[k]||dayKeys.includes(dishKey(id)))return;const sc=Math.abs(Math.log(P.kcal/(others+kcalOf(id,P))));if(sc<bs){bs=sc;bi=i}});
-  if(bi<0)return;const old=day[k];day[k]=q.splice(bi,1)[0];if(old&&recipeOk(RX[old],foodOf(P)))q.push(old);
-  day.f=portion(P.kcal/(others+kcalOf(day[k],P)));syncBlock(P,d);if(!silent){saveMenu({},blockDays(P,d));renderMenu()}
+  // меняем только это блюдо: ищем замену близкую по калорийности, остальные блюда и порции дня остаются как были
+  const ok0=kcalOf(day[k],P)||P.kcal/4;
+  const dayKeys=MEALS.filter(m=>m[0]!==k).map(([kk])=>dishKey(day[kk]));let bi=-1,bs=1e9;q.slice(0,20).forEach((id,i)=>{if(id===day[k]||dayKeys.includes(dishKey(id)))return;const sc=Math.abs(Math.log(ok0/(kcalOf(id,P)||1)))+i*.01;if(sc<bs){bs=sc;bi=i}});
+  if(bi<0)return;const old=day[k];day[k]=q.splice(bi,1)[0];if(old&&recipeOk(RX[old],foodOf(P)))q.push(old);syncBlock(P,d);if(!silent){saveMenu({},blockDays(P,d));renderMenu()}
   return blockDays(P,d);
 }
 // граммы под порцию: «600 г» на 4 порции → «175 г» для тебя
@@ -1525,7 +1530,7 @@ function mealRow(d,k,label,day){
   ${open?recipeBody(r,day.f)+(s?`<div class="rb"><h5>Гарнир: ${esc(s.name)}</h5></div>`+recipeBody(s,day.f,true):''):''}</div>`;
 }
 function renderMenu(){
-  const made=ensureMenu(P);if(made)saveMenu({},made);
+  const made=ensureMenu(P);if(made&&menuReady)saveMenu({},made);
   const t=Math.max(1,dayIdx(P.start)),food=foodOf(P);
   const ex=[...food.noTags.map(x=>(FOODTAGS.find(f=>f[0]===x)||[,x])[1].toLowerCase()),...food.noWords];
   let h='';
@@ -1549,12 +1554,12 @@ $('cookSeg').onclick=e=>{const b=e.target.closest('[data-cook]');if(!b)return;co
 $('menu').onclick=async e=>{
   const o=e.target.closest('[data-open]');if(o){openMeal=openMeal===o.dataset.open?null:o.dataset.open;renderMenu();return}
   const fm=e.target.closest('[data-fam]');if(fm){famMode=fm.dataset.fam==='1';renderMenu();return}
-  const sw=e.target.closest('[data-swap]');if(sw){const[d,k]=sw.closest('.meal').dataset.key.split('|');sw.disabled=true;await pullMenu();swapMeal(+d,k);toast(`Заменили только это блюдо${(+P.cook||1)>1?' (во всех днях, когда ешь это меню)':''} — остальное меню без изменений`);return}
+  const sw=e.target.closest('[data-swap]');if(sw){const[d,k]=sw.closest('.meal').dataset.key.split('|');sw.disabled=true;swapMeal(+d,k);toast(`Заменили только это блюдо${(+P.cook||1)>1?' (во всех днях, когда ешь это меню)':''} — остальное меню без изменений`);return}
   const fv=e.target.closest('[data-fav]');if(fv){const id=fv.dataset.fav;P.food.favs=P.food.favs||[];
     if(P.food.favs.includes(id))P.food.favs=P.food.favs.filter(x=>x!==id);else{P.food.favs.push(id);const key=RX[id].meal==='bake'?'snack':RX[id].meal;const q=queue(P,key);q.splice(Math.floor(q.length/2),0,id);toast('Запомнили — это блюдо будет появляться чаще')}
     saveMenu({food:P.food});renderMenu();return}
   const nv=e.target.closest('[data-never]');if(nv){const id=nv.dataset.never;P.food.noIds=[...(P.food.noIds||[]),id];P.food.favs=(P.food.favs||[]).filter(x=>x!==id);
-    await pullMenu();const t=Math.max(1,dayIdx(P.start)),ch=[];Object.keys(P.menu).forEach(dk=>{const d=+dk.slice(1);if(d<t)return;MEALS.forEach(([k])=>{if(P.menu[dk][k]===id)ch.push(...(swapMeal(d,k,true)||[]))})});
+    const t=Math.max(1,dayIdx(P.start)),ch=[];Object.keys(P.menu).forEach(dk=>{const d=+dk.slice(1);if(d<t)return;MEALS.forEach(([k])=>{if(P.menu[dk][k]===id)ch.push(...(swapMeal(d,k,true)||[]))})});
     openMeal=null;saveMenu({food:P.food},ch);renderMenu();toast(`«${RX[id].name}» больше не появится в твоём меню`);return}
 };
 $('menuDays').onclick=e=>{const b=e.target.closest('[data-days]');if(!b)return;menuDays=+b.dataset.days;renderMenu()};
@@ -1847,7 +1852,7 @@ function renderRc(){
   if(saved){
     bindRef(saved);
     // есть копия на телефоне — открываем кабинет сразу, свежие данные из базы подтянем в фоне
-    if(bk){try{P=JSON.parse(bk);openCabinet();setTimeout(refresh,500);return}catch(e){console.warn(e)}}
+    if(bk){try{P=JSON.parse(bk);menuReady=false;openCabinet();setTimeout(refresh,500);return}catch(e){console.warn(e)}}
     try{const s=await readDoc(ref);if(s.exists){P=s.data();openCabinet();return}}catch(e){console.warn(e);loginFail(e)}
     $('email').value=saved;
   }
