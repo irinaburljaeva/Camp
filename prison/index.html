@@ -268,6 +268,8 @@ section.quests{position:relative}
 .parts li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.86rem}
 .parts li:last-child{border-bottom:0}.parts li b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--steel);font-weight:600}
 .parts li.ok{opacity:.7}.parts .d{color:var(--steel)}
+.yday{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding:10px 14px;border:1.5px dashed var(--line);border-radius:8px;font-size:.86rem}
+.yday .yb{display:flex;gap:6px;flex-wrap:wrap}
 .quest .pts{font-family:"Russo One";color:var(--release);font-size:1rem}
 .quest.bonus .qi{background:var(--hazard);color:var(--ink)}
 .quest.bonus.done .qi{background:var(--release);color:#fff}
@@ -1293,6 +1295,9 @@ function renderToday(c){
   const measToday=(P.measurements||[]).some(m=>m.date===iso(new Date())&&t>1);
   if(c.measAgo>=3||measToday)Q.push({icon:'meas',done:measToday,pts:PTS.meas,title:'Замеры',sub:'утром, натощак',right:'<button class="btn small ghost" data-go="progress">Внести</button>'});
   h+=Q.map(quest).join('');
+  // вчерашний день можно закрыть самой, если забыла или не успела отметить
+  if(t>1){const y=t-1,ly=P.log['d'+y]||{},ey=P.plan[y-1]||{},nt=!ly.done&&ey.w&&!ey.rest,nf=!ly.food;
+    if(nt||nf)h+=`<div class="yday"><b>Вчера не всё отмечено</b><span class="yb">${nt?'<button class="btn small ghost" data-act="ydone">Тренировку сделала</button>':''}${nf?'<button class="btn small ghost" data-act="yfood">Питалась по меню</button>':''}</span></div>`}
   h+=stepsCard(t);
   if(l.done&&!l.feel)h+=`<div class="feel"><b>Как прошла тренировка?</b> <span style="color:var(--release);font-family:'Russo One'">+${PTS.feel}</span><div class="opts">${['Легко','Нормально','Тяжело'].map(f=>`<button class="opt" data-act="feel" data-v="${f}">${f}</button>`).join('')}</div><details class="more"><summary>Комментарий куратору</summary><textarea id="fbText" style="margin-top:8px"></textarea></details></div>`;
   $('today').innerHTML=h;
@@ -1329,6 +1334,9 @@ function adaptAfterFeel(){
 $('today').onclick=async e=>{
   const a=e.target.closest('[data-act]');if(!a)return;
   if(a.dataset.act==='startnow'){a.disabled=true;await startNow();return}
+  if(a.dataset.act==='ydone'||a.dataset.act==='yfood'){const y=dayIdx(P.start)-1,k='d'+y,f=a.dataset.act==='ydone'?'done':'food';P.log[k]=P.log[k]||{};
+    P.log[k][f]=f==='done'?Date.now():true;P.log[k].late=Date.now();ref.update({[`log.${k}.${f}`]:P.log[k][f],[`log.${k}.late`]:P.log[k].late}).catch(console.warn);
+    toast(f==='done'?'Вчерашняя тренировка засчитана':'Вчерашнее питание отмечено');renderCabinet();return}
   if(a.dataset.act==='steps'){a.disabled=true;await saveSteps(dayIdx(P.start),+$('stToday').value);a.disabled=false;return}
   const t=dayIdx(P.start),key='d'+t;P.log[key]=P.log[key]||{};let act=a.dataset.act;const en=P.plan[t-1]||{};
   if(act==='popen'){const pid=a.dataset.pid,l=P.log[key];l.po={...(l.po||{}),[pid]:Date.now()};const u={[`log.${key}.po`]:l.po,lastSeen:Date.now()};if(pid==='m'&&!l.opened){l.opened=Date.now();u[`log.${key}.opened`]=l.opened}
@@ -1357,7 +1365,7 @@ function renderWeek(){
     const e=P.plan[d-1],l=P.log['d'+d]||{},date=addDays(pd(P.start),d-1),w=W[e.w];
     const xs=(e.x||[]).map(id=>W[id]).filter(Boolean),tot=wMin(w)+xs.reduce((s,x)=>s+wMin(x),0);
     const name=e.rest?'Отдых, прогулка':w?`<a class="wlink" href="${esc(w.url)}" target="_blank" rel="noopener" data-wd="${d}">${esc(pn(w.program))} <span aria-hidden="true">↗</span></a> <span class="d">· ${LV[w.level]}${wMin(w)?' · '+wMin(w)+' мин':''}</span>${xs.map(x=>`<br><span class="d">+ </span><a class="wlink" href="${esc(x.url)}" target="_blank" rel="noopener" data-wd="${d}" data-pid="${x.id}">${esc(pn(x.program))} <span aria-hidden="true">↗</span></a> <span class="d">· ${wMin(x)} мин</span>`).join('')}${xs.length?`<br><span class="d">всего ≈ ${tot} мин</span>`:''}`:'—';
-    const tag=l.done?'<span class="tag done">готово</span>':wm.miss.has(d)?'<span class="tag late">пропуск</span>':d<t||e.rest?'<span class="tag rest">отдых</span>':d===t?'<span class="tag todo">сегодня</span>':'';
+    const tag=l.done?'<span class="tag done">готово</span>':wm.miss.has(d)?'<span class="tag late">пропуск</span>':e.rest?'<span class="tag rest">отдых</span>':d<t?'<span class="tag rest">не отмечена</span>':d===t?'<span class="tag todo">сегодня</span>':'';
     h+=`<li><span class="d ${d===t?'now':''}">${fmtS(date)}</span><span>${name}</span>${tag}</li>`;
   }
   $('week').innerHTML=h;
@@ -1753,7 +1761,7 @@ function renderMarks(){
     if(t<1)h+='<p class="lead">Срок ещё не начался.</p>';
     else{h+=`<div class="tbl"><table class="marks"><tr><th>День</th><th>Тренировка дня</th>${MARKS.map(([,n])=>`<th>${n}</th>`).join('')}<th>Шаги</th></tr>`;
       for(let d=t;d>=1;d--){const e=p.plan[d-1]||{},l=(p.log||{})['d'+d]||{},w=W[e.w];
-        h+=`<tr><td><b>${d}</b> <span class="s">${fmtS(addDays(pd(p.start),d-1))}</span>${c.wm&&c.wm.miss.has(d)?' <span class="tag late">пропуск</span>':''}${l.byCur?' <span class="tag rest" title="Менял куратор">куратор</span>':''}</td>
+        h+=`<tr><td><b>${d}</b> <span class="s">${fmtS(addDays(pd(p.start),d-1))}</span>${c.wm&&c.wm.miss.has(d)?' <span class="tag late">пропуск</span>':''}${l.byCur?' <span class="tag rest" title="Менял куратор">куратор</span>':''}${l.late?' <span class="tag todo" title="Участница отметила на следующий день">назавтра</span>':''}</td>
         <td>${e.rest?'<span class="s">отдых</span>':w?`<a href="${esc(w.url)}" target="_blank" rel="noopener">${esc(pn(w.program))}</a>`:'—'}</td>
         ${MARKS.map(([k])=>e.rest&&k==='done'?'<td class="s">—</td>':`<td><button class="mk ${l[k]?'on':''}" data-d="${d}" data-k="${k}" aria-pressed="${!!l[k]}" aria-label="${l[k]?'Выполнено — снять':'Не выполнено — отметить'}">${l[k]?'✓':'—'}</button></td>`).join('')}<td>${l.steps?nf(l.steps):'<span class="s">—</span>'}</td></tr>`}
       h+='</table></div>'}
