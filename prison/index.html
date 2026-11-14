@@ -554,57 +554,73 @@ const wait=(p,ms)=>Promise.race([p,new Promise((_,no)=>setTimeout(()=>no(Object.
 function put(p){Promise.resolve(p).catch(e=>console.warn('put',e));return Promise.resolve(true)}
 
 /* ---------- офлайн-режим: всё хранится на телефоне и досылается в базу, когда появляется связь ---------- */
-let realRef=null,netWarned=false,flushing=false,pend=0,carried=false;   // pend — записи в пути; carried — есть запись, которую база так и не подтвердила
-const isDirty=()=>!!(P&&P.email&&recall('sr_dirty_'+P.email));
-function markDirty(){
-  if(!P||!P.email)return;backup();store('sr_dirty_'+P.email,'1');carried=true;
-  if(!netWarned){netWarned=true;toast('Нет связи с базой — всё сохраняется на телефоне и отправится само')}
-}
-// оборачиваем документ участницы: каждая запись сначала сохраняется на телефоне, потом уходит в базу
-function track(p){
-  // пока база не подтвердила запись, она считается неотправленной: если страницу закроют раньше, при следующем входе всё дошлётся
-  const em=P&&P.email;if(em)store('sr_dirty_'+em,'1');pend++;
-  Promise.resolve().then(backup);
-  return wait(p,15000).then(r=>{pend--;if(!pend&&!carried&&em)store('sr_dirty_'+em,null);return r},e=>{pend--;if(e.code!=='permission-denied')markDirty();throw e});
+let realRef=null,netWarned=false,flushing=false,pend=0,obEmail='';
+/* Очередь неотправленных записей. В базу уходят только те поля, которые участница реально изменила, —
+   документ целиком с телефона никогда не перезаписывается, поэтому правки куратора и отметки с другого устройства не теряются. */
+const obGet=()=>{try{return JSON.parse(recall('sr_ob_'+obEmail)||'[]')}catch(e){return[]}};
+const obSet=a=>store('sr_ob_'+obEmail,a.length?JSON.stringify(a):null);
+const obDrop=id=>obSet(obGet().filter(q=>q.id!==id));
+const isDirty=()=>!!(P&&P.email&&(obGet().length||recall('sr_dirty_'+P.email)));
+function warnNet(){if(!netWarned){netWarned=true;toast('Нет связи с базой — всё сохраняется на телефоне и отправится само')}}
+function markDirty(){if(!P||!P.email)return;backup();store('sr_dirty_'+P.email,'1');warnNet()}
+const sendOp=op=>op.t==='s'?(op.o?realRef.set(op.x,op.o):realRef.set(op.x)):realRef.update(op.x);
+const fatal=e=>['permission-denied','invalid-argument','not-found'].includes(e&&e.code);
+// каждая запись сначала кладётся в очередь на телефоне, потом уходит в базу; из очереди убирается только после подтверждения базы
+function track(t,x,o){
+  const ks=Object.keys(x||{}),light=t==='u'&&ks.length===1&&ks[0]==='lastSeen';
+  const op={id:Date.now()+'_'+Math.random().toString(36).slice(2,8),t,x,o};
+  if(!light){const a=obGet();a.push(op);obSet(a)}
+  pend++;Promise.resolve().then(backup);
+  return wait(sendOp(op),15000).then(r=>{pend--;obDrop(op.id);return r},e=>{pend--;if(fatal(e))obDrop(op.id);else if(!light)warnNet();throw e});
 }
 function bindRef(email){
-  realRef=db.collection(PART).doc(email);pend=0;carried=!!recall('sr_dirty_'+email);
+  realRef=db.collection(PART).doc(email);pend=0;obEmail=email;
   ref={id:email,get:o=>o?realRef.get(o):realRef.get(),
     // анкету прошли без связи: пока не сверились с базой, на сервер ничего не шлём
-    update:x=>P&&P.offlineNew?(markDirty(),Promise.resolve()):track(realRef.update(x)),
-    set:(x,o)=>P&&P.offlineNew?(markDirty(),Promise.resolve()):track(o?realRef.set(x,o):realRef.set(x))};
+    update:x=>P&&P.offlineNew?(markDirty(),Promise.resolve()):track('u',x),
+    set:(x,o)=>P&&P.offlineNew?(markDirty(),Promise.resolve()):track('s',x,o)};
   return ref;
 }
+// метка «есть неотправленное» от прошлых версий: досылаем только то, чего нет в базе, и ничего в ней не затираем
+async function migrateDirty(){
+  const sv=await wait(realRef.get({source:'server'}),15000);
+  if(!sv.exists){await wait(realRef.set(P),20000);store('sr_dirty_'+P.email,null);return}
+  const sd=sv.data(),sl=sd.log||{},u={};
+  Object.entries(P.log||{}).forEach(([k,l])=>{const v=sl[k]||{};if(!l||v.byCur)return;
+    ['done','food','bonus','steps','opened','feel','comment','pd','po','again'].forEach(f=>{if(l[f]&&!v[f])u[`log.${k}.${f}`]=l[f]})});
+  const have=new Set((sd.measurements||[]).map(m=>m.date+'|'+m.t)),add=(P.measurements||[]).filter(m=>!have.has(m.date+'|'+m.t));
+  if(add.length)u.measurements=[...(sd.measurements||[]),...add].sort((a,b)=>(a.t||0)-(b.t||0));
+  if(Object.keys(u).length)await wait(realRef.update(u),20000);
+  store('sr_dirty_'+P.email,null);
+}
 async function flush(){
-  if(flushing||!realRef||!isDirty()||(pend>0&&!carried))return;
+  if(flushing||!realRef||!P||!isDirty())return !isDirty();
   flushing=true;
   try{
     if(P.offlineNew){   // анкета пройдена без связи: вдруг личное дело уже есть в базе (например, с другого телефона)
       const s=await wait(realRef.get({source:'server'}),15000);
-      if(s.exists){P=s.data();store('sr_dirty_'+P.email,null);backup();toast('Нашли твоё личное дело в базе — открыли его');openCabinet();return}
-      delete P.offlineNew;
+      if(s.exists){P=s.data();store('sr_dirty_'+P.email,null);obSet([]);backup();toast('Нашли твоё личное дело в базе — открыли его');openCabinet();return true}
+      delete P.offlineNew;await wait(realRef.set(P),20000);store('sr_dirty_'+P.email,null);obSet([]);backup();
     }
-    // правки куратора в отметках важнее старой копии с телефона
-    try{const sv=await wait(realRef.get({source:'server'}),10000);if(sv.exists){const sl=sv.data().log||{};let m=0;
-      Object.entries(sl).forEach(([k,v])=>{if(v&&v.byCur&&(!P.log[k]||!P.log[k].byCur||P.log[k].byCur<v.byCur)){P.log[k]={...(P.log[k]||{}),done:v.done??null,food:v.food??null,bonus:v.bonus??null,byCur:v.byCur};m++}});
-      // отметки, которые есть в базе, но нет на этом телефоне (сделаны с другого устройства), тоже сохраняем
-      Object.entries(sl).forEach(([k,v])=>{if(!v||v.byCur)return;const l=P.log[k]=P.log[k]||{};if(l.byCur)return;
-        ['done','food','bonus','steps','opened','feel','comment','pd','po'].forEach(f=>{if(v[f]&&!l[f]){l[f]=v[f];m++}})});
-      if(m){backup();if(!$('cabinet').classList.contains('hidden'))renderCabinet()}}}catch(e){console.warn('merge',e)}
-    await wait(realRef.set(P),20000);
-    store('sr_dirty_'+P.email,null);carried=false;if(netWarned)toast('Связь есть — всё сохранено в базе ✓');netWarned=false;
-  }catch(e){console.warn('flush',e)}
+    if(recall('sr_dirty_'+P.email))await migrateDirty();
+    if(pend>0)return false;                       // записи ещё в пути — подождём их
+    for(const op of obGet()){
+      try{await wait(sendOp(op),20000);obDrop(op.id)}catch(e){if(fatal(e)){console.warn('drop op',e);obDrop(op.id)}else throw e}
+    }
+    if(netWarned)toast('Связь есть — всё сохранено в базе ✓');netWarned=false;
+    return true;
+  }catch(e){console.warn('flush',e);return false}
   finally{flushing=false}
 }
 // при открытии подтягиваем свежую версию из базы (если на телефоне нет неотправленного)
 async function refresh(){
   if(!realRef)return;
-  if(isDirty())return flush();
+  if(isDirty()){const ok=await flush();if(!ok||isDirty()||pend>0)return}
   try{
     const s=await wait(realRef.get({source:'server'}),15000);if(!s.exists)return;
     const sd=s.data(),strip=o=>JSON.stringify({...o,lastSeen:0});
     const miss=Object.keys(P.menu||{}).filter(k=>!(sd.menu||{})[k]);
-    if(isDirty())return;
+    if(isDirty()||pend>0)return;
     if(strip(sd)!==strip(P)){const loc=P.menu||{};P=sd;P.menu=P.menu||{};miss.forEach(k=>P.menu[k]=loc[k]);menuSyncAt=Date.now();backup();if(!$('cabinet').classList.contains('hidden'))openCabinet()}
     menuReady=true;if(miss.length)saveMenu({},miss.map(k=>+k.slice(1)));
   }catch(e){console.warn('refresh',e)}
@@ -613,7 +629,7 @@ async function refresh(){
 let menuReady=true;   // false — кабинет открыт из копии на телефоне, база ещё не сверена: новые дни меню пока не записываем
 setInterval(flush,60000);
 addEventListener('online',()=>setTimeout(flush,2000));
-let refAt=0;document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(isDirty())flush();else if(Date.now()-refAt>120000){refAt=Date.now();refresh()}});
+let refAt=0;document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(Date.now()-refAt>120000||isDirty()){refAt=Date.now();refresh()}});
 // читаем документ: сервер → локальная копия → резервная копия в браузере
 async function readDoc(r){
   try{return await wait(r.get(),12000)}catch(e){
@@ -955,8 +971,8 @@ $('loginBtn').onclick=async()=>{
   $('loginMsg').textContent='';$('loginBtn').disabled=true;
   $('loginMsg').textContent='Подключаемся…';
   // на этом телефоне есть неотправленные отметки — открываем их, а не старую версию из базы
-  const bk=recall('sr_dirty_'+email)&&recall('sr_bk_'+email);
-  if(bk){try{bindRef(email);store('sr_email',email);P=JSON.parse(bk);$('loginMsg').textContent='';$('loginBtn').disabled=false;openCabinet();flush();return}catch(e){console.warn(e)}}
+  const bk=(recall('sr_dirty_'+email)||recall('sr_ob_'+email))&&recall('sr_bk_'+email);
+  if(bk){try{bindRef(email);store('sr_email',email);P=JSON.parse(bk);$('loginMsg').textContent='';$('loginBtn').disabled=false;menuReady=false;openCabinet();refresh();return}catch(e){console.warn(e)}}
   try{
     bindRef(email);const s=await readDoc(ref);store('sr_email',email);$('loginMsg').textContent='';
     if(s.exists){P=s.data();if(s.fromBackup){toast('Нет связи — открыли копию с телефона');openCabinet();refresh()}else openCabinet()}
@@ -1381,7 +1397,7 @@ $('measBtn').onclick=async()=>{
   $('measBtn').disabled=true;
   try{
     const before=calc(P).total,prev=lastWeight(P);
-    const upd={measurements:FV.arrayUnion(m),lastSeen:Date.now()};P.measurements.push(m);
+    P.measurements.push(m);const upd={measurements:P.measurements,lastSeen:Date.now()};
     if(P.track!=='tone'&&w<=P.goal&&!P.finishedAt){P.finishedAt=Date.now();upd.finishedAt=P.finishedAt}
     await put(ref.update(upd));['mW','mWaist','mHip','mChest'].forEach(id=>$(id).value='');$('measMsg').textContent='';
     const after=calc(P).total,diff=w-prev;
