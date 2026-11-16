@@ -789,6 +789,27 @@ function dayOk(p,t,d,wm){const e=p.plan[d-1]||{},l=p.log['d'+d]||{};if(!l.food)r
 /* ================= РАСЧЁТ ДАТЫ ВЫХОДА ================= */
 function lastWeight(p){const m=(p.measurements||[]).filter(x=>x.w);return m.length?m[m.length-1].w:p.startW}
 function avgWeek(p){const m=(p.measurements||[]).filter(x=>x.w);if(!m.length)return p.startW;const lastD=pd(m[m.length-1].date);const wk=m.filter(x=>(lastD-pd(x.date))/DAY<7);return wk.reduce((s,x)=>s+x.w,0)/wk.length}
+/* Поправка срока по весу — мягкая, чтобы не пугать скачками:
+   • считается только с 15-го дня (первые две недели вес скачет из-за воды) и при 3+ взвешиваниях;
+   • вес берётся по линии тренда за последние 2 недели, а не по одному замеру;
+   • не больше ±7 дней за весь срок и не быстрее чем на 1 день за 3 дня — дата не может прыгнуть разом. */
+const W_FROM=15,W_CAP=7;
+function weightTrend(p,t,ms){
+  const pts=ms.map(m=>({x:dayIdx(p.start)-Math.round((pd(iso(new Date()))-pd(m.date))/DAY),y:m.w}));
+  let use=pts.filter(q=>q.x>=t-14);if(use.length<3||Math.max(...use.map(q=>q.x))-Math.min(...use.map(q=>q.x))<5)use=pts;
+  if(use.length<2)return null;
+  const n=use.length,mx=use.reduce((a,q)=>a+q.x,0)/n,my=use.reduce((a,q)=>a+q.y,0)/n;
+  const sxx=use.reduce((a,q)=>a+(q.x-mx)**2,0);if(!sxx)return null;
+  const k=use.reduce((a,q)=>a+(q.x-mx)*(q.y-my),0)/sxx;return my+k*(t-mx);
+}
+function weightShift(p,t,ms){
+  if(t<W_FROM||ms.length<3)return 0;
+  const now=weightTrend(p,t,ms);if(now==null)return 0;
+  const lost=p.startW-now,need=p.startW-p.goal;if(need<=0)return 0;
+  const raw=lost>0.2?Math.round(need/lost*(t-1))-p.planDays:W_CAP;
+  const ramp=Math.min(W_CAP,1+Math.floor((t-W_FROM)/3));      // растёт постепенно
+  return clamp(raw,-ramp,ramp);
+}
 function calc(p){
   const t=dayIdx(p.start),wm=weekMiss(p,t);let food=0,run=0,bonus=0;
   const miss=wm.miss.size,recentMiss=[...wm.miss].filter(d=>d>=t-3).length;
@@ -803,7 +824,7 @@ function calc(p){
   const discipline=miss+Math.floor(food/2);
   let weightAdj=0;const ms=(p.measurements||[]).filter(x=>x.w);
   const tone=p.track==='tone';
-  if(!tone&&ms.length>=2&&t>=8){const lost=p.startW-avgWeek(p),need=p.startW-p.goal;weightAdj=lost>0?clamp(Math.round(need/lost*(t-1))-p.planDays,-14,21):7}
+  if(!tone)weightAdj=weightShift(p,t,ms);
   const extra=weightAdj>0?Math.max(discipline,weightAdj):discipline+weightAdj;
   const total=Math.max(t,p.planDays+extra-bonus);
   const cur=lastWeight(p);
@@ -1187,7 +1208,12 @@ function renderCabinet(){
   $('bar').style.width=Math.max(2,c.progress)+'%';
   const key='sr_total_'+P.email,prev=+recall(key);
   if(prev&&prev!==c.total&&!free){const el=$('relDate');el.classList.remove('flip');void el.offsetWidth;el.classList.add('flip');
-    toast(c.total<prev?`Дата выхода приблизилась на ${prev-c.total} ${pl(prev-c.total,'день','дня','дней')}`:`Дата выхода отодвинулась на ${c.total-prev} ${pl(c.total-prev,'день','дня','дней')}`)}
+    let why='';try{const o=JSON.parse(recall('sr_parts_'+P.email)||'null');if(o){const r=[];
+      if(c.miss>o.miss)r.push('неделя закрылась с недобором тренировок');if(Math.floor(c.food/2)>Math.floor(o.food/2))r.push('дни без отметки питания');
+      if(c.weightAdj!==o.w)r.push(c.weightAdj>o.w?'вес снижается медленнее плана':'вес снижается быстрее плана');if(c.bonus>o.bonus)r.push('УДО');if(c.miss<o.miss)r.push('куратор поправил отметки');
+      if(r.length)why=': '+r.join(', ')}}catch(e){}
+    toast(c.total<prev?`Дата выхода приблизилась на ${prev-c.total} ${pl(prev-c.total,'день','дня','дней')}${why}`:`Дата выхода отодвинулась на ${c.total-prev} ${pl(c.total-prev,'день','дня','дней')}${why}. Подробно — «?» у даты`)}
+  store('sr_parts_'+P.email,JSON.stringify({miss:c.miss,food:c.food,w:c.weightAdj,bonus:c.bonus}));
   store(key,c.total);
   let ch='';
   if(!free&&c.t>=1)ch+=`<button class="chip2" data-hint="udo">УДО <span class="udo">${Array.from({length:UDO_DAYS},(_,i)=>`<i class="${i<c.run?'on':''}"></i>`).join('')}</span><b>${c.run}/${UDO_DAYS}</b></button>`;
@@ -1648,7 +1674,7 @@ function hintHtml(key){
   if(key==='date'){const rows=[[P.track==='tone'?'Режим «Тонус»':`${P.startW} → ${P.goal} кг по ${g(P.weekly||Math.min(1,P.startW*.01))} кг/нед`,`${P.planDays} дн.`]];
     if(c.miss)rows.push(['Недобор тренировок до нормы',`+${c.miss}`]);if(Math.floor(c.food/2))rows.push([`${c.food} дн. без питания`,`+${Math.floor(c.food/2)}`]);
     if(c.weightAdj>0)rows.push(['Вес медленнее плана',`+${c.weightAdj}`]);if(c.weightAdj<0)rows.push(['Худеешь быстрее',`${c.weightAdj}`]);if(c.bonus)rows.push(['Условно-досрочное',`−${c.bonus}`]);rows.push(['Итого',`${c.total} дн.`]);
-    return`<b>Дата живая.</b> Пропуски отодвигают её, неделя без пропусков приближает.<ul>${rows.map(([a,b])=>`<li><span>${a}</span><b>${b}</b></li>`).join('')}</ul>`}
+    return`<b>Дата живая.</b> Пропуски отодвигают её, неделя без пропусков приближает. Вес учитывается с ${W_FROM}-го дня по среднему тренду, не больше чем на ±${W_CAP} дней и постепенно — не быстрее дня за 3 дня.<ul>${rows.map(([a,b])=>`<li><span>${a}</span><b>${b}</b></li>`).join('')}</ul>`}
   if(key==='udo')return`<b>Условно-досрочное.</b> ${UDO_DAYS} засчитанных дней подряд — минус день срока и +${PTS.udo} баллов. Сейчас подряд: ${c.run} из ${UDO_DAYS}.${c.bonus?` Уже заработано: −${c.bonus} ${pl(c.bonus,'день','дня','дней')} — после каждого УДО счёт начинается заново.`:''}<br><br>День идёт в серию, если отмечено питание и сделана тренировка (или её можно было пропустить без ущерба для нормы недели). Серия обнуляется, если в какой-то день не отмечено питание или неделя закрылась с пропуском.`;
   if(key==='points')return`<b>Баллы поведения</b><ul><li><span>Тренировка</span><b>+${PTS.train}</b></li><li><span>День по меню</span><b>+${PTS.food}</b></li><li><span>День без пропусков</span><b>+${PTS.perfect}</b></li><li><span>Бонус-задание</span><b>+${PTS.bonus}</b></li><li><span>Замеры</span><b>+${PTS.meas}</b></li><li><span>Отзыв</span><b>+${PTS.feel}</b></li><li><span>УДО</span><b>+${PTS.udo}</b></li></ul>`;
   if(key==='meas')return'Раз в 3 дня, утром натощак. Колебания ±1–2 кг — норма: дата считается по среднему за неделю.';
@@ -1911,6 +1937,7 @@ function renderRc(){
 </script>
 </body>
 </html>
+
 
 
 
