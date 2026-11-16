@@ -565,10 +565,50 @@ const obDrop=id=>obSet(obGet().filter(q=>q.id!==id));
 const isDirty=()=>!!(P&&P.email&&(obGet().length||recall('sr_dirty_'+P.email)));
 function warnNet(){if(!netWarned){netWarned=true;toast('Нет связи с базой — всё сохраняется на телефоне и отправится само')}}
 function markDirty(){if(!P||!P.email)return;backup();store('sr_dirty_'+P.email,'1');warnNet()}
-const sendOp=op=>op.t==='s'?(op.o?realRef.set(op.x,op.o):realRef.set(op.x)):realRef.update(op.x);
+/* Журнал отметок — отдельный документ «email~log». В него отметки только добавляются (по одному полю), целиком он не перезаписывается никогда.
+   Если основное личное дело затрёт старая версия страницы или другое устройство, отметки и замеры восстановятся из журнала. */
+const MARKF=['done','food','bonus','steps','opened','feel','comment','again','late','byCur'],MAPF=['pd','po'];
+const jRef=()=>db.collection(PART).doc(obEmail+'~log');
+const measMap=a=>{const o={};(a||[]).forEach(m=>{if(m&&m.t)o[String(m.t)]=m});return o};
+function jPatch(x){const pt={};let has=false;
+  Object.entries(x||{}).forEach(([k,v])=>{const a=k.split('.');
+    if(a[0]==='log'&&a.length===3){((pt.log=pt.log||{})[a[1]]=pt.log[a[1]]||{})[a[2]]=v;has=true}
+    else if(k==='measurements'&&Array.isArray(v)){pt.meas=measMap(v);has=true}
+    else if(k==='start'){pt.start=v;has=true}});
+  return has?pt:null}
+const sendOp=op=>op.t==='j'?jRef().set(op.x,{merge:true}):op.t==='J'?jRef().set(op.x):op.t==='s'?(op.o?realRef.set(op.x,op.o):realRef.set(op.x)):realRef.update(op.x);
+function journal(x,whole){if(!obEmail||(P&&P.offlineNew))return;
+  const pt=whole?{start:P.start,log:P.log||{},meas:measMap(P.measurements)}:jPatch(x);if(!pt)return;
+  if(!whole&&P&&P.start&&!pt.start)pt.start=P.start;
+  track(whole?'J':'j',pt).catch(e=>console.warn('journal',e))}
+// отметку, однажды поставленную, может снять только куратор: объединяем отметки журнала (или другой копии) с текущими
+function mergeMarks(log,src,curWins){const add={};
+  Object.entries(src||{}).forEach(([k,v])=>{if(!v||typeof v!=='object')return;const l=log[k]=log[k]||{};
+    const curNewer=l.byCur&&(!v.byCur||v.byCur<l.byCur);          // в этом дне есть более свежая правка куратора — её не трогаем
+    MARKF.forEach(f=>{if(!(f in v))return;
+      if(curNewer&&['done','food','bonus'].includes(f))return;
+      if(v[f]&&!l[f]){l[f]=v[f];add[`log.${k}.${f}`]=v[f]}
+      else if(curWins&&v[f]==null&&l[f]&&v.byCur&&(!l.byCur||l.byCur<=v.byCur)&&f!=='byCur'){l[f]=null;add[`log.${k}.${f}`]=null}
+      else if(f==='byCur'&&v[f]>(l[f]||0)){l[f]=v[f];add[`log.${k}.${f}`]=v[f]}});
+    MAPF.forEach(f=>{if(v[f]&&typeof v[f]==='object'){const m={...v[f],...(l[f]||{})};if(JSON.stringify(m)!==JSON.stringify(l[f]||{})){l[f]=m;add[`log.${k}.${f}`]=m}}})});
+  return add}
+function mergeMeas(list,srcMap){const have=new Set(list.map(m=>String(m.t)));let ch=false;Object.values(srcMap||{}).forEach(m=>{if(m&&m.t&&!have.has(String(m.t))){list.push(m);ch=true}});if(ch)list.sort((a,b)=>(a.t||0)-(b.t||0));return ch}
+async function syncJournal(){
+  if(!realRef||!P||P.offlineNew||!FB_OK&&false)return;
+  let j;try{const s=await wait(jRef().get({source:'server'}),15000);j=s.exists?s.data():null}catch(e){console.warn('journal get',e);return}
+  P.log=P.log||{};P.measurements=P.measurements||[];
+  if(!j||(j.start&&j.start!==P.start)){journal(null,true);return}
+  const fix=mergeMarks(P.log,j.log,true);                          // из журнала → в личное дело
+  if(mergeMeas(P.measurements,j.meas))fix.measurements=P.measurements;
+  if(Object.keys(fix).length){track('u',fix,null,true).catch(console.warn);backup();if(!$('cabinet').classList.contains('hidden'))renderCabinet()}
+  const back={};Object.entries(P.log).forEach(([k,l])=>{const v=(j.log||{})[k]||{};[...MARKF,...MAPF].forEach(f=>{if(l&&l[f]&&!(f in v))((back.log=back.log||{})[k]=back.log[k]||{})[f]=l[f]})});
+  const jm=j.meas||{},mm={};P.measurements.forEach(m=>{if(m&&m.t&&!jm[String(m.t)])mm[String(m.t)]=m});if(Object.keys(mm).length)back.meas=mm;
+  if(back.log||back.meas){back.start=P.start;track('j',back).catch(console.warn)}   // из личного дела → в журнал
+}
 const fatal=e=>['permission-denied','invalid-argument','not-found'].includes(e&&e.code);
 // каждая запись сначала кладётся в очередь на телефоне, потом уходит в базу; из очереди убирается только после подтверждения базы
-function track(t,x,o){
+function track(t,x,o,noJ){
+  if(!noJ&&(t==='u'||t==='s'))Promise.resolve().then(()=>journal(x,t==='s'));
   const ks=Object.keys(x||{}),light=t==='u'&&ks.length===1&&ks[0]==='lastSeen';
   const op={id:Date.now()+'_'+Math.random().toString(36).slice(2,8),t,x,o};
   if(!light){const a=obGet();a.push(op);obSet(a)}
@@ -602,7 +642,7 @@ async function flush(){
     if(P.offlineNew){   // анкета пройдена без связи: вдруг личное дело уже есть в базе (например, с другого телефона)
       const s=await wait(realRef.get({source:'server'}),15000);
       if(s.exists){P=s.data();store('sr_dirty_'+P.email,null);obSet([]);backup();toast('Нашли твоё личное дело в базе — открыли его');openCabinet();return true}
-      delete P.offlineNew;await wait(realRef.set(P),20000);store('sr_dirty_'+P.email,null);obSet([]);backup();
+      delete P.offlineNew;await wait(realRef.set(P),20000);store('sr_dirty_'+P.email,null);obSet([]);backup();journal(null,true);
     }
     if(recall('sr_dirty_'+P.email))await migrateDirty();
     if(pend>0)return false;                       // записи ещё в пути — подождём их
@@ -623,11 +663,26 @@ async function refresh(){
     const sd=s.data(),strip=o=>JSON.stringify({...o,lastSeen:0});
     const miss=Object.keys(P.menu||{}).filter(k=>!(sd.menu||{})[k]);
     if(isDirty()||pend>0)return;
-    if(strip(sd)!==strip(P)){const loc=P.menu||{};P=sd;P.menu=P.menu||{};miss.forEach(k=>P.menu[k]=loc[k]);menuSyncAt=Date.now();backup();if(!$('cabinet').classList.contains('hidden'))openCabinet()}
+    if(strip(sd)!==strip(P)){const loc=P.menu||{},old=P;P=sd;P.menu=P.menu||{};miss.forEach(k=>P.menu[k]=loc[k]);
+      // отметки и замеры, которые есть на телефоне, но пропали из базы, возвращаем обратно
+      if(old&&old.start===P.start){P.log=P.log||{};const keep=mergeMarks(P.log,old.log,false);P.measurements=P.measurements||[];if(mergeMeas(P.measurements,measMap(old.measurements)))keep.measurements=P.measurements;
+        if(Object.keys(keep).length)track('u',keep).catch(console.warn)}
+      menuSyncAt=Date.now();backup();if(!$('cabinet').classList.contains('hidden'))openCabinet()}
     menuReady=true;if(miss.length)saveMenu({},miss.map(k=>+k.slice(1)));
+    await syncJournal();
   }catch(e){console.warn('refresh',e)}
   finally{menuReady=true}
 }
+// страница сама подхватывает новую версию: старые вкладки больше не живут днями со старым кодом
+const APP_V='20261116a';let verAt=0;
+async function checkVersion(){
+  if(location.protocol==='file:'||Date.now()-verAt<6e5)return;verAt=Date.now();
+  try{const r=await fetch(location.pathname+'?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const m=(await r.text()).match(/const APP_V='([^']+)'/);
+    if(!m||m[1]===APP_V||pend>0)return;
+    if(!$('onb').classList.contains('hidden')||(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)))return;
+    backup();location.reload()}catch(e){}
+}
+setInterval(checkVersion,18e5);document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkVersion()});
 let menuReady=true;   // false — кабинет открыт из копии на телефоне, база ещё не сверена: новые дни меню пока не записываем
 setInterval(flush,60000);
 addEventListener('online',()=>setTimeout(flush,2000));
@@ -998,7 +1053,7 @@ $('loginBtn').onclick=async()=>{
   if(bk){try{bindRef(email);store('sr_email',email);P=JSON.parse(bk);$('loginMsg').textContent='';$('loginBtn').disabled=false;menuReady=false;openCabinet();refresh();return}catch(e){console.warn(e)}}
   try{
     bindRef(email);const s=await readDoc(ref);store('sr_email',email);$('loginMsg').textContent='';
-    if(s.exists){P=s.data();if(s.fromBackup){toast('Нет связи — открыли копию с телефона');openCabinet();refresh()}else openCabinet()}
+    if(s.exists){P=s.data();if(s.fromBackup){toast('Нет связи — открыли копию с телефона');openCabinet();refresh()}else{openCabinet();syncJournal()}}
     else newbie(email,false);
   }catch(e){console.warn(e);loginFail(e)}
   finally{$('loginBtn').disabled=false}
@@ -1737,7 +1792,10 @@ $('curTabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(!b)return;
 const panel=n=>document.querySelector(`[data-panel="${n}"]`);
 async function loadCurator(){
   ['red','cases','all'].forEach(n=>panel(n).innerHTML='<p class="loading">Загружаем…</p>');
-  try{const s=await db.collection(PART).get();CUR=[];s.forEach(d=>{const p=d.data();if(p.plan&&p.start)CUR.push({p,c:calc(p)})})}
+  try{const s=await db.collection(PART).get();CUR=[];const JR={},raw=[];s.forEach(d=>{if(d.id.endsWith('~log'))JR[d.id.slice(0,-4)]=d.data();else raw.push(d.data())});
+    raw.forEach(p=>{if(!(p.plan&&p.start))return;const j=JR[p.email];
+      if(j&&(!j.start||j.start===p.start)){p.log=p.log||{};mergeMarks(p.log,j.log,true);p.measurements=p.measurements||[];mergeMeas(p.measurements,j.meas)}
+      CUR.push({p,c:calc(p)})})}
   catch(e){panel('red').innerHTML=`<p class="msg">Ошибка чтения: ${esc(e.message)}. Проверь правила Firestore.</p>`;return}
   renderRed();renderCases();renderAll();renderMarks();renderWk();renderRc();
 }
@@ -1802,7 +1860,8 @@ panel('marks').addEventListener('click',async e=>{
   p.log=p.log||{};const l=p.log[key]=p.log[key]||{};const on=!l[k];
   const val=on?(k==='done'?(l.opened||Date.now()):true):null;
   b.disabled=true;
-  try{await wait(db.collection(PART).doc(p.email).update({[`log.${key}.${k}`]:val,[`log.${key}.byCur`]:Date.now()}),15000);
+  try{const now=Date.now();await wait(Promise.all([db.collection(PART).doc(p.email).update({[`log.${key}.${k}`]:val,[`log.${key}.byCur`]:now}),
+      db.collection(PART).doc(p.email+'~log').set({start:p.start,log:{[key]:{[k]:val,byCur:now}}},{merge:true})]),15000);
     l[k]=val;l.byCur=Date.now();x.c=calc(p);renderMarks();renderRed();renderCases();renderAll();
     toast(`${p.name}: день ${d} — ${MARKS.find(m=>m[0]===k)[1].toLowerCase()} ${on?'засчитана':'снята'}`.replace('питание засчитана','питание засчитано').replace('питание снята','питание снято'))}
   catch(err){b.disabled=false;alert('Не сохранилось: '+(err.code||err.message)+'. Проверь связь и попробуй ещё раз.')}
@@ -1929,7 +1988,7 @@ function renderRc(){
     bindRef(saved);
     // есть копия на телефоне — открываем кабинет сразу, свежие данные из базы подтянем в фоне
     if(bk){try{P=JSON.parse(bk);menuReady=false;openCabinet();setTimeout(refresh,500);return}catch(e){console.warn(e)}}
-    try{const s=await readDoc(ref);if(s.exists){P=s.data();openCabinet();return}}catch(e){console.warn(e);loginFail(e)}
+    try{const s=await readDoc(ref);if(s.exists){P=s.data();openCabinet();syncJournal();return}}catch(e){console.warn(e);loginFail(e)}
     $('email').value=saved;
   }
   show('login');
