@@ -291,6 +291,18 @@ section.quests{position:relative}
 .badge svg{width:58px;height:66px;display:block;margin:0 auto 4px}
 .badge b{display:block;font-size:.8rem;color:var(--ink);font-weight:600;line-height:1.2}
 .badge:not(.on){opacity:.75}.badge:not(.on) b{color:var(--steel)}
+.bell{position:relative;display:inline-flex;align-items:center;gap:4px;padding-inline:10px}.bell svg{width:18px;height:18px}
+.bell b{background:var(--alarm);color:#fff;border-radius:9px;min-width:18px;height:18px;padding:0 5px;font-size:.72rem;line-height:18px;text-align:center}
+.bell.ring svg{animation:ring 1.2s ease-in-out 2}
+@keyframes ring{0%,100%{transform:rotate(0)}15%{transform:rotate(14deg)}30%{transform:rotate(-12deg)}45%{transform:rotate(8deg)}60%{transform:rotate(-4deg)}}
+.nbox{position:relative;text-align:left}.nbox h3{margin:4px 0 10px}.nbox #nText{white-space:pre-line;font-size:.95rem;line-height:1.5}
+.nbox #nText a{color:inherit}.nbox .btn{width:100%;margin-top:14px}.nbox #nLink{display:block;text-align:center}.nbox #nLink.hidden{display:none}
+.nx{position:absolute;top:8px;right:10px;background:none;border:0;font-size:1.6rem;line-height:1;color:var(--steel);cursor:pointer;padding:4px 8px}
+.nk{font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--steel);font-weight:600;padding-right:28px}
+.nmore{font-size:.78rem;color:var(--steel);text-align:center;margin-top:8px}
+.nsent{border:1.5px solid var(--line);border-radius:8px;background:#fff;padding:12px 14px;margin-top:10px}
+.nsent.off{opacity:.55}.nsent h4{margin:0 0 4px;font-size:1rem}.nsent p{font-size:.86rem;white-space:pre-line}
+.nsent .s{font-size:.78rem;color:var(--steel)}
 .modal{position:fixed;inset:0;background:rgba(20,21,18,.72);display:grid;place-items:center;z-index:20;padding:16px}
 .mbox{background:var(--paper);border-radius:12px;padding:28px 22px 22px;max-width:360px;width:100%;text-align:center;animation:pop .45s cubic-bezier(.2,1.5,.4,1)}
 .mbox svg{width:110px;height:124px}
@@ -358,7 +370,7 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
 <div class="wrap">
 <header>
   <div class="brand">Строгий режим<small>интенсив-лагерь от ШАГАЙ ДОМА»</small></div>
-  <div style="display:flex;gap:8px"><button class="toggle hidden" id="tourBtn" aria-label="Как играть">?</button><button class="toggle" id="modeBtn">Кабинет куратора</button></div>
+  <div style="display:flex;gap:8px"><button class="toggle bell hidden" id="newsBtn" aria-label="Новые сообщения"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v4l-2 3h16l-2-3V9a6 6 0 0 0-6-6zm-2 15a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><b id="newsCnt"></b></button><button class="toggle hidden" id="tourBtn" aria-label="Как играть">?</button><button class="toggle" id="modeBtn">Кабинет куратора</button></div>
 </header>
 
 <div id="boot" class="loading">Загружаем…</div>
@@ -479,6 +491,7 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
   <button class="btn" id="edYes" disabled>Подтверждаю</button>
   <button class="btn ghost" id="edNo" style="margin-top:8px">Пока нет согласия</button>
 </div></div>
+<div class="modal hidden" id="newsModal" role="dialog" aria-modal="true" aria-labelledby="nTitle"><div class="mbox nbox"><button class="nx" id="nLater" aria-label="Прочитаю позже">×</button><p class="nk" id="nKicker">Сообщение от кураторов</p><h3 id="nTitle"></h3><div id="nText"></div><a class="btn ghost hidden" id="nLink" target="_blank" rel="noopener"></a><button class="btn" id="nRead">Прочитано</button><p class="nmore" id="nMore"></p></div></div>
 <div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="mbox"><div id="mIcon"></div><p class="mk" id="mKicker">Новая нашивка</p><h3 id="mTitle"></h3><p id="mText"></p><button class="btn" id="mClose">Забрать</button></div></div>
 
 <!-- КУРАТОР -->
@@ -497,6 +510,7 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
       <button role="tab" data-tab="marks" aria-selected="false">Отметки</button>
       <button role="tab" data-tab="wk" aria-selected="false">База тренировок</button>
       <button role="tab" data-tab="rc" aria-selected="false">База меню</button>
+      <button role="tab" data-tab="news" aria-selected="false">Уведомления</button>
       <button class="toggle" id="reloadCur" style="margin-left:auto">Обновить</button>
     </div>
     <section data-panel="red"></section>
@@ -505,6 +519,7 @@ details.more{margin-top:10px}details.more summary{cursor:pointer;font-size:.85re
     <section data-panel="marks" class="hidden"></section>
     <section data-panel="wk" class="hidden"></section>
     <section data-panel="rc" class="hidden"></section>
+    <section data-panel="news" class="hidden"></section>
   </div>
 </div>
 </div>
@@ -674,7 +689,7 @@ async function refresh(){
   finally{menuReady=true}
 }
 // страница сама подхватывает новую версию: старые вкладки больше не живут днями со старым кодом
-const APP_V='20261116a';let verAt=0;
+const APP_V='20261123a';let verAt=0;
 async function checkVersion(){
   if(location.protocol==='file:'||Date.now()-verAt<6e5)return;verAt=Date.now();
   try{const r=await fetch(location.pathname+'?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const m=(await r.text()).match(/const APP_V='([^']+)'/);
@@ -729,7 +744,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function store(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
 function recall(k){try{return localStorage.getItem(k)}catch(e){return null}}
 const SCREENS=['boot','login','onb','reveal','cabinet','curator'];
-function show(id){SCREENS.forEach(s=>$(s).classList.toggle('hidden',s!==id));$('tabbar').classList.toggle('hidden',id!=='cabinet');$('tourBtn').classList.toggle('hidden',id!=='cabinet');document.body.classList.toggle('app',id==='cabinet');document.querySelector('header').classList.toggle('hidden',id==='reveal');window.scrollTo(0,0)}
+function show(id){SCREENS.forEach(s=>$(s).classList.toggle('hidden',s!==id));$('tabbar').classList.toggle('hidden',id!=='cabinet');$('tourBtn').classList.toggle('hidden',id!=='cabinet');if(id!=='cabinet'){$('newsBtn').classList.add('hidden');$('newsModal').classList.add('hidden')}else setTimeout(newsUI,0);document.body.classList.toggle('app',id==='cabinet');document.querySelector('header').classList.toggle('hidden',id==='reveal');window.scrollTo(0,0)}
 let toastT;function toast(t){let el=$('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';el.setAttribute('role','status');document.body.appendChild(el)}el.textContent=t;el.classList.remove('hidden');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.add('hidden'),3800)}
 const dossierNo=email=>{let h=7;for(const c of email)h=(h*31+c.charCodeAt(0))%9000;return String(1000+h)};
 
@@ -1151,6 +1166,7 @@ function openCabinet(){
   backup();
   go('today');renderCabinet();renderMenu();
   if(!P.tourDone&&!recall('sr_tour_'+P.email))setTimeout(startTour,500);
+  setTimeout(()=>loadNews(),900);
 }
 const whyText=p=>p.why.list.map(w=>w==='К событию'&&p.why.eventName?'к событию «'+p.why.eventName+'»':w.toLowerCase()).join(', ');
 function greeting(){const h=new Date().getHours();return h<5?'Доброй ночи':h<12?'Доброе утро':h<18?'Добрый день':'Добрый вечер'}
@@ -1208,12 +1224,47 @@ const ICON={
   done:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>'
 };
 let justDone=false,modalQ=[];
+/* ================= УВЕДОМЛЕНИЯ ОТ КУРАТОРОВ ================= */
+const NCOL='strict_news';let NEWS=[],newsAt=0;
+const newsReadSet=()=>new Set([...(P&&P.newsRead||[]),...(()=>{try{return JSON.parse(recall('sr_nr_'+(P&&P.email))||'[]')}catch(e){return[]}})()]);
+const newsFor=(n,p)=>n&&n.title&&(n.until||0)>Date.now()&&(!n.to||!n.to.length||n.to.includes(p.email));
+const unreadNews=()=>{if(!P)return[];const r=newsReadSet();return NEWS.filter(n=>newsFor(n,P)&&!r.has(n.id)).sort((a,b)=>a.at-b.at)};
+// ссылки в тексте: https://…, www.… и t.me/… — открываются в новой вкладке; точка или скобка в конце в ссылку не попадает
+function linkify(t){return esc(t).replace(/(https?:\/\/|www\.|t\.me\/)[^\s<]+/g,m=>{const tail=(m.match(/[.,!?;:)»"']+$/)||[''])[0],u=tail?m.slice(0,-tail.length):m;
+  const href=/^https?:/.test(u)?u:'https://'+u;return`<a href="${href}" target="_blank" rel="noopener">${u}</a>${tail}`})}
+async function loadNews(force){
+  if(!P||!FB_OK)return;if(!force&&Date.now()-newsAt<5*6e4){newsUI();return}newsAt=Date.now();
+  try{const s=await wait(db.collection(NCOL).where('until','>',Date.now()).get(),10000);const a=[];s.forEach(d=>a.push({id:d.id,...d.data()}));NEWS=a;store('sr_news',JSON.stringify(a))}
+  catch(e){console.warn('news',e);try{NEWS=JSON.parse(recall('sr_news')||'[]')}catch(_){}}
+  newsUI();showNews();
+}
+function newsUI(){const u=unreadNews().length,b=$('newsBtn');if(!b)return;const was=!b.classList.contains('hidden');
+  b.classList.toggle('hidden',!u||$('cabinet').classList.contains('hidden'));$('newsCnt').textContent=u||'';if(u&&!was){b.classList.remove('ring');void b.offsetWidth;b.classList.add('ring')}}
+function showNews(manual){
+  const u=unreadNews();if(!u.length){$('newsModal').classList.add('hidden');newsUI();return}
+  if(!manual&&(!$('modal').classList.contains('hidden')||tourI>=0||$('cabinet').classList.contains('hidden')))return;
+  const n=u[0];$('newsModal').dataset.id=n.id;
+  $('nKicker').textContent='Сообщение от кураторов · '+new Date(n.at).toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+  $('nTitle').textContent=n.title;$('nText').innerHTML=linkify(n.text||'');
+  const l=$('nLink');if(n.link){l.href=n.link;l.textContent=n.linkText||'Открыть';l.classList.remove('hidden')}else l.classList.add('hidden');
+  $('nMore').textContent=u.length>1?`Ещё ${u.length-1} ${pl(u.length-1,'сообщение','сообщения','сообщений')}`:'';
+  $('newsModal').classList.remove('hidden');$('nRead').focus();
+}
+function markNewsRead(id){const r=newsReadSet();r.add(id);
+  const keep=[...r].filter(x=>NEWS.some(n=>n.id===x)||(P.newsRead||[]).includes(x)).slice(-200);
+  P.newsRead=keep;store('sr_nr_'+P.email,JSON.stringify(keep));ref.update({newsRead:keep}).catch(console.warn);backup()}
+$('nRead').onclick=()=>{markNewsRead($('newsModal').dataset.id);$('newsModal').classList.add('hidden');newsUI();setTimeout(()=>{if(unreadNews().length)showNews(true);else showModal()},250)};
+$('nLink').addEventListener('click',()=>markNewsRead($('newsModal').dataset.id));
+$('nLater').onclick=()=>{$('newsModal').classList.add('hidden');newsUI();setTimeout(showModal,250)};
+$('newsBtn').onclick=()=>showNews(true);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&P&&!$('cabinet').classList.contains('hidden'))loadNews()});
+setInterval(()=>{if(P&&!document.hidden&&!$('cabinet').classList.contains('hidden'))loadNews(true)},10*6e4);
 function showModal(){
-  if(!modalQ.length||!$('modal').classList.contains('hidden')||tourI>=0)return;
+  if(!modalQ.length||!$('modal').classList.contains('hidden')||!$('newsModal').classList.contains('hidden')||tourI>=0)return;
   const m=modalQ.shift();$('mIcon').innerHTML=m.icon;$('mKicker').textContent=m.kicker;$('mTitle').textContent=m.title;$('mText').textContent=m.text;
   $('modal').classList.remove('hidden');$('mClose').focus();
 }
-$('mClose').onclick=()=>{$('modal').classList.add('hidden');setTimeout(showModal,250)};
+$('mClose').onclick=()=>{$('modal').classList.add('hidden');setTimeout(()=>{if(modalQ.length)showModal();else showNews()},250)};
 function checkRewards(c,s,pts){
   const earned=BADGES.filter(b=>b[4](c,s)).map(b=>b[0]);
   const known=P.badges;const fresh=known?earned.filter(id=>!known.includes(id)):[];
@@ -1764,7 +1815,7 @@ const TOUR=[
 let tourI=-1;
 function tourStep(){
   document.querySelectorAll('.spot').forEach(x=>x.classList.remove('spot'));$('tabbar').style.zIndex='';
-  let c=$('coach');if(tourI>=TOUR.length){c&&c.remove();$('tourBlock')&&$('tourBlock').remove();tourI=-1;P.tourDone=true;store('sr_tour_'+P.email,'1');ref.update({tourDone:true}).catch(console.warn);showModal();return}
+  let c=$('coach');if(tourI>=TOUR.length){c&&c.remove();$('tourBlock')&&$('tourBlock').remove();tourI=-1;P.tourDone=true;store('sr_tour_'+P.email,'1');ref.update({tourDone:true}).catch(console.warn);showModal();setTimeout(showNews,400);return}
   const[pane,sel,text]=TOUR[tourI];go(pane);const el=document.querySelector(sel);if(!el){tourI++;return tourStep()}
   if(el.closest('#tabbar'))$('tabbar').style.zIndex=31;
   el.classList.add('spot');el.scrollIntoView({block:'center',behavior:reduced?'auto':'smooth'});
@@ -1797,7 +1848,7 @@ async function loadCurator(){
       if(j&&(!j.start||j.start===p.start)){p.log=p.log||{};mergeMarks(p.log,j.log,true);p.measurements=p.measurements||[];mergeMeas(p.measurements,j.meas)}
       CUR.push({p,c:calc(p)})})}
   catch(e){panel('red').innerHTML=`<p class="msg">Ошибка чтения: ${esc(e.message)}. Проверь правила Firestore.</p>`;return}
-  renderRed();renderCases();renderAll();renderMarks();renderWk();renderRc();
+  renderRed();renderCases();renderAll();renderMarks();renderWk();renderRc();loadCurNews();
 }
 const seenAgo=p=>Math.floor((Date.now()-(p.lastSeen||p.createdAt||0))/DAY);
 function reminder(p,reasons){
@@ -1882,6 +1933,55 @@ function wkForm(w,isNew){
   <div class="rcb" style="margin-top:12px"><button class="btn green" data-wksave="${isNew?'':esc(w.id)}">${isNew?'Добавить':'Сохранить'}</button><button class="btn ghost" data-wkcancel="1">Отмена</button></div>
   </div></div>`;
 }
+/* ---------- куратор: уведомления участницам ---------- */
+let CNEWS=[],nTo='all',nPick=new Set(),nQ='';
+async function loadCurNews(){
+  try{const s=await wait(db.collection(NCOL).get(),12000);CNEWS=[];s.forEach(d=>CNEWS.push({id:d.id,...d.data()}));CNEWS.sort((a,b)=>b.at-a.at)}catch(e){console.warn(e);panel('news').innerHTML=`<p class="msg">Не удалось прочитать уведомления: ${esc(e.code||e.message)}. Проверь правила Firestore для коллекции ${NCOL}.</p>`;return}
+  renderCurNews();
+}
+function renderCurNews(){
+  const def=iso(addDays(new Date(),7)),q=nQ.trim().toLowerCase();
+  const list=CUR.map(x=>x.p).sort((a,b)=>a.name.localeCompare(b.name,'ru')),found=q?list.filter(p=>(p.name+' '+p.email+' '+(p.contact||'')+' '+(p.num||'')).toLowerCase().includes(q)).slice(0,30):[];
+  const keep=id=>{const e=document.getElementById(id);return e?e.value:''};
+  const vals={t:keep('nwT'),x:keep('nwX'),l:keep('nwL'),lt:keep('nwLT'),u:keep('nwU')||def};
+  const reads=n=>{const tg=CUR.filter(({p})=>!n.to||!n.to.length||n.to.includes(p.email));return`${tg.filter(({p})=>(p.newsRead||[]).includes(n.id)).length} из ${tg.length}`};
+  panel('news').innerHTML=`<h2>Новое уведомление</h2>
+  <p class="note">Участница увидит его в лагере окном поверх экрана при следующем входе (или в течение 10 минут, если лагерь открыт). После «Прочитано» сообщение исчезает. Пока не прочитано — на колокольчике вверху горит счётчик.</p>
+  <label for="nwT">Заголовок</label><input id="nwT" maxlength="80" value="${esc(vals.t)}" placeholder="например, Новые тренировки в плане">
+  <label for="nwX">Текст</label><textarea id="nwX" rows="5" maxlength="1500" placeholder="Ссылки в тексте станут кликабельными">${esc(vals.x)}</textarea>
+  <div class="row"><div><label for="nwL">Ссылка-кнопка (необязательно)</label><input id="nwL" value="${esc(vals.l)}" placeholder="https://…"></div><div><label for="nwLT">Текст кнопки</label><input id="nwLT" value="${esc(vals.lt)}" placeholder="Открыть"></div></div>
+  <div class="row"><div><label for="nwU">Показывать до (включительно)</label><input id="nwU" type="date" value="${esc(vals.u)}"></div><div></div></div>
+  <label>Кому</label><div class="opts"><button class="opt" data-nto="all" aria-pressed="${nTo==='all'}">Всем участницам · ${CUR.length}</button><button class="opt" data-nto="pick" aria-pressed="${nTo==='pick'}">Выбранным${nPick.size?' · '+nPick.size:''}</button></div>
+  ${nTo==='pick'?`<label for="nwQ">Найти участницу</label><input id="nwQ" value="${esc(nQ)}" placeholder="Имя, email, телефон или № дела" autocomplete="off">
+    <div class="mpick">${found.map(p=>`<button class="btn small ${nPick.has(p.email)?'':'ghost'}" data-npk="${esc(p.email)}">${esc(p.name)}<span class="s"> · № ${esc(p.num||'')}</span></button>`).join('')}</div>
+    ${nPick.size?`<p class="note">Выбраны: ${[...nPick].map(e=>{const p=list.find(x=>x.email===e);return`<button class="lnk" data-npk="${esc(e)}" title="Убрать">${esc(p?p.name:e)} ×</button>`}).join(', ')}</p>`:''}`:''}
+  <div class="msg" id="nwMsg"></div>
+  <button class="btn green" id="nwSend" style="margin-top:12px">Отправить</button>
+  <h2 style="margin-top:26px">Отправленные · ${CNEWS.length}</h2>
+  ${CNEWS.map(n=>{const on=(n.until||0)>Date.now();return`<div class="nsent ${on?'':'off'}"><h4>${esc(n.title)}</h4><p>${linkify(n.text||'')}</p>${n.link?`<p class="s">Кнопка «${esc(n.linkText||'Открыть')}» → ${esc(n.link)}</p>`:''}
+    <p class="s">${new Date(n.at).toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})} · ${n.to&&n.to.length?`выбранным: ${n.to.length}`:'всем'} · ${on?`показывается до ${fmt(new Date(n.until-1))}`:'снято'} · прочитали ${reads(n)}</p>
+    ${on?`<button class="btn small ghost" data-nstop="${esc(n.id)}" style="margin-top:6px">Снять — больше не показывать</button>`:''}</div>`}).join('')||'<p class="note">Пока ничего не отправляли.</p>'}`;
+  const qi=$('nwQ');if(qi)qi.oninput=()=>{nQ=qi.value;const pos=qi.selectionStart;renderCurNews();const nn=$('nwQ');nn.focus();nn.setSelectionRange(pos,pos)};
+}
+panel('news').addEventListener('click',async e=>{
+  const to=e.target.closest('[data-nto]');if(to){nTo=to.dataset.nto;renderCurNews();return}
+  const pk=e.target.closest('[data-npk]');if(pk){const m=pk.dataset.npk;nPick.has(m)?nPick.delete(m):nPick.add(m);renderCurNews();return}
+  const st=e.target.closest('[data-nstop]');if(st){if(!confirm('Снять уведомление? Те, кто ещё не прочитал, его не увидят.'))return;st.disabled=true;
+    try{await wait(db.collection(NCOL).doc(st.dataset.nstop).set({until:Date.now()-1},{merge:true}),15000);const n=CNEWS.find(x=>x.id===st.dataset.nstop);if(n)n.until=Date.now()-1;renderCurNews();toast('Уведомление снято')}catch(err){st.disabled=false;alert('Не сохранилось: '+(err.code||err.message))}return}
+  if(e.target.id!=='nwSend')return;
+  const b=e.target,msg=$('nwMsg'),title=$('nwT').value.trim(),text=$('nwX').value.trim(),link=$('nwL').value.trim(),u=$('nwU').value;
+  if(!title)return msg.textContent='Нужен заголовок';if(!text)return msg.textContent='Нужен текст';
+  if(link&&!/^https?:\/\//.test(link))return msg.textContent='Ссылка должна начинаться с https://';
+  if(!u||pd(u)<pd(iso(new Date())))return msg.textContent='Дата «показывать до» — сегодня или позже';
+  if(nTo==='pick'&&!nPick.size)return msg.textContent='Выбери хотя бы одну участницу';
+  const who=nTo==='pick'?`${nPick.size} ${pl(nPick.size,'участнице','участницам','участницам')}`:`всем (${CUR.length})`;
+  if(!confirm(`Отправить уведомление «${title}» ${who}?`))return;
+  const id='n'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const n={title,text,link:link||null,linkText:link?($('nwLT').value.trim()||'Открыть'):null,to:nTo==='pick'?[...nPick]:[],at:Date.now(),until:addDays(pd(u),1).getTime()};
+  b.disabled=true;
+  try{await wait(db.collection(NCOL).doc(id).set(n),15000);CNEWS.unshift({id,...n});['nwT','nwX','nwL','nwLT'].forEach(k=>$(k).value='');nPick=new Set();nTo='all';renderCurNews();toast('Уведомление отправлено')}
+  catch(err){b.disabled=false;msg.textContent='Не отправилось: '+(err.code||err.message)+'. Если ошибка permission-denied — добавь коллекцию '+NCOL+' в правила Firestore.'}
+});
 function renderWk(){
   const all=Object.values(W),q=wkQ.trim().toLowerCase();
   const noMin=all.filter(w=>!wMin(w)&&w.active!==false),guess=all.filter(w=>w.lvlGuess&&!w.editedAt),off=all.filter(w=>w.active===false);
@@ -1996,7 +2096,5 @@ function renderRc(){
 </script>
 </body>
 </html>
-
-
 
 
