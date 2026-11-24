@@ -7,8 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Golos+Text:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="workouts.js?v=20261113b"></script>
-<script src="recipes.js?v=20261113b"></script>
+<script src="workouts.js?v=20261124a"></script>
+<script src="recipes.js?v=20261124a"></script>
 <style>
 :root{--concrete:#E4E5E0;--wall:#F3F3F0;--paper:#FBFAF5;--ink:#1F211D;--steel:#6B6E67;--hazard:#F2C230;--release:#1F7A4D;--alarm:#C9352B;--line:#C9CBC4}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -157,6 +157,8 @@ svg.chart{width:100%;height:auto;margin-top:12px;display:block}
 .rb{padding:2px 0 12px 84px;font-size:.88rem}
 .rb h5{font-size:.8rem;margin:12px 0 4px;font-weight:600}
 .rb ul,.rb ol{padding-left:18px}.rb li{margin:3px 0}
+.rb li.ih{list-style:none;margin:10px 0 2px -18px;font-weight:600;font-size:.86rem}.rb li.ih:first-child{margin-top:2px}
+.rb ol li{white-space:pre-line}
 .rb .s{font-size:.8rem;color:var(--steel)}
 .rb .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
 .seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:4px;overflow:hidden;margin-top:10px}
@@ -689,7 +691,7 @@ async function refresh(){
   finally{menuReady=true}
 }
 // страница сама подхватывает новую версию: старые вкладки больше не живут днями со старым кодом
-const APP_V='20261123a';let verAt=0;
+const APP_V='20261124a';let verAt=0;
 async function checkVersion(){
   if(location.protocol==='file:'||Date.now()-verAt<6e5)return;verAt=Date.now();
   try{const r=await fetch(location.pathname+'?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const m=(await r.text()).match(/const APP_V='([^']+)'/);
@@ -1584,7 +1586,15 @@ async function loadRecipes(ms=5000){
   if(cfg){RDIS=new Set(cfg.disabled||[]);RED=cfg.edits||{};applyEdits()}
 }
 let RED={};const BASE={};
-function applyEdits(){Object.entries(RED).forEach(([id,ed])=>{if(!RX[id])return;if(!BASE[id])BASE[id]={...RX[id]};RX[id]=ed?{...BASE[id],...ed}:{...BASE[id]};delete ING[id]})}
+/* Правки кураторов показываем «как задумано»: при копировании из Заметок, Telegram или документа на телефоне переносы строк бывают
+   невидимыми символами (U+2028 и др.) — раньше из-за них шаги и продукты склеивались в одну строку. Сами правки в базе не меняются. */
+const SEP=/\r\n|\r|\u2028|\u2029|\u0085/;
+function tidyIng(a){return(a||[]).flatMap(x=>String(x??'').split(/\r\n|\r|\n|\u2028|\u2029|\u0085/)).map(x=>x.trim()).filter(Boolean)}
+function tidySteps(a){const out=[];(a||[]).forEach(x=>String(x??'').split(SEP).forEach(y=>{y=y.trim();if(!y)return;
+  if(/^[-–•*·]\s*/.test(y)&&out.length){out[out.length-1]+='\n• '+y.replace(/^[-–•*·]\s*/,'');return}
+  out.push(y.replace(/^(?:шаг\s*)?\d{1,2}\s*[.)](?!\d)\s*/i,''))}));return out}
+function applyEdits(){Object.entries(RED).forEach(([id,ed])=>{if(!RX[id])return;if(!BASE[id])BASE[id]={...RX[id]};
+  const r=ed?{...BASE[id],...ed}:{...BASE[id]};if(ed){r.ingredients=tidyIng(r.ingredients);r.steps=tidySteps(r.steps)}RX[id]=r;delete ING[id]})}
 function foodOf(p){const f=p.food||{};return{noTags:f.noTags||[],noWords:(f.noWords||p.excl||[]).map(w=>w.toLowerCase()).filter(Boolean),favs:f.favs||[],noIds:f.noIds||[],simple:f.simple!==false}}
 function recipeOk(r,food){
   if(!r||r.hide||RDIS.has(r.id)||food.noIds.includes(r.id))return false;
@@ -1609,7 +1619,7 @@ const portion=f=>Math.round(clamp(f,.7,1.6)*20)/20;
 // основные продукты блюда — чтобы меню соседних дней использовало одни и те же покупки
 const PANTRY=/^(соль|перец|специи|зелень|вода|масло|сахар|подсласт|разрыхл|ванил|корица|лавров|чеснок|сок|уксус|мука|соевый|томатн.*паст|сода|стевия|горчиц|паприк|куркум|прованс|итальянск|приправ)/i;
 const ING={};function ingOf(id){if(ING[id])return ING[id];const r=RX[id];if(!r)return[];
-  return ING[id]=[...new Set(r.ingredients.map(i=>i.split(' — ')[0].toLowerCase().replace(/\([^)]*\)/g,'').replace(/ё/g,'е').trim()).filter(n=>n&&!PANTRY.test(n)).map(n=>n.split(/[\s,]+/)[0].slice(0,6)))]}
+  return ING[id]=[...new Set(ingItems(r).map(x=>x.name.toLowerCase().replace(/\([^)]*\)/g,'').replace(/ё/g,'е').trim()).filter(n=>n&&!PANTRY.test(n)).map(n=>n.split(/[\s,]+/)[0].slice(0,6)))]}
 // ключ блюда: одинаковые по названию блюда из разных марафонов не должны встречаться в один день
 const dishKey=id=>{const r=RX[id];return r?(r.name+'|'+(r.nick||'')).toLowerCase().replace(/[^а-яёa-z|]/g,''):''};
 // вес порции для участницы, г
@@ -1617,7 +1627,7 @@ const gramsOf=(r,f)=>r&&r.g?Math.round(r.g*f/5)*5:null;
 // короткое описание из основных продуктов — для блюд с общими названиями («Блюдо», «Запеканка», «Салат»)
 const SKIP=/^(соль|перец|специи|зелень|вода|масло|сахар|подсласт|разрыхл|ванил|корица|лавров|чеснок|лимонн|сок|мёд|мед)/i;
 function aboutOf(r){if(!r||(r.name||'').split(/\s+/).length>4)return'';
-  return r.ingredients.map(i=>i.split(' — ')[0].replace(/\([^)]*\)/g,'').replace(/[:;,].*$/,'').replace(/\*|\b(ozon|вкусвилл|spar|озон)\b/gi,'').trim()).filter(n=>n.length>2&&!SKIP.test(n)).slice(0,3).map(n=>n.toLowerCase()).join(', ')}
+  return ingItems(r).map(x=>x.name.replace(/\([^)]*\)/g,'').replace(/[:;,].*$/,'').replace(/\*|\b(ozon|вкусвилл|spar|озон)\b/gi,'').trim()).filter(n=>n.length>2&&!SKIP.test(n)).slice(0,3).map(n=>n.toLowerCase()).join(', ')}
 function buildDay(p){
   const q={};MEALS.forEach(([k,key])=>q[k]=queue(p,key));
   const L=k=>Math.max(1,Math.min(8,q[k].length));let best=null;
@@ -1692,7 +1702,20 @@ function fmtAmt(v,u){
   const r=Math.max(.5,Math.round(v*2)/2),w=Math.floor(r);return (w?String(w):'')+(r-w?'½':'');
 }
 const scaleQty=(q,k)=>q.replace(QRX,(m,a,b,u)=>b?`${fmtAmt(num(a)*k,u)}–${fmtAmt(num(b)*k,u)} ${u}`:`${fmtAmt(num(a)*k,u)} ${u}`);
-function ingLines(r,k){return r.ingredients.map(line=>{const i=line.indexOf(' — ');return i<0?esc(line):`${esc(line.slice(0,i))} — <b>${esc(scaleQty(line.slice(i+3),k))}</b>`})}
+/* Ингредиенты с подзаголовками: «Для соуса:» отдельной строкой — подзаголовок; «Для салата: огурцы — 400 г» → подзаголовок «Для салата» + продукт «Огурцы — 400 г».
+   Так подпункты не сливаются ни в рецепте, ни в списке продуктов. */
+const IPC=new WeakMap(),cap=t=>t?t[0].toUpperCase()+t.slice(1):t;
+function ingParts(r){if(!r||!r.ingredients)return[];if(IPC.has(r))return IPC.get(r);const out=[];let lastH=null;
+  const head=h=>{h=h.trim().replace(/[:\s]+$/,'');if(h&&h!==lastH){out.push({h});lastH=h}};
+  r.ingredients.forEach(raw=>{const line=String(raw||'').trim();if(!line)return;const i=line.indexOf(' — ');
+    if(i<0){if(/:\s*$/.test(line)&&line.length<=60){head(line);return}out.push({name:line,q:'',line});return}
+    let name=line.slice(0,i).trim();const q=line.slice(i+3).trim();
+    const m=name.match(/^((?:для|на|соус|заправк|маринад|крем|салат|гарнир|овощи|тесто|начинк|глазур|подач|дополнительно|топпинг|посыпк|основа)[^:()]{0,36}(?:\([^)]*\)[^:()]{0,20})?):\s*(\S.*)$/i);
+    if(m){head(m[1]);name=cap(m[2].trim())}
+    out.push({name,q,line:name+' — '+q})});
+  IPC.set(r,out);return out}
+const ingItems=r=>ingParts(r).filter(x=>!x.h);
+function ingLines(r,k){return ingParts(r).map(x=>x.h?{h:1,html:esc(x.h)}:{html:x.q?`${esc(x.name)} — <b>${esc(scaleQty(x.q,k))}</b>`:esc(x.name)})}
 function recipeBody(r,f,isSide){
   const fam=famMode&&P.household>1,k=(fam?P.household:1)*f/(r.servings||4);
   const fav=foodOf(P).favs.includes(r.id);
@@ -1700,7 +1723,7 @@ function recipeBody(r,f,isSide){
   return `<div class="rb">${gm?`<p class="portion">${isSide?'Гарнира':'Положи себе'}: <b>${r.gEst?'≈ ':''}${gm} г</b> готового блюда</p>`:''}<p class="s">${Math.round(r.kcal*f)} ккал · Б ${g(r.p*f)} · Ж ${g(r.f*f)} · У ${g(r.c*f)}</p>
   ${r.serve?`<p class="s">Подача: ${esc(r.serve)}</p>`:''}
   ${P.household>1&&!isSide?`<div class="seg" role="group" aria-label="Граммы"><button data-fam="0" aria-pressed="${!famMode}">Моя порция</button><button data-fam="1" aria-pressed="${famMode}">На ${P.household} чел.</button></div>`:''}
-  ${r.ingredients.length?`<h5>Ингредиенты</h5><ul>${ingLines(r,k).map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
+  ${r.ingredients.length?`<h5>Ингредиенты</h5><ul>${ingLines(r,k).map(i=>i.h?`<li class="ih">${i.html}</li>`:`<li>${i.html}</li>`).join('')}</ul>`:''}
   ${r.steps.length?`<h5>Приготовление</h5><ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`:''}
   ${isSide?'':`<div class="acts"><button class="btn small ${fav?'':'ghost'}" data-fav="${r.id}" aria-label="${fav?'Убрать из любимых':'Нравится'}">${fav?'♥':'♡'}</button><button class="btn small ghost" data-swap>Заменить</button><button class="btn small ghost" data-never="${r.id}">Не предлагать</button></div>`}</div>`;
 }
@@ -1752,7 +1775,7 @@ function renderShop(){
   for(let d=t;d<t+menuDays;d++){const day=P.menu['d'+d];if(!day)continue;
     MEALS.forEach(([k,,label])=>{const r=RX[day[k]];if(!r)return;[r,sideOf(r,P)].filter(Boolean).forEach(rr=>{
       const kk=hh*day.f/(rr.servings||4);
-      rr.ingredients.forEach(line=>{const i=line.indexOf(' — ');let name=(i<0?line:line.slice(0,i)).replace(/\([^)]*\)/g,'').replace(/[:,].*$/,'').replace(/\s*\($/,'').trim();if(!name||name.length>40)return;
+      ingItems(rr).forEach(({line})=>{const i=line.indexOf(' — ');let name=(i<0?line:line.slice(0,i)).replace(/\([^)]*\)/g,'').replace(/[:,].*$/,'').replace(/\s*\($/,'').trim();if(!name||name.length>40)return;
         const key=name.toLowerCase();const q=i<0?'':line.slice(i+3);QRX.lastIndex=0;const m=QRX.exec(q);
         // для какого блюда и в какой день нужен продукт — чтобы список совпадал с меню
         const u0=use[key]=use[key]||{};const dn=(rr===r?'':'гарнир: ')+rr.name+(rr.nick?' «'+rr.nick+'»':'');(u0[dn]=u0[dn]||{meal:label.toLowerCase(),days:[]}).days.includes(wd(d))||u0[dn].days.push(wd(d));
@@ -2022,6 +2045,7 @@ let rcEdit=null,rcHidden=false;
 const MEALN={breakfast:'Завтрак',snack:'Полдник',lunch:'Обед',dinner:'Ужин',bake:'ПП-выпечка'};
 function rcEditor(r){
   const lines=a=>esc((a||[]).join('\n'));
+  const ingText=esc(ingParts(r).map(x=>x.h?x.h+':':x.q?x.name+' — '+x.q:x.name).join('\n'));
   return `<li class="rced"><div>
   <p class="note">Ингредиенты указываются <b>на всё блюдо</b> (на число порций ниже), каждый с новой строки в формате «Продукт — количество», например «Творог 5% — 600 г». Участнице количество пересчитается на её порцию.</p>
   <div class="row"><div><label for="reName">Название</label><input id="reName" value="${esc(r.name)}"></div><div><label for="reNick">Название «в лагере»</label><input id="reNick" value="${esc(r.nick||'')}"></div></div>
@@ -2030,8 +2054,10 @@ function rcEditor(r){
     <div><label for="reG">Вес порции, г</label><input id="reG" type="number" min="0" step="5" value="${r.g||''}"></div>
     <div><label for="reKcal">Ккал на порцию</label><input id="reKcal" type="number" min="0" value="${r.kcal||''}"></div></div>
   <div class="row rc4"><div><label for="reP">Белки, г</label><input id="reP" type="number" step="0.1" value="${r.p??''}"></div><div><label for="reF">Жиры, г</label><input id="reF" type="number" step="0.1" value="${r.f??''}"></div><div><label for="reC">Углеводы, г</label><input id="reC" type="number" step="0.1" value="${r.c??''}"></div><div></div></div>
-  <label for="reIng">Ингредиенты (на ${r.servings||4} порц.)</label><textarea id="reIng" rows="${Math.max(5,(r.ingredients||[]).length+1)}">${lines(r.ingredients)}</textarea>
-  <label for="reSteps">Шаги приготовления</label><textarea id="reSteps" rows="${Math.max(4,(r.steps||[]).length+1)}">${lines(r.steps)}</textarea>
+  <label for="reIng">Ингредиенты (на ${r.servings||4} порц.)</label><textarea id="reIng" rows="${Math.max(5,ingParts(r).length+1)}">${ingText}</textarea>
+  <p class="note">Подзаголовок — отдельной строкой с двоеточием на конце, например «Для соуса:». Продукты под ним — каждый своей строкой.</p>
+  <label for="reSteps">Шаги приготовления</label><textarea id="reSteps" rows="${Math.max(4,(r.steps||[]).join('\n').split('\n').length+1)}">${lines(r.steps)}</textarea>
+  <p class="note">Каждый шаг — с новой строки. Подпункт внутри шага начни с «-» или «•» — он останется в этом же шаге отдельной строкой.</p>
   <label for="reServe">Подача (необязательно)</label><input id="reServe" value="${esc(r.serve||'')}">
   <label class="chk"><input type="checkbox" id="reShow" ${r.hide?'':'checked'}> Показывать в меню участниц</label>
   <div class="msg" id="reMsg"></div>
@@ -2040,11 +2066,15 @@ function rcEditor(r){
 }
 async function saveRecipeEdit(id,btn){
   const v=k=>$(k).value.trim(),num=k=>v(k)===''?null:+v(k).replace(',','.');
-  const ing=v('reIng').split('\n').map(x=>x.trim().replace(/\s+[-–]\s+/,' — ')).filter(Boolean),steps=v('reSteps').split('\n').map(x=>x.trim().replace(/^\d+[.)]\s*/,'')).filter(Boolean);
-  const bad=ing.filter(l=>!l.includes(' — '));
+  const NL=/\r\n|\r|\n|\u2028|\u2029/;
+  const ing=v('reIng').split(NL).map(x=>x.trim().replace(/\s+[-–]\s+/,' — ')).filter(Boolean);
+  const steps=[];v('reSteps').split(NL).map(x=>x.trim()).filter(Boolean).forEach(x=>{
+    if(/^[-–•*·]\s*/.test(x)&&steps.length){steps[steps.length-1]+='\n'+x.replace(/^[-–•*·]\s*/,'• ');return}
+    steps.push(x.replace(/^(?:шаг\s*)?\d{1,2}\s*[.)](?!\d)\s*/i,''))});
+  const bad=ing.filter(l=>!l.includes(' — ')&&!/:$/.test(l));
   if(!v('reName'))return $('reMsg').textContent='Нужно название';
   if(!ing.length)return $('reMsg').textContent='Добавь хотя бы один ингредиент';
-  if(bad.length)return $('reMsg').textContent='Без количества: «'+bad.slice(0,3).join('», «')+'». Напиши через тире, например «Соль — по вкусу».';
+  if(bad.length)return $('reMsg').textContent='Без количества: «'+bad.slice(0,3).join('», «')+'». Напиши через тире, например «Соль — по вкусу». Если это подзаголовок — поставь в конце двоеточие: «Для соуса:».';
   const serv=num('reServ'),kcal=num('reKcal');
   if(!(serv>=1&&serv<=20))return $('reMsg').textContent='Порций — от 1 до 20';
   if(!(kcal>0))return $('reMsg').textContent='Укажи калорийность порции';
@@ -2096,5 +2126,6 @@ function renderRc(){
 </script>
 </body>
 </html>
+
 
 
