@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Golos+Text:wght@400;500;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="workouts.js?v=20261124a"></script>
+<script src="workouts.js?v=20261126a"></script>
 <script src="recipes.js?v=20261124a"></script>
 <style>
 :root{--concrete:#E4E5E0;--wall:#F3F3F0;--paper:#FBFAF5;--ink:#1F211D;--steel:#6B6E67;--hazard:#F2C230;--release:#1F7A4D;--alarm:#C9352B;--line:#C9CBC4}
@@ -691,7 +691,7 @@ async function refresh(){
   finally{menuReady=true}
 }
 // страница сама подхватывает новую версию: старые вкладки больше не живут днями со старым кодом
-const APP_V='20261124a';let verAt=0;
+const APP_V='20261126b';let verAt=0;
 async function checkVersion(){
   if(location.protocol==='file:'||Date.now()-verAt<6e5)return;verAt=Date.now();
   try{const r=await fetch(location.pathname+'?_='+Date.now(),{cache:'no-store'});if(!r.ok)return;const m=(await r.text()).match(/const APP_V='([^']+)'/);
@@ -763,29 +763,36 @@ const DEAD=['339707488'];
 function killDead(){DEAD.forEach(id=>{const w=W[id];if(w&&String(w.url||'').includes(id))w.active=false})}
 function mergeSeed(){killDead();SEED.forEach(s=>{const w=W[s.id];
   if(!w){W[s.id]={...s,active:s.active!==false,fromSeed:true};return}
-  if(w.editedAt)return;['min','title'].forEach(k=>{if(s[k]!=null&&w[k]==null)w[k]=s[k]});if(s.active===false)w.active=false});killDead()}
+  if(s.min&&!w.min)w.min=s.min;   // длительность из файла подставляем всегда, если в базе её нет
+  if(w.editedAt)return;['title'].forEach(k=>{if(s[k]!=null&&w[k]==null)w[k]=s[k]});if(s.active===false)w.active=false});killDead()}
 /* ---------- длительность дня: обязательная тренировка + дополнительные, чтобы набралось 30–45 минут ---------- */
 const DAY_MIN=30,DAY_MAX=45;
+// сколько минут в день хочет участница (анкета) → диапазон «основная + дополнительные»
+const RANGE={15:[15,25],30:[30,45],45:[45,60],60:[60,80]};
+const dayRange=p=>RANGE[(p&&p.rider&&+p.rider.dayMin)||30]||RANGE[30];
+const dayMinTxt=p=>({15:'15–20 минут',30:'30–40 минут',45:'45–60 минут',60:'час и больше'})[(p&&p.rider&&+p.rider.dayMin)||30];
 const wMin=w=>(w&&+w.min)||0;
 const gateOf=w=>wMin(w)?Math.max(3,Math.round(wMin(w)*.7)):MIN_OPEN;
 const wTitle=w=>esc(pn(w.program))+(w.title?` <span class="d">· ${esc(w.title)}</span>`:'');
 function pickExtras(p,e){
-  const main=W[e.w],m=wMin(main);if(!main||!m||m>=DAY_MIN)return[];
+  const[LO,HI]=dayRange(p);const main=W[e.w],m=wMin(main);if(!main||!m||m>=LO)return[];
   const near=new Set(p.plan.filter(x=>x!==e&&Math.abs(x.d-e.d)<=3).flatMap(x=>[x.w,...(x.x||[])]));
   const base=poolFor(p.rider,p.level).filter(w=>wMin(w)&&w.id!==main.id);
   const pool=shuffle(base.filter(w=>!near.has(w.id)).length>=2?base.filter(w=>!near.has(w.id)):base);
-  const need=DAY_MIN-m,cap=DAY_MAX-m,mid=(need+cap)/2;
+  const need=LO-m,cap=HI-m,mid=(need+cap)/2;
   const sc=s=>s>=need&&s<=cap?Math.abs(s-mid)/20:s<need?10+need-s:5+s-cap;
   let best=null;
   pool.forEach((a,i)=>{const s1=wMin(a),v=sc(s1)+(a.program===main.program?.2:0);if(!best||v<best.v)best={v,ids:[a.id]};
     pool.slice(i+1,i+40).forEach(b=>{const v2=sc(s1+wMin(b))+.6;if(v2<best.v)best={v:v2,ids:[a.id,b.id]}})});
+  // на длинный день двух может не хватить — добираем третьей
+  if(best){let sum=best.ids.reduce((t,id)=>t+wMin(W[id]),0);while(sum<need&&best.ids.length<4){const c=pool.filter(w=>!best.ids.includes(w.id)).sort((x,y)=>sc(sum+wMin(x))-sc(sum+wMin(y)))[0];if(!c)break;best.ids.push(c.id);sum+=wMin(c)}}
   return best?best.ids:[];
 }
 // расставляем дополнительные тренировки на ближайшие дни (и пересчитываем, если у тренировки поменялась длительность)
 function ensureExtras(p){const t=Math.max(1,dayIdx(p.start));let ch=false;
   p.plan.forEach(e=>{if(e.d<t||e.d>t+7||!e.w||e.rest)return;const l=p.log['d'+e.d]||{};
     if(e.d===t&&(l.opened||l.done||l.po))return;
-    const m=wMin(W[e.w]);if(e.x===undefined||e.xm!==m){e.x=pickExtras(p,e);e.xm=m;ch=true}});
+    const m=wMin(W[e.w]),tg=dayRange(p)[0];if(e.x===undefined||e.xm!==m||e.xt!==tg){e.x=pickExtras(p,e);e.xm=m;e.xt=tg;ch=true}});
   return ch}
 // выключенные и битые тренировки в плане меняем на другие
 function fixPlan(p){const t=Math.max(1,dayIdx(p.start));let ch=false;
@@ -812,9 +819,13 @@ function spread(list,lastProg){
 function makeCycle(pool,lastProg){let res=[];[1,2,3].forEach(l=>{const t=pool.filter(w=>w.level===l);if(t.length){const prev=res.length?res[res.length-1].program:lastProg;res=res.concat(spread(t,prev))}});return res.map(w=>w.id)}
 const isRest=(d,perWeek)=>(REST[perWeek]||REST[5]).includes((d-1)%7);
 const lastProg=p=>{const e=[...p.plan].reverse().find(e=>e.w);return e&&W[e.w]?W[e.w].program:null};
+// основные тренировки: тем, кто выбрал короткий день, не ставим основную длиннее их времени (если подходящих хватает)
+function mainPool(p){const pool=poolFor(p.rider,p.level),hi=dayRange(p)[1];
+  const fit=pool.filter(w=>wMin(w)&&wMin(w)<=hi+5);if(fit.length>=10)return fit;
+  const ok=pool.filter(w=>!wMin(w)||wMin(w)<=hi+5);return ok.length>=10?ok:pool}
 function newCycle(p){
   if(p.cycle>0){const ent=p.plan.filter(e=>e.c===p.cycle&&e.w);const done=ent.filter(e=>(p.log['d'+e.d]||{}).done).length;if(ent.length&&done/ent.length>=.7&&p.level<p.rider.cap)p.level++}
-  p.cycle++;let pool=poolFor(p.rider,p.level);if(!pool.length)pool=Object.values(W).filter(w=>w.active!==false);
+  p.cycle++;let pool=mainPool(p);if(!pool.length)pool=Object.values(W).filter(w=>w.active!==false);
   p.queue=makeCycle(pool,lastProg(p));
 }
 function extendPlan(p,upto){
@@ -829,7 +840,7 @@ function rebuildFuture(p,soft){
   p.plan=p.plan.filter(e=>e.d<=t);
   const done=new Set(p.plan.filter(e=>e.c===p.cycle&&e.w).map(e=>e.w));
   p.cycle++;
-  let q=makeCycle(poolFor(p.rider,p.level),lastProg(p)).filter(id=>!done.has(id));
+  let q=makeCycle(mainPool(p),lastProg(p)).filter(id=>!done.has(id));
   if(soft){
     let s=q.filter(id=>SOFT.includes(W[id].program));if(s.length<4)s=q.filter(id=>W[id].level===1);
     const first=shuffle(s.slice()).slice(0,6);q=[...first,...q.filter(id=>!first.includes(id))];
@@ -933,6 +944,7 @@ const Q=[
   {k:'box',t:'Удары руками, как в боксе?',o:[['yes','Да'],['no','Нет']]},
   {k:'tabata',t:'Короткие интенсивные интервалы (табата)?',o:[['yes','Да'],['no','Нет']]},
   {k:'joints',t:'Есть ограничения по коленям, суставам или спине?',o:[['no','Нет'],['yes','Есть']]},
+  {k:'dayMin',t:'Сколько минут в день готова тренироваться? Если тренировка дня короче — добавим дополнительную.',o:[[15,'15–20 минут'],[30,'30–40 минут'],[45,'45–60 минут'],[60,'Час и больше']]},
   {k:'perWeek',t:'Сколько тренировок в неделю — обязательно? Тренировка будет на каждый день, остальные — по желанию.',o:[[3,'3'],[4,'4'],[5,'5'],[6,'6'],[7,'Все 7']]}
 ];
 const effLevel=r=>r.joints==='yes'?Math.min(r.level,2):r.level;
@@ -1038,7 +1050,7 @@ $('stepBody').onclick=e=>{
   if(b.dataset.set){const v=b.dataset.v;D[b.dataset.set]=isNaN(+v)?v:+v}
   if(b.dataset.multi){const k=b.dataset.multi,v=b.dataset.v;D[k]=D[k]||[];D[k]=D[k].includes(v)?D[k].filter(x=>x!==v):[...D[k],v];
     if(k==='stops'&&v==='ed'){if(D.stops.includes('ed')){if(!D.edConsent)setTimeout(openEd,50)}else D.edConsent=false}}
-  if(b.dataset.rk){const k=b.dataset.rk,v=b.dataset.v;D.rider[k]=['level','perWeek'].includes(k)?+v:v;if(k!=='perWeek'&&k!=='level')riderDefaults(D.rider,num(D.weight),num(D.age))}
+  if(b.dataset.rk){const k=b.dataset.rk,v=b.dataset.v;D.rider[k]=['level','perWeek','dayMin'].includes(k)?+v:v;if(!['perWeek','level','dayMin'].includes(k))riderDefaults(D.rider,num(D.weight),num(D.age))}
   if(b.dataset.p){const p=b.dataset.p,r=D.rider;r.excluded=r.excluded.includes(p)?r.excluded.filter(x=>x!==p):[...r.excluded,p]}
   if(b.dataset.q){const now=new Date();let d=now;if(b.dataset.q==='1')d=addDays(now,1);if(b.dataset.q==='mon')d=addDays(now,((8-now.getDay())%7)||7);D.start=iso(d)}
   const y=window.scrollY;renderStep();window.scrollTo(0,y);
@@ -1046,7 +1058,7 @@ $('stepBody').onclick=e=>{
 $('backBtn').onclick=()=>{if(si>0){si--;renderStep();return}D.mode==='new'?show('login'):openCabinet()};
 $('nextBtn').onclick=async()=>{
   const v=STEPS[flow[si]].valid();if(v!==true){$('onbMsg').textContent=v;return}
-  if(flow[si]==='weight'&&!D.rider){D.rider={level:1,dance:'yes',box:'yes',tabata:'yes',joints:num(D.weight)>=100?'yes':'no',perWeek:5};riderDefaults(D.rider,num(D.weight),num(D.age))}
+  if(flow[si]==='weight'&&!D.rider){D.rider={level:1,dance:'yes',box:'yes',tabata:'yes',joints:num(D.weight)>=100?'yes':'no',perWeek:5,dayMin:30};riderDefaults(D.rider,num(D.weight),num(D.age))}
   if(si<flow.length-1){si++;renderStep();window.scrollTo(0,0);return}
   $('nextBtn').disabled=true;
   try{await finishOnb()}catch(e){$('onbMsg').textContent='Не получилось сохранить: '+e.message}
@@ -1141,12 +1153,12 @@ function reveal(){
   if(TONE)L.push(`Режим <b>«Тонус»</b> — без дефицита калорий<small>Худеть тебе не нужно. ${TONE_DAYS/7} недель: сила, выносливость, привычки. Меню — на поддержание веса</small>`);
   if(!TONE&&P.wantGoal&&P.wantGoal<P.goal)L.push(`Цель ${P.wantGoal} кг мы заменили на <b>${P.goal} кг</b><small>Ниже — уже опасно для твоего роста. Остальное сделают объёмы</small>`);
   if(!TONE)L.push(`Безопасный темп для тебя — <b>${g(P.weekly)} кг в неделю</b><small>${P.startW} → ${P.goal} кг за ${P.planDays} ${pl(P.planDays,'день','дня','дней')}</small>`);
-  L.push(`Из ${Object.keys(W).length} тренировок тебе подходят <b>${pool.length}</b><small>${[cut.length?'убрали '+cut.join(', '):'',add.length?'добавили '+add.join(' и '):'','уровень «'+LV[P.level]+'», каждый день, обязательно '+r.perWeek+' в неделю'].filter(Boolean).join('; ')}</small>`);
+  L.push(`Из ${Object.keys(W).length} тренировок тебе подходят <b>${pool.length}</b><small>${[cut.length?'убрали '+cut.join(', '):'',add.length?'добавили '+add.join(' и '):'','уровень «'+LV[P.level]+'», каждый день '+dayMinTxt(P)+', обязательно '+r.perWeek+' в неделю'].filter(Boolean).join('; ')}</small>`);
   L.push(`Из ${allMeals} блюд для тебя — <b>${meals}</b><small>${noFood.length?'без: '+noFood.join(', ')+'. ':''}Граммы посчитаны под твою норму${P.household>1?', продукты — на '+P.household+' '+pl(P.household,'человека','человек','человек'):''}</small>`);
   if(!TONE&&P.why.eventDate){const days=Math.round((pd(P.why.eventDate)-pd(P.start))/DAY);if(days>0){const kg=Math.min(P.startW-P.goal,P.weekly*days/7);L.push(`${esc(P.why.eventName||'Событие')}, ${fmt(pd(P.why.eventDate))}: к этому дню <b>−${g(kg)} кг</b><small>${pd(P.why.eventDate)<rel?'и ещё −'+g(P.startW-P.goal-kg)+' кг к финишу':'придёшь уже с достигнутой целью'}</small>`)}}
   $('rvLines').innerHTML=L.map(x=>`<div class="rvl"><div>${x}</div></div>`).join('');
   $('dossier').innerHTML=`<span class="bigstamp" id="bigstamp">Принята</span><div class="no">Личное дело № ${P.num}</div><h3>${esc(P.name)}</h3>
-    <dl><dt>Статья</dt><dd>${TONE?'«Тонус»: сила и выносливость':'−'+g(P.startW-P.goal)+' кг'}</dd><dt>Режим</dt><dd>тренировка каждый день, обязательно ${r.perWeek} в неделю</dd><dt>Паёк</dt><dd>${P.kcal} ккал в день</dd>${P.why.list.length?`<dt>Мотив</dt><dd>${esc(whyText(P))}</dd>`:''}${P.reward?`<dt>На выходе</dt><dd>${esc(P.reward)}</dd>`:''}</dl>
+    <dl><dt>Статья</dt><dd>${TONE?'«Тонус»: сила и выносливость':'−'+g(P.startW-P.goal)+' кг'}</dd><dt>Режим</dt><dd>тренировка каждый день, ${dayMinTxt(P)}, обязательно ${r.perWeek} в неделю</dd><dt>Паёк</dt><dd>${P.kcal} ккал в день</dd>${P.why.list.length?`<dt>Мотив</dt><dd>${esc(whyText(P))}</dd>`:''}${P.reward?`<dt>На выходе</dt><dd>${esc(P.reward)}</dd>`:''}</dl>
     <div class="out"><span>Дата выхода</span><b>${fmt(rel)}</b><span>Может сдвинуться: пропуски отодвигают её, а неделя без пропусков приближает.</span></div>
     <button class="btn" id="enterBtn">Войти в режим</button>`;
   $('enterBtn').onclick=openCabinet;
@@ -1421,7 +1433,7 @@ function renderToday(c){
       const cw=c.wm.cur,left=Math.max(0,cw.need-cw.done),skip=canSkipToday(P,t,c.wm);
       // после отчёта тренировку можно пройти ещё раз — по желанию, баллы и срок не меняются
       const again=l.done?`<a class="btn small ghost again" href="${esc(w.url)}" target="_blank" rel="noopener" data-act="again" title="Пройти эту тренировку ещё раз — по желанию">Ещё раз${l.again?` · ${l.again}`:''}</a>`:'';
-      Q.push({icon:'train',opt:skip,done:!!l.done,pts:PTS.train,after:many?'':again,below,title:many?`Тренировки дня · ≈ ${tot} мин`:esc(pn(w.program))+(wMin(w)?` <span class="d">· ${wMin(w)} мин</span>`:''),sub:`${l.done?'':left===0?'сверх нормы · ':skip?'по желанию · ':'обязательная · '}${many?'основная + дополнительная, чтобы набралось 30–45 минут · ':''}неделя ${cw.done}/${cw.need}${l.opened&&!l.done?` · <a href="${esc(w.url)}" target="_blank" rel="noopener" style="color:inherit">открыть снова</a>`:''}`,right})}}
+      Q.push({icon:'train',opt:skip,done:!!l.done,pts:PTS.train,after:many?'':again,below,title:many?`Тренировки дня · ≈ ${tot} мин`:esc(pn(w.program))+(wMin(w)?` <span class="d">· ${wMin(w)} мин</span>`:''),sub:`${l.done?'':left===0?'сверх нормы · ':skip?'по желанию · ':'обязательная · '}${many?'основная + дополнительная, чтобы набралось ${dayMinTxt(P)} · ':''}неделя ${cw.done}/${cw.need}${l.opened&&!l.done?` · <a href="${esc(w.url)}" target="_blank" rel="noopener" style="color:inherit">открыть снова</a>`:''}`,right})}}
   const md=P.menu&&P.menu['d'+t];
   Q.push({icon:'food',done:!!l.food,pts:PTS.food,title:'Питание по меню',sub:`${md?Math.round(MEALS.reduce((s,[k])=>s+kcalOf(md[k],P),0)*md.f)+' ккал · ':''}<a href="#" data-go="menu" style="color:inherit">меню</a>`,right:'<button class="btn small ghost" data-act="food">Ела</button>'});
   const bq=bonusOf(t);
@@ -1811,7 +1823,7 @@ function hintHtml(key){
   if(key==='cook')return'Не любишь стоять у плиты? Выбери «раз в 2 дня» или «раз в 3 дня» — меню будет повторяться несколько дней подряд. Готовишь один раз сразу на несколько дней, калорийность та же, а список продуктов посчитан на все дни.';
   if(key==='shop')return'Сумма по рецептам за выбранные дни, с твоими порциями и числом едоков. Соль и специи — в конце списка.';
   if(key==='steps')return`Вноси шаги раз в день — по шагомеру в телефоне, часах или браслете. Можно внести за прошлые дни, если забыла. Цель по умолчанию ${nf(STEP_GOAL)}, её можно поменять. Шаги — для тебя: на срок и баллы они не влияют, а вот ходить больше — отличная поддержка похудения.`;
-  if(key==='plan')return`Тренировка — на каждый день, обязательны <b>${P.rider.perWeek} в неделю</b>, остальные по желанию (+баллы). Если неделя закроется с недобором — дата выхода сдвинется на недостающие дни. Подборка из твоего райдера: ${poolFor(P.rider,P.level).length} тренировок без повторов. «Тяжело» дважды — нагрузка ниже, «легко» трижды — уровень выше.`;
+  if(key==='plan')return`Тренировка — на каждый день, <b>${dayMinTxt(P)}</b>: если основная короче, к ней добавляется дополнительная. Обязательны <b>${P.rider.perWeek} в неделю</b>, остальные по желанию (+баллы). Если неделя закроется с недобором — дата выхода сдвинется на недостающие дни. Подборка из твоего райдера: ${poolFor(P.rider,P.level).length} тренировок без повторов. «Тяжело» дважды — нагрузка ниже, «легко» трижды — уровень выше.`;
   if(key==='bonus'){const b=bonusOf(dayIdx(P.start));return`<b>${b[0]}.</b> ${b[1]}. +${PTS.bonus} балла.`}
   if(key.startsWith('badge:')){const b=BADGES.find(x=>x[0]===key.slice(6));const on=b[4](c,stats(P));return`<b>${b[2]}</b><br>${b[3]}.${on?' Получена.':' Ещё впереди.'}`}
   return'';
@@ -2126,6 +2138,5 @@ function renderRc(){
 </script>
 </body>
 </html>
-
 
 
